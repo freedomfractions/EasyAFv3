@@ -1,5 +1,6 @@
 using System.Windows.Media;
 using Unity;
+using System.Collections.Generic;
 
 namespace EasyAF.Core.Contracts;
 
@@ -37,6 +38,15 @@ public interface IModule
     string[] SupportedFileExtensions { get; }
 
     /// <summary>
+    /// Gets rich file type definitions (extension + description) supported by this module.
+    /// </summary>
+    /// <remarks>
+    /// Used by the shell for dynamically building file dialogs and association lists.
+    /// If not provided (null), the shell will fall back to <see cref="SupportedFileExtensions"/> with generic descriptions.
+    /// </remarks>
+    IReadOnlyList<FileTypeDefinition>? SupportedFileTypes { get; }
+
+    /// <summary>
     /// Gets the icon representing this module.
     /// </summary>
     /// <value>
@@ -62,3 +72,8 @@ public interface IModule
     /// </remarks>
     void Shutdown();
 }
+
+// CROSS-MODULE EDIT: 2025-01-11T17:15:00-06:00 Task 10
+// Modified for: Add SupportedFileTypes metadata for dynamic file type discovery in File Management System
+// Related modules: Core (IModule consumers: ModuleLoader, ModuleCatalog), future Map/Project/Spec modules
+// Rollback instructions: Remove SupportedFileTypes property & associated using directive; delete FileTypeDefinition record file.

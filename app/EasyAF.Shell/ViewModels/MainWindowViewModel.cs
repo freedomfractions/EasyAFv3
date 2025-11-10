@@ -25,11 +25,13 @@ public class MainWindowViewModel : BindableBase
     /// <param name="logViewerViewModel">The log viewer view model.</param>
     /// <param name="ribbonService">The module ribbon injection service.</param>
     /// <param name="documentManager">The document manager for managing open documents.</param>
-    public MainWindowViewModel(IThemeService themeService, LogViewerViewModel logViewerViewModel, IModuleRibbonService ribbonService, IDocumentManager documentManager)
+    /// <param name="fileCommands">The file commands view model.</param>
+    public MainWindowViewModel(IThemeService themeService, LogViewerViewModel logViewerViewModel, IModuleRibbonService ribbonService, IDocumentManager documentManager, FileCommandsViewModel fileCommands)
     {
         _themeService = themeService;
         _ribbonService = ribbonService;
         _documentManager = documentManager;
+        FileCommands = fileCommands;
         LogViewerViewModel = logViewerViewModel;
 
         Documents = _documentManager.OpenDocuments;
@@ -140,4 +142,9 @@ public class MainWindowViewModel : BindableBase
     }
 
     public IDocumentManager DocumentManager => _documentManager;
+
+    /// <summary>
+    /// Gets the file commands view model.
+    /// </summary>
+    public FileCommandsViewModel FileCommands { get; }
 }

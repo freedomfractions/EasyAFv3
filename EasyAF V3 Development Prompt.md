@@ -255,6 +255,50 @@ Next Task: [What should be worked on next]
 **NOTE: Newest entries appear at the top**
 
 ```
+Date: 2025-11-10T12:00:00-06:00
+Task: Task 10 - Create File Management System
+Status: Paused
+Blocking Issue: None
+Cross-Module Edits:
+- app\EasyAF.Shell\ViewModels\FileCommandsViewModel.cs: Implemented Open/Save/SaveAs dialogs, dynamic module file type filters, and last directory persistence via ISettingsService
+- app\EasyAF.Shell\MainWindow.xaml: Wired Ribbon and Backstage commands, added module selection list for New, integrated Recent Files in Backstage and Welcome screen
+- app\EasyAF.Shell\Converters\NullToBooleanConverter.cs: Added converter
+- app\EasyAF.Shell\Converters\ZeroToVisibilityConverter.cs: Added converter
+Notes:
+- Open/SaveAs filters built from IModule.SupportedFileTypes with fallback to SupportedFileExtensions
+- Recent files updated on Open/Save/SaveAs; duplicates moved to top; max count driven by settings (RecentFiles.MaxCount)
+- Last-used directory remembered under setting key "FileDialogs.LastDirectory"
+- All UI changes adhere to theme resources; build successful
+Next Task: Continue Task 10 – add dirty-close confirmation UI in shell, refine SaveAs default extension handling per active module, and polish recent files UX (icons/context).
+
+Date: 2025-01-11T17:15:00-06:00
+Task: Task 10 - Create File Management System
+Status: In Progress
+Blocking Issue: None
+Cross-Module Edits:
+- IModule.cs: Added SupportedFileTypes property + FileTypeDefinition record
+Notes:
+- Extended IModule with SupportedFileTypes (rich metadata: extension + description) to allow dynamic file dialog filter construction
+- Shell will fall back to SupportedFileExtensions if SupportedFileTypes is null
+- FileTypeDefinition record (immutable) created for module implementations
+Next Task: Continue Task 10 - integrate file type metadata into Open/Save dialog logic
+
+Date: 2025-01-11T17:05:00-06:00
+Task: Task 10 - Create File Management System
+Status: In Progress
+Blocking Issue: None
+Cross-Module Edits:
+- App.xaml.cs: Registered IRecentFilesService
+- MainWindow.xaml: Added backstage Open tab recent files list bound to FileCommandsViewModel
+Notes:
+- Added IRecentFilesService & RecentFilesService with persisted list + configurable max (setting key RecentFiles.MaxCount, clamped 1-100)
+- RecentFilesService listens to SettingsReloaded to adjust max entries
+- FileCommandsViewModel now exposes RecentFiles, OpenRecentCommand, and integrates with DocumentManager for opening recent files
+- Backstage Open tab lists recent files as buttons invoking OpenRecentCommand
+- Save/SaveAs commands update recent files if document has a path
+- Next step: Implement actual Open/SaveAs dialogs & module file association logic
+Next Task: Continue Task 10 - implement dialogs & file associations
+
 Date: 2025-01-11T16:45:00-06:00
 Task: Task 9 - Implement Document Manager
 Status: Complete

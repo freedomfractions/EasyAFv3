@@ -68,10 +68,11 @@ public partial class App : PrismApplication
         containerRegistry.RegisterSingleton<ILoggerService, LoggerService>();
         containerRegistry.RegisterSingleton<IModuleLoader, ModuleLoader>();
         containerRegistry.RegisterSingleton<IModuleRibbonService, ModuleRibbonService>();
-        // CROSS-MODULE EDIT: 2025-01-11T16:45:00-06:00 Task 9
-        // Modified for: Register document manager service for shell integration
-        // Related modules: EasyAF.Core (IDocumentManager, DocumentManager), EasyAF.Shell
-        // Rollback instructions: Remove the following registration line if reverting Task 9
+        // CROSS-MODULE EDIT: 2025-01-11T17:00:00-06:00 Task 10
+        // Modified for: Add recent files tracking service for File Management System
+        // Related modules: EasyAF.Core (IRecentFilesService, RecentFilesService), EasyAF.Shell
+        // Rollback instructions: Remove RecentFilesService registration line below
+        containerRegistry.RegisterSingleton<IRecentFilesService, RecentFilesService>();
         containerRegistry.RegisterSingleton<IDocumentManager, DocumentManager>();
         
         // Register shared log entries collection
@@ -80,6 +81,11 @@ public partial class App : PrismApplication
         // Register ViewModels
         containerRegistry.Register<MainWindowViewModel>();
         containerRegistry.Register<LogViewerViewModel>();
+        // CROSS-MODULE EDIT: 2025-01-11T17:00:00-06:00 Task 10
+        // Modified for: Register FileCommandsViewModel for New/Open/Save/SaveAs shell commands
+        // Related modules: EasyAF.Core (DocumentManager, ModuleCatalog), EasyAF.Shell
+        // Rollback instructions: Remove the following registration line if reverting Task 10
+        containerRegistry.Register<FileCommandsViewModel>();
         
         Log.Information("Services registered with Unity container");
     }
