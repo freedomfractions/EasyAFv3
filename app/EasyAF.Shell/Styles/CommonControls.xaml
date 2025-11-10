@@ -35,8 +35,14 @@
             <Setter.Value>
                 <ControlTemplate TargetType="ScrollBar">
                     <Grid Background="{TemplateBinding Background}">
-                        <Track x:Name="PART_Track" Focusable="False"
-                               Orientation="{TemplateBinding Orientation}">
+                        <Track x:Name="PART_Track"
+                               Focusable="False"
+                               Orientation="{TemplateBinding Orientation}"
+                               Maximum="{TemplateBinding Maximum}"
+                               Minimum="{TemplateBinding Minimum}"
+                               Value="{Binding Value, RelativeSource={RelativeSource TemplatedParent}}"
+                               ViewportSize="{TemplateBinding ViewportSize}"
+                               IsDirectionReversed="False">
                             <Track.DecreaseRepeatButton>
                                 <RepeatButton Visibility="Collapsed"/>
                             </Track.DecreaseRepeatButton>
@@ -48,6 +54,16 @@
                             </Track.Thumb>
                         </Track>
                     </Grid>
+                    <ControlTemplate.Triggers>
+                        <!-- Flip vertical direction: thumb moves opposite default -->
+                        <Trigger Property="Orientation" Value="Vertical">
+                            <Setter TargetName="PART_Track" Property="IsDirectionReversed" Value="True"/>
+                        </Trigger>
+                        <!-- Keep horizontal natural mapping -->
+                        <Trigger Property="Orientation" Value="Horizontal">
+                            <Setter TargetName="PART_Track" Property="IsDirectionReversed" Value="False"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

@@ -14,6 +14,9 @@
 
                 <!-- Document Tabs Styles -->
                 <ResourceDictionary Source="/EasyAF.Shell;component/Styles/DocumentTabs.xaml" />
+
+                <!-- Common Control Styles (ScrollBar, Thumb, future shared styles) -->
+                <ResourceDictionary Source="/EasyAF.Shell;component/Styles/CommonControls.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
