@@ -11,6 +11,9 @@
                 
                 <!-- Application Theme (default to Light) -->
                 <ResourceDictionary Source="/EasyAF.Shell;component/Theme/Light.xaml" />
+
+                <!-- Document Tabs Styles -->
+                <ResourceDictionary Source="/EasyAF.Shell;component/Styles/DocumentTabs.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

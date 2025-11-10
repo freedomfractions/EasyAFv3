@@ -3,6 +3,7 @@ using Prism.Mvvm;
 using EasyAF.Core.Contracts;
 using System.Windows;
 using System.Windows.Input;
+using System.Collections.ObjectModel;
 
 namespace EasyAF.Shell.ViewModels;
 
@@ -23,10 +24,43 @@ public class MainWindowViewModel : BindableBase
         _themeService = themeService;
         LogViewerViewModel = logViewerViewModel;
 
+        Documents = new ObservableCollection<IDocument>();
+
         // Initialize commands
         SwitchToLightThemeCommand = new DelegateCommand(SwitchToLightTheme);
         SwitchToDarkThemeCommand = new DelegateCommand(SwitchToDarkTheme);
         ExitCommand = new DelegateCommand(Exit);
+        CloseDocumentCommand = new DelegateCommand<IDocument?>(CloseDocument, CanCloseDocument);
+    }
+
+    /// <summary>
+    /// Collection of open documents (placeholder until DocumentManager implemented).
+    /// </summary>
+    public ObservableCollection<IDocument> Documents { get; }
+
+    private IDocument? _selectedDocument;
+    /// <summary>
+    /// Currently selected document.
+    /// </summary>
+    public IDocument? SelectedDocument
+    {
+        get => _selectedDocument;
+        set => SetProperty(ref _selectedDocument, value);
+    }
+
+    /// <summary>
+    /// Command to close a document.
+    /// </summary>
+    public ICommand CloseDocumentCommand { get; }
+
+    private bool CanCloseDocument(IDocument? doc) => doc != null;
+
+    private void CloseDocument(IDocument? doc)
+    {
+        if (doc == null) return;
+        Documents.Remove(doc);
+        if (SelectedDocument == doc)
+            SelectedDocument = Documents.FirstOrDefault();
     }
 
     /// <summary>
