@@ -255,6 +255,46 @@ Next Task: [What should be worked on next]
 **NOTE: Newest entries appear at the top**
 
 ```
+Date: 2025-01-11T16:45:00-06:00
+Task: Task 9 - Implement Document Manager
+Status: Complete
+Blocking Issue: None
+Cross-Module Edits:
+- App.xaml.cs: Registered IDocumentManager singleton (DocumentManager)
+- MainWindowViewModel: Injected IDocumentManager and bound Documents to manager's collection
+Notes:
+- Added IDocumentManager interface with: OpenDocuments collection, ActiveDocument property, Open/Create/Save/Close operations, events (ActiveDocumentChanged, DocumentOpened, DocumentClosed)
+- Added DocumentCloseDecision enum (Save/Discard/Cancel) for dirty document confirmation workflow
+- Implemented DocumentManager with module-based open/creation using IModuleCatalog
+- Ensures ActiveDocument updated on open, close, and removal; selects nearest remaining tab when closing
+- Dirty document close logic invokes supplied confirmation callback
+- SaveDocument delegates to owning IDocumentModule and marks document clean on success
+- Integrated DocumentManager into DI container and MainWindowViewModel
+- ViewModel now listens to ActiveDocumentChanged to sync SelectedDocument
+- Documents ObservableCollection now shared singleton from DocumentManager (state centralization achieved)
+- No UI changes yet for prompts (will be addressed at File Management step)
+- Build successful with no warnings
+Next Task: Task 10 - Create File Management System
+
+Date: 2025-01-11T16:30:00-06:00
+Task: Task 8 - Create Module Loader Service
+Status: Complete
+Blocking Issue: None
+Cross-Module Edits:
+- Modified App.xaml.cs to register IModuleLoader and IModuleRibbonService and hook module load event
+Notes:
+- Added IModuleLoader interface (Module discovery & loading)
+- Implemented ModuleLoader: reflects over loaded assemblies & optional /Modules folder, instantiates IModule types
+- Handles ReflectionTypeLoadException gracefully, logs warnings/errors via Serilog
+- Added IModuleRibbonService + ModuleRibbonService for ribbon tab injection from document modules
+- Integrated ModuleLoader in startup (App.xaml.cs) with ModuleLoaded event wiring to ModuleRibbonService
+- Fully qualified EasyAF.Core.Contracts.IModule to avoid Prism.IModule ambiguity
+- Attempt to data-bind Ribbon.ItemsSource removed (Fluent Ribbon does not expose ItemsSource); kept programmatic injection path
+- Updated MainWindowViewModel to build Home tab programmatically and expose RibbonTabs collection (reserved for future manual binding strategy if needed)
+- Build successful with new module loading infrastructure; ready for future module projects in /Modules folder
+Decision (2025-01-11T16:55:00-06:00): Retaining current programmatic ribbon tab injection (no attached behavior / region adapter) for simplicity; revisit if future dynamic composition needs arise.
+Next Task: Task 9 - Implement Document Manager
+
 Date: 2025-01-11T16:00:00-06:00
 Task: Task 2 - Implement Theme Engine (Reopened - Dark Theme Revision)
 Status: Complete

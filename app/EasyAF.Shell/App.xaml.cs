@@ -9,6 +9,7 @@ using EasyAF.Core.Logging;
 using EasyAF.Shell.Services;
 using EasyAF.Shell.ViewModels;
 using Serilog;
+using Fluent;
 
 namespace EasyAF.Shell;
 
@@ -42,6 +43,12 @@ public partial class App : PrismApplication
         themeService.ApplyTheme(savedTheme);
         
         Log.Information("Applied theme: {Theme}", savedTheme);
+
+        // Hook module loaded event for ribbon injection
+        var ribbonService = Container.Resolve<IModuleRibbonService>();
+        var loader = Container.Resolve<IModuleLoader>();
+        loader.ModuleLoaded += (object? sender, EasyAF.Core.Contracts.IModule module) => ribbonService.AddModuleTabs(module, null);
+        loader.DiscoverAndLoadModules();
     }
 
     protected override Window CreateShell()
@@ -59,6 +66,13 @@ public partial class App : PrismApplication
         containerRegistry.RegisterSingleton<ISettingsService, SettingsManager>();
         containerRegistry.RegisterSingleton<IThemeService, ThemeService>();
         containerRegistry.RegisterSingleton<ILoggerService, LoggerService>();
+        containerRegistry.RegisterSingleton<IModuleLoader, ModuleLoader>();
+        containerRegistry.RegisterSingleton<IModuleRibbonService, ModuleRibbonService>();
+        // CROSS-MODULE EDIT: 2025-01-11T16:45:00-06:00 Task 9
+        // Modified for: Register document manager service for shell integration
+        // Related modules: EasyAF.Core (IDocumentManager, DocumentManager), EasyAF.Shell
+        // Rollback instructions: Remove the following registration line if reverting Task 9
+        containerRegistry.RegisterSingleton<IDocumentManager, DocumentManager>();
         
         // Register shared log entries collection
         containerRegistry.RegisterInstance(_logEntries);
