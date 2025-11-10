@@ -18,4 +18,10 @@
     <ProjectReference Include="..\..\lib\EasyAF.Core\EasyAF.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="..\..\EasyAF V3 Development Prompt.md">
+      <Link>EasyAF V3 Development Prompt.md</Link>
+    </None>
+  </ItemGroup>
+
 </Project>

@@ -1,12 +1,226 @@
-﻿<Window x:Class="EasyAF.Shell.MainWindow"
+﻿<fluent:RibbonWindow x:Class="EasyAF.Shell.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EasyAF.Shell"
+        xmlns:fluent="urn:fluent-ribbon"
+        xmlns:views="clr-namespace:EasyAF.Shell.Views"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
+        Title="EasyAF v3" 
+        Height="768" 
+        Width="1024"
+        WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource WindowBackgroundBrush}">
+    <Grid Background="{DynamicResource PrimaryBackgroundBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
 
+        <!-- Ribbon -->
+        <fluent:Ribbon Grid.Row="0" Background="{DynamicResource SecondaryBackgroundBrush}">
+            <fluent:Ribbon.Menu>
+                <fluent:Backstage Background="{DynamicResource PrimaryBackgroundBrush}">
+                    <fluent:BackstageTabControl>
+                        <fluent:BackstageTabItem Header="New">
+                            <TextBlock Text="Create new document..." 
+                                     Foreground="{DynamicResource TextPrimaryBrush}"
+                                     Margin="20"/>
+                        </fluent:BackstageTabItem>
+                        <fluent:BackstageTabItem Header="Open">
+                            <TextBlock Text="Open existing document..." 
+                                     Foreground="{DynamicResource TextPrimaryBrush}"
+                                     Margin="20"/>
+                        </fluent:BackstageTabItem>
+                        <fluent:BackstageTabItem Header="Settings">
+                            <TextBlock Text="Application settings..." 
+                                     Foreground="{DynamicResource TextPrimaryBrush}"
+                                     Margin="20"/>
+                        </fluent:BackstageTabItem>
+                        <fluent:Button Header="Exit" 
+                                     Command="{Binding ExitCommand}"/>
+                    </fluent:BackstageTabControl>
+                </fluent:Backstage>
+            </fluent:Ribbon.Menu>
+
+            <!-- Home Tab -->
+            <fluent:RibbonTabItem Header="Home">
+                <fluent:RibbonGroupBox Header="File">
+                    <fluent:Button Header="New" 
+                                 SizeDefinition="Large"/>
+                    <fluent:Button Header="Open" 
+                                 SizeDefinition="Large"/>
+                    <fluent:Button Header="Save" 
+                                 SizeDefinition="Large"/>
+                </fluent:RibbonGroupBox>
+                <fluent:RibbonGroupBox Header="View">
+                    <fluent:Button Header="Light Theme" 
+                                 Command="{Binding SwitchToLightThemeCommand}"/>
+                    <fluent:Button Header="Dark Theme" 
+                                 Command="{Binding SwitchToDarkThemeCommand}"/>
+                </fluent:RibbonGroupBox>
+            </fluent:RibbonTabItem>
+        </fluent:Ribbon>
+
+        <!-- Main Content Area with Vertical Tab Strip -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Vertical Tab Strip Panel (Left Side) -->
+            <Border Grid.Column="0" 
+                    Background="{DynamicResource SecondaryBackgroundBrush}"
+                    BorderBrush="{DynamicResource ControlBorderBrush}"
+                    BorderThickness="0,0,1,0"
+                    MinWidth="48">
+                <StackPanel Orientation="Vertical">
+                    <!-- Document Tabs will be added here dynamically -->
+                    <TextBlock Text="📄" 
+                             FontSize="24"
+                             HorizontalAlignment="Center"
+                             VerticalAlignment="Center"
+                             Foreground="{DynamicResource TextSecondaryBrush}"
+                             Margin="0,10"
+                             ToolTip="No documents open"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Document Content Area -->
+            <Grid Grid.Column="1" Background="{DynamicResource PrimaryBackgroundBrush}">
+                <!-- Welcome Screen (shown when no documents are open) -->
+                <Border Visibility="Visible">
+                    <StackPanel HorizontalAlignment="Center" 
+                              VerticalAlignment="Center">
+                        <TextBlock Text="Welcome to EasyAF v3" 
+                                 FontSize="32" 
+                                 FontWeight="Light"
+                                 Foreground="{DynamicResource TextPrimaryBrush}"
+                                 HorizontalAlignment="Center"
+                                 Margin="0,0,0,20"/>
+                        
+                        <TextBlock Text="Get started by creating or opening a document" 
+                                 FontSize="16" 
+                                 Foreground="{DynamicResource TextSecondaryBrush}"
+                                 HorizontalAlignment="Center"
+                                 Margin="0,0,0,40"/>
+
+                        <StackPanel Orientation="Horizontal" 
+                                  HorizontalAlignment="Center">
+                            <Button Content="Create New" 
+                                  Padding="20,10"
+                                  Margin="10,0"
+                                  Background="{DynamicResource AccentBrush}"
+                                  Foreground="White"
+                                  BorderThickness="0"
+                                  FontSize="14"
+                                  Cursor="Hand">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border Background="{TemplateBinding Background}"
+                                                          CornerRadius="4"
+                                                          Padding="{TemplateBinding Padding}">
+                                                        <ContentPresenter HorizontalAlignment="Center" 
+                                                                        VerticalAlignment="Center"/>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="{DynamicResource AccentHoverBrush}"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+
+                            <Button Content="Open Existing" 
+                                  Padding="20,10"
+                                  Margin="10,0"
+                                  Background="{DynamicResource ControlBackgroundBrush}"
+                                  Foreground="{DynamicResource TextPrimaryBrush}"
+                                  BorderBrush="{DynamicResource ControlBorderBrush}"
+                                  BorderThickness="1"
+                                  FontSize="14"
+                                  Cursor="Hand">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border Background="{TemplateBinding Background}"
+                                                          BorderBrush="{TemplateBinding BorderBrush}"
+                                                          BorderThickness="{TemplateBinding BorderThickness}"
+                                                          CornerRadius="4"
+                                                          Padding="{TemplateBinding Padding}">
+                                                        <ContentPresenter HorizontalAlignment="Center" 
+                                                                        VerticalAlignment="Center"/>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="{DynamicResource HighlightSelectionBrush}"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                        </StackPanel>
+
+                        <!-- Recent Files Section -->
+                        <Border Margin="0,40,0,0"
+                              Padding="20"
+                              Background="{DynamicResource SecondaryBackgroundBrush}"
+                              BorderBrush="{DynamicResource ControlBorderBrush}"
+                              BorderThickness="1"
+                              CornerRadius="4"
+                              MinWidth="400">
+                            <StackPanel>
+                                <TextBlock Text="Recent Files" 
+                                         FontSize="14" 
+                                         FontWeight="SemiBold"
+                                         Foreground="{DynamicResource TextPrimaryBrush}"
+                                         Margin="0,0,0,10"/>
+                                <TextBlock Text="No recent files" 
+                                         FontSize="12" 
+                                         Foreground="{DynamicResource TextSecondaryBrush}"
+                                         FontStyle="Italic"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <!-- Document Content Container (will be populated by document tabs) -->
+                <ContentControl x:Name="DocumentContentContainer"
+                              Visibility="Collapsed"/>
+            </Grid>
+        </Grid>
+
+        <!-- Status Bar with Log Viewer -->
+        <Expander Grid.Row="2" 
+                  Header="Application Log"
+                  IsExpanded="False"
+                  Background="{DynamicResource SecondaryBackgroundBrush}"
+                  BorderBrush="{DynamicResource ControlBorderBrush}"
+                  BorderThickness="0,1,0,0">
+            <Expander.HeaderTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding}" 
+                             Foreground="{DynamicResource TextPrimaryBrush}"
+                             FontWeight="SemiBold"
+                             Padding="4"/>
+                </DataTemplate>
+            </Expander.HeaderTemplate>
+            <views:LogViewer Height="150" DataContext="{Binding LogViewerViewModel}"/>
+        </Expander>
     </Grid>
-</Window>
+</fluent:RibbonWindow>

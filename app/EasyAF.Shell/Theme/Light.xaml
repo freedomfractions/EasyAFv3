@@ -1,0 +1,94 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Light Theme Color Palette -->
+    <!-- Primary Colors -->
+    <Color x:Key="AccentColor">#0F62FE</Color>
+    <Color x:Key="AccentColorHover">#1559D5</Color>
+    
+    <!-- Background Colors -->
+    <Color x:Key="WindowBackgroundColor">#FFFFFFFF</Color>
+    <Color x:Key="PrimaryBackgroundColor">#FFFFFFFF</Color>
+    <Color x:Key="SecondaryBackgroundColor">#FFF8F9FA</Color>
+    <Color x:Key="ControlBackgroundColor">#FFFFFFFF</Color>
+    
+    <!-- Border Colors -->
+    <Color x:Key="ControlBorderColor">#FFD1D5DB</Color>
+    <Color x:Key="ControlBorderHoverColor">#FF9CA3AF</Color>
+    <Color x:Key="ControlBorderFocusColor">#0F62FE</Color>
+    
+    <!-- Tab Colors -->
+    <Color x:Key="TabInactiveBackgroundColor">#FFF1F3F4</Color>
+    <Color x:Key="TabInactiveBorderColor">#FFE5E7EB</Color>
+    <Color x:Key="TabActiveBackgroundColor">#FFFFFFFF</Color>
+    <Color x:Key="TabActiveBorderColor">#FF0F62FE</Color>
+    
+    <!-- Separator & Divider -->
+    <Color x:Key="SeparatorColor">#FFE5E7EB</Color>
+    
+    <!-- Text Colors -->
+    <Color x:Key="TextPrimaryColor">#FF111827</Color>
+    <Color x:Key="TextSecondaryColor">#FF6B7280</Color>
+    <Color x:Key="TextTertiaryColor">#FF9CA3AF</Color>
+    <Color x:Key="TextDisabledColor">#FFD1D5DB</Color>
+    
+    <!-- Status Colors -->
+    <Color x:Key="ErrorColor">#FFDC2626</Color>
+    <Color x:Key="SuccessColor">#FF059669</Color>
+    <Color x:Key="WarningColor">#FFD97706</Color>
+    <Color x:Key="InfoColor">#FF2563EB</Color>
+    
+    <!-- Highlight Colors -->
+    <Color x:Key="HighlightSelectionColor">#FFE0F2FF</Color>
+    <Color x:Key="ReadonlyBackgroundColor">#FFF9FAFB</Color>
+
+    <!-- Log Level Colors (Light Theme - optimized for contrast on light backgrounds) -->
+    <Color x:Key="LogVerboseColor">#FF6B7280</Color>
+    <Color x:Key="LogDebugColor">#FF4B5563</Color>
+    <Color x:Key="LogInformationColor">#FF2563EB</Color>
+    <Color x:Key="LogWarningColor">#FFD97706</Color>
+    <Color x:Key="LogErrorColor">#FFDC2626</Color>
+    <Color x:Key="LogFatalColor">#FF991B1B</Color>
+
+    <!-- Brushes -->
+    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}"/>
+    <SolidColorBrush x:Key="AccentHoverBrush" Color="{StaticResource AccentColorHover}"/>
+    
+    <SolidColorBrush x:Key="WindowBackgroundBrush" Color="{StaticResource WindowBackgroundColor}"/>
+    <SolidColorBrush x:Key="PrimaryBackgroundBrush" Color="{StaticResource PrimaryBackgroundColor}"/>
+    <SolidColorBrush x:Key="SecondaryBackgroundBrush" Color="{StaticResource SecondaryBackgroundColor}"/>
+    <SolidColorBrush x:Key="ControlBackgroundBrush" Color="{StaticResource ControlBackgroundColor}"/>
+    
+    <SolidColorBrush x:Key="ControlBorderBrush" Color="{StaticResource ControlBorderColor}"/>
+    <SolidColorBrush x:Key="ControlBorderHoverBrush" Color="{StaticResource ControlBorderHoverColor}"/>
+    <SolidColorBrush x:Key="ControlBorderFocusBrush" Color="{StaticResource ControlBorderFocusColor}"/>
+    
+    <SolidColorBrush x:Key="TabInactiveBackgroundBrush" Color="{StaticResource TabInactiveBackgroundColor}"/>
+    <SolidColorBrush x:Key="TabInactiveBorderBrush" Color="{StaticResource TabInactiveBorderColor}"/>
+    <SolidColorBrush x:Key="TabActiveBackgroundBrush" Color="{StaticResource TabActiveBackgroundColor}"/>
+    <SolidColorBrush x:Key="TabActiveBorderBrush" Color="{StaticResource TabActiveBorderColor}"/>
+    
+    <SolidColorBrush x:Key="SeparatorBrush" Color="{StaticResource SeparatorColor}"/>
+    
+    <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimaryColor}"/>
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondaryColor}"/>
+    <SolidColorBrush x:Key="TextTertiaryBrush" Color="{StaticResource TextTertiaryColor}"/>
+    <SolidColorBrush x:Key="TextDisabledBrush" Color="{StaticResource TextDisabledColor}"/>
+    
+    <SolidColorBrush x:Key="ErrorBrush" Color="{StaticResource ErrorColor}"/>
+    <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource SuccessColor}"/>
+    <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource WarningColor}"/>
+    <SolidColorBrush x:Key="InfoBrush" Color="{StaticResource InfoColor}"/>
+    
+    <SolidColorBrush x:Key="HighlightSelectionBrush" Color="{StaticResource HighlightSelectionColor}"/>
+    <SolidColorBrush x:Key="ReadonlyBackgroundBrush" Color="{StaticResource ReadonlyBackgroundColor}"/>
+
+    <!-- Log Level Brushes -->
+    <SolidColorBrush x:Key="LogVerboseBrush" Color="{StaticResource LogVerboseColor}"/>
+    <SolidColorBrush x:Key="LogDebugBrush" Color="{StaticResource LogDebugColor}"/>
+    <SolidColorBrush x:Key="LogInformationBrush" Color="{StaticResource LogInformationColor}"/>
+    <SolidColorBrush x:Key="LogWarningBrush" Color="{StaticResource LogWarningColor}"/>
+    <SolidColorBrush x:Key="LogErrorBrush" Color="{StaticResource LogErrorColor}"/>
+    <SolidColorBrush x:Key="LogFatalBrush" Color="{StaticResource LogFatalColor}"/>
+
+</ResourceDictionary>
