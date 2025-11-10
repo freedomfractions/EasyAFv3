@@ -371,7 +371,7 @@ Notes:
 - Vertical tab strip styled with SecondaryBackgroundBrush and border separator
 - Placeholder emoji icon (📄) shown when no documents open
 - Created document content area in main grid column
-- Implemented welcome screen with centered layout shown when no documents open
+- Implemented welcome screen with centered layout shown when no documents are open
 - Welcome screen includes: title, subtitle, action buttons (Create New, Open Existing)
 - Added recent files section to welcome screen with themed border
 - Created styled buttons with rounded corners using ControlTemplate
@@ -387,3 +387,69 @@ Notes:
 - All theme brushes applied: WindowBackground, PrimaryBackground, SecondaryBackground, ControlBorder, etc.
 - Solution builds successfully with no errors or warnings
 Next Task: Task 7 - Implement Document Tab System
+
+Date: 2025-01-11T14:00:00-06:00
+Task: Task 5 - Create Settings Management System
+Status: Complete
+Blocking Issue: None
+Cross-Module Edits:
+- App.xaml.cs: Reads saved theme setting at startup and applies it via IThemeService
+Notes:
+- Created ISettingsService and SettingsManager using System.Text.Json for persistence
+- Implemented hot-reload via FileSystemWatcher; SettingsManager raises change notifications
+- Added ApplicationSettings model; settings stored under %AppData%/EasyAFv3/settings.json by default
+- Exposed GetSetting/SetSetting and module-scoped GetModuleSettings
+- Integrated with theme selection to persist current theme
+- Verified thread-safe read/write and graceful fallback when file missing/corrupt
+Next Task: Task 6 - Create Shell Window
+
+Date: 2025-01-11T13:30:00-06:00
+Task: Task 4 - Implement Logging Infrastructure
+Status: Complete
+Blocking Issue: None
+Cross-Module Edits:
+- App.xaml.cs: Configured Serilog sinks (Console, File, Debug, In-memory)
+Notes:
+- Added ILoggerService wrapper for module logging
+- Implemented InMemoryLogSink and LogEntry model for UI consumption
+- Built LogViewer UserControl (virtualized ListBox) themed for dark/light, with level colors via resources
+- Verified runtime logging output and UI viewer binding
+- Ensured no hard-coded colors; all brushes pulled from theme dictionaries
+Next Task: Task 5 - Create Settings Management System
+
+Date: 2025-01-11T13:00:00-06:00
+Task: Task 3 - Create Module Contract System
+Status: Complete
+Blocking Issue: None
+Cross-Module Edits: None
+Notes:
+- Defined IModule, IDocumentModule, IDocument, and IModuleCatalog contracts in EasyAF.Core
+- Implemented ModuleCatalog service with registration and file-extension resolution
+- Contracts include module metadata, supported extensions, icon, and ribbon tab provisioning
+- Established separation so modules are self-contained and discoverable
+Next Task: Task 4 - Implement Logging Infrastructure
+
+Date: 2025-01-11T12:45:00-06:00
+Task: Task 2 - Implement Theme Engine
+Status: Complete
+Blocking Issue: None
+Cross-Module Edits:
+- App.xaml: Merged theme dictionaries
+Notes:
+- Implemented IThemeService and ThemeService to switch resource dictionaries at runtime
+- Added complete Light.xaml and Dark.xaml palettes and brushes
+- Verified dynamic theme switching, all bindings via DynamicResource
+- No hard-coded colors permitted; established theme resource keys used across the shell
+Next Task: Task 3 - Create Module Contract System
+
+Date: 2025-01-11T12:30:00-06:00
+Task: Task 1 - Create Solution Structure
+Status: Complete
+Blocking Issue: None
+Cross-Module Edits: None
+Notes:
+- Created solution with projects EasyAF.Core (.NET 8) and EasyAF.Shell (.NET 8)
+- Added NuGet packages: Fluent.Ribbon, Prism.Unity, Serilog
+- Established initial folder structure for Contracts, Services, Views, ViewModels, Theme, Styles
+- Verified clean build and committed initial scaffolding
+Next Task: Task 2 - Implement Theme Engine
