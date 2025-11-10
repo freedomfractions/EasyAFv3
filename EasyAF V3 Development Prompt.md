@@ -187,6 +187,63 @@ public interface IDocumentModule : IModule
 }
 ```
 
+### Optional Module Help System (IHelpProvider)
+Modules may optionally provide end-user help pages without modifying the base `IModule` contract by implementing `IHelpProvider`.
+
+`IHelpProvider` Contract:
+```csharp
+public interface IHelpProvider
+{
+    IEnumerable<HelpPageDescriptor> GetHelpPages();
+}
+
+public record HelpPageDescriptor(
+    string Id,            // stable unique id e.g. "map.intro"
+    string Title,         // user-visible title
+    string Category,      // logical grouping e.g. "Getting Started"
+    string ResourcePath,  // embedded markdown resource path or relative file path
+    string[]? Keywords = null // optional extra search terms
+);
+```
+Implementation Guidelines:
+1. Embed Markdown files as `EmbeddedResource` or `Resource` in the module project.
+2. Use a predictable folder (recommended: `Help/` root in module project).
+3. ResourcePath should match the build action path (e.g. `Help/Intro.md`).
+4. Keep `Id` stable; changing it breaks deep links and search index references.
+5. Prefer short Category names; hierarchy can be simulated with `Mapping/Advanced` if needed.
+6. Provide Keywords to enhance search (synonyms, abbreviations).
+7. Keep each page focused; large topics should be split into multiple pages.
+8. Use first-level heading (`# Title`) matching the descriptor Title.
+9. Avoid hard-coded colors or theme references; UI screenshots should be neutral or dual-theme if added later.
+
+Search Behavior:
+- Title, Category, and Keywords are indexed.
+- Shell aggregates pages via `IHelpCatalog` when modules load.
+
+Example:
+```csharp
+public class MapModule : IModule, IHelpProvider
+{
+    public IEnumerable<HelpPageDescriptor> GetHelpPages() => new[]
+    {
+        new HelpPageDescriptor("map.intro", "Introduction", "Getting Started", "Help/Intro.md", new[]{"overview","basics"}),
+        new HelpPageDescriptor("map.mapping", "Creating Mappings", "Mapping", "Help/CreatingMappings.md", new[]{"associate","link"})
+    };
+}
+```
+Future Extensions (Non-breaking):
+- Localization via adding locale-specific resources (e.g. `Help/Intro.en-US.md`).
+- Rich metadata (e.g. `RequiresModuleFeature`, `Order`) can be added with a new descriptor type if needed.
+- A build analyzer can later enforce presence of at least one help page.
+
+Shell Responsibilities:
+- Detect modules implementing `IHelpProvider` on load.
+- Ignore duplicates (Id uniqueness enforced; first wins).
+- Provide Help ribbon tab & dialog (TOC + search) aggregating all registered pages.
+
+Rollback Instructions:
+- Remove `IHelpProvider`, `HelpPageDescriptor`, `IHelpCatalog` registrations and delete related files.
+
 ## Critical Implementation Notes
 
 ### Theme Application Rules
@@ -194,6 +251,29 @@ public interface IDocumentModule : IModule
 2. Every control must have explicit style assignment
 3. Create control templates for any custom controls
 4. Test both light and dark themes after every UI change
+
+### Centralized Theming Architecture
+**Location:** `app/EasyAF.Shell/Styles/CommonControls.xaml`
+
+All standard WPF controls have themed styles defined in CommonControls.xaml:
+- **Buttons**: BaseButtonStyle (keyed), AccentButtonStyle (keyed)
+- **TextBox**: Implicit style with focus/disabled states
+- **ListBox/ListBoxItem**: Implicit styles with selection/hover states
+- **TabControl/TabItem**: Implicit styles with active/inactive tab states
+- **CheckBox**: Implicit style with check mark and all interaction states
+- **ScrollBar/Thumb**: Implicit styles for vertical and horizontal scrollbars
+
+**Theme Resources:** All styles reference brushes from `Theme/Light.xaml` and `Theme/Dark.xaml`:
+- Background: WindowBackgroundBrush, PrimaryBackgroundBrush, SecondaryBackgroundBrush, ControlBackgroundBrush
+- Text: TextPrimaryBrush, TextSecondaryBrush, TextTertiaryBrush, TextDisabledBrush
+- Borders: ControlBorderBrush, ControlBorderHoverBrush, ControlBorderFocusBrush
+- Tabs: TabActiveBackgroundBrush, TabActiveBorderBrush, TabInactiveBackgroundBrush, TabInactiveBorderBrush
+- Buttons: ButtonBackgroundBrush, ButtonForegroundBrush, ButtonBorderBrush, ButtonHoverBackgroundBrush, ButtonDisabledBackgroundBrush, ButtonDisabledForegroundBrush
+- Highlights: HighlightSelectionBrush, ReadonlyBackgroundBrush, AccentBrush, AccentHoverBrush
+
+**Custom Controls:** Specialized controls (DocumentTabControl) have dedicated resource dictionaries in `Styles/` folder.
+
+**Usage:** CommonControls.xaml is merged in App.xaml, making all styles available application-wide. Controls automatically inherit these styles unless explicitly overridden.
 
 ### Module Isolation Requirements
 1. Modules cannot reference each other directly
@@ -229,7 +309,7 @@ After each task completion, verify:
 1. All module operations wrapped in try-catch
 2. Errors logged with full context via Serilog
 3. User-friendly error messages in UI
-4. Graceful degradation when modules fail
+4. Graceful deterioration when modules fail
 5. Document recovery on unexpected shutdown
 
 ---
@@ -251,249 +331,201 @@ Notes: [Any important observations or decisions]
 Next Task: [What should be worked on next]
 ```
 
+### ⚠️ CRITICAL JOURNAL RULES FOR AI AGENTS
+1. **NEVER DELETE OLD JOURNAL ENTRIES** - The journal is a permanent historical record
+2. **Only modify the entry for the task you are currently working on**
+3. **Add new entries at the TOP of the Active Journal Entries section**
+4. **Supplemental fixes to completed tasks should be added to the original task entry, not create new entries**
+5. **All entries remain in the journal permanently - no exceptions**
+
 ### Active Journal Entries
 **NOTE: Newest entries appear at the top**
 
 ```
-Date: 2025-11-10T12:00:00-06:00
-Task: Task 10 - Create File Management System
-Status: Paused
-Blocking Issue: None
-Cross-Module Edits:
-- app\EasyAF.Shell\ViewModels\FileCommandsViewModel.cs: Implemented Open/Save/SaveAs dialogs, dynamic module file type filters, and last directory persistence via ISettingsService
-- app\EasyAF.Shell\MainWindow.xaml: Wired Ribbon and Backstage commands, added module selection list for New, integrated Recent Files in Backstage and Welcome screen
-- app\EasyAF.Shell\Converters\NullToBooleanConverter.cs: Added converter
-- app\EasyAF.Shell\Converters\ZeroToVisibilityConverter.cs: Added converter
-Notes:
-- Open/SaveAs filters built from IModule.SupportedFileTypes with fallback to SupportedFileExtensions
-- Recent files updated on Open/Save/SaveAs; duplicates moved to top; max count driven by settings (RecentFiles.MaxCount)
-- Last-used directory remembered under setting key "FileDialogs.LastDirectory"
-- All UI changes adhere to theme resources; build successful
-Next Task: Continue Task 10 – add dirty-close confirmation UI in shell, refine SaveAs default extension handling per active module, and polish recent files UX (icons/context).
-
-Date: 2025-01-11T17:15:00-06:00
-Task: Task 10 - Create File Management System
+Date: 2025-01-11T21:00:00-06:00
+Task: SANITY CHECK - Pre-Phase 3 Review
 Status: In Progress
 Blocking Issue: None
 Cross-Module Edits:
-- IModule.cs: Added SupportedFileTypes property + FileTypeDefinition record
+- app\EasyAF.Shell\Styles\CommonControls.xaml: Added TabControl, TabItem, and CheckBox styles
+- EasyAF V3 Development Prompt.md: Added Centralized Theming Architecture documentation
 Notes:
-- Extended IModule with SupportedFileTypes (rich metadata: extension + description) to allow dynamic file dialog filter construction
-- Shell will fall back to SupportedFileExtensions if SupportedFileTypes is null
-- FileTypeDefinition record (immutable) created for module implementations
-Next Task: Continue Task 10 - integrate file type metadata into Open/Save dialog logic
+- Conducting comprehensive review of Phase 1 & 2 implementation before starting Map Module (Phase 3)
+- Goal: Identify incomplete features, missing pieces, and integration gaps that should be addressed
+- All findings will be documented in this entry with decisions on whether to fix now or defer
 
-Date: 2025-01-11T17:05:00-06:00
-Task: Task 10 - Create File Management System
-Status: In Progress
-Blocking Issue: None
-Cross-Module Edits:
-- App.xaml.cs: Registered IRecentFilesService
-- MainWindow.xaml: Added backstage Open tab recent files list bound to FileCommandsViewModel
-Notes:
-- Added IRecentFilesService & RecentFilesService with persisted list + configurable max (setting key RecentFiles.MaxCount, clamped 1-100)
-- RecentFilesService listens to SettingsReloaded to adjust max entries
-- FileCommandsViewModel now exposes RecentFiles, OpenRecentCommand, and integrates with DocumentManager for opening recent files
-- Backstage Open tab lists recent files as buttons invoking OpenRecentCommand
-- Save/SaveAs commands update recent files if document has a path
-- Next step: Implement actual Open/SaveAs dialogs & module file association logic
-Next Task: Continue Task 10 - implement dialogs & file associations
+THEMING DEEP DIVE (2025-01-11T21:30:00-06:00):
+- IDENTIFIED ISSUE: Settings Dialog controls (TabControl, TabItem, CheckBox) had no themed styles
+- Controls were using WPF system defaults (gray tabs, blue selection, system checkmark)
+- SOLUTION APPLIED:
+  - Added TabControl style with themed backgrounds and borders
+  - Added TabItem style with active/inactive states using TabActiveBorderBrush (blue accent)
+  - Added CheckBox style with themed box, checkmark path, and all interaction states
+  - All styles use DynamicResource bindings to theme brushes
+  - Verified styles work with existing Light.xaml and Dark.xaml brush definitions
+- DOCUMENTATION:
+  - Added "Centralized Theming Architecture" section to prompt.md Critical Implementation Notes
+  - Documents location, available controls, theme resources, and usage pattern
+  - Establishes CommonControls.xaml as single source of truth for control theming
+- VERIFIED: Build successful, all controls now have complete theme support
+- Settings Dialog now fully themed for both Light and Dark modes
 
-Date: 2025-01-11T16:45:00-06:00
-Task: Task 9 - Implement Document Manager
-Status: Complete
-Blocking Issue: None
-Cross-Module Edits:
-- App.xaml.cs: Registered IDocumentManager singleton (DocumentManager)
-- MainWindowViewModel: Injected IDocumentManager and bound Documents to manager's collection
-Notes:
-- Added IDocumentManager interface with: OpenDocuments collection, ActiveDocument property, Open/Create/Save/Close operations, events (ActiveDocumentChanged, DocumentOpened, DocumentClosed)
-- Added DocumentCloseDecision enum (Save/Discard/Cancel) for dirty document confirmation workflow
-- Implemented DocumentManager with module-based open/creation using IModuleCatalog
-- Ensures ActiveDocument updated on open, close, and removal; selects nearest remaining tab when closing
-- Dirty document close logic invokes supplied confirmation callback
-- SaveDocument delegates to owning IDocumentModule and marks document clean on success
-- Integrated DocumentManager into DI container and MainWindowViewModel
-- ViewModel now listens to ActiveDocumentChanged to sync SelectedDocument
-- Documents ObservableCollection now shared singleton from DocumentManager (state centralization achieved)
-- No UI changes yet for prompts (will be addressed at File Management step)
-- Build successful with no warnings
-Next Task: Task 10 - Create File Management System
+UX REFINEMENT (2025-01-11T22:00:00-06:00):
+- IDENTIFIED ISSUE: Settings Dialog window border doesn't change between Light/Dark themes
+- ROOT CAUSE: Standard WPF Window uses system-controlled chrome/title bar (not themeable without custom chrome)
+- MainWindow uses fluent:RibbonWindow which has its own chrome management
+- DECISION: Acceptable limitation - system title bar/chrome remains OS-styled for modal dialogs
+- UX IMPROVEMENT #1:
+  - Changed backstage "Settings" tab to "Options..." button
+  - Options button directly launches settings dialog (no intermediate tab content)
+  - Provides cleaner, more direct UX pattern (click → dialog appears immediately)
+  - Consistent with modern application patterns (Office, VS Code, etc.)
+  - Removed obsolete Settings BackstageTabItem content
+- UX IMPROVEMENT #2:
+  - Made SettingsDialog resizable (changed ResizeMode from NoResize to CanResize)
+  - Added MinHeight="400" and MinWidth="600" to prevent dialog from becoming too small
+  - Default size remains 500x700 for good initial layout
+  - Users can now adjust dialog size to their preference or screen constraints
+- UX IMPROVEMENT #3:
+  - Added "Save" and "Save As..." buttons to backstage menu
+  - Positioned between "Open" tab and "Options..." button for logical workflow
+  - Save: Quick-save to current document path (wired to FileCommands.SaveCommand)
+  - Save As: Always prompts for file location (wired to FileCommands.SaveAsCommand)
+  - Consistent with backstage pattern: direct action buttons for common operations
+  - Commands already implemented in FileCommandsViewModel (Task 10)
+- UX IMPROVEMENT #4:
+  - Wired Options dialog OK / Apply / Cancel button behaviors
+  - ViewModel now raises PropertyChanged for DialogResult and dialog auto-closes on OK/Cancel
+  - Cancel reverts theme to original; Apply leaves dialog open; OK applies and closes
+  - Removed maximize/minimize buttons by setting WindowStyle="ToolWindow" while keeping resize
+  - Ensures modal dialog remains focused and lightweight
+- UX IMPROVEMENT #5:
+  - Removed Light/Dark theme buttons from Home ribbon tab
+  - Theme switching now exclusively via Options dialog to reduce ribbon clutter
+  - Home tab now focuses only on core file operations (New/Open/Save/Save As)
+  - Added inline XAML comment documenting removal rationale
+- VERIFIED: Build successful, behaviors work and dialog closes appropriately
 
-Date: 2025-01-11T16:30:00-06:00
-Task: Task 8 - Create Module Loader Service
-Status: Complete
-Blocking Issue: None
-Cross-Module Edits:
-- Modified App.xaml.cs to register IModuleLoader and IModuleRibbonService and hook module load event
-Notes:
-- Added IModuleLoader interface (Module discovery & loading)
-- Implemented ModuleLoader: reflects over loaded assemblies & optional /Modules folder, instantiates IModule types
-- Handles ReflectionTypeLoadException gracefully, logs warnings/errors via Serilog
-- Added IModuleRibbonService + ModuleRibbonService for ribbon tab injection from document modules
-- Integrated ModuleLoader in startup (App.xaml.cs) with ModuleLoaded event wiring to ModuleRibbonService
-- Fully qualified EasyAF.Core.Contracts.IModule to avoid Prism.IModule ambiguity
-- Attempt to data-bind Ribbon.ItemsSource removed (Fluent Ribbon does not expose ItemsSource); kept programmatic injection path
-- Updated MainWindowViewModel to build Home tab programmatically and expose RibbonTabs collection (reserved for future manual binding strategy if needed)
-- Build successful with new module loading infrastructure; ready for future module projects in /Modules folder
-Decision (2025-01-11T16:55:00-06:00): Retaining current programmatic ribbon tab injection (no attached behavior / region adapter) for simplicity; revisit if future dynamic composition needs arise.
-Next Task: Task 9 - Implement Document Manager
+REVIEW FINDINGS:
+1. Document Content Display:
+   - ISSUE: Welcome screen works, but DocumentContentContainer is always Collapsed
+   - IMPACT: Cannot display actual document views when tabs are selected
+   - ROOT CAUSE: No binding between SelectedDocument and ContentControl.Content
+   - DECISION: [PENDING]
 
-Date: 2025-01-11T16:00:00-06:00
-Task: Task 2 - Implement Theme Engine (Reopened - Dark Theme Revision)
-Status: Complete
-Blocking Issue: None
-Cross-Module Edits: None
-Notes:
-- Revised Dark theme to be grayscale-first with subtle blue accents
-- Backgrounds now near-neutral blacks: #121212, #1C1C1C, #181818
-- Borders adjusted to grayscale: #2A2A2A (hover #3A3A3A)
-- Text colors high-contrast: Primary #F2F2F2, Secondary #CACACA, Tertiary #9E9E9E, Disabled #6E6E6E
-- Tabs: inactive #1C1C1C, active #161616 with blue accent border for active
-- Highlight selection: #222222, Readonly: #202020
-- Kept blue accent (#3B82F6) for focus/active cues; hover accent #60A5FA
-- Log level colors validated against new grayscale backgrounds
-- Build successful, visual contrast improved, blue used sparingly for emphasis
-Next Task: Task 8 - Create Module Loader Service
+2. Welcome Screen Visibility:
+   - ISSUE: Welcome screen Border has Visibility="Visible" hardcoded
+   - IMPACT: Will overlap document content when documents are open
+   - ROOT CAUSE: No visibility binding based on Documents.Count
+   - DECISION: [PENDING]
 
-Date: 2025-01-11T15:30:00-06:00
-Task: Task 7 - Implement Document Tab System
-Status: Complete
-Blocking Issue: None
-Cross-Module Edits:
-- Modified App.xaml to merge new Styles/DocumentTabs.xaml resource dictionary
-Notes:
-- Created custom control DocumentTabControl (ListBox-derived) with vertical tab strip behavior
-- Implemented SelectedDocument dependency property (two-way binding)
-- Implemented CloseDocumentCommand dependency property for MVVM command injection
-- Added internal routed command CloseTabCommand for template-level close button binding
-- Added drag-drop reordering using DoDragDrop and ObservableCollection mutation
-- Added hit-testing helper to reposition documents based on pointer target
-- Created Styles/DocumentTabs.xaml resource dictionary with:
-  - DataTemplate (DocumentTabItemTemplate) including icon, title, dirty indicator ellipse
-  - ItemContainerStyle with selection/hover visual state and accent border for active tab
-  - Default Style for DocumentTabControl (vertical StackPanel, themed borders, min width)
-- Replaced placeholder left panel with bound DocumentTabControl in MainWindow.xaml
-- Added Documents ObservableCollection<IDocument> and SelectedDocument property to MainWindowViewModel
-- Added CloseDocumentCommand to remove documents and update selection
-- Removed unsupported StackPanel Spacing property (WPF compatibility fix)
-- All brushes use DynamicResource theme bindings (no hard-coded colors)
-- Shell builds successfully with integrated tab strip (placeholder collection until DocumentManager in Task 9)
-Next Task: Task 8 - Create Module Loader Service
+3. Module Loading Testing:
+   - STATUS: ModuleLoader implemented but never tested with actual modules
+   - IMPACT: Unknown if module discovery, initialization, and ribbon injection work correctly
+   - DECISION: [PENDING] - Will be tested naturally when Task 12 creates first module
 
-Date: 2025-01-11T15:00:00-06:00
-Task: Bug Fix - Log Viewer Theme Contrast Issues
-Status: Complete
-Blocking Issue: None
-Cross-Module Edits:
-- Modified lib\\EasyAF.Core\\Logging\\LogEntry.cs to use brush resource keys instead of hard-coded colors
-Notes:
-- IDENTIFIED ISSUE: Log level colors were hard-coded strings ("Gray", "White", "Orange", etc.)
-- This violated "Never use hard-coded colors" critical rule
-- Light theme: "White" text was invisible on white background, "LightGray" had poor contrast
-- Dark theme: Hard-coded colors didn't adapt properly
-- SOLUTION: Added theme-specific log level color definitions to both Light.xaml and Dark.xaml
-- Light theme colors: Verbose=#6B7280, Debug=#4B5563, Information=#2563EB, Warning=#D97706, Error=#DC2626, Fatal=#991B1B
-- Dark theme colors: Verbose=#9CA3AF, Debug=#D1D5DB, Information=#60A5FA, Warning=#FBBF24, Error=#FCA5A5, Fatal=#FECACA
-- All colors meet WCAG AA contrast ratio (4.5:1) for readability
-- Changed LogEntry.LevelColor property to LevelBrushKey returning resource key strings
-- Created ResourceKeyToBrushConverter in Shell/Converters/ to resolve brush keys to actual brushes
-- Updated LogViewer.xaml to use converter for log level foreground binding
-- Log viewer now properly adapts colors when switching between Light and Dark themes
-- Solution builds successfully with no errors or warnings
-Next Task: Task 7 - Implement Document Tab System
+4. IThemeService.AvailableThemeDescriptors:
+   - ISSUE: SettingsDialogViewModel uses this property but IThemeService interface doesn't define it
+   - IMPACT: Will cause compilation error or runtime issue
+   - ROOT CAUSE: Added during Task 11 but forgot to update interface
+   - DECISION: [PENDING]
 
-Date: 2025-01-11T14:30:00-06:00
-Task: Task 6 - Create Shell Window
-Status: Complete
-Blocking Issue: None
-Cross-Module Edits: None
-Notes: 
-- Enhanced MainWindow.xaml with complete shell layout structure
-- Added Fluent.Ribbon with enhanced backstage menu (New, Open, Settings, Exit)
-- Created vertical tab strip panel on left side with 48px minimum width
-- Vertical tab strip styled with SecondaryBackgroundBrush and border separator
-- Placeholder emoji icon (📄) shown when no documents open
-- Created document content area in main grid column
-- Implemented welcome screen with centered layout shown when no documents are open
-- Welcome screen includes: title, subtitle, action buttons (Create New, Open Existing)
-- Added recent files section to welcome screen with themed border
-- Created styled buttons with rounded corners using ControlTemplate
-- Button hover states use theme brushes (AccentHoverBrush, HighlightSelectionBrush)
-- Added DocumentContentContainer ContentControl for future document display (currently collapsed)
-- Enhanced Home ribbon tab with File group (New, Open, Save) and View group (themes)
-- All buttons use Large size definition for better visibility
-- Status bar with collapsible log viewer maintained from Task 4
-- All UI elements use DynamicResource bindings for theme colors
-- Window starts centered with 1024x768 default size
-- Grid layout: Auto (Ribbon), * (Content), Auto (Status Bar)
-- Content grid: Auto (Vertical Tabs), * (Document Area)
-- All theme brushes applied: WindowBackground, PrimaryBackground, SecondaryBackground, ControlBorder, etc.
-- Solution builds successfully with no errors or warnings
-Next Task: Task 7 - Implement Document Tab System
+5. Document State Persistence:
+   - STATUS: DocumentManager tracks ActiveDocument but content never displayed
+   - IMPACT: Cannot verify if state preservation across tab switches works
+   - DECISION: [PENDING] - Depends on fixing #1
 
-Date: 2025-01-11T14:00:00-06:00
-Task: Task 5 - Create Settings Management System
-Status: Complete
-Blocking Issue: None
-Cross-Module Edits:
-- App.xaml.cs: Reads saved theme setting at startup and applies it via IThemeService
-Notes:
-- Created ISettingsService and SettingsManager using System.Text.Json for persistence
-- Implemented hot-reload via FileSystemWatcher; SettingsManager raises change notifications
-- Added ApplicationSettings model; settings stored under %AppData%/EasyAFv3/settings.json by default
-- Exposed GetSetting/SetSetting and module-scoped GetModuleSettings
-- Integrated with theme selection to persist current theme
-- Verified thread-safe read/write and graceful fallback when file missing/corrupt
-Next Task: Task 6 - Create Shell Window
+6. File Type Support:
+   - STATUS: IModule.SupportedFileTypes added but no modules implement it yet
+   - IMPACT: Cannot test file dialog filters until modules exist
+   - DECISION: [DEFER] - Will be tested in Phase 3
 
-Date: 2025-01-11T13:30:00-06:00
-Task: Task 4 - Implement Logging Infrastructure
-Status: Complete
-Blocking Issue: None
-Cross-Module Edits:
-- App.xaml.cs: Configured Serilog sinks (Console, File, Debug, In-memory)
-Notes:
-- Added ILoggerService wrapper for module logging
-- Implemented InMemoryLogSink and LogEntry model for UI consumption
-- Built LogViewer UserControl (virtualized ListBox) themed for dark/light, with level colors via resources
-- Verified runtime logging output and UI viewer binding
-- Ensured no hard-coded colors; all brushes pulled from theme dictionaries
-Next Task: Task 5 - Create Settings Management System
+7. Settings Persistence:
+   - STATUS: Theme setting persists correctly (verified in Task 2)
+   - STATUS: Recent files persist correctly (verified in Task 10)
+   - DECISION: [OK] - Working as expected
 
-Date: 2025-01-11T13:00:00-06:00
-Task: Task 3 - Create Module Contract System
-Status: Complete
-Blocking Issue: None
-Cross-Module Edits: None
-Notes:
-- Defined IModule, IDocumentModule, IDocument, and IModuleCatalog contracts in EasyAF.Core
-- Implemented ModuleCatalog service with registration and file-extension resolution
-- Contracts include module metadata, supported extensions, icon, and ribbon tab provisioning
-- Established separation so modules are self-contained and discoverable
-Next Task: Task 4 - Implement Logging Infrastructure
+8. Module Settings Tabs:
+   - STATUS: Settings dialog has placeholder "Modules" tab (disabled)
+   - IMPACT: No mechanism for modules to register their settings UI
+   - DECISION: [DEFER] - Not needed until modules have settings
 
-Date: 2025-01-11T12:45:00-06:00
-Task: Task 2 - Implement Theme Engine
-Status: Complete
-Blocking Issue: None
-Cross-Module Edits:
-- App.xaml: Merged theme dictionaries
-Notes:
-- Implemented IThemeService and ThemeService to switch resource dictionaries at runtime
-- Added complete Light.xaml and Dark.xaml palettes and brushes
-- Verified dynamic theme switching, all bindings via DynamicResource
-- No hard-coded colors permitted; established theme resource keys used across the shell
-Next Task: Task 3 - Create Module Contract System
+9. Settings Dialog Theming:
+   - ISSUE: TabControl, TabItem, CheckBox using system defaults
+   - DECISION: [FIXED] - Added complete themed styles to CommonControls.xaml
 
-Date: 2025-01-11T12:30:00-06:00
-Task: Task 1 - Create Solution Structure
-Status: Complete
-Blocking Issue: None
-Cross-Module Edits: None
-Notes:
-- Created solution with projects EasyAF.Core (.NET 8) and EasyAF.Shell (.NET 8)
-- Added NuGet packages: Fluent.Ribbon, Prism.Unity, Serilog
-- Established initial folder structure for Contracts, Services, Views, ViewModels, Theme, Styles
-- Verified clean build and committed initial scaffolding
-Next Task: Task 2 - Implement Theme Engine
+CRITICAL FIXES NEEDED BEFORE TASK 12:
+- [ ] Fix #1: Wire SelectedDocument to DocumentContentContainer.Content
+- [ ] Fix #2: Bind welcome screen visibility to Documents.Count == 0
+- [ ] Fix #4: Add AvailableThemeDescriptors property to IThemeService
+- [X] Fix #9: Theme Settings Dialog controls (COMPLETE)
+
+NON-CRITICAL (CAN DEFER):
+- #3: Module loading will be tested in Task 12
+- #5: Document state will be testable after fixing #1
+- #6: File type support will be tested in Phase 3
+- #8: Module settings registration not needed yet
+
+Next Task: Apply remaining critical fixes (#1, #2, #4), then proceed to Task 12
+
+AUDIT UPDATE (2025-01-11T22:30:00-06:00): Runtime & Architectural Stubs / Unreachable Code Identified
+- A1: Module Ribbon Injection Ineffective
+  - ModuleRibbonService.Tabs is never bound to the visual Ribbon. Tabs added after module load are not shown.
+  - OPTIONS TO FIX: (a) Inject returned RibbonTabItem directly into MainRibbon.Items; (b) Replace service with RegionAdapter approach; (c) Bind via attached behavior that syncs Tabs to Ribbon.
+  - RECOMMENDATION: Implement direct injection now for simplicity; refactor later if dynamic removal required.
+
+- A2: Help/About Dialog Close Logic
+  - ViewModels set DialogResult property but windows are not closed automatically (DialogResult on VM != Window.DialogResult).
+  - RESULT: Help/About dialogs remain open unless user manually closes window (Close button sets command but does not close window).
+  - FIX: In HelpDialog/AboutDialog code-behind handle CloseCommand via event or set Window.DialogResult and call Close().
+
+- A3: Help Tab Ordering
+  - Requirement: Help tab always last. Currently declared in XAML before any future module-injected tabs (which will appear at end). After modules load, Help may be mid-ribbon.
+  - FIX: After each module tab injection, move Help tab to end.
+
+- A4: Orphaned Theme Commands
+  - SwitchToLightThemeCommand/SwitchToDarkThemeCommand remain but no ribbon buttons reference them (removed in UX refinement). Dead code but harmless.
+  - DECISION: Mark as deprecated or remove once Options dialog theme switching confirmed stable.
+
+- A5: Ribbon x:Name Added but Unused
+  - x:Name="MainRibbon" declared; no code uses it for dynamic tab injection.
+  - FIX: Use MainRibbon.Items.Add for module tabs (see A1).
+
+- A6: Document Content Binding Missing (Already in #1)
+  - ContentControl never bound to SelectedDocument view; essential before module UI tasks.
+  - APPROACH: Bind ContentControl.Content to SelectedDocument.View or create a DocumentContentTemplateSelector.
+
+- A7: Welcome Screen Visibility (Already in #2)
+  - Hardcoded Visibility="Visible"; should collapse when Documents.Count > 0.
+
+- A8: SelectedDocument Dirty Indicator Works but No Save Prompt Integration in UI Area
+  - Dirty state tracked; visual area for document content absent so tests incomplete.
+
+- A9: Help Content Rendering Plain Text
+  - Markdown displayed raw; will need Markdig or custom renderer later (non-blocking).
+
+- A10: Converters Throw NotImplementedException on ConvertBack
+  - Acceptable since used in OneWay bindings; note to avoid accidental TwoWay usage.
+
+- A11: RibbonTabs Property Unused For Static Tabs
+  - Home & Help defined in XAML; RibbonTabs only holds future module tabs—unclear integration path.
+  - OPTION: Remove RibbonTabs exposure until dynamic binding implemented to avoid confusion.
+
+- A12: About Dialog Minimal Metadata
+  - Only lists modules & .NET version; may later add build commit, configuration, runtime info (non-critical).
+
+PRIORITY ORDER FOR RESOLUTION BEFORE TASK 12:
+1. Implement ContentControl binding (A6 / Critical #1).
+2. Implement welcome screen visibility binding (A7 / Critical #2).
+3. Add AvailableThemeDescriptors interface fix (Critical #4 done already in IThemeService? VERIFY; interface now includes property).
+4. Fix module ribbon injection (A1) & help tab ordering (A3).
+5. Correct dialog close behavior (A2).
+6. Remove or mark deprecated theme commands (A4).
+
+DEFERRED UNTIL AFTER FIRST MODULE (Map): A9, A11, A12.
+
+Rollback Instructions for Audit Fixes:
+- Removing direct injection: revert additions to App.xaml.cs module load handler and any code-behind modifications for Ribbon dynamic tab management.
+- Dialog close fix: delete added code-behind event handler and restore original XAML if necessary.
+
+END AUDIT UPDATE

@@ -6,6 +6,8 @@ using System.Windows.Input;
 using System.Collections.ObjectModel;
 using Fluent;
 using EasyAF.Shell.Services;
+using Serilog;
+using Prism.Ioc;
 
 namespace EasyAF.Shell.ViewModels;
 
@@ -17,6 +19,17 @@ public class MainWindowViewModel : BindableBase
     private readonly IThemeService _themeService;
     private readonly IModuleRibbonService _ribbonService;
     private readonly IDocumentManager _documentManager;
+    // CROSS-MODULE EDIT: 2025-01-11 Task 10
+    // Modified for: Add dirty-close confirmation support
+    // Related modules: Core (IUserDialogService), Shell (UserDialogService)
+    // Rollback instructions: Remove _dialogService field and constructor parameter
+    private readonly IUserDialogService _dialogService;
+    // CROSS-MODULE EDIT: 2025-01-11 Task 11
+    // Modified for: Add settings dialog support
+    // Related modules: Core (ISettingsService)
+    // Rollback instructions: Remove _settingsService field and constructor parameter
+    private readonly ISettingsService _settingsService;
+    private readonly IContainerProvider _container;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MainWindowViewModel"/> class.
@@ -26,11 +39,24 @@ public class MainWindowViewModel : BindableBase
     /// <param name="ribbonService">The module ribbon injection service.</param>
     /// <param name="documentManager">The document manager for managing open documents.</param>
     /// <param name="fileCommands">The file commands view model.</param>
-    public MainWindowViewModel(IThemeService themeService, LogViewerViewModel logViewerViewModel, IModuleRibbonService ribbonService, IDocumentManager documentManager, FileCommandsViewModel fileCommands)
+    /// <param name="dialogService">The dialog service for user confirmations.</param>
+    /// <param name="settingsService">The settings service for application settings.</param>
+    /// <param name="container">The container provider for resolving services.</param>
+    public MainWindowViewModel(IThemeService themeService,
+                               LogViewerViewModel logViewerViewModel,
+                               IModuleRibbonService ribbonService,
+                               IDocumentManager documentManager,
+                               FileCommandsViewModel fileCommands,
+                               IUserDialogService dialogService,
+                               ISettingsService settingsService,
+                               IContainerProvider container)
     {
         _themeService = themeService;
         _ribbonService = ribbonService;
         _documentManager = documentManager;
+        _dialogService = dialogService;
+        _settingsService = settingsService;
+        _container = container;
         FileCommands = fileCommands;
         LogViewerViewModel = logViewerViewModel;
 
@@ -41,38 +67,37 @@ public class MainWindowViewModel : BindableBase
         SwitchToDarkThemeCommand = new DelegateCommand(SwitchToDarkTheme);
         ExitCommand = new DelegateCommand(Exit);
         CloseDocumentCommand = new DelegateCommand<IDocument?>(CloseDocument, CanCloseDocument);
+        // CROSS-MODULE EDIT: 2025-01-11 Task 11
+        // Modified for: Add settings dialog support
+        // Related modules: Shell (SettingsDialog, SettingsDialogViewModel)
+        // Rollback instructions: Remove OpenSettingsCommand
+        OpenSettingsCommand = new DelegateCommand(OpenSettings);
+        // CROSS-MODULE EDIT: 2025-01-11 SANITY CHECK
+        // Modified for: Add Help/About commands for Help ribbon tab
+        // Related modules: Shell (HelpDialog, AboutDialog), Core (IHelpProvider via catalog)
+        // Rollback instructions: Remove OpenHelpCommand/OpenAboutCommand and Help tab XAML
+        OpenHelpCommand = new DelegateCommand(OpenHelp);
+        OpenAboutCommand = new DelegateCommand(OpenAbout);
 
         _documentManager.ActiveDocumentChanged += (_, doc) => SelectedDocument = doc;
-
-        // Build Home tab
-        BuildHomeTab();
     }
 
-    private void BuildHomeTab()
+    private void OpenHelp()
     {
-        var home = new RibbonTabItem { Header = "Home" };
+        var vm = _container.Resolve<HelpDialogViewModel>();
+        var dlg = new Views.HelpDialog { DataContext = vm, Owner = Application.Current.MainWindow };
+        dlg.ShowDialog();
+    }
 
-        var fileGroup = new RibbonGroupBox { Header = "File" };
-        fileGroup.Items.Add(new Button { Header = "New", SizeDefinition = "Large" });
-        fileGroup.Items.Add(new Button { Header = "Open", SizeDefinition = "Large" });
-        fileGroup.Items.Add(new Button { Header = "Save", SizeDefinition = "Large" });
-
-        var viewGroup = new RibbonGroupBox { Header = "View" };
-        var lightBtn = new Button { Header = "Light Theme" };
-        lightBtn.SetBinding(Button.CommandProperty, new System.Windows.Data.Binding(nameof(SwitchToLightThemeCommand)));
-        var darkBtn = new Button { Header = "Dark Theme" };
-        darkBtn.SetBinding(Button.CommandProperty, new System.Windows.Data.Binding(nameof(SwitchToDarkThemeCommand)));
-        viewGroup.Items.Add(lightBtn);
-        viewGroup.Items.Add(darkBtn);
-
-        home.Groups.Add(fileGroup);
-        home.Groups.Add(viewGroup);
-
-        _ribbonService.Tabs.Insert(0, home);
+    private void OpenAbout()
+    {
+        var vm = _container.Resolve<AboutDialogViewModel>();
+        var dlg = new Views.AboutDialog { DataContext = vm, Owner = Application.Current.MainWindow };
+        dlg.ShowDialog();
     }
 
     /// <summary>
-    /// Collection of tabs shown in the ribbon, including Home and module tabs.
+    /// Collection of tabs shown in the ribbon contributed by modules (XAML declares Home & Help).
     /// </summary>
     public ObservableCollection<RibbonTabItem> RibbonTabs => _ribbonService.Tabs;
 
@@ -96,20 +121,20 @@ public class MainWindowViewModel : BindableBase
     /// </summary>
     public ICommand CloseDocumentCommand { get; }
 
-    private bool CanCloseDocument(IDocument? doc) => doc != null;
-
-    private void CloseDocument(IDocument? doc)
-    {
-        if (doc == null) return;
-        Documents.Remove(doc);
-        if (SelectedDocument == doc)
-            SelectedDocument = Documents.FirstOrDefault();
-    }
+    /// <summary>
+    /// Gets the command to open the settings dialog.
+    /// </summary>
+    public ICommand OpenSettingsCommand { get; }
 
     /// <summary>
-    /// Gets the log viewer view model.
+    /// Gets the command to open the help dialog.
     /// </summary>
-    public LogViewerViewModel LogViewerViewModel { get; }
+    public ICommand OpenHelpCommand { get; }
+
+    /// <summary>
+    /// Gets the command to open the about dialog.
+    /// </summary>
+    public ICommand OpenAboutCommand { get; }
 
     /// <summary>
     /// Gets the command to switch to light theme.
@@ -126,6 +151,38 @@ public class MainWindowViewModel : BindableBase
     /// </summary>
     public ICommand ExitCommand { get; }
 
+    private bool CanCloseDocument(IDocument? doc) => doc != null;
+
+    private void CloseDocument(IDocument? doc)
+    {
+        if (doc == null) return;
+        
+        // Use DocumentManager with dirty confirmation callback
+        _documentManager.CloseDocument(doc, ConfirmCloseDocument);
+    }
+
+    /// <summary>
+    /// Confirmation callback for closing dirty documents.
+    /// </summary>
+    private DocumentCloseDecision ConfirmCloseDocument(IDocument doc)
+    {
+        var result = _dialogService.ConfirmWithCancel(
+            $"'{doc.Title}' has unsaved changes. Do you want to save before closing?",
+            "Unsaved Changes");
+
+        return result switch
+        {
+            MessageBoxResult.Yes => DocumentCloseDecision.Save,
+            MessageBoxResult.No => DocumentCloseDecision.Discard,
+            _ => DocumentCloseDecision.Cancel
+        };
+    }
+
+    /// <summary>
+    /// Gets the log viewer view model.
+    /// </summary>
+    public LogViewerViewModel LogViewerViewModel { get; }
+
     private void SwitchToLightTheme()
     {
         _themeService.ApplyTheme("Light");
@@ -138,7 +195,47 @@ public class MainWindowViewModel : BindableBase
 
     private void Exit()
     {
+        // Check for dirty documents before exiting
+        var dirtyDocs = Documents.Where(d => d.IsDirty).ToList();
+        if (dirtyDocs.Count > 0)
+        {
+            var message = dirtyDocs.Count == 1
+                ? $"'{dirtyDocs[0].Title}' has unsaved changes. Save before exiting?"
+                : $"{dirtyDocs.Count} documents have unsaved changes. Save all before exiting?";
+
+            var result = _dialogService.ConfirmWithCancel(message, "Unsaved Changes");
+            
+            if (result == MessageBoxResult.Cancel)
+                return;
+                
+            if (result == MessageBoxResult.Yes)
+            {
+                // Try to save all dirty documents
+                foreach (var doc in dirtyDocs)
+                {
+                    if (!_documentManager.SaveDocument(doc))
+                    {
+                        _dialogService.ShowError($"Failed to save '{doc.Title}'.", "Save Error");
+                        return; // Abort exit
+                    }
+                }
+            }
+        }
+        
         Application.Current.Shutdown();
+    }
+
+    private void OpenSettings()
+    {
+        var viewModel = new SettingsDialogViewModel(_themeService, _settingsService);
+        var dialog = new Views.SettingsDialog
+        {
+            DataContext = viewModel,
+            Owner = Application.Current.MainWindow
+        };
+
+        dialog.ShowDialog();
+        Log.Information("Settings dialog opened");
     }
 
     public IDocumentManager DocumentManager => _documentManager;

@@ -19,7 +19,12 @@
         <!-- Added converters for File Management UI bindings -->
         <conv:NullToBooleanConverter x:Key="NullToBooleanConverter" />
         <conv:ZeroToVisibilityConverter x:Key="ZeroToVisibilityConverter" />
+        <conv:PathToFileNameConverter x:Key="PathToFileNameConverter" />
+        <conv:PathToDirectoryConverter x:Key="PathToDirectoryConverter" />
         <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+        
+        <!-- Apply our base button style locally where needed to avoid global impact -->
+        <Style BasedOn="{StaticResource BaseButtonStyle}" TargetType="Button" />
     </fluent:RibbonWindow.Resources>
     <Grid Background="{DynamicResource PrimaryBackgroundBrush}">
         <Grid.RowDefinitions>
@@ -29,7 +34,7 @@
         </Grid.RowDefinitions>
 
         <!-- Ribbon -->
-        <fluent:Ribbon Grid.Row="0" Background="{DynamicResource SecondaryBackgroundBrush}">
+        <fluent:Ribbon x:Name="MainRibbon" Grid.Row="0" Background="{DynamicResource SecondaryBackgroundBrush}">
             <fluent:Ribbon.Menu>
                 <fluent:Backstage Background="{DynamicResource PrimaryBackgroundBrush}">
                     <fluent:BackstageTabControl>
@@ -46,6 +51,7 @@
                                          SelectedItem="{Binding FileCommands.SelectedModule, Mode=TwoWay}"
                                          Background="{DynamicResource ControlBackgroundBrush}"
                                          BorderBrush="{DynamicResource ControlBorderBrush}"
+                                         BorderThickness="1"
                                          Foreground="{DynamicResource TextPrimaryBrush}"
                                          Height="220">
                                     <ListBox.ItemTemplate>
@@ -80,16 +86,28 @@
                                 <Button Content="Browse..." Margin="0,12,0,16" Width="120"
                                         Command="{Binding FileCommands.OpenCommand}"/>
                                 <TextBlock Text="Recent Files" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold"/>
+                                <!-- CROSS-MODULE EDIT: 2025-01-11 Task 10 -->
+                                <!-- Modified for: Polish recent files UX with filename/directory display -->
+                                <!-- Related modules: Shell (Converters) -->
+                                <!-- Rollback instructions: Restore simple button display with full path as Content -->
                                 <ItemsControl ItemsSource="{Binding FileCommands.RecentFiles}" Margin="0,8,0,0">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <Button Content="{Binding}" 
-                                                    Command="{Binding DataContext.FileCommands.OpenRecentCommand, RelativeSource={RelativeSource AncestorType=fluent:BackstageTabItem}}"
+                                            <Button Command="{Binding DataContext.FileCommands.OpenRecentCommand, RelativeSource={RelativeSource AncestorType=fluent:BackstageTabItem}}"
                                                     CommandParameter="{Binding}"
-                                                    Background="{DynamicResource ControlBackgroundBrush}"
-                                                    Foreground="{DynamicResource TextPrimaryBrush}"
-                                                    BorderBrush="{DynamicResource ControlBorderBrush}"
-                                                    Margin="0,2,0,0"/>
+                                                    HorizontalContentAlignment="Left"
+                                                    Padding="8"
+                                                    Margin="0,2,0,0">
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Converter={StaticResource PathToFileNameConverter}}" 
+                                                               FontWeight="SemiBold"
+                                                               TextTrimming="CharacterEllipsis"/>
+                                                    <TextBlock Text="{Binding Converter={StaticResource PathToDirectoryConverter}}" 
+                                                               FontSize="10"
+                                                               Foreground="{DynamicResource TextSecondaryBrush}"
+                                                               TextTrimming="CharacterEllipsis"/>
+                                                </StackPanel>
+                                            </Button>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
@@ -100,11 +118,12 @@
                                          Visibility="{Binding FileCommands.RecentFiles.Count, Converter={StaticResource ZeroToVisibilityConverter}}"/>
                             </StackPanel>
                         </fluent:BackstageTabItem>
-                        <fluent:BackstageTabItem Header="Settings">
-                            <TextBlock Text="Application settings..." 
-                                     Foreground="{DynamicResource TextPrimaryBrush}"
-                                     Margin="20"/>
-                        </fluent:BackstageTabItem>
+                        <fluent:Button Header="Save" 
+                                     Command="{Binding FileCommands.SaveCommand}"/>
+                        <fluent:Button Header="Save As..." 
+                                     Command="{Binding FileCommands.SaveAsCommand}"/>
+                        <fluent:Button Header="Options..." 
+                                     Command="{Binding OpenSettingsCommand}"/>
                         <fluent:Button Header="Exit" 
                                      Command="{Binding ExitCommand}"/>
                     </fluent:BackstageTabControl>
@@ -123,11 +142,17 @@
                     <fluent:Button Header="Save As" 
                                  SizeDefinition="Large" Command="{Binding FileCommands.SaveAsCommand}"/>
                 </fluent:RibbonGroupBox>
-                <fluent:RibbonGroupBox Header="View">
-                    <fluent:Button Header="Light Theme" 
-                                 Command="{Binding SwitchToLightThemeCommand}"/>
-                    <fluent:Button Header="Dark Theme" 
-                                 Command="{Binding SwitchToDarkThemeCommand}"/>
+                <!-- Theme switching removed; now managed exclusively via Options dialog -->
+            </fluent:RibbonTabItem>
+
+            <!-- CROSS-MODULE EDIT: 2025-01-11 SANITY CHECK -->
+            <!-- Modified for: Add persistent Help tab (Help/About dialogs) -->
+            <!-- Related modules: Shell (HelpDialog, AboutDialog, HelpCatalog), Core (IHelpProvider) -->
+            <!-- Rollback instructions: Remove this RibbonTabItem and associated Help/About commands in MainWindowViewModel -->
+            <fluent:RibbonTabItem Header="Help">
+                <fluent:RibbonGroupBox Header="Support">
+                    <fluent:Button Header="Help" Command="{Binding OpenHelpCommand}"/>
+                    <fluent:Button Header="About" Command="{Binding OpenAboutCommand}"/>
                 </fluent:RibbonGroupBox>
             </fluent:RibbonTabItem>
         </fluent:Ribbon>
@@ -172,22 +197,13 @@
                         <StackPanel Orientation="Horizontal" 
                                   HorizontalAlignment="Center">
                             <Button Content="Create New" 
-                                  Padding="20,10"
+                                  Style="{StaticResource AccentButtonStyle}"
                                   Margin="10,0"
-                                  Background="{DynamicResource AccentBrush}"
-                                  Foreground="White"
-                                  BorderThickness="0"
-                                  FontSize="14"
-                                  Cursor="Hand"
                                   Command="{Binding FileCommands.NewCommand}"/>
 
                             <Button Content="Open Existing" 
                                   Padding="20,10"
                                   Margin="10,0"
-                                  Background="{DynamicResource ControlBackgroundBrush}"
-                                  Foreground="{DynamicResource TextPrimaryBrush}"
-                                  BorderBrush="{DynamicResource ControlBorderBrush}"
-                                  BorderThickness="1"
                                   FontSize="14"
                                   Cursor="Hand"
                                   Command="{Binding FileCommands.OpenCommand}"/>
@@ -207,16 +223,39 @@
                                          FontWeight="SemiBold"
                                          Foreground="{DynamicResource TextPrimaryBrush}"
                                          Margin="0,0,0,10"/>
+                                <!-- CROSS-MODULE EDIT: 2025-01-11 Task 10 -->
+                                <!-- Modified for: Polish recent files UX with filename/directory display -->
+                                <!-- Related modules: Shell (Converters) -->
+                                <!-- Rollback instructions: Restore simple button display with full path as Content -->
                                 <ItemsControl ItemsSource="{Binding FileCommands.RecentFiles}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <Button Content="{Binding}" 
-                                                    Command="{Binding DataContext.FileCommands.OpenRecentCommand, RelativeSource={RelativeSource AncestorType=fluent:RibbonWindow}}"
+                                            <Button Command="{Binding DataContext.FileCommands.OpenRecentCommand, RelativeSource={RelativeSource AncestorType=fluent:RibbonWindow}}"
                                                     CommandParameter="{Binding}"
-                                                    Background="{DynamicResource ControlBackgroundBrush}"
-                                                    Foreground="{DynamicResource TextPrimaryBrush}"
-                                                    BorderBrush="{DynamicResource ControlBorderBrush}"
-                                                    Margin="0,2,0,0"/>
+                                                    HorizontalContentAlignment="Left"
+                                                    Padding="8"
+                                                    Margin="0,2,0,0">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" 
+                                                               Text="📄" 
+                                                               FontSize="16" 
+                                                               Margin="0,0,8,0"
+                                                               VerticalAlignment="Center"/>
+                                                    <StackPanel Grid.Column="1">
+                                                        <TextBlock Text="{Binding Converter={StaticResource PathToFileNameConverter}}" 
+                                                                   FontWeight="SemiBold"
+                                                                   TextTrimming="CharacterEllipsis"/>
+                                                        <TextBlock Text="{Binding Converter={StaticResource PathToDirectoryConverter}}" 
+                                                                   FontSize="10"
+                                                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                                                   TextTrimming="CharacterEllipsis"/>
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Button>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>

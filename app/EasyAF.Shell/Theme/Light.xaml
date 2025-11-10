@@ -12,6 +12,14 @@
     <Color x:Key="SecondaryBackgroundColor">#FFF8F9FA</Color>
     <Color x:Key="ControlBackgroundColor">#FFFFFFFF</Color>
     
+    <!-- Button Specific Colors (improve contrast in light mode) -->
+    <Color x:Key="ButtonBackgroundColor">#FFFFFFFF</Color>
+    <Color x:Key="ButtonForegroundColor">#FF111827</Color>
+    <Color x:Key="ButtonBorderColor">#FFD1D5DB</Color>
+    <Color x:Key="ButtonHoverBackgroundColor">#FFEFF6FF</Color>
+    <Color x:Key="ButtonDisabledBackgroundColor">#FFF3F4F6</Color>
+    <Color x:Key="ButtonDisabledForegroundColor">#FF6B7280</Color>
+    
     <!-- Border Colors -->
     <Color x:Key="ControlBorderColor">#FFD1D5DB</Color>
     <Color x:Key="ControlBorderHoverColor">#FF9CA3AF</Color>
@@ -30,7 +38,7 @@
     <Color x:Key="TextPrimaryColor">#FF111827</Color>
     <Color x:Key="TextSecondaryColor">#FF6B7280</Color>
     <Color x:Key="TextTertiaryColor">#FF9CA3AF</Color>
-    <Color x:Key="TextDisabledColor">#FFD1D5DB</Color>
+    <Color x:Key="TextDisabledColor">#FF9CA3AF</Color>
     
     <!-- Status Colors -->
     <Color x:Key="ErrorColor">#FFDC2626</Color>
@@ -58,6 +66,14 @@
     <SolidColorBrush x:Key="PrimaryBackgroundBrush" Color="{StaticResource PrimaryBackgroundColor}"/>
     <SolidColorBrush x:Key="SecondaryBackgroundBrush" Color="{StaticResource SecondaryBackgroundColor}"/>
     <SolidColorBrush x:Key="ControlBackgroundBrush" Color="{StaticResource ControlBackgroundColor}"/>
+
+    <!-- Button Brushes -->
+    <SolidColorBrush x:Key="ButtonBackgroundBrush" Color="{StaticResource ButtonBackgroundColor}"/>
+    <SolidColorBrush x:Key="ButtonForegroundBrush" Color="{StaticResource ButtonForegroundColor}"/>
+    <SolidColorBrush x:Key="ButtonBorderBrush" Color="{StaticResource ButtonBorderColor}"/>
+    <SolidColorBrush x:Key="ButtonHoverBackgroundBrush" Color="{StaticResource ButtonHoverBackgroundColor}"/>
+    <SolidColorBrush x:Key="ButtonDisabledBackgroundBrush" Color="{StaticResource ButtonDisabledBackgroundColor}"/>
+    <SolidColorBrush x:Key="ButtonDisabledForegroundBrush" Color="{StaticResource ButtonDisabledForegroundColor}"/>
     
     <SolidColorBrush x:Key="ControlBorderBrush" Color="{StaticResource ControlBorderColor}"/>
     <SolidColorBrush x:Key="ControlBorderHoverBrush" Color="{StaticResource ControlBorderHoverColor}"/>

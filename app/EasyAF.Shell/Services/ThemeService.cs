@@ -12,6 +12,11 @@ public class ThemeService : IThemeService
 {
     private readonly ISettingsService _settingsService;
     private string _currentTheme;
+    // CROSS-MODULE EDIT: 2025-01-11 Task 2 (Supplemental Fix)
+    // Modified for: Prevent stack overflow from recursive theme application & duplicate event firing
+    // Related modules: Core (ISettingsService, SettingsManager)
+    // Rollback instructions: Restore previous ApplyTheme implementation without re-entry guard and single CurrentTheme assignment
+    private bool _isApplyingTheme;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ThemeService"/> class.
@@ -21,6 +26,7 @@ public class ThemeService : IThemeService
     {
         _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
         _currentTheme = "Light";
+        _isApplyingTheme = false;
     }
 
     /// <inheritdoc/>
@@ -61,6 +67,13 @@ public class ThemeService : IThemeService
     /// <inheritdoc/>
     public void ApplyTheme(string themeName)
     {
+        // Prevent re-entry
+        if (_isApplyingTheme)
+        {
+            Log.Debug("Skipping recursive theme application for {Theme}", themeName);
+            return;
+        }
+
         if (string.IsNullOrWhiteSpace(themeName))
             themeName = "Light";
 
@@ -68,43 +81,56 @@ public class ThemeService : IThemeService
             d.Name.Equals(themeName, StringComparison.OrdinalIgnoreCase))
             ?? AvailableThemeDescriptors.First();
 
-        // Remove existing theme dictionaries
-        var resources = Application.Current.Resources.MergedDictionaries;
-        var toRemove = resources
-            .Where(d => d.Source != null && d.Source.OriginalString.Contains("/Theme/", StringComparison.OrdinalIgnoreCase))
-            .ToList();
-
-        foreach (var dict in toRemove)
+        // Skip if already applied
+        if (CurrentTheme.Equals(descriptor.Name, StringComparison.OrdinalIgnoreCase))
         {
-            resources.Remove(dict);
+            Log.Debug("Theme {Theme} already applied, skipping", descriptor.Name);
+            return;
         }
 
-        // Add the new theme dictionary
-        var themeUri = new Uri(descriptor.Source, UriKind.RelativeOrAbsolute);
-        resources.Add(new ResourceDictionary { Source = themeUri });
-
-        // Apply Fluent.Ribbon theme using ControlzEx
         try
         {
-            var baseColor = descriptor.BaseColor;
-            ThemeManager.Current.ChangeTheme(Application.Current, $"{baseColor}.Blue");
+            _isApplyingTheme = true;
+
+            // Remove existing theme dictionaries
+            var resources = Application.Current.Resources.MergedDictionaries;
+            var toRemove = resources
+                .Where(d => d.Source != null && d.Source.OriginalString.Contains("/Theme/", StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            foreach (var dict in toRemove)
+                resources.Remove(dict);
+
+            // Add the new theme dictionary
+            resources.Add(new ResourceDictionary { Source = new Uri(descriptor.Source, UriKind.RelativeOrAbsolute) });
+
+            // Apply Fluent.Ribbon base color (safe fail)
+            try
+            {
+                ThemeManager.Current.ChangeTheme(Application.Current, $"{descriptor.BaseColor}.Blue");
+            }
+            catch { /* ignore */ }
+
+            // Persist only if changed value differs from stored setting to avoid unnecessary writes
+            try
+            {
+                var stored = _settingsService.GetSetting("Theme", "Light");
+                if (!string.Equals(stored, descriptor.Name, StringComparison.OrdinalIgnoreCase))
+                {
+                    _settingsService.SetSetting("Theme", descriptor.Name);
+                    Log.Information("Theme changed to {Theme} and persisted to settings", descriptor.Name);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Failed to persist theme selection to settings");
+            }
         }
-        catch
+        finally
         {
-            // Fluent theme change failed, continue with custom theme
+            _isApplyingTheme = false;
         }
 
+        // Fire change AFTER guard released
         CurrentTheme = descriptor.Name;
-
-        // Persist theme selection to settings
-        try
-        {
-            _settingsService.SetSetting("Theme", descriptor.Name);
-            Log.Information("Theme changed to {Theme} and persisted to settings", descriptor.Name);
-        }
-        catch (Exception ex)
-        {
-            Log.Warning(ex, "Failed to persist theme selection to settings");
-        }
     }
 }

@@ -149,7 +149,12 @@ public class FileCommandsViewModel : BindableBase
                 AddExtension = true,
                 OverwritePrompt = true,
                 InitialDirectory = GetInitialDirectory(),
-                FileName = SuggestFileName(doc)
+                FileName = SuggestFileName(doc),
+                // CROSS-MODULE EDIT: 2025-01-11 Task 10
+                // Modified for: Set default extension from module's primary file type
+                // Related modules: Core (IModule, FileTypeDefinition)
+                // Rollback instructions: Remove DefaultExt assignment below
+                DefaultExt = GetDefaultExtension(doc.OwnerModule)
             };
             var result = dialog.ShowDialog();
             if (result != true) return;
@@ -259,5 +264,16 @@ public class FileCommandsViewModel : BindableBase
             }
         }
         catch { /* swallow */ }
+    }
+
+    private string GetDefaultExtension(IDocumentModule module)
+    {
+        // Get primary extension from module's supported file types
+        var types = module.SupportedFileTypes;
+        if (types != null && types.Count > 0)
+            return types[0].Extension;
+
+        // Fallback to first supported extension
+        return module.SupportedFileExtensions.FirstOrDefault() ?? "dat";
     }
 }

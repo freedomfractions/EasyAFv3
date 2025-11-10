@@ -47,7 +47,13 @@ public partial class App : PrismApplication
         // Hook module loaded event for ribbon injection
         var ribbonService = Container.Resolve<IModuleRibbonService>();
         var loader = Container.Resolve<IModuleLoader>();
-        loader.ModuleLoaded += (object? sender, EasyAF.Core.Contracts.IModule module) => ribbonService.AddModuleTabs(module, null);
+        loader.ModuleLoaded += (object? sender, EasyAF.Core.Contracts.IModule module) => 
+        {
+            ribbonService.AddModuleTabs(module, null);
+            // Register help pages if provided
+            var helpCatalog = Container.Resolve<IHelpCatalog>();
+            helpCatalog.RegisterModule(module);
+        };
         loader.DiscoverAndLoadModules();
     }
 
@@ -68,25 +74,31 @@ public partial class App : PrismApplication
         containerRegistry.RegisterSingleton<ILoggerService, LoggerService>();
         containerRegistry.RegisterSingleton<IModuleLoader, ModuleLoader>();
         containerRegistry.RegisterSingleton<IModuleRibbonService, ModuleRibbonService>();
-        // CROSS-MODULE EDIT: 2025-01-11T17:00:00-06:00 Task 10
-        // Modified for: Add recent files tracking service for File Management System
-        // Related modules: EasyAF.Core (IRecentFilesService, RecentFilesService), EasyAF.Shell
-        // Rollback instructions: Remove RecentFilesService registration line below
         containerRegistry.RegisterSingleton<IRecentFilesService, RecentFilesService>();
         containerRegistry.RegisterSingleton<IDocumentManager, DocumentManager>();
-        
+        containerRegistry.RegisterSingleton<IDialogService, DialogService>();
+        // CROSS-MODULE EDIT: 2025-01-11 Task 10
+        // Modified for: Register UserDialogService for dirty-close confirmation dialogs
+        // Related modules: Core (IUserDialogService), Shell (UserDialogService)
+        // Rollback instructions: Remove UserDialogService registration line below
+        containerRegistry.RegisterSingleton<IUserDialogService, UserDialogService>();
+        // CROSS-MODULE EDIT: 2025-01-11 SANITY CHECK (Help system scaffold)
+        // Modified for: Register IHelpCatalog to aggregate optional module help pages (IHelpProvider)
+        // Related modules: Core (IHelpProvider), Shell (HelpCatalog)
+        // Rollback instructions: Remove IHelpCatalog registration and delete HelpCatalog.cs
+        containerRegistry.RegisterSingleton<IHelpCatalog, HelpCatalog>();
+        containerRegistry.RegisterSingleton<IHelpContentLoader, HelpContentLoader>();
+
         // Register shared log entries collection
         containerRegistry.RegisterInstance(_logEntries);
         
         // Register ViewModels
         containerRegistry.Register<MainWindowViewModel>();
         containerRegistry.Register<LogViewerViewModel>();
-        // CROSS-MODULE EDIT: 2025-01-11T17:00:00-06:00 Task 10
-        // Modified for: Register FileCommandsViewModel for New/Open/Save/SaveAs shell commands
-        // Related modules: EasyAF.Core (DocumentManager, ModuleCatalog), EasyAF.Shell
-        // Rollback instructions: Remove the following registration line if reverting Task 10
         containerRegistry.Register<FileCommandsViewModel>();
-        
+        containerRegistry.Register<HelpDialogViewModel>();
+        containerRegistry.Register<AboutDialogViewModel>();
+
         Log.Information("Services registered with Unity container");
     }
 
