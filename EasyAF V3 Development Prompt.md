@@ -342,6 +342,56 @@ Next Task: [What should be worked on next]
 **NOTE: Newest entries appear at the top**
 
 ```
+Date: 2025-11-11T22:00:00-06:00
+Task: SANITY CHECK - Pre-Phase 3 Review
+Status: Paused
+Blocking Issue: None
+Cross-Module Edits (Today):
+- app\EasyAF.Shell\MainWindow.xaml: Added ribbon groups (Current Document, System, Settings); applied Segoe MDL2 glyph icons; moved Close actions to File group
+- app\EasyAF.Shell\ViewModels\MainWindowViewModel.cs: Implemented shell commands (Close/Close All/Close Others, Open Containing Folder, Import/Export Settings, Open Logs/AppData)
+- app\EasyAF.Shell\Services\ModuleRibbonService.cs: Added TabsChanged event to support dynamic ribbon sync
+- app\EasyAF.Shell\App.xaml.cs: Implemented dynamic module tab injection and Help-tab-last ordering
+- app\EasyAF.Shell\Converters\NonZeroToVisibilityConverter.cs: Added for document content visibility
+- app\EasyAF.Shell\Views\HelpDialog.xaml.cs: Wired DialogResult propagation
+- app\EasyAF.Shell\Views\AboutDialog.xaml: Footer logo height bound to OK button for visual balance
+Notes:
+- Shell polish complete for now: essential ribbon groups added with theme-safe glyphs; About dialog visual tweak done
+- A1/A3 implemented: module tabs injected at runtime; Help tab kept last
+- Backstage Open layout refinement deferred (two-column Office-like layout)
+- Diagnostics/reporting feature deferred but noted for future (issue forms, diagnostics zip)
+- Document view hosting strategy agreed (Approach A: DataTemplates via module-provided resources)
+- Next time: introduce optional IResourceProvider and wire template resource merging during module load
+Next Task: Task 12 – Create Map Module Structure (implement MapModule : IDocumentModule) with DataTemplate hosting groundwork
+```
+
+```
+Date: 2025-11-10T19:50:00-06:00
+Task: SANITY CHECK - Pre-Phase 3 Review
+Status: In Progress
+Blocking Issue: None
+Cross-Module Edits (Supplemental Fixes Applied):
+- app\EasyAF.Shell\MainWindow.xaml: Bound SelectedDocument to ContentControl; added visibility bindings; added NonZeroToVisibilityConverter resource
+- app\EasyAF.Shell\Converters\NonZeroToVisibilityConverter.cs: Added converter for document content visibility
+- app\EasyAF.Shell\Views\HelpDialog.xaml.cs: Added DialogResult wiring for consistent close behavior
+- app\EasyAF.Shell\ViewModels\MainWindowViewModel.cs: Deprecated theme switch commands (exposed as null); cleaned constructor
+Notes:
+FIXES IMPLEMENTED (Critical Items Before Task 12):
+1. Document content binding added (SelectedDocument -> ContentControl.Content). Currently displays object ToString(); will be replaced with actual document view hosting once modules provide views.
+2. Welcome screen visibility now bound to Documents.Count (Zero -> Visible); document content shown when count > 0.
+3. Theme service interface already includes AvailableThemeDescriptors (verified); no action required beyond confirmation.
+4. HelpDialog close logic aligned with AboutDialog (DialogResult wiring via DataContextChanged & PropertyChanged handlers).
+5. Deprecated Light/Dark theme commands removed from active use (retained as null properties for potential future ribbon UI if reinstated).
+REMAINING ITEMS:
+- A1 / A3: Module ribbon tab injection and Help tab final positioning still pending; will implement after first module provides tabs (Map Module Task 12) for realistic test.
+- A6 follow-up: Need a view-hosting strategy (likely each IDocument will expose a UserControl View property or a DataTemplate keyed on document type).
+- A11: RibbonTabs collection currently unused for static tabs; defer until dynamic injection + ordering finalized.
+DECISIONS:
+- Will implement ribbon injection by direct MainRibbon.Items.Add in ModuleLoader handler (simple & performant) and then reorder Help tab to last after each injection.
+- Document view strategy: Add IDocumentContentProvider or extend IDocument with object? View property (module supplies control). DataTemplate approach preferred for decoupling.
+Next Task: Proceed to Task 12 (Create Map Module Structure) after completing ribbon injection (A1/A3) inline during module initialization.
+```
+
+```
 Date: 2025-01-11T21:00:00-06:00
 Task: SANITY CHECK - Pre-Phase 3 Review
 Status: In Progress
@@ -509,7 +559,7 @@ AUDIT UPDATE (2025-01-11T22:30:00-06:00): Runtime & Architectural Stubs / Unreac
 
 - A11: RibbonTabs Property Unused For Static Tabs
   - Home & Help defined in XAML; RibbonTabs only holds future module tabs—unclear integration path.
-  - OPTION: Remove RibbonTabs exposure until dynamic binding implemented to avoid confusion.
+  - OPTION: Remove RibbonTabs exposure until dynamic injection implemented to avoid confusion.
 
 - A12: About Dialog Minimal Metadata
   - Only lists modules & .NET version; may later add build commit, configuration, runtime info (non-critical).

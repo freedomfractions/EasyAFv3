@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>Assets\App.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,6 +23,12 @@
     <None Include="..\..\EasyAF V3 Development Prompt.md">
       <Link>EasyAF V3 Development Prompt.md</Link>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\Logo.png" />
+    <Resource Include="Assets\CompanyLogo.png" />
+    <Resource Include="Assets\App.ico" />
   </ItemGroup>
 
 </Project>

@@ -8,6 +8,8 @@ using Fluent;
 using EasyAF.Shell.Services;
 using Serilog;
 using Prism.Ioc;
+using System.Diagnostics;
+using System.IO;
 
 namespace EasyAF.Shell.ViewModels;
 
@@ -19,29 +21,10 @@ public class MainWindowViewModel : BindableBase
     private readonly IThemeService _themeService;
     private readonly IModuleRibbonService _ribbonService;
     private readonly IDocumentManager _documentManager;
-    // CROSS-MODULE EDIT: 2025-01-11 Task 10
-    // Modified for: Add dirty-close confirmation support
-    // Related modules: Core (IUserDialogService), Shell (UserDialogService)
-    // Rollback instructions: Remove _dialogService field and constructor parameter
     private readonly IUserDialogService _dialogService;
-    // CROSS-MODULE EDIT: 2025-01-11 Task 11
-    // Modified for: Add settings dialog support
-    // Related modules: Core (ISettingsService)
-    // Rollback instructions: Remove _settingsService field and constructor parameter
     private readonly ISettingsService _settingsService;
     private readonly IContainerProvider _container;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="MainWindowViewModel"/> class.
-    /// </summary>
-    /// <param name="themeService">The theme service for managing application themes.</param>
-    /// <param name="logViewerViewModel">The log viewer view model.</param>
-    /// <param name="ribbonService">The module ribbon injection service.</param>
-    /// <param name="documentManager">The document manager for managing open documents.</param>
-    /// <param name="fileCommands">The file commands view model.</param>
-    /// <param name="dialogService">The dialog service for user confirmations.</param>
-    /// <param name="settingsService">The settings service for application settings.</param>
-    /// <param name="container">The container provider for resolving services.</param>
     public MainWindowViewModel(IThemeService themeService,
                                LogViewerViewModel logViewerViewModel,
                                IModuleRibbonService ribbonService,
@@ -62,22 +45,28 @@ public class MainWindowViewModel : BindableBase
 
         Documents = _documentManager.OpenDocuments;
 
-        // Initialize commands
-        SwitchToLightThemeCommand = new DelegateCommand(SwitchToLightTheme);
-        SwitchToDarkThemeCommand = new DelegateCommand(SwitchToDarkTheme);
         ExitCommand = new DelegateCommand(Exit);
         CloseDocumentCommand = new DelegateCommand<IDocument?>(CloseDocument, CanCloseDocument);
-        // CROSS-MODULE EDIT: 2025-01-11 Task 11
-        // Modified for: Add settings dialog support
-        // Related modules: Shell (SettingsDialog, SettingsDialogViewModel)
-        // Rollback instructions: Remove OpenSettingsCommand
         OpenSettingsCommand = new DelegateCommand(OpenSettings);
-        // CROSS-MODULE EDIT: 2025-01-11 SANITY CHECK
-        // Modified for: Add Help/About commands for Help ribbon tab
-        // Related modules: Shell (HelpDialog, AboutDialog), Core (IHelpProvider via catalog)
-        // Rollback instructions: Remove OpenHelpCommand/OpenAboutCommand and Help tab XAML
         OpenHelpCommand = new DelegateCommand(OpenHelp);
         OpenAboutCommand = new DelegateCommand(OpenAbout);
+
+        // Shell-level document commands
+        CloseActiveCommand = new DelegateCommand(() => CloseDocument(SelectedDocument), () => SelectedDocument != null)
+            .ObservesProperty(() => SelectedDocument);
+        CloseAllCommand = new DelegateCommand(CloseAll, () => Documents.Count > 0)
+            .ObservesProperty(() => Documents.Count);
+        CloseOthersCommand = new DelegateCommand(CloseOthers, () => Documents.Count > 1 && SelectedDocument != null)
+            .ObservesProperty(() => Documents.Count)
+            .ObservesProperty(() => SelectedDocument);
+        OpenContainingFolderCommand = new DelegateCommand(OpenContainingFolder, () => !string.IsNullOrWhiteSpace(SelectedDocument?.FilePath))
+            .ObservesProperty(() => SelectedDocument);
+
+        // System/Settings commands (Help tab)
+        OpenLogsFolderCommand = new DelegateCommand(OpenLogsFolder);
+        OpenAppDataFolderCommand = new DelegateCommand(OpenAppDataFolder);
+        ExportSettingsCommand = new DelegateCommand(ExportSettings);
+        ImportSettingsCommand = new DelegateCommand(ImportSettings);
 
         _documentManager.ActiveDocumentChanged += (_, doc) => SelectedDocument = doc;
     }
@@ -137,19 +126,23 @@ public class MainWindowViewModel : BindableBase
     public ICommand OpenAboutCommand { get; }
 
     /// <summary>
-    /// Gets the command to switch to light theme.
-    /// </summary>
-    public ICommand SwitchToLightThemeCommand { get; }
-
-    /// <summary>
-    /// Gets the command to switch to dark theme.
-    /// </summary>
-    public ICommand SwitchToDarkThemeCommand { get; }
-
-    /// <summary>
     /// Gets the command to exit the application.
     /// </summary>
     public ICommand ExitCommand { get; }
+
+    // Newly added shell-level commands
+    public ICommand CloseActiveCommand { get; }
+    public ICommand CloseAllCommand { get; }
+    public ICommand CloseOthersCommand { get; }
+    public ICommand OpenContainingFolderCommand { get; }
+    public ICommand OpenLogsFolderCommand { get; }
+    public ICommand OpenAppDataFolderCommand { get; }
+    public ICommand ExportSettingsCommand { get; }
+    public ICommand ImportSettingsCommand { get; }
+
+    // DEPRECATED (A4): Theme switching now exclusively handled via Options dialog
+    public ICommand? SwitchToLightThemeCommand => null;
+    public ICommand? SwitchToDarkThemeCommand => null;
 
     private bool CanCloseDocument(IDocument? doc) => doc != null;
 
@@ -159,6 +152,135 @@ public class MainWindowViewModel : BindableBase
         
         // Use DocumentManager with dirty confirmation callback
         _documentManager.CloseDocument(doc, ConfirmCloseDocument);
+    }
+
+    private void CloseAll()
+    {
+        foreach (var doc in Documents.ToList())
+        {
+            if (!_documentManager.CloseDocument(doc, ConfirmCloseDocument))
+                break; // user canceled
+        }
+    }
+
+    private void CloseOthers()
+    {
+        var keep = SelectedDocument;
+        if (keep == null) return;
+        foreach (var doc in Documents.Where(d => d != keep).ToList())
+        {
+            if (!_documentManager.CloseDocument(doc, ConfirmCloseDocument))
+                break; // user canceled
+        }
+    }
+
+    private void OpenContainingFolder()
+    {
+        var path = SelectedDocument?.FilePath;
+        if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+        {
+            _dialogService.ShowMessage("No file on disk for this document yet.", "Open Containing Folder");
+            return;
+        }
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "explorer.exe",
+                Arguments = $"/select,\"{path}\"",
+                UseShellExecute = true
+            });
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to open containing folder for {Path}", path);
+            _dialogService.ShowError("Unable to open containing folder.");
+        }
+    }
+
+    private void OpenLogsFolder()
+    {
+        try
+        {
+            var logs = Path.Combine(AppContext.BaseDirectory, "logs");
+            if (!Directory.Exists(logs)) Directory.CreateDirectory(logs);
+            Process.Start(new ProcessStartInfo { FileName = logs, UseShellExecute = true });
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to open logs folder");
+            _dialogService.ShowError("Unable to open logs folder.");
+        }
+    }
+
+    private void OpenAppDataFolder()
+    {
+        try
+        {
+            var appData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EasyAF");
+            if (!Directory.Exists(appData)) Directory.CreateDirectory(appData);
+            Process.Start(new ProcessStartInfo { FileName = appData, UseShellExecute = true });
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to open app data folder");
+            _dialogService.ShowError("Unable to open app data folder.");
+        }
+    }
+
+    private void ExportSettings()
+    {
+        try
+        {
+            // Ensure latest settings saved
+            _settingsService.Save();
+            var source = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EasyAF", "settings.json");
+            var dlg = new Microsoft.Win32.SaveFileDialog
+            {
+                Title = "Export Settings",
+                Filter = "JSON Files (*.json)|*.json|All Files (*.*)|*.*",
+                FileName = "easyaf-settings.json",
+                AddExtension = true,
+                OverwritePrompt = true
+            };
+            if (dlg.ShowDialog() == true)
+            {
+                File.Copy(source, dlg.FileName, true);
+                _dialogService.ShowMessage("Settings exported successfully.", "Export Settings");
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Export settings failed");
+            _dialogService.ShowError("Failed to export settings.");
+        }
+    }
+
+    private void ImportSettings()
+    {
+        try
+        {
+            var dlg = new Microsoft.Win32.OpenFileDialog
+            {
+                Title = "Import Settings",
+                Filter = "JSON Files (*.json)|*.json|All Files (*.*)|*.*",
+                Multiselect = false
+            };
+            if (dlg.ShowDialog() == true)
+            {
+                var targetDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EasyAF");
+                if (!Directory.Exists(targetDir)) Directory.CreateDirectory(targetDir);
+                var target = Path.Combine(targetDir, "settings.json");
+                File.Copy(dlg.FileName, target, true);
+                _settingsService.Reload();
+                _dialogService.ShowMessage("Settings imported. Some changes may apply after restart.", "Import Settings");
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Import settings failed");
+            _dialogService.ShowError("Failed to import settings.");
+        }
     }
 
     /// <summary>
@@ -182,16 +304,6 @@ public class MainWindowViewModel : BindableBase
     /// Gets the log viewer view model.
     /// </summary>
     public LogViewerViewModel LogViewerViewModel { get; }
-
-    private void SwitchToLightTheme()
-    {
-        _themeService.ApplyTheme("Light");
-    }
-
-    private void SwitchToDarkTheme()
-    {
-        _themeService.ApplyTheme("Dark");
-    }
 
     private void Exit()
     {

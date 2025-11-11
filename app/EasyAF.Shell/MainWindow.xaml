@@ -15,15 +15,16 @@
         WindowStartupLocation="CenterScreen"
         Background="{DynamicResource WindowBackgroundBrush}">
     <fluent:RibbonWindow.Resources>
-        <!-- CROSS-MODULE EDIT: 2025-01-11T17:45:00-06:00 Task 10 -->
-        <!-- Added converters for File Management UI bindings -->
+        <!-- CROSS-MODULE EDIT: 2025-11-10 SANITY CHECK (Iconography) -->
+        <!-- Modified for: Add glyph icons to Ribbon buttons using Segoe MDL2 Assets for consistent visual language -->
+        <!-- Related modules: Shell (MainWindow) -->
+        <!-- Rollback instructions: Remove <fluent:Button.Icon> elements -->
         <conv:NullToBooleanConverter x:Key="NullToBooleanConverter" />
         <conv:ZeroToVisibilityConverter x:Key="ZeroToVisibilityConverter" />
         <conv:PathToFileNameConverter x:Key="PathToFileNameConverter" />
         <conv:PathToDirectoryConverter x:Key="PathToDirectoryConverter" />
+        <conv:NonZeroToVisibilityConverter x:Key="NonZeroToVisibilityConverter" />
         <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
-        
-        <!-- Apply our base button style locally where needed to avoid global impact -->
         <Style BasedOn="{StaticResource BaseButtonStyle}" TargetType="Button" />
     </fluent:RibbonWindow.Resources>
     <Grid Background="{DynamicResource PrimaryBackgroundBrush}">
@@ -134,25 +135,99 @@
             <fluent:RibbonTabItem Header="Home">
                 <fluent:RibbonGroupBox Header="File">
                     <fluent:Button Header="New" 
-                                 SizeDefinition="Large" Command="{Binding FileCommands.NewCommand}"/>
+                                 SizeDefinition="Large" Command="{Binding FileCommands.NewCommand}">
+                        <fluent:Button.Icon>
+                            <TextBlock Text="&#xE7C3;" FontFamily="Segoe MDL2 Assets" FontSize="26" Foreground="{DynamicResource TextPrimaryBrush}" />
+                        </fluent:Button.Icon>
+                    </fluent:Button>
                     <fluent:Button Header="Open" 
-                                 SizeDefinition="Large" Command="{Binding FileCommands.OpenCommand}"/>
+                                 SizeDefinition="Large" Command="{Binding FileCommands.OpenCommand}">
+                        <fluent:Button.Icon>
+                            <TextBlock Text="&#xE8E5;" FontFamily="Segoe MDL2 Assets" FontSize="26" Foreground="{DynamicResource TextPrimaryBrush}" />
+                        </fluent:Button.Icon>
+                    </fluent:Button>
                     <fluent:Button Header="Save" 
-                                 SizeDefinition="Large" Command="{Binding FileCommands.SaveCommand}"/>
+                                 SizeDefinition="Large" Command="{Binding FileCommands.SaveCommand}">
+                        <fluent:Button.Icon>
+                            <TextBlock Text="&#xE74E;" FontFamily="Segoe MDL2 Assets" FontSize="26" Foreground="{DynamicResource TextPrimaryBrush}" />
+                        </fluent:Button.Icon>
+                    </fluent:Button>
                     <fluent:Button Header="Save As" 
-                                 SizeDefinition="Large" Command="{Binding FileCommands.SaveAsCommand}"/>
+                                 SizeDefinition="Large" Command="{Binding FileCommands.SaveAsCommand}">
+                        <fluent:Button.Icon>
+                            <TextBlock Text="&#xE792;" FontFamily="Segoe MDL2 Assets" FontSize="26" Foreground="{DynamicResource TextPrimaryBrush}" />
+                        </fluent:Button.Icon>
+                    </fluent:Button>
+                    <fluent:Button Header="Close" Command="{Binding CloseActiveCommand}">
+                        <fluent:Button.Icon>
+                            <TextBlock Text="&#xE711;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="{DynamicResource TextPrimaryBrush}" />
+                        </fluent:Button.Icon>
+                    </fluent:Button>
+                    <fluent:Button Header="Close Others" Command="{Binding CloseOthersCommand}">
+                        <fluent:Button.Icon>
+                            <TextBlock Text="&#xE711;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="{DynamicResource TextPrimaryBrush}" />
+                        </fluent:Button.Icon>
+                    </fluent:Button>
+                    <fluent:Button Header="Close All" Command="{Binding CloseAllCommand}">
+                        <fluent:Button.Icon>
+                            <TextBlock Text="&#xE8BB;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="{DynamicResource TextPrimaryBrush}" />
+                        </fluent:Button.Icon>
+                    </fluent:Button>
                 </fluent:RibbonGroupBox>
+                
+                <!-- Current Document: keep contextual operations only -->
+                <fluent:RibbonGroupBox Header="Current Document">
+                    <fluent:Button Header="Open Containing Folder" Command="{Binding OpenContainingFolderCommand}">
+                        <fluent:Button.Icon>
+                            <TextBlock Text="&#xE8B7;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="{DynamicResource TextPrimaryBrush}" />
+                        </fluent:Button.Icon>
+                    </fluent:Button>
+                </fluent:RibbonGroupBox>
+                
                 <!-- Theme switching removed; now managed exclusively via Options dialog -->
             </fluent:RibbonTabItem>
 
-            <!-- CROSS-MODULE EDIT: 2025-01-11 SANITY CHECK -->
-            <!-- Modified for: Add persistent Help tab (Help/About dialogs) -->
-            <!-- Related modules: Shell (HelpDialog, AboutDialog, HelpCatalog), Core (IHelpProvider) -->
-            <!-- Rollback instructions: Remove this RibbonTabItem and associated Help/About commands in MainWindowViewModel -->
+            <!-- Help Tab -->
             <fluent:RibbonTabItem Header="Help">
                 <fluent:RibbonGroupBox Header="Support">
-                    <fluent:Button Header="Help" Command="{Binding OpenHelpCommand}"/>
-                    <fluent:Button Header="About" Command="{Binding OpenAboutCommand}"/>
+                    <fluent:Button Header="Help" Command="{Binding OpenHelpCommand}">
+                        <fluent:Button.Icon>
+                            <TextBlock Text="&#xE897;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="{DynamicResource TextPrimaryBrush}" />
+                        </fluent:Button.Icon>
+                    </fluent:Button>
+                    <fluent:Button Header="About" Command="{Binding OpenAboutCommand}">
+                        <fluent:Button.Icon>
+                            <TextBlock Text="&#xE946;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="{DynamicResource TextPrimaryBrush}" />
+                        </fluent:Button.Icon>
+                    </fluent:Button>
+                </fluent:RibbonGroupBox>
+                
+                <!-- New group: System -->
+                <fluent:RibbonGroupBox Header="System">
+                    <fluent:Button Header="Open Logs Folder" Command="{Binding OpenLogsFolderCommand}">
+                        <fluent:Button.Icon>
+                            <TextBlock Text="&#xE8D5;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="{DynamicResource TextPrimaryBrush}" />
+                        </fluent:Button.Icon>
+                    </fluent:Button>
+                    <fluent:Button Header="Open App Data Folder" Command="{Binding OpenAppDataFolderCommand}">
+                        <fluent:Button.Icon>
+                            <TextBlock Text="&#xE8B7;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="{DynamicResource TextPrimaryBrush}" />
+                        </fluent:Button.Icon>
+                    </fluent:Button>
+                </fluent:RibbonGroupBox>
+                
+                <!-- New group: Settings -->
+                <fluent:RibbonGroupBox Header="Settings">
+                    <fluent:Button Header="Import Settings" Command="{Binding ImportSettingsCommand}">
+                        <fluent:Button.Icon>
+                            <TextBlock Text="&#xE898;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="{DynamicResource TextPrimaryBrush}" />
+                        </fluent:Button.Icon>
+                    </fluent:Button>
+                    <fluent:Button Header="Export Settings" Command="{Binding ExportSettingsCommand}">
+                        <fluent:Button.Icon>
+                            <TextBlock Text="&#xE89A;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="{DynamicResource TextPrimaryBrush}" />
+                        </fluent:Button.Icon>
+                    </fluent:Button>
                 </fluent:RibbonGroupBox>
             </fluent:RibbonTabItem>
         </fluent:Ribbon>
@@ -178,7 +253,7 @@
             <!-- Document Content Area -->
             <Grid Grid.Column="1" Background="{DynamicResource PrimaryBackgroundBrush}">
                 <!-- Welcome Screen (shown when no documents are open) -->
-                <Border Visibility="Visible">
+                <Border Visibility="{Binding Documents.Count, Converter={StaticResource ZeroToVisibilityConverter}}">
                     <StackPanel HorizontalAlignment="Center" 
                               VerticalAlignment="Center">
                         <TextBlock Text="Welcome to EasyAF v3" 
@@ -271,7 +346,8 @@
 
                 <!-- Document Content Container (will be populated by document tabs) -->
                 <ContentControl x:Name="DocumentContentContainer"
-                              Visibility="Collapsed"/>
+                              Content="{Binding SelectedDocument}"
+                              Visibility="{Binding Documents.Count, Converter={StaticResource NonZeroToVisibilityConverter}}"/>
             </Grid>
         </Grid>
 

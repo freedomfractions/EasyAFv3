@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using EasyAF.Core.Contracts;
 using Fluent;
+using System.Collections.Specialized;
 
 namespace EasyAF.Shell.Services;
 
@@ -11,11 +12,23 @@ public interface IModuleRibbonService
 {
     ObservableCollection<RibbonTabItem> Tabs { get; }
     void AddModuleTabs(EasyAF.Core.Contracts.IModule module, IDocument? activeDocument = null);
+    event EventHandler? TabsChanged;
 }
 
 public class ModuleRibbonService : IModuleRibbonService
 {
     public ObservableCollection<RibbonTabItem> Tabs { get; } = new();
+    public event EventHandler? TabsChanged;
+
+    public ModuleRibbonService()
+    {
+        Tabs.CollectionChanged += OnTabsCollectionChanged;
+    }
+
+    private void OnTabsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        TabsChanged?.Invoke(this, EventArgs.Empty);
+    }
 
     public void AddModuleTabs(EasyAF.Core.Contracts.IModule module, IDocument? activeDocument = null)
     {

@@ -10,6 +10,8 @@ using EasyAF.Shell.Services;
 using EasyAF.Shell.ViewModels;
 using Serilog;
 using Fluent;
+using System.Linq;
+using System; // for EventHandler
 
 namespace EasyAF.Shell;
 
@@ -44,7 +46,7 @@ public partial class App : PrismApplication
         
         Log.Information("Applied theme: {Theme}", savedTheme);
 
-        // Hook module loaded event for ribbon injection
+        // Hook module loaded event for service-side tab aggregation and help registration
         var ribbonService = Container.Resolve<IModuleRibbonService>();
         var loader = Container.Resolve<IModuleLoader>();
         loader.ModuleLoaded += (object? sender, EasyAF.Core.Contracts.IModule module) => 
@@ -62,6 +64,40 @@ public partial class App : PrismApplication
         var mainWindow = Container.Resolve<MainWindow>();
         var viewModel = Container.Resolve<MainWindowViewModel>();
         mainWindow.DataContext = viewModel;
+
+        // CROSS-MODULE EDIT: 2025-11-10 SANITY CHECK (A1/A3)
+        // Modified for: Dynamic module Ribbon tab injection & ensuring Help tab is last
+        // Related modules: Shell (ModuleRibbonService, MainWindow), Core (IDocumentModule)
+        // Rollback instructions: Remove SyncTabsToRibbon logic and TabsChanged subscription; rely on static XAML only
+        var ribbonService = Container.Resolve<IModuleRibbonService>();
+
+        void SyncTabsToRibbon()
+        {
+            var ribbon = mainWindow.MainRibbon; // Name from XAML
+            if (ribbon == null) return;
+
+            // Inject any new module-provided tabs
+            foreach (var tab in ribbonService.Tabs)
+            {
+                if (!ribbon.Tabs.Contains(tab))
+                {
+                    ribbon.Tabs.Add(tab);
+                }
+            }
+
+            // Ensure Help tab is last (if present)
+            var helpTab = ribbon.Tabs.FirstOrDefault(t => (t.Header as string)?.Equals("Help", StringComparison.OrdinalIgnoreCase) == true);
+            if (helpTab != null && ribbon.Tabs.LastOrDefault() != helpTab)
+            {
+                ribbon.Tabs.Remove(helpTab);
+                ribbon.Tabs.Add(helpTab);
+            }
+        }
+
+        // Initial sync and subscribe for future changes
+        SyncTabsToRibbon();
+        ribbonService.TabsChanged += (_, __) => SyncTabsToRibbon();
+
         return mainWindow;
     }
 
