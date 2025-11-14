@@ -82,6 +82,11 @@ public class OpenBackstageViewModel : BindableBase
     private readonly ObservableCollection<FolderFileEntry> _allFolderFiles;
 
     /// <summary>
+    /// Master collection of browser entries (files + folders) in the current path (unfiltered).
+    /// </summary>
+    private readonly ObservableCollection<FolderBrowserEntry> _allBrowserEntries;
+
+    /// <summary>
     /// Filtered collection of recent files displayed in the Files tab.
     /// </summary>
     public ObservableCollection<RecentFileEntry> RecentFiles { get; }
@@ -96,6 +101,49 @@ public class OpenBackstageViewModel : BindableBase
     /// </summary>
     public ObservableCollection<FolderFileEntry> FolderFiles { get; }
 
+    /// <summary>
+    /// Filtered collection of browser entries (files + folders) displayed in the browser.
+    /// </summary>
+    public ObservableCollection<FolderBrowserEntry> BrowserEntries { get; }
+
+    private string _currentBrowsePath = string.Empty;
+    /// <summary>
+    /// Gets or sets the current directory being browsed.
+    /// </summary>
+    public string CurrentBrowsePath
+    {
+        get => _currentBrowsePath;
+        set
+        {
+            if (SetProperty(ref _currentBrowsePath, value))
+            {
+                RaisePropertyChanged(nameof(CanNavigateUp));
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets whether the user can navigate up to the parent directory.
+    /// </summary>
+    public bool CanNavigateUp
+    {
+        get
+        {
+            if (string.IsNullOrEmpty(CurrentBrowsePath))
+                return false;
+
+            try
+            {
+                var dirInfo = new DirectoryInfo(CurrentBrowsePath);
+                return dirInfo.Parent != null;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+    }
+
     public DelegateCommand SelectRecentCommand { get; }
     public DelegateCommand<QuickAccessFolder> SelectQuickAccessFolderCommand { get; }
     public DelegateCommand<RecentFileEntry> TogglePinCommand { get; }
@@ -103,6 +151,8 @@ public class OpenBackstageViewModel : BindableBase
     public DelegateCommand<RecentFileEntry> OpenFileCommand { get; }
     public DelegateCommand<RecentFolderEntry> OpenFolderCommand { get; }
     public DelegateCommand<FolderFileEntry> OpenFolderFileCommand { get; }
+    public DelegateCommand<FolderBrowserEntry> OpenBrowserEntryCommand { get; }
+    public DelegateCommand NavigateUpCommand { get; }
 
     /// <summary>
     /// Event raised when a file is selected (via Browse, double-click, etc.)
@@ -125,9 +175,11 @@ public class OpenBackstageViewModel : BindableBase
         _allRecentFiles = new ObservableCollection<RecentFileEntry>();
         _allRecentFolders = new ObservableCollection<RecentFolderEntry>();
         _allFolderFiles = new ObservableCollection<FolderFileEntry>();
+        _allBrowserEntries = new ObservableCollection<FolderBrowserEntry>();
         RecentFiles = new ObservableCollection<RecentFileEntry>();
         RecentFolders = new ObservableCollection<RecentFolderEntry>();
         FolderFiles = new ObservableCollection<FolderFileEntry>();
+        BrowserEntries = new ObservableCollection<FolderBrowserEntry>();
 
         SelectRecentCommand = new DelegateCommand(ExecuteSelectRecent);
         SelectQuickAccessFolderCommand = new DelegateCommand<QuickAccessFolder>(ExecuteSelectQuickAccessFolder);
@@ -136,6 +188,8 @@ public class OpenBackstageViewModel : BindableBase
         OpenFileCommand = new DelegateCommand<RecentFileEntry>(ExecuteOpenFile);
         OpenFolderCommand = new DelegateCommand<RecentFolderEntry>(ExecuteOpenFolder);
         OpenFolderFileCommand = new DelegateCommand<FolderFileEntry>(ExecuteOpenFolderFile);
+        OpenBrowserEntryCommand = new DelegateCommand<FolderBrowserEntry>(ExecuteOpenBrowserEntry);
+        NavigateUpCommand = new DelegateCommand(ExecuteNavigateUp, CanExecuteNavigateUp);
 
         // Initialize with sample data
         LoadSampleQuickAccessFolders();
@@ -158,8 +212,10 @@ public class OpenBackstageViewModel : BindableBase
         Mode = OpenBackstageMode.QuickAccessFolder;
         SelectedQuickAccessFolder = folder;
         
-        // Load files from the selected folder
-        LoadFolderFiles(folder.FolderPath);
+        // Set the current browse path and load browser entries
+        CurrentBrowsePath = folder.FolderPath;
+        LoadBrowserEntries(CurrentBrowsePath);
+        NavigateUpCommand.RaiseCanExecuteChanged();
     }
 
     private void ExecuteTogglePin(RecentFileEntry file)
@@ -190,7 +246,7 @@ public class OpenBackstageViewModel : BindableBase
         
         // Visual feedback for demonstration (remove when integrated with real file system)
         System.Windows.MessageBox.Show(
-            $"Would open folder:\n\n{folder.FolderPath}\n\nThis event will be handled by MainWindowViewModel to:\n• Navigate to folder in Quick Access view\n• Or open in file explorer",
+            $"Would open folder:\n\n{folder.FolderPath}\n\nThis event will behandel by MainWindowViewModel to:\n• Navigate to folder in Quick Access view\n• Or open in file explorer",
             "Folder Double-Click (Demo)",
             System.Windows.MessageBoxButton.OK,
             System.Windows.MessageBoxImage.Information);
@@ -212,6 +268,47 @@ public class OpenBackstageViewModel : BindableBase
         
         // Fire the event for parent integration
         FileSelected?.Invoke(file.FilePath);
+    }
+
+    private void ExecuteOpenBrowserEntry(FolderBrowserEntry entry)
+    {
+        if (entry == null) return;
+
+        if (entry.IsFolder)
+        {
+            // Navigate into the folder
+            CurrentBrowsePath = entry.FullPath;
+            LoadBrowserEntries(CurrentBrowsePath);
+            NavigateUpCommand.RaiseCanExecuteChanged();
+        }
+        else
+        {
+            // Open the file
+            FileSelected?.Invoke(entry.FullPath);
+        }
+    }
+
+    private void ExecuteNavigateUp()
+    {
+        try
+        {
+            var currentDir = new DirectoryInfo(CurrentBrowsePath);
+            if (currentDir.Parent != null)
+            {
+                CurrentBrowsePath = currentDir.Parent.FullName;
+                LoadBrowserEntries(CurrentBrowsePath);
+                NavigateUpCommand.RaiseCanExecuteChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error navigating up: {ex.Message}");
+        }
+    }
+
+    private bool CanExecuteNavigateUp()
+    {
+        return CanNavigateUp;
     }
 
     private void ExecuteBrowse()
@@ -311,7 +408,7 @@ public class OpenBackstageViewModel : BindableBase
         // Filter Quick Access folder files (if in that mode)
         if (Mode == OpenBackstageMode.QuickAccessFolder)
         {
-            ApplyFolderFileFilter();
+            ApplyBrowserEntryFilter();
         }
     }
 
@@ -398,6 +495,104 @@ public class OpenBackstageViewModel : BindableBase
             // Log error or show message to user
             System.Diagnostics.Debug.WriteLine($"Error loading folder files: {ex.Message}");
         }
+    }
+
+    /// <summary>
+    /// Loads files and folders from the specified directory into BrowserEntries.
+    /// </summary>
+    private void LoadBrowserEntries(string path)
+    {
+        _allBrowserEntries.Clear();
+        BrowserEntries.Clear();
+
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            System.Diagnostics.Debug.WriteLine("LoadBrowserEntries: path is null or empty");
+            return;
+        }
+
+        if (!Directory.Exists(path))
+        {
+            System.Diagnostics.Debug.WriteLine($"LoadBrowserEntries: Directory does not exist: {path}");
+            return;
+        }
+
+        try
+        {
+            var directory = new DirectoryInfo(path);
+            
+            // Load subdirectories first
+            var directories = directory.GetDirectories();
+            System.Diagnostics.Debug.WriteLine($"LoadBrowserEntries: Found {directories.Length} folders in {path}");
+            
+            foreach (var dirInfo in directories)
+            {
+                _allBrowserEntries.Add(new FolderBrowserEntry
+                {
+                    FullPath = dirInfo.FullName,
+                    IsFolder = true,
+                    LastModified = dirInfo.LastWriteTime
+                });
+            }
+
+            // Then load files
+            var files = directory.GetFiles();
+            System.Diagnostics.Debug.WriteLine($"LoadBrowserEntries: Found {files.Length} files in {path}");
+            
+            foreach (var fileInfo in files)
+            {
+                _allBrowserEntries.Add(new FolderBrowserEntry
+                {
+                    FullPath = fileInfo.FullName,
+                    IsFolder = false,
+                    FileSize = fileInfo.Length,
+                    LastModified = fileInfo.LastWriteTime
+                });
+            }
+
+            // Apply filter
+            ApplyBrowserEntryFilter();
+
+            System.Diagnostics.Debug.WriteLine($"LoadBrowserEntries: After filter, BrowserEntries.Count = {BrowserEntries.Count}");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error loading browser entries: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Applies search filter to browser entries.
+    /// </summary>
+    private void ApplyBrowserEntryFilter()
+    {
+        var searchTerm = SearchText?.Trim() ?? string.Empty;
+        var fuzzyThreshold = _settingsService.GetSetting("Search.FuzzyThreshold", 0.7);
+        var fuzzyEnabled = _settingsService.GetSetting("Search.FuzzyEnabled", true);
+        var threshold = fuzzyEnabled ? fuzzyThreshold : 0.0;
+
+        BrowserEntries.Clear();
+        foreach (var entry in _allBrowserEntries)
+        {
+            if (MatchesBrowserEntrySearch(entry, searchTerm, threshold))
+            {
+                BrowserEntries.Add(entry);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Checks if a browser entry matches the search criteria.
+    /// </summary>
+    private bool MatchesBrowserEntrySearch(FolderBrowserEntry entry, string searchTerm, double fuzzyThreshold)
+    {
+        return SearchHelper.IsMatchAny(
+            searchTerm,
+            fuzzyThreshold,
+            entry.Name,
+            entry.Extension,
+            entry.FullPath
+        );
     }
 
     /// <summary>
