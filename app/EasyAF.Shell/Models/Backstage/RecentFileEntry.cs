@@ -1,12 +1,16 @@
 using System;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace EasyAF.Shell.Models.Backstage;
 
 /// <summary>
 /// Represents a recent file entry in the Open backstage.
 /// </summary>
-public class RecentFileEntry
+public class RecentFileEntry : INotifyPropertyChanged
 {
+    private bool _isPinned;
+
     /// <summary>
     /// Full file path.
     /// </summary>
@@ -51,7 +55,19 @@ public class RecentFileEntry
     /// <summary>
     /// Whether this file is pinned (starred).
     /// </summary>
-    public bool IsPinned { get; set; }
+    public bool IsPinned
+    {
+        get => _isPinned;
+        set
+        {
+            if (_isPinned != value)
+            {
+                _isPinned = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(DateCategory)); // Notify that category changed
+            }
+        }
+    }
 
     /// <summary>
     /// Category for grouping files by date (Pinned, Today, Yesterday, This Week, Last Week, Older).
@@ -80,5 +96,12 @@ public class RecentFileEntry
 
             return "Older";
         }
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }
