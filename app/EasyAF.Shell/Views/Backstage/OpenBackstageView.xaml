@@ -102,6 +102,7 @@
                 <!-- Browse Button -->
                 <Button x:Name="BrowseButton"
                         Style="{StaticResource BaseButtonStyle}"
+                        Command="{Binding BrowseCommand}"
                         Padding="8,6">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="&#xE8E5;" 
