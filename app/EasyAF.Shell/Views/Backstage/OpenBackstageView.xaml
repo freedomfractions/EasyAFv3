@@ -482,7 +482,7 @@
                                                                             <TextBlock Text="{Binding Name}" 
                                                                                        FontWeight="SemiBold"
                                                                                        Foreground="{DynamicResource TextPrimaryBrush}"/>
-                                                                            <TextBlock Text="{Binding Extension}" 
+                                                                            <TextBlock Text="{Binding DirectoryPath}" 
                                                                                        FontSize="11"
                                                                                        Foreground="{DynamicResource TextSecondaryBrush}"/>
                                                                         </StackPanel>

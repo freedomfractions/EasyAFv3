@@ -53,6 +53,34 @@ public class FolderBrowserEntry : BindableBase
     public string Extension => IsFolder ? string.Empty : Path.GetExtension(FullPath);
 
     /// <summary>
+    /// Gets the directory path containing this file or folder.
+    /// For files: returns the parent directory path
+    /// For folders: returns the parent directory path
+    /// </summary>
+    public string DirectoryPath
+    {
+        get
+        {
+            try
+            {
+                if (IsFolder)
+                {
+                    var dirInfo = new DirectoryInfo(FullPath);
+                    return dirInfo.Parent?.FullName ?? string.Empty;
+                }
+                else
+                {
+                    return Path.GetDirectoryName(FullPath) ?? string.Empty;
+                }
+            }
+            catch
+            {
+                return string.Empty;
+            }
+        }
+    }
+
+    /// <summary>
     /// Gets the appropriate Segoe MDL2 icon for this entry.
     /// </summary>
     public string Icon => IsFolder ? "\uE8B7" : "\uE8A5"; // Folder or Document icon
