@@ -255,8 +255,10 @@
         <Setter Property="Background" Value="{DynamicResource TabInactiveBackgroundBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource TabInactiveBorderBrush}"/>
         <Setter Property="BorderThickness" Value="0,0,0,2"/>
-        <Setter Property="Padding" Value="12,8"/>
+        <Setter Property="Padding" Value="20,8"/>
+        <Setter Property="MinWidth" Value="100"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="TabItem">
@@ -267,7 +269,7 @@
                             Padding="{TemplateBinding Padding}">
                         <ContentPresenter x:Name="ContentSite"
                                           ContentSource="Header"
-                                          HorizontalAlignment="Center"
+                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                           VerticalAlignment="Center"/>
                     </Border>
                     <ControlTemplate.Triggers>

@@ -1,5 +1,6 @@
 using Prism.Commands;
 using Prism.Mvvm;
+using System;
 using System.Collections.ObjectModel;
 using EasyAF.Shell.Models.Backstage;
 
@@ -9,7 +10,7 @@ public enum OpenBackstageMode { Recent, QuickAccessFolder }
 public enum RecentTab { Files, Folders }
 
 /// <summary>
-/// ViewModel for Open Backstage with Quick Access folder support.
+/// ViewModel for Open Backstage with Quick Access folder support and sample data.
 /// </summary>
 public class OpenBackstageViewModel : BindableBase
 {
@@ -46,18 +47,34 @@ public class OpenBackstageViewModel : BindableBase
     /// </summary>
     public ObservableCollection<QuickAccessFolder> QuickAccessFolders { get; }
 
+    /// <summary>
+    /// Collection of recent files for the Files tab.
+    /// </summary>
+    public ObservableCollection<RecentFileEntry> RecentFiles { get; }
+
+    /// <summary>
+    /// Collection of recent folders for the Folders tab.
+    /// </summary>
+    public ObservableCollection<RecentFolderEntry> RecentFolders { get; }
+
     public DelegateCommand SelectRecentCommand { get; }
     public DelegateCommand<QuickAccessFolder> SelectQuickAccessFolderCommand { get; }
+    public DelegateCommand<RecentFileEntry> TogglePinCommand { get; }
 
     public OpenBackstageViewModel()
     {
         QuickAccessFolders = new ObservableCollection<QuickAccessFolder>();
+        RecentFiles = new ObservableCollection<RecentFileEntry>();
+        RecentFolders = new ObservableCollection<RecentFolderEntry>();
 
         SelectRecentCommand = new DelegateCommand(ExecuteSelectRecent);
         SelectQuickAccessFolderCommand = new DelegateCommand<QuickAccessFolder>(ExecuteSelectQuickAccessFolder);
+        TogglePinCommand = new DelegateCommand<RecentFileEntry>(ExecuteTogglePin);
 
-        // Initialize with sample Quick Access folders for demonstration
+        // Initialize with sample data
         LoadSampleQuickAccessFolders();
+        LoadSampleRecentFiles();
+        LoadSampleRecentFolders();
     }
 
     private void ExecuteSelectRecent()
@@ -73,9 +90,15 @@ public class OpenBackstageViewModel : BindableBase
         SelectedQuickAccessFolder = folder;
     }
 
+    private void ExecuteTogglePin(RecentFileEntry file)
+    {
+        if (file == null) return;
+        file.IsPinned = !file.IsPinned;
+        // In real implementation, persist to settings
+    }
+
     private void LoadSampleQuickAccessFolders()
     {
-        // Sample data - in real implementation, load from ISettingsService
         QuickAccessFolders.Add(new QuickAccessFolder
         {
             FolderName = "Projects",
@@ -95,6 +118,65 @@ public class OpenBackstageViewModel : BindableBase
             FolderName = "Archives",
             FolderPath = @"C:\Users\Documents\Archives",
             IconGlyph = "\uE8B7"
+        });
+    }
+
+    private void LoadSampleRecentFiles()
+    {
+        RecentFiles.Add(new RecentFileEntry
+        {
+            FilePath = @"C:\Users\Documents\Projects\Proposal_2024.docx",
+            LastModified = DateTime.Now.AddHours(-2),
+            IsPinned = true
+        });
+
+        RecentFiles.Add(new RecentFileEntry
+        {
+            FilePath = @"C:\Users\Documents\Reports\Q4_Analysis.xlsx",
+            LastModified = DateTime.Now.AddHours(-5),
+            IsPinned = false
+        });
+
+        RecentFiles.Add(new RecentFileEntry
+        {
+            FilePath = @"C:\Users\Documents\Meeting_Notes.txt",
+            LastModified = DateTime.Now.AddDays(-1),
+            IsPinned = false
+        });
+
+        RecentFiles.Add(new RecentFileEntry
+        {
+            FilePath = @"C:\Users\Downloads\Invoice_12345.pdf",
+            LastModified = DateTime.Now.AddDays(-2),
+            IsPinned = true
+        });
+
+        RecentFiles.Add(new RecentFileEntry
+        {
+            FilePath = @"C:\Users\Documents\Projects\Client_Presentation.pptx",
+            LastModified = DateTime.Now.AddDays(-3),
+            IsPinned = false
+        });
+    }
+
+    private void LoadSampleRecentFolders()
+    {
+        RecentFolders.Add(new RecentFolderEntry
+        {
+            FolderPath = @"C:\Users\Documents\Projects",
+            LastAccessed = DateTime.Now.AddHours(-1)
+        });
+
+        RecentFolders.Add(new RecentFolderEntry
+        {
+            FolderPath = @"C:\Users\Downloads",
+            LastAccessed = DateTime.Now.AddDays(-1)
+        });
+
+        RecentFolders.Add(new RecentFolderEntry
+        {
+            FolderPath = @"C:\Users\Documents\Reports",
+            LastAccessed = DateTime.Now.AddDays(-4)
         });
     }
 }

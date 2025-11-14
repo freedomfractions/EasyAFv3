@@ -10,6 +10,8 @@
     <UserControl.Resources>
         <conv:ZeroToVisibilityConverter x:Key="ZeroToVisibilityConverter" />
         <conv:RecentTabToIndexConverter x:Key="RecentTabToIndexConverter" />
+        <conv:PinnedToStarGlyphConverter x:Key="PinnedToStarGlyphConverter" />
+        <conv:PinnedToColorConverter x:Key="PinnedToColorConverter" />
     </UserControl.Resources>
     
     <!-- Step 3 - Search bar with TextBox and scrollable content host -->
@@ -203,7 +205,8 @@
                                                 <TabControl SelectedIndex="{Binding RecentTab, Converter={StaticResource RecentTabToIndexConverter}}">
                                                     <TabItem Header="Files">
                                                         <ListView Background="Transparent"
-                                                                  BorderThickness="0">
+                                                                  BorderThickness="0"
+                                                                  ItemsSource="{Binding RecentFiles}">
                                                             <ListView.View>
                                                                 <GridView>
                                                                     <!-- Icon Column -->
@@ -220,14 +223,14 @@
                                                                         </GridViewColumn.CellTemplate>
                                                                     </GridViewColumn>
                                                                     <!-- Name Column (two-line) -->
-                                                                    <GridViewColumn Width="300" Header="Name">
+                                                                    <GridViewColumn Width="320" Header="Name">
                                                                         <GridViewColumn.CellTemplate>
                                                                             <DataTemplate>
                                                                                 <StackPanel VerticalAlignment="Center">
-                                                                                    <TextBlock Text="Sample_Document.txt" 
+                                                                                    <TextBlock Text="{Binding FileName}" 
                                                                                                FontWeight="SemiBold"
                                                                                                Foreground="{DynamicResource TextPrimaryBrush}"/>
-                                                                                    <TextBlock Text="C:\Users\Documents\Projects" 
+                                                                                    <TextBlock Text="{Binding DirectoryPath}" 
                                                                                                FontSize="11"
                                                                                                Foreground="{DynamicResource TextSecondaryBrush}"/>
                                                                                 </StackPanel>
@@ -238,12 +241,20 @@
                                                                     <GridViewColumn Width="30">
                                                                         <GridViewColumn.CellTemplate>
                                                                             <DataTemplate>
-                                                                                <TextBlock Text="&#xE734;" 
+                                                                                <TextBlock Text="{Binding IsPinned, Converter={StaticResource PinnedToStarGlyphConverter}}" 
                                                                                            FontFamily="Segoe MDL2 Assets"
                                                                                            FontSize="16"
-                                                                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                                                                           Foreground="{Binding IsPinned, Converter={StaticResource PinnedToColorConverter}}"
                                                                                            HorizontalAlignment="Center"
-                                                                                           VerticalAlignment="Center"/>
+                                                                                           VerticalAlignment="Center"
+                                                                                           Cursor="Hand">
+                                                                                    <TextBlock.InputBindings>
+                                                                                        <MouseBinding MouseAction="LeftClick"
+                                                                                                      Command="{Binding DataContext.TogglePinCommand, 
+                                                                                                                RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                                                      CommandParameter="{Binding}"/>
+                                                                                    </TextBlock.InputBindings>
+                                                                                </TextBlock>
                                                                             </DataTemplate>
                                                                         </GridViewColumn.CellTemplate>
                                                                     </GridViewColumn>
@@ -251,7 +262,7 @@
                                                                     <GridViewColumn Width="120" Header="Date modified">
                                                                         <GridViewColumn.CellTemplate>
                                                                             <DataTemplate>
-                                                                                <TextBlock Text="Today" 
+                                                                                <TextBlock Text="{Binding LastModifiedDisplay}" 
                                                                                            Foreground="{DynamicResource TextSecondaryBrush}"
                                                                                            VerticalAlignment="Center"/>
                                                                             </DataTemplate>
@@ -291,15 +302,12 @@
                                                                     </Setter>
                                                                 </Style>
                                                             </ListView.ItemContainerStyle>
-                                                            <!-- Placeholder items -->
-                                                            <ListViewItem/>
-                                                            <ListViewItem/>
-                                                            <ListViewItem/>
                                                         </ListView>
                                                     </TabItem>
                                                     <TabItem Header="Folders">
                                                         <ListView Background="Transparent"
-                                                                  BorderThickness="0">
+                                                                  BorderThickness="0"
+                                                                  ItemsSource="{Binding RecentFolders}">
                                                             <ListView.View>
                                                                 <GridView>
                                                                     <!-- Icon Column -->
@@ -320,10 +328,10 @@
                                                                         <GridViewColumn.CellTemplate>
                                                                             <DataTemplate>
                                                                                 <StackPanel VerticalAlignment="Center">
-                                                                                    <TextBlock Text="Projects" 
+                                                                                    <TextBlock Text="{Binding FolderName}" 
                                                                                                FontWeight="SemiBold"
                                                                                                Foreground="{DynamicResource TextPrimaryBrush}"/>
-                                                                                    <TextBlock Text="C:\Users\Documents" 
+                                                                                    <TextBlock Text="{Binding ParentPath}" 
                                                                                                FontSize="11"
                                                                                                Foreground="{DynamicResource TextSecondaryBrush}"/>
                                                                                 </StackPanel>
@@ -334,7 +342,7 @@
                                                                     <GridViewColumn Width="120" Header="Date modified">
                                                                         <GridViewColumn.CellTemplate>
                                                                             <DataTemplate>
-                                                                                <TextBlock Text="Yesterday" 
+                                                                                <TextBlock Text="{Binding LastAccessedDisplay}" 
                                                                                            Foreground="{DynamicResource TextSecondaryBrush}"
                                                                                            VerticalAlignment="Center"/>
                                                                             </DataTemplate>
@@ -374,9 +382,6 @@
                                                                     </Setter>
                                                                 </Style>
                                                             </ListView.ItemContainerStyle>
-                                                            <!-- Placeholder items -->
-                                                            <ListViewItem/>
-                                                            <ListViewItem/>
                                                         </ListView>
                                                     </TabItem>
                                                 </TabControl>
