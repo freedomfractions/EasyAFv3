@@ -157,6 +157,7 @@ public class OpenBackstageViewModel : BindableBase
     public DelegateCommand<RecentFolderEntry> CopyFolderPathCommand { get; }
     public DelegateCommand<RecentFileEntry> RemoveFromListCommand { get; }
     public DelegateCommand<RecentFolderEntry> RemoveFolderFromListCommand { get; }
+    public DelegateCommand<FolderBrowserEntry> CopyBrowserPathCommand { get; }
 
     /// <summary>
     /// Event raised when a file is selected (via Browse, double-click, etc.)
@@ -198,6 +199,7 @@ public class OpenBackstageViewModel : BindableBase
         CopyFolderPathCommand = new DelegateCommand<RecentFolderEntry>(ExecuteCopyFolderPath);
         RemoveFromListCommand = new DelegateCommand<RecentFileEntry>(ExecuteRemoveFromList);
         RemoveFolderFromListCommand = new DelegateCommand<RecentFolderEntry>(ExecuteRemoveFolderFromListCommand);
+        CopyBrowserPathCommand = new DelegateCommand<FolderBrowserEntry>(ExecuteCopyBrowserPath);
 
         // Initialize with sample data
         LoadSampleQuickAccessFolders();
@@ -389,6 +391,28 @@ public class OpenBackstageViewModel : BindableBase
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Error copying folder path: {ex.Message}");
+        }
+    }
+
+    private void ExecuteCopyBrowserPath(FolderBrowserEntry entry)
+    {
+        if (entry == null) return;
+
+        try
+        {
+            // Copy the browser entry path to clipboard
+            System.Windows.Clipboard.SetText(entry.FullPath);
+
+            // Show a messagebox indicating the path has been copied
+            System.Windows.MessageBox.Show(
+                $"Path copied to clipboard:\n\n{entry.FullPath}",
+                "Path Copied",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Information);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error copying browser entry path: {ex.Message}");
         }
     }
 
