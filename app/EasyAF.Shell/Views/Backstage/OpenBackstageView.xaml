@@ -404,27 +404,104 @@
                                             </Setter.Value>
                                         </Setter>
                                     </DataTrigger>
-                                    <!-- QuickAccessFolder Mode: Placeholder -->
+                                    <!-- QuickAccessFolder Mode: File Browser -->
                                     <DataTrigger Binding="{Binding Mode}" Value="QuickAccessFolder">
                                         <Setter Property="Content">
                                             <Setter.Value>
-                                                <Border Padding="12"
-                                                        Background="{DynamicResource SecondaryBackgroundBrush}"
-                                                        BorderBrush="{DynamicResource ControlBorderBrush}"
-                                                        BorderThickness="1"
-                                                        CornerRadius="4">
-                                                    <StackPanel>
-                                                        <TextBlock Text="Quick Access Folder View" FontWeight="SemiBold" 
-                                                                   Foreground="{DynamicResource TextPrimaryBrush}"/>
-                                                        <TextBlock Text="{Binding SelectedQuickAccessFolder.FolderPath}" 
-                                                                   Foreground="{DynamicResource TextSecondaryBrush}"
-                                                                   Margin="0,4"/>
-                                                        <TextBlock Text="(Step 9 implementation)" 
-                                                                   Foreground="{DynamicResource TextTertiaryBrush}"
-                                                                   FontStyle="Italic"
-                                                                   Margin="0,4"/>
-                                                    </StackPanel>
-                                                </Border>
+                                                <ListView Background="Transparent"
+                                                          BorderThickness="0"
+                                                          ItemsSource="{Binding FolderFiles}">
+                                                    <ListView.View>
+                                                        <GridView>
+                                                            <!-- Icon Column -->
+                                                            <GridViewColumn Width="40">
+                                                                <GridViewColumn.CellTemplate>
+                                                                    <DataTemplate>
+                                                                        <TextBlock Text="&#xE8A5;" 
+                                                                                   FontFamily="Segoe MDL2 Assets"
+                                                                                   FontSize="20"
+                                                                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                                                                   HorizontalAlignment="Center"
+                                                                                   VerticalAlignment="Center"/>
+                                                                    </DataTemplate>
+                                                                </GridViewColumn.CellTemplate>
+                                                            </GridViewColumn>
+                                                            <!-- Name Column (two-line) -->
+                                                            <GridViewColumn Width="280" Header="Name">
+                                                                <GridViewColumn.CellTemplate>
+                                                                    <DataTemplate>
+                                                                        <StackPanel VerticalAlignment="Center">
+                                                                            <TextBlock Text="{Binding FileName}" 
+                                                                                       FontWeight="SemiBold"
+                                                                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                                                            <TextBlock Text="{Binding Extension}" 
+                                                                                       FontSize="11"
+                                                                                       Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                                                        </StackPanel>
+                                                                    </DataTemplate>
+                                                                </GridViewColumn.CellTemplate>
+                                                            </GridViewColumn>
+                                                            <!-- File Size Column -->
+                                                            <GridViewColumn Width="100" Header="Size">
+                                                                <GridViewColumn.CellTemplate>
+                                                                    <DataTemplate>
+                                                                        <TextBlock Text="{Binding FileSizeDisplay}" 
+                                                                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                                                                   VerticalAlignment="Center"/>
+                                                                    </DataTemplate>
+                                                                </GridViewColumn.CellTemplate>
+                                                            </GridViewColumn>
+                                                            <!-- Date Modified Column -->
+                                                            <GridViewColumn Width="90" Header="Modified">
+                                                                <GridViewColumn.CellTemplate>
+                                                                    <DataTemplate>
+                                                                        <TextBlock Text="{Binding LastModifiedDisplay}" 
+                                                                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                                                                   VerticalAlignment="Center"/>
+                                                                    </DataTemplate>
+                                                                </GridViewColumn.CellTemplate>
+                                                            </GridViewColumn>
+                                                        </GridView>
+                                                    </ListView.View>
+                                                    <ListView.ItemContainerStyle>
+                                                        <Style TargetType="ListViewItem">
+                                                            <Setter Property="Background" Value="Transparent"/>
+                                                            <Setter Property="BorderThickness" Value="0"/>
+                                                            <Setter Property="Padding" Value="0"/>
+                                                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                                            <Setter Property="MinHeight" Value="52"/>
+                                                            <Setter Property="Template">
+                                                                <Setter.Value>
+                                                                    <ControlTemplate TargetType="ListViewItem">
+                                                                        <Border x:Name="ItemBorder"
+                                                                                Background="{TemplateBinding Background}"
+                                                                                BorderBrush="Transparent"
+                                                                                BorderThickness="0"
+                                                                                Padding="{TemplateBinding Padding}">
+                                                                            <Border.InputBindings>
+                                                                                <MouseBinding MouseAction="LeftDoubleClick"
+                                                                                              Command="{Binding DataContext.OpenFolderFileCommand, 
+                                                                                                                RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                                              CommandParameter="{Binding}"/>
+                                                                            </Border.InputBindings>
+                                                                            <GridViewRowPresenter VerticalAlignment="Center"/>
+                                                                        </Border>
+                                                                        <ControlTemplate.Triggers>
+                                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                                <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource HighlightSelectionBrush}"/>
+                                                                            </Trigger>
+                                                                            <Trigger Property="IsSelected" Value="True">
+                                                                                <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource HighlightSelectionBrush}"/>
+                                                                                <Setter TargetName="ItemBorder" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                                                                                <Setter TargetName="ItemBorder" Property="BorderThickness" Value="2,0,0,0"/>
+                                                                            </Trigger>
+                                                                        </ControlTemplate.Triggers>
+                                                                    </ControlTemplate>
+                                                                </Setter.Value>
+                                                            </Setter>
+                                                        </Style>
+                                                    </ListView.ItemContainerStyle>
+                                                </ListView>
                                             </Setter.Value>
                                         </Setter>
                                     </DataTrigger>

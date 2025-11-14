@@ -2,6 +2,7 @@ using Prism.Commands;
 using Prism.Mvvm;
 using System;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -76,6 +77,11 @@ public class OpenBackstageViewModel : BindableBase
     private readonly ObservableCollection<RecentFolderEntry> _allRecentFolders;
 
     /// <summary>
+    /// Master collection of files in the selected Quick Access folder (unfiltered).
+    /// </summary>
+    private readonly ObservableCollection<FolderFileEntry> _allFolderFiles;
+
+    /// <summary>
     /// Filtered collection of recent files displayed in the Files tab.
     /// </summary>
     public ObservableCollection<RecentFileEntry> RecentFiles { get; }
@@ -85,12 +91,18 @@ public class OpenBackstageViewModel : BindableBase
     /// </summary>
     public ObservableCollection<RecentFolderEntry> RecentFolders { get; }
 
+    /// <summary>
+    /// Filtered collection of files in the selected Quick Access folder.
+    /// </summary>
+    public ObservableCollection<FolderFileEntry> FolderFiles { get; }
+
     public DelegateCommand SelectRecentCommand { get; }
     public DelegateCommand<QuickAccessFolder> SelectQuickAccessFolderCommand { get; }
     public DelegateCommand<RecentFileEntry> TogglePinCommand { get; }
     public DelegateCommand BrowseCommand { get; }
     public DelegateCommand<RecentFileEntry> OpenFileCommand { get; }
     public DelegateCommand<RecentFolderEntry> OpenFolderCommand { get; }
+    public DelegateCommand<FolderFileEntry> OpenFolderFileCommand { get; }
 
     /// <summary>
     /// Event raised when a file is selected (via Browse, double-click, etc.)
@@ -112,8 +124,10 @@ public class OpenBackstageViewModel : BindableBase
         QuickAccessFolders = new ObservableCollection<QuickAccessFolder>();
         _allRecentFiles = new ObservableCollection<RecentFileEntry>();
         _allRecentFolders = new ObservableCollection<RecentFolderEntry>();
+        _allFolderFiles = new ObservableCollection<FolderFileEntry>();
         RecentFiles = new ObservableCollection<RecentFileEntry>();
         RecentFolders = new ObservableCollection<RecentFolderEntry>();
+        FolderFiles = new ObservableCollection<FolderFileEntry>();
 
         SelectRecentCommand = new DelegateCommand(ExecuteSelectRecent);
         SelectQuickAccessFolderCommand = new DelegateCommand<QuickAccessFolder>(ExecuteSelectQuickAccessFolder);
@@ -121,6 +135,7 @@ public class OpenBackstageViewModel : BindableBase
         BrowseCommand = new DelegateCommand(ExecuteBrowse);
         OpenFileCommand = new DelegateCommand<RecentFileEntry>(ExecuteOpenFile);
         OpenFolderCommand = new DelegateCommand<RecentFolderEntry>(ExecuteOpenFolder);
+        OpenFolderFileCommand = new DelegateCommand<FolderFileEntry>(ExecuteOpenFolderFile);
 
         // Initialize with sample data
         LoadSampleQuickAccessFolders();
@@ -142,6 +157,9 @@ public class OpenBackstageViewModel : BindableBase
         if (folder == null) return;
         Mode = OpenBackstageMode.QuickAccessFolder;
         SelectedQuickAccessFolder = folder;
+        
+        // Load files from the selected folder
+        LoadFolderFiles(folder.FolderPath);
     }
 
     private void ExecuteTogglePin(RecentFileEntry file)
@@ -179,6 +197,21 @@ public class OpenBackstageViewModel : BindableBase
         
         // Fire the event for parent integration
         FolderSelected?.Invoke(folder.FolderPath);
+    }
+
+    private void ExecuteOpenFolderFile(FolderFileEntry file)
+    {
+        if (file == null) return;
+        
+        // Visual feedback for demonstration (remove when integrated with real file system)
+        System.Windows.MessageBox.Show(
+            $"Would open file:\n\n{file.FilePath}\n\nThis event will be handled by MainWindowViewModel to:\n• Close backstage\n• Load file via DocumentManager\n• Update recent files list",
+            "Folder File Double-Click (Demo)",
+            System.Windows.MessageBoxButton.OK,
+            System.Windows.MessageBoxImage.Information);
+        
+        // Fire the event for parent integration
+        FileSelected?.Invoke(file.FilePath);
     }
 
     private void ExecuteBrowse()
@@ -244,7 +277,7 @@ public class OpenBackstageViewModel : BindableBase
     }
 
     /// <summary>
-    /// Applies the search filter to both RecentFiles and RecentFolders collections.
+    /// Applies the search filter to RecentFiles, RecentFolders, and FolderFiles collections.
     /// </summary>
     private void ApplySearchFilter()
     {
@@ -273,6 +306,12 @@ public class OpenBackstageViewModel : BindableBase
             {
                 RecentFolders.Add(folder);
             }
+        }
+
+        // Filter Quick Access folder files (if in that mode)
+        if (Mode == OpenBackstageMode.QuickAccessFolder)
+        {
+            ApplyFolderFileFilter();
         }
     }
 
@@ -303,6 +342,95 @@ public class OpenBackstageViewModel : BindableBase
             folder.FolderName,
             folder.ParentPath,
             folder.FolderPath  // Also search full path
+        );
+    }
+
+    #endregion
+
+    #region Quick Access Folder File Loading
+
+    /// <summary>
+    /// Loads files from the specified folder path.
+    /// </summary>
+    private void LoadFolderFiles(string folderPath)
+    {
+        _allFolderFiles.Clear();
+        FolderFiles.Clear();
+
+        if (string.IsNullOrWhiteSpace(folderPath))
+        {
+            System.Diagnostics.Debug.WriteLine("LoadFolderFiles: folderPath is null or empty");
+            return;
+        }
+
+        if (!System.IO.Directory.Exists(folderPath))
+        {
+            System.Diagnostics.Debug.WriteLine($"LoadFolderFiles: Directory does not exist: {folderPath}");
+            return;
+        }
+
+        try
+        {
+            var directory = new System.IO.DirectoryInfo(folderPath);
+            var files = directory.GetFiles();
+
+            System.Diagnostics.Debug.WriteLine($"LoadFolderFiles: Found {files.Length} files in {folderPath}");
+
+            foreach (var fileInfo in files)
+            {
+                _allFolderFiles.Add(new FolderFileEntry
+                {
+                    FilePath = fileInfo.FullName,
+                    FileSize = fileInfo.Length,
+                    LastModified = fileInfo.LastWriteTime
+                });
+            }
+
+            System.Diagnostics.Debug.WriteLine($"LoadFolderFiles: Added {_allFolderFiles.Count} files to _allFolderFiles");
+
+            // Apply initial filter
+            ApplyFolderFileFilter();
+
+            System.Diagnostics.Debug.WriteLine($"LoadFolderFiles: After filter, FolderFiles.Count = {FolderFiles.Count}");
+        }
+        catch (Exception ex)
+        {
+            // Log error or show message to user
+            System.Diagnostics.Debug.WriteLine($"Error loading folder files: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Applies search filter to folder files.
+    /// </summary>
+    private void ApplyFolderFileFilter()
+    {
+        var searchTerm = SearchText?.Trim() ?? string.Empty;
+        var fuzzyThreshold = _settingsService.GetSetting("Search.FuzzyThreshold", 0.7);
+        var fuzzyEnabled = _settingsService.GetSetting("Search.FuzzyEnabled", true);
+        var threshold = fuzzyEnabled ? fuzzyThreshold : 0.0;
+
+        FolderFiles.Clear();
+        foreach (var file in _allFolderFiles)
+        {
+            if (MatchesFolderFileSearch(file, searchTerm, threshold))
+            {
+                FolderFiles.Add(file);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Checks if a folder file entry matches the search criteria.
+    /// </summary>
+    private bool MatchesFolderFileSearch(FolderFileEntry file, string searchTerm, double fuzzyThreshold)
+    {
+        return SearchHelper.IsMatchAny(
+            searchTerm,
+            fuzzyThreshold,
+            file.FileName,
+            file.Extension,
+            file.FilePath
         );
     }
 
@@ -401,26 +529,34 @@ public class OpenBackstageViewModel : BindableBase
 
     private void LoadSampleQuickAccessFolders()
     {
+        // Use real paths that exist on the system
+        var documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+        var downloadsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
+
         QuickAccessFolders.Add(new QuickAccessFolder
         {
-            FolderName = "Projects",
-            FolderPath = @"C:\Users\Documents\Projects",
+            FolderName = "Documents",
+            FolderPath = documentsPath,
             IconGlyph = "\uE8B7"
         });
 
         QuickAccessFolders.Add(new QuickAccessFolder
         {
-            FolderName = "Templates",
-            FolderPath = @"C:\Users\Documents\Templates",
+            FolderName = "Desktop",
+            FolderPath = desktopPath,
             IconGlyph = "\uE8B7"
         });
 
-        QuickAccessFolders.Add(new QuickAccessFolder
+        if (Directory.Exists(downloadsPath))
         {
-            FolderName = "Archives",
-            FolderPath = @"C:\Users\Documents\Archives",
-            IconGlyph = "\uE8B7"
-        });
+            QuickAccessFolders.Add(new QuickAccessFolder
+            {
+                FolderName = "Downloads",
+                FolderPath = downloadsPath,
+                IconGlyph = "\uE8B7"
+            });
+        }
     }
 
     private void LoadSampleRecentFiles()
