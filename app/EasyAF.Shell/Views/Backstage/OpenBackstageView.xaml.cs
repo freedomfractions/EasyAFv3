@@ -12,6 +12,9 @@ namespace EasyAF.Shell.Views.Backstage
         public OpenBackstageView()
         {
             InitializeComponent();
+            
+            // Handle keyboard navigation for Page Up/Down in ListViews
+            this.AddHandler(PreviewKeyDownEvent, new KeyEventHandler(OnPreviewKeyDown), true);
         }
 
         protected override void OnPreviewMouseWheel(MouseWheelEventArgs e)
@@ -34,6 +37,41 @@ namespace EasyAF.Shell.Views.Backstage
 
             // Forward the scroll to the ScrollViewer
             scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset - (e.Delta / 3.0));
+            e.Handled = true;
+        }
+
+        private void OnPreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            // Handle Page Up/Down to scroll the parent ScrollViewer instead of jumping to first/last item
+            if (e.Key != Key.PageUp && e.Key != Key.PageDown)
+                return;
+
+            if (!(e.OriginalSource is DependencyObject source))
+                return;
+
+            // Find the ListView
+            var listView = FindParent<ListView>(source);
+            if (listView == null)
+                return;
+
+            // Find the parent ScrollViewer
+            var scrollViewer = FindParent<ScrollViewer>(listView);
+            if (scrollViewer == null)
+                return;
+
+            // Calculate page size (viewport height)
+            var pageSize = scrollViewer.ViewportHeight;
+
+            // Scroll by page size
+            if (e.Key == Key.PageUp)
+            {
+                scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset - pageSize);
+            }
+            else // PageDown
+            {
+                scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset + pageSize);
+            }
+
             e.Handled = true;
         }
 
