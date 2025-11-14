@@ -12,27 +12,44 @@ namespace EasyAF.Shell.Views.Backstage
         public OpenBackstageView()
         {
             InitializeComponent();
-            
-            // Handle PreviewMouseWheel to forward scroll events from ListView to parent ScrollViewer
-            this.AddHandler(PreviewMouseWheelEvent, new MouseWheelEventHandler(OnPreviewMouseWheel), true);
         }
 
-        private void OnPreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        protected override void OnPreviewMouseWheel(MouseWheelEventArgs e)
         {
-            // Let ListView scroll events bubble up to the parent ScrollViewer
-            // This allows scrolling when mouse is over ListView items, not just the scrollbar
-            if (e.Handled)
+            base.OnPreviewMouseWheel(e);
+
+            // Only handle if the event originated from a ListView and hasn't been handled yet
+            if (e.Handled || !(e.OriginalSource is DependencyObject source))
                 return;
 
+            // Find the ListView in the visual tree
+            var listView = FindParent<ListView>(source);
+            if (listView == null)
+                return;
+
+            // Find the ScrollViewer that contains the ListView
+            var scrollViewer = FindParent<ScrollViewer>(listView);
+            if (scrollViewer == null)
+                return;
+
+            // Forward the scroll to the ScrollViewer
+            scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset - (e.Delta / 3.0));
             e.Handled = true;
-            var eventArg = new MouseWheelEventArgs(e.MouseDevice, e.Timestamp, e.Delta)
+        }
+
+        private static T? FindParent<T>(DependencyObject child) where T : DependencyObject
+        {
+            DependencyObject? parentObject = child;
+
+            while (parentObject != null)
             {
-                RoutedEvent = MouseWheelEvent,
-                Source = sender
-            };
-            
-            var parent = ((Control)sender).Parent as UIElement;
-            parent?.RaiseEvent(eventArg);
+                if (parentObject is T parent)
+                    return parent;
+
+                parentObject = System.Windows.Media.VisualTreeHelper.GetParent(parentObject);
+            }
+
+            return null;
         }
     }
 }
