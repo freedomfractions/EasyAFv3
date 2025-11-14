@@ -69,6 +69,9 @@ public class MainWindowViewModel : BindableBase
         ImportSettingsCommand = new DelegateCommand(ImportSettings);
 
         _documentManager.ActiveDocumentChanged += (_, doc) => SelectedDocument = doc;
+
+        // Initialize Open Backstage ViewModel
+        OpenBackstage = _container.Resolve<EasyAF.Shell.ViewModels.Backstage.OpenBackstageViewModel>();
     }
 
     private void OpenHelp()
@@ -84,6 +87,11 @@ public class MainWindowViewModel : BindableBase
         var dlg = new Views.AboutDialog { DataContext = vm, Owner = Application.Current.MainWindow };
         dlg.ShowDialog();
     }
+
+    /// <summary>
+    /// Exposes Open Backstage ViewModel for the Open tab content.
+    /// </summary>
+    public EasyAF.Shell.ViewModels.Backstage.OpenBackstageViewModel OpenBackstage { get; }
 
     /// <summary>
     /// Collection of tabs shown in the ribbon contributed by modules (XAML declares Home & Help).

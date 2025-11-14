@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using Microsoft.Win32;
 using System.Linq;
 using System.IO;
+using System.Diagnostics;
 
 namespace EasyAF.Shell.ViewModels;
 
@@ -38,6 +39,17 @@ public class FileCommandsViewModel : BindableBase
         SaveAsCommand = new DelegateCommand(ExecuteSaveAs, CanExecuteSave).ObservesProperty(() => _documentManager.ActiveDocument);
         OpenRecentCommand = new DelegateCommand<string?>(ExecuteOpenRecent, path => !string.IsNullOrWhiteSpace(path));
 
+        // CROSS-MODULE EDIT: 2025-11-14 Backstage Open UX
+        // Modified for: Add context actions for recent files (remove entry, open containing folder, clear list)
+        // Related modules: Core (IRecentFilesService), Shell (MainWindow Open backstage)
+        // Rollback instructions: Remove RemoveRecentCommand/OpenRecentLocationCommand/ClearRecentCommand and corresponding XAML bindings
+        RemoveRecentCommand = new DelegateCommand<string?>(ExecuteRemoveRecent, path => !string.IsNullOrWhiteSpace(path));
+        OpenRecentLocationCommand = new DelegateCommand<string?>(ExecuteOpenRecentLocation, path => !string.IsNullOrWhiteSpace(path));
+        ClearRecentCommand = new DelegateCommand(ExecuteClearRecent, CanExecuteClearRecent);
+
+        // Requery Clear when the list changes
+        _recentFiles.RecentFiles.CollectionChanged += (_, __) => ClearRecentCommand.RaiseCanExecuteChanged();
+
         // Default selected module (first available) for convenience
         _selectedModule = AvailableDocumentModules.FirstOrDefault();
     }
@@ -58,6 +70,11 @@ public class FileCommandsViewModel : BindableBase
     public DelegateCommand SaveCommand { get; }
     public DelegateCommand SaveAsCommand { get; }
     public DelegateCommand<string?> OpenRecentCommand { get; }
+
+    // New backstage commands
+    public DelegateCommand<string?> RemoveRecentCommand { get; }
+    public DelegateCommand<string?> OpenRecentLocationCommand { get; }
+    public DelegateCommand ClearRecentCommand { get; }
 
     private bool CanExecuteNew() => SelectedModule != null;
 
@@ -174,6 +191,66 @@ public class FileCommandsViewModel : BindableBase
         {
             Log.Error(ex, "SaveAs dialog failed for document {Title}", doc.Title);
         }
+    }
+
+    private void ExecuteRemoveRecent(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path)) return;
+        _recentFiles.RemoveRecentFile(path!);
+    }
+
+    private void ExecuteOpenRecentLocation(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path)) return;
+        try
+        {
+            var full = Path.GetFullPath(path);
+            if (File.Exists(full))
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = "explorer.exe",
+                    Arguments = $"/select,\"{full}\"",
+                    UseShellExecute = true
+                });
+            }
+            else
+            {
+                var dir = Path.GetDirectoryName(full);
+                if (!string.IsNullOrWhiteSpace(dir) && Directory.Exists(dir))
+                {
+                    Process.Start(new ProcessStartInfo { FileName = dir, UseShellExecute = true });
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to open recent file location: {Path}", path);
+        }
+    }
+
+    private bool CanExecuteClearRecent() => _recentFiles.RecentFiles.Count > 0;
+
+    private void ExecuteClearRecent()
+    {
+        // Prefer service to handle persistence
+        if (_recentFiles is { } svc)
+        {
+            // If service implements Clear, call it; otherwise clear and persist via remove loop
+            try
+            {
+                // dynamic cast in case of interface not updated, but in our code we add Clear to interface
+                svc.Clear();
+            }
+            catch
+            {
+                foreach (var path in _recentFiles.RecentFiles.ToList())
+                {
+                    _recentFiles.RemoveRecentFile(path);
+                }
+            }
+        }
+        ClearRecentCommand.RaiseCanExecuteChanged();
     }
 
     private string SuggestFileName(IDocument doc)

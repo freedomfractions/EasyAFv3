@@ -134,6 +134,12 @@ public partial class App : PrismApplication
         containerRegistry.Register<FileCommandsViewModel>();
         containerRegistry.Register<HelpDialogViewModel>();
         containerRegistry.Register<AboutDialogViewModel>();
+        
+        // CROSS-MODULE EDIT: 2025-11-14 Open Backstage Step 1
+        // Modified for: Register OpenBackstageViewModel for the new Open backstage UI
+        // Related modules: Shell (OpenBackstageViewModel, MainWindow)
+        // Rollback instructions: Remove the registration line below
+        containerRegistry.Register<EasyAF.Shell.ViewModels.Backstage.OpenBackstageViewModel>();
 
         Log.Information("Services registered with Unity container");
     }

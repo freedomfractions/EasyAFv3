@@ -50,6 +50,32 @@ public class RecentFilesService : IRecentFilesService
         Log.Debug("Recent file added: {Path}", normalized);
     }
 
+    public void RemoveRecentFile(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path)) return;
+        try
+        {
+            var normalized = Path.GetFullPath(path);
+            if (RecentFiles.Contains(normalized))
+            {
+                RecentFiles.Remove(normalized);
+                Persist();
+                Log.Debug("Recent file removed: {Path}", normalized);
+            }
+        }
+        catch
+        {
+            // ignore
+        }
+    }
+
+    public void Clear()
+    {
+        RecentFiles.Clear();
+        Persist();
+        Log.Debug("Recent files cleared");
+    }
+
     private void TrimToMax()
     {
         while (RecentFiles.Count > _maxEntries)

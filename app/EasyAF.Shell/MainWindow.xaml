@@ -7,6 +7,7 @@
         xmlns:controls="clr-namespace:EasyAF.Shell.Controls"
         xmlns:fluent="urn:fluent-ribbon"
         xmlns:views="clr-namespace:EasyAF.Shell.Views"
+        xmlns:viewsBackstage="clr-namespace:EasyAF.Shell.Views.Backstage"
         xmlns:conv="clr-namespace:EasyAF.Shell.Converters"
         mc:Ignorable="d"
         Title="EasyAF v3" 
@@ -80,44 +81,8 @@
                             </StackPanel>
                         </fluent:BackstageTabItem>
                         <fluent:BackstageTabItem Header="Open">
-                            <StackPanel Margin="20" >
-                                <TextBlock Text="Open existing document" 
-                                           Foreground="{DynamicResource TextPrimaryBrush}" 
-                                           FontWeight="SemiBold"/>
-                                <Button Content="Browse..." Margin="0,12,0,16" Width="120"
-                                        Command="{Binding FileCommands.OpenCommand}"/>
-                                <TextBlock Text="Recent Files" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold"/>
-                                <!-- CROSS-MODULE EDIT: 2025-01-11 Task 10 -->
-                                <!-- Modified for: Polish recent files UX with filename/directory display -->
-                                <!-- Related modules: Shell (Converters) -->
-                                <!-- Rollback instructions: Restore simple button display with full path as Content -->
-                                <ItemsControl ItemsSource="{Binding FileCommands.RecentFiles}" Margin="0,8,0,0">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <Button Command="{Binding DataContext.FileCommands.OpenRecentCommand, RelativeSource={RelativeSource AncestorType=fluent:BackstageTabItem}}"
-                                                    CommandParameter="{Binding}"
-                                                    HorizontalContentAlignment="Left"
-                                                    Padding="8"
-                                                    Margin="0,2,0,0">
-                                                <StackPanel>
-                                                    <TextBlock Text="{Binding Converter={StaticResource PathToFileNameConverter}}" 
-                                                               FontWeight="SemiBold"
-                                                               TextTrimming="CharacterEllipsis"/>
-                                                    <TextBlock Text="{Binding Converter={StaticResource PathToDirectoryConverter}}" 
-                                                               FontSize="10"
-                                                               Foreground="{DynamicResource TextSecondaryBrush}"
-                                                               TextTrimming="CharacterEllipsis"/>
-                                                </StackPanel>
-                                            </Button>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                                <TextBlock Text="No recent files" 
-                                         FontSize="12" 
-                                         Foreground="{DynamicResource TextSecondaryBrush}"
-                                         FontStyle="Italic"
-                                         Visibility="{Binding FileCommands.RecentFiles.Count, Converter={StaticResource ZeroToVisibilityConverter}}"/>
-                            </StackPanel>
+                            <!-- Replace previous inline Open content with dedicated view for stepwise implementation -->
+                            <viewsBackstage:OpenBackstageView DataContext="{Binding OpenBackstage}"/>
                         </fluent:BackstageTabItem>
                         <fluent:Button Header="Save" 
                                      Command="{Binding FileCommands.SaveCommand}"/>
