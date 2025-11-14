@@ -282,8 +282,8 @@
                                                             <ListView.ContextMenu>
                                                                 <ContextMenu>
                                                                     <MenuItem Header="Open" 
-                                                                              Command="{Binding DataContext.OpenFileCommand, 
-                                                                                        RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                              Command="{Binding PlacementTarget.DataContext.OpenFileCommand, 
+                                                                                        RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                                                               CommandParameter="{Binding PlacementTarget.SelectedItem, 
                                                                                                  RelativeSource={RelativeSource AncestorType=ContextMenu}}">
                                                                         <MenuItem.Icon>
@@ -291,8 +291,8 @@
                                                                         </MenuItem.Icon>
                                                                     </MenuItem>
                                                                     <MenuItem Header="Copy Path" 
-                                                                              Command="{Binding DataContext.CopyPathCommand, 
-                                                                                        RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                              Command="{Binding PlacementTarget.DataContext.CopyPathCommand, 
+                                                                                        RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                                                               CommandParameter="{Binding PlacementTarget.SelectedItem, 
                                                                                                  RelativeSource={RelativeSource AncestorType=ContextMenu}}">
                                                                         <MenuItem.Icon>
@@ -301,8 +301,8 @@
                                                                     </MenuItem>
                                                                     <Separator/>
                                                                     <MenuItem Header="Pin to top" 
-                                                                              Command="{Binding DataContext.TogglePinCommand, 
-                                                                                        RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                              Command="{Binding PlacementTarget.DataContext.TogglePinCommand, 
+                                                                                        RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                                                               CommandParameter="{Binding PlacementTarget.SelectedItem, 
                                                                                                  RelativeSource={RelativeSource AncestorType=ContextMenu}}">
                                                                         <MenuItem.Icon>
@@ -310,8 +310,8 @@
                                                                         </MenuItem.Icon>
                                                                     </MenuItem>
                                                                     <MenuItem Header="Remove from list" 
-                                                                              Command="{Binding DataContext.RemoveFromListCommand, 
-                                                                                        RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                              Command="{Binding PlacementTarget.DataContext.RemoveFromListCommand, 
+                                                                                        RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                                                               CommandParameter="{Binding PlacementTarget.SelectedItem, 
                                                                                                  RelativeSource={RelativeSource AncestorType=ContextMenu}}">
                                                                         <MenuItem.Icon>
@@ -430,8 +430,8 @@
                                                             <ListView.ContextMenu>
                                                                 <ContextMenu>
                                                                     <MenuItem Header="Open in File Browser" 
-                                                                              Command="{Binding DataContext.OpenFolderCommand, 
-                                                                                        RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                              Command="{Binding PlacementTarget.DataContext.OpenFolderCommand, 
+                                                                                        RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                                                               CommandParameter="{Binding PlacementTarget.SelectedItem, 
                                                                                                  RelativeSource={RelativeSource AncestorType=ContextMenu}}">
                                                                         <MenuItem.Icon>
@@ -439,8 +439,8 @@
                                                                         </MenuItem.Icon>
                                                                     </MenuItem>
                                                                     <MenuItem Header="Copy Path" 
-                                                                              Command="{Binding DataContext.CopyFolderPathCommand, 
-                                                                                        RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                              Command="{Binding PlacementTarget.DataContext.CopyFolderPathCommand, 
+                                                                                        RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                                                               CommandParameter="{Binding PlacementTarget.SelectedItem, 
                                                                                                  RelativeSource={RelativeSource AncestorType=ContextMenu}}">
                                                                         <MenuItem.Icon>
@@ -449,8 +449,8 @@
                                                                     </MenuItem>
                                                                     <Separator/>
                                                                     <MenuItem Header="Remove from list" 
-                                                                              Command="{Binding DataContext.RemoveFolderFromListCommand, 
-                                                                                        RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                              Command="{Binding PlacementTarget.DataContext.RemoveFolderFromListCommand, 
+                                                                                        RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                                                               CommandParameter="{Binding PlacementTarget.SelectedItem, 
                                                                                                  RelativeSource={RelativeSource AncestorType=ContextMenu}}">
                                                                         <MenuItem.Icon>
