@@ -89,12 +89,20 @@ public class OpenBackstageViewModel : BindableBase
     public DelegateCommand<QuickAccessFolder> SelectQuickAccessFolderCommand { get; }
     public DelegateCommand<RecentFileEntry> TogglePinCommand { get; }
     public DelegateCommand BrowseCommand { get; }
+    public DelegateCommand<RecentFileEntry> OpenFileCommand { get; }
+    public DelegateCommand<RecentFolderEntry> OpenFolderCommand { get; }
 
     /// <summary>
     /// Event raised when a file is selected (via Browse, double-click, etc.)
     /// The string parameter is the selected file path.
     /// </summary>
     public event Action<string>? FileSelected;
+
+    /// <summary>
+    /// Event raised when a folder is selected for opening (via double-click).
+    /// The string parameter is the selected folder path.
+    /// </summary>
+    public event Action<string>? FolderSelected;
 
     public OpenBackstageViewModel(IModuleLoader? moduleLoader, ISettingsService settingsService)
     {
@@ -111,6 +119,8 @@ public class OpenBackstageViewModel : BindableBase
         SelectQuickAccessFolderCommand = new DelegateCommand<QuickAccessFolder>(ExecuteSelectQuickAccessFolder);
         TogglePinCommand = new DelegateCommand<RecentFileEntry>(ExecuteTogglePin);
         BrowseCommand = new DelegateCommand(ExecuteBrowse);
+        OpenFileCommand = new DelegateCommand<RecentFileEntry>(ExecuteOpenFile);
+        OpenFolderCommand = new DelegateCommand<RecentFolderEntry>(ExecuteOpenFolder);
 
         // Initialize with sample data
         LoadSampleQuickAccessFolders();
@@ -139,6 +149,36 @@ public class OpenBackstageViewModel : BindableBase
         if (file == null) return;
         file.IsPinned = !file.IsPinned;
         // TODO: Persist to settings via ISettingsService
+    }
+
+    private void ExecuteOpenFile(RecentFileEntry file)
+    {
+        if (file == null) return;
+        
+        // Visual feedback for demonstration (remove when integrated with real file system)
+        System.Windows.MessageBox.Show(
+            $"Would open file:\n\n{file.FilePath}\n\nThis event will be handled by MainWindowViewModel to:\n• Close backstage\n• Load file via DocumentManager\n• Update recent files list",
+            "File Double-Click (Demo)",
+            System.Windows.MessageBoxButton.OK,
+            System.Windows.MessageBoxImage.Information);
+        
+        // Fire the event for parent integration
+        FileSelected?.Invoke(file.FilePath);
+    }
+
+    private void ExecuteOpenFolder(RecentFolderEntry folder)
+    {
+        if (folder == null) return;
+        
+        // Visual feedback for demonstration (remove when integrated with real file system)
+        System.Windows.MessageBox.Show(
+            $"Would open folder:\n\n{folder.FolderPath}\n\nThis event will be handled by MainWindowViewModel to:\n• Navigate to folder in Quick Access view\n• Or open in file explorer",
+            "Folder Double-Click (Demo)",
+            System.Windows.MessageBoxButton.OK,
+            System.Windows.MessageBoxImage.Information);
+        
+        // Fire the event for parent integration
+        FolderSelected?.Invoke(folder.FolderPath);
     }
 
     private void ExecuteBrowse()

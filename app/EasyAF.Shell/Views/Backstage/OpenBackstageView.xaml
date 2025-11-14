@@ -289,6 +289,12 @@
                                                                                         BorderBrush="Transparent"
                                                                                         BorderThickness="0"
                                                                                         Padding="{TemplateBinding Padding}">
+                                                                                    <Border.InputBindings>
+                                                                                        <MouseBinding MouseAction="LeftDoubleClick"
+                                                                                                      Command="{Binding DataContext.OpenFileCommand, 
+                                                                                                                RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                                                      CommandParameter="{Binding}"/>
+                                                                                    </Border.InputBindings>
                                                                                     <GridViewRowPresenter VerticalAlignment="Center"/>
                                                                                 </Border>
                                                                                 <ControlTemplate.Triggers>
@@ -369,6 +375,12 @@
                                                                                         BorderBrush="Transparent"
                                                                                         BorderThickness="0"
                                                                                         Padding="{TemplateBinding Padding}">
+                                                                                    <Border.InputBindings>
+                                                                                        <MouseBinding MouseAction="LeftDoubleClick"
+                                                                                                      Command="{Binding DataContext.OpenFolderCommand, 
+                                                                                                                RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                                                      CommandParameter="{Binding}"/>
+                                                                                    </Border.InputBindings>
                                                                                     <GridViewRowPresenter VerticalAlignment="Center"/>
                                                                                 </Border>
                                                                                 <ControlTemplate.Triggers>
