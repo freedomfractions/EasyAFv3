@@ -232,6 +232,20 @@ public class OpenBackstageViewModel : BindableBase
     {
         if (file == null) return;
         file.IsPinned = !file.IsPinned;
+        
+        // Force the CollectionViewSource to refresh its grouping
+        // We need to access it through the view's resources
+        System.Windows.Application.Current?.Dispatcher.Invoke(() =>
+        {
+            // Trigger a refresh by removing and re-adding the item
+            var index = RecentFiles.IndexOf(file);
+            if (index >= 0)
+            {
+                RecentFiles.RemoveAt(index);
+                RecentFiles.Insert(index, file);
+            }
+        });
+        
         // TODO: Persist to settings via ISettingsService
     }
 
