@@ -12,6 +12,13 @@
         <conv:RecentTabToIndexConverter x:Key="RecentTabToIndexConverter" />
         <conv:PinnedToStarGlyphConverter x:Key="PinnedToStarGlyphConverter" />
         <conv:PinnedToColorConverter x:Key="PinnedToColorConverter" />
+        
+        <!-- CollectionViewSource for grouped Recent Files -->
+        <CollectionViewSource x:Key="GroupedRecentFiles" Source="{Binding RecentFiles}">
+            <CollectionViewSource.GroupDescriptions>
+                <PropertyGroupDescription PropertyName="DateCategory"/>
+            </CollectionViewSource.GroupDescriptions>
+        </CollectionViewSource>
     </UserControl.Resources>
     
     <!-- Step 3 - Search bar with TextBox and scrollable content host -->
@@ -258,7 +265,61 @@
                                                     <TabItem Header="Files">
                                                         <ListView Background="Transparent"
                                                                   BorderThickness="0"
-                                                                  ItemsSource="{Binding RecentFiles}">
+                                                                  ItemsSource="{Binding Source={StaticResource GroupedRecentFiles}}">
+                                                            <ListView.GroupStyle>
+                                                                <GroupStyle>
+                                                                    <GroupStyle.HeaderTemplate>
+                                                                        <DataTemplate>
+                                                                            <TextBlock Text="{Binding Name}" 
+                                                                                       FontWeight="SemiBold"
+                                                                                       FontSize="13"
+                                                                                       Foreground="{DynamicResource TextPrimaryBrush}"
+                                                                                       Margin="0,12,0,4"/>
+                                                                        </DataTemplate>
+                                                                    </GroupStyle.HeaderTemplate>
+                                                                </GroupStyle>
+                                                            </ListView.GroupStyle>
+                                                            <ListView.ContextMenu>
+                                                                <ContextMenu>
+                                                                    <MenuItem Header="Open" 
+                                                                              Command="{Binding DataContext.OpenFileCommand, 
+                                                                                        RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                              CommandParameter="{Binding PlacementTarget.SelectedItem, 
+                                                                                                 RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+                                                                        <MenuItem.Icon>
+                                                                            <TextBlock Text="&#xE8E5;" FontFamily="Segoe MDL2 Assets"/>
+                                                                        </MenuItem.Icon>
+                                                                    </MenuItem>
+                                                                    <MenuItem Header="Copy Path" 
+                                                                              Command="{Binding DataContext.CopyPathCommand, 
+                                                                                        RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                              CommandParameter="{Binding PlacementTarget.SelectedItem, 
+                                                                                                 RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+                                                                        <MenuItem.Icon>
+                                                                            <TextBlock Text="&#xE8C8;" FontFamily="Segoe MDL2 Assets"/>
+                                                                        </MenuItem.Icon>
+                                                                    </MenuItem>
+                                                                    <Separator/>
+                                                                    <MenuItem Header="Pin to top" 
+                                                                              Command="{Binding DataContext.TogglePinCommand, 
+                                                                                        RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                              CommandParameter="{Binding PlacementTarget.SelectedItem, 
+                                                                                                 RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+                                                                        <MenuItem.Icon>
+                                                                            <TextBlock Text="&#xE840;" FontFamily="Segoe MDL2 Assets"/>
+                                                                        </MenuItem.Icon>
+                                                                    </MenuItem>
+                                                                    <MenuItem Header="Remove from list" 
+                                                                              Command="{Binding DataContext.RemoveFromListCommand, 
+                                                                                        RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                              CommandParameter="{Binding PlacementTarget.SelectedItem, 
+                                                                                                 RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+                                                                        <MenuItem.Icon>
+                                                                            <TextBlock Text="&#xE738;" FontFamily="Segoe MDL2 Assets"/>
+                                                                        </MenuItem.Icon>
+                                                                    </MenuItem>
+                                                                </ContextMenu>
+                                                            </ListView.ContextMenu>
                                                             <ListView.View>
                                                                 <GridView>
                                                                     <!-- Icon Column -->
@@ -366,6 +427,38 @@
                                                         <ListView Background="Transparent"
                                                                   BorderThickness="0"
                                                                   ItemsSource="{Binding RecentFolders}">
+                                                            <ListView.ContextMenu>
+                                                                <ContextMenu>
+                                                                    <MenuItem Header="Open in File Browser" 
+                                                                              Command="{Binding DataContext.OpenFolderCommand, 
+                                                                                        RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                              CommandParameter="{Binding PlacementTarget.SelectedItem, 
+                                                                                                 RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+                                                                        <MenuItem.Icon>
+                                                                            <TextBlock Text="&#xE8B7;" FontFamily="Segoe MDL2 Assets"/>
+                                                                        </MenuItem.Icon>
+                                                                    </MenuItem>
+                                                                    <MenuItem Header="Copy Path" 
+                                                                              Command="{Binding DataContext.CopyFolderPathCommand, 
+                                                                                        RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                              CommandParameter="{Binding PlacementTarget.SelectedItem, 
+                                                                                                 RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+                                                                        <MenuItem.Icon>
+                                                                            <TextBlock Text="&#xE8C8;" FontFamily="Segoe MDL2 Assets"/>
+                                                                        </MenuItem.Icon>
+                                                                    </MenuItem>
+                                                                    <Separator/>
+                                                                    <MenuItem Header="Remove from list" 
+                                                                              Command="{Binding DataContext.RemoveFolderFromListCommand, 
+                                                                                        RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                              CommandParameter="{Binding PlacementTarget.SelectedItem, 
+                                                                                                 RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+                                                                        <MenuItem.Icon>
+                                                                            <TextBlock Text="&#xE738;" FontFamily="Segoe MDL2 Assets"/>
+                                                                        </MenuItem.Icon>
+                                                                    </MenuItem>
+                                                                </ContextMenu>
+                                                            </ListView.ContextMenu>
                                                             <ListView.View>
                                                                 <GridView>
                                                                     <!-- Icon Column -->

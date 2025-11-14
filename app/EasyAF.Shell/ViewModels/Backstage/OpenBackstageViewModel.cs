@@ -153,6 +153,10 @@ public class OpenBackstageViewModel : BindableBase
     public DelegateCommand<FolderFileEntry> OpenFolderFileCommand { get; }
     public DelegateCommand<FolderBrowserEntry> OpenBrowserEntryCommand { get; }
     public DelegateCommand NavigateUpCommand { get; }
+    public DelegateCommand<RecentFileEntry> CopyPathCommand { get; }
+    public DelegateCommand<RecentFolderEntry> CopyFolderPathCommand { get; }
+    public DelegateCommand<RecentFileEntry> RemoveFromListCommand { get; }
+    public DelegateCommand<RecentFolderEntry> RemoveFolderFromListCommand { get; }
 
     /// <summary>
     /// Event raised when a file is selected (via Browse, double-click, etc.)
@@ -190,6 +194,10 @@ public class OpenBackstageViewModel : BindableBase
         OpenFolderFileCommand = new DelegateCommand<FolderFileEntry>(ExecuteOpenFolderFile);
         OpenBrowserEntryCommand = new DelegateCommand<FolderBrowserEntry>(ExecuteOpenBrowserEntry);
         NavigateUpCommand = new DelegateCommand(ExecuteNavigateUp, CanExecuteNavigateUp);
+        CopyPathCommand = new DelegateCommand<RecentFileEntry>(ExecuteCopyPath);
+        CopyFolderPathCommand = new DelegateCommand<RecentFolderEntry>(ExecuteCopyFolderPath);
+        RemoveFromListCommand = new DelegateCommand<RecentFileEntry>(ExecuteRemoveFromList);
+        RemoveFolderFromListCommand = new DelegateCommand<RecentFolderEntry>(ExecuteRemoveFolderFromListCommand);
 
         // Initialize with sample data
         LoadSampleQuickAccessFolders();
@@ -338,6 +346,72 @@ public class OpenBackstageViewModel : BindableBase
             // Raise event for parent to handle (close backstage, open file)
             FileSelected?.Invoke(dialog.FileName);
         }
+    }
+
+    private void ExecuteCopyPath(RecentFileEntry file)
+    {
+        if (file == null) return;
+
+        try
+        {
+            // Copy the file path to clipboard
+            System.Windows.Clipboard.SetText(file.FilePath);
+
+            // Show a messagebox indicating the path has been copied
+            System.Windows.MessageBox.Show(
+                $"File path copied to clipboard:\n\n{file.FilePath}",
+                "Path Copied",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Information);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error copying file path: {ex.Message}");
+        }
+    }
+
+    private void ExecuteCopyFolderPath(RecentFolderEntry folder)
+    {
+        if (folder == null) return;
+
+        try
+        {
+            // Copy the folder path to clipboard
+            System.Windows.Clipboard.SetText(folder.FolderPath);
+
+            // Show a messagebox indicating the path has been copied
+            System.Windows.MessageBox.Show(
+                $"Folder path copied to clipboard:\n\n{folder.FolderPath}",
+                "Path Copied",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Information);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error copying folder path: {ex.Message}");
+        }
+    }
+
+    private void ExecuteRemoveFromList(RecentFileEntry file)
+    {
+        if (file == null) return;
+
+        // Remove from recent files collection
+        _allRecentFiles.Remove(file);
+        RecentFiles.Remove(file);
+
+        // TODO: Persist removal to settings via ISettingsService
+    }
+
+    private void ExecuteRemoveFolderFromListCommand(RecentFolderEntry folder)
+    {
+        if (folder == null) return;
+
+        // Remove from recent folders collection
+        _allRecentFolders.Remove(folder);
+        RecentFolders.Remove(folder);
+
+        // TODO: Persist removal to settings via ISettingsService
     }
 
     #region Search Implementation

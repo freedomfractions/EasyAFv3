@@ -52,4 +52,33 @@ public class RecentFileEntry
     /// Whether this file is pinned (starred).
     /// </summary>
     public bool IsPinned { get; set; }
+
+    /// <summary>
+    /// Category for grouping files by date (Pinned, Today, Yesterday, This Week, Last Week, Older).
+    /// </summary>
+    public string DateCategory
+    {
+        get
+        {
+            if (IsPinned)
+                return "Pinned";
+
+            var now = DateTime.Now;
+            var diff = now - LastModified;
+
+            if (now.Date == LastModified.Date)
+                return "Today";
+
+            if (now.Date.AddDays(-1) == LastModified.Date)
+                return "Yesterday";
+
+            if (diff.TotalDays < 7)
+                return "This Week";
+
+            if (diff.TotalDays < 14)
+                return "Last Week";
+
+            return "Older";
+        }
+    }
 }
