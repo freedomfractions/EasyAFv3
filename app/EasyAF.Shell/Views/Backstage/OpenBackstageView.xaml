@@ -157,21 +157,24 @@
                                  BorderThickness="0"
                                  Background="Transparent"
                                  VerticalAlignment="Center"
-                                 Foreground="{DynamicResource TextPrimaryBrush}">
+                                 Foreground="{DynamicResource TextPrimaryBrush}"
+                                 CaretBrush="{DynamicResource TextPrimaryBrush}">
                             <TextBox.Style>
                                 <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
                                     <Setter Property="Template">
                                         <Setter.Value>
                                             <ControlTemplate TargetType="TextBox">
                                                 <Grid>
-                                                    <!-- Placeholder text with matching padding -->
-                                                    <TextBlock Text="Search"
-                                                               Foreground="{DynamicResource TextSecondaryBrush}"
-                                                               VerticalAlignment="Center"
-                                                               Padding="2,0,0,0"
-                                                               Visibility="Collapsed"
-                                                               x:Name="PlaceholderText"
-                                                               IsHitTestVisible="False"/>
+                                                    <!-- Placeholder using TextBox for identical rendering -->
+                                                    <TextBox Text="Search"
+                                                             Foreground="{DynamicResource TextSecondaryBrush}"
+                                                             Background="Transparent"
+                                                             BorderThickness="0"
+                                                             IsHitTestVisible="False"
+                                                             IsTabStop="False"
+                                                             Focusable="False"
+                                                             Visibility="Collapsed"
+                                                             x:Name="PlaceholderText"/>
                                                     <!-- Actual text input -->
                                                     <ScrollViewer x:Name="PART_ContentHost" 
                                                                   Padding="0"/>

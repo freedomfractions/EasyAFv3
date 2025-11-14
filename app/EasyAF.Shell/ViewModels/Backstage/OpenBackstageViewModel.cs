@@ -4,7 +4,10 @@ using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using EasyAF.Shell.Models.Backstage;
+using EasyAF.Shell.Helpers;
 using EasyAF.Core.Contracts;
 using Microsoft.Win32;
 
@@ -14,12 +17,14 @@ public enum OpenBackstageMode { Recent, QuickAccessFolder }
 public enum RecentTab { Files, Folders }
 
 /// <summary>
-/// ViewModel for Open Backstage with Quick Access folder support and sample data.
+/// ViewModel for Open Backstage with Quick Access folder support and comprehensive search.
 /// </summary>
 public class OpenBackstageViewModel : BindableBase
 {
     private readonly IModuleLoader? _moduleLoader;
     private readonly ISettingsService _settingsService;
+    private CancellationTokenSource? _searchCancellation;
+    private Timer? _searchDebounceTimer;
 
     private OpenBackstageMode _mode = OpenBackstageMode.Recent;
     public OpenBackstageMode Mode
@@ -39,7 +44,13 @@ public class OpenBackstageViewModel : BindableBase
     public string SearchText
     {
         get => _searchText;
-        set => SetProperty(ref _searchText, value);
+        set
+        {
+            if (SetProperty(ref _searchText, value))
+            {
+                DebounceSearch();
+            }
+        }
     }
 
     private QuickAccessFolder? _selectedQuickAccessFolder;
@@ -55,12 +66,22 @@ public class OpenBackstageViewModel : BindableBase
     public ObservableCollection<QuickAccessFolder> QuickAccessFolders { get; }
 
     /// <summary>
-    /// Collection of recent files for the Files tab.
+    /// Master collection of all recent files (unfiltered).
+    /// </summary>
+    private readonly ObservableCollection<RecentFileEntry> _allRecentFiles;
+
+    /// <summary>
+    /// Master collection of all recent folders (unfiltered).
+    /// </summary>
+    private readonly ObservableCollection<RecentFolderEntry> _allRecentFolders;
+
+    /// <summary>
+    /// Filtered collection of recent files displayed in the Files tab.
     /// </summary>
     public ObservableCollection<RecentFileEntry> RecentFiles { get; }
 
     /// <summary>
-    /// Collection of recent folders for the Folders tab.
+    /// Filtered collection of recent folders displayed in the Folders tab.
     /// </summary>
     public ObservableCollection<RecentFolderEntry> RecentFolders { get; }
 
@@ -77,10 +98,12 @@ public class OpenBackstageViewModel : BindableBase
 
     public OpenBackstageViewModel(IModuleLoader? moduleLoader, ISettingsService settingsService)
     {
-        _moduleLoader = moduleLoader; // Nullable - modules may not be loaded yet
+        _moduleLoader = moduleLoader;
         _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
 
         QuickAccessFolders = new ObservableCollection<QuickAccessFolder>();
+        _allRecentFiles = new ObservableCollection<RecentFileEntry>();
+        _allRecentFolders = new ObservableCollection<RecentFolderEntry>();
         RecentFiles = new ObservableCollection<RecentFileEntry>();
         RecentFolders = new ObservableCollection<RecentFolderEntry>();
 
@@ -93,6 +116,9 @@ public class OpenBackstageViewModel : BindableBase
         LoadSampleQuickAccessFolders();
         LoadSampleRecentFiles();
         LoadSampleRecentFolders();
+
+        // Initial filter (shows all)
+        ApplySearchFilter();
     }
 
     private void ExecuteSelectRecent()
@@ -128,7 +154,7 @@ public class OpenBackstageViewModel : BindableBase
         };
 
         // Set initial directory to most recent folder if available
-        var mostRecentFolder = RecentFolders.OrderByDescending(f => f.LastAccessed).FirstOrDefault();
+        var mostRecentFolder = _allRecentFolders.OrderByDescending(f => f.LastAccessed).FirstOrDefault();
         if (mostRecentFolder != null && System.IO.Directory.Exists(mostRecentFolder.FolderPath))
         {
             dialog.InitialDirectory = mostRecentFolder.FolderPath;
@@ -143,6 +169,106 @@ public class OpenBackstageViewModel : BindableBase
             FileSelected?.Invoke(dialog.FileName);
         }
     }
+
+    #region Search Implementation
+
+    /// <summary>
+    /// Debounces the search to avoid filtering on every keystroke.
+    /// Waits for user to stop typing for the configured delay.
+    /// </summary>
+    private void DebounceSearch()
+    {
+        // Cancel any pending search
+        _searchCancellation?.Cancel();
+        _searchDebounceTimer?.Dispose();
+
+        // Get debounce delay from settings (default 250ms)
+        int delayMs = _settingsService.GetSetting("Search.DebounceDelayMs", 250);
+
+        // Create new cancellation token
+        _searchCancellation = new CancellationTokenSource();
+        var token = _searchCancellation.Token;
+
+        // Start debounce timer
+        _searchDebounceTimer = new Timer(_ =>
+        {
+            if (!token.IsCancellationRequested)
+            {
+                // Execute search on UI thread
+                System.Windows.Application.Current?.Dispatcher.Invoke(() =>
+                {
+                    ApplySearchFilter();
+                });
+            }
+        }, null, delayMs, Timeout.Infinite);
+    }
+
+    /// <summary>
+    /// Applies the search filter to both RecentFiles and RecentFolders collections.
+    /// </summary>
+    private void ApplySearchFilter()
+    {
+        var searchTerm = SearchText?.Trim() ?? string.Empty;
+        var fuzzyThreshold = _settingsService.GetSetting("Search.FuzzyThreshold", 0.7);
+        var fuzzyEnabled = _settingsService.GetSetting("Search.FuzzyEnabled", true);
+
+        // Use threshold of 0 if fuzzy is disabled (forces exact/wildcard only)
+        var threshold = fuzzyEnabled ? fuzzyThreshold : 0.0;
+
+        // Filter files
+        RecentFiles.Clear();
+        foreach (var file in _allRecentFiles)
+        {
+            if (MatchesFileSearch(file, searchTerm, threshold))
+            {
+                RecentFiles.Add(file);
+            }
+        }
+
+        // Filter folders
+        RecentFolders.Clear();
+        foreach (var folder in _allRecentFolders)
+        {
+            if (MatchesFolderSearch(folder, searchTerm, threshold))
+            {
+                RecentFolders.Add(folder);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Checks if a file entry matches the search criteria.
+    /// Searches: FileName and DirectoryPath.
+    /// </summary>
+    private bool MatchesFileSearch(RecentFileEntry file, string searchTerm, double fuzzyThreshold)
+    {
+        return SearchHelper.IsMatchAny(
+            searchTerm,
+            fuzzyThreshold,
+            file.FileName,
+            file.DirectoryPath,
+            file.FilePath  // Also search full path
+        );
+    }
+
+    /// <summary>
+    /// Checks if a folder entry matches the search criteria.
+    /// Searches: FolderName and ParentPath.
+    /// </summary>
+    private bool MatchesFolderSearch(RecentFolderEntry folder, string searchTerm, double fuzzyThreshold)
+    {
+        return SearchHelper.IsMatchAny(
+            searchTerm,
+            fuzzyThreshold,
+            folder.FolderName,
+            folder.ParentPath,
+            folder.FolderPath  // Also search full path
+        );
+    }
+
+    #endregion
+
+    #region File Type Filter Building
 
     /// <summary>
     /// Builds the file type filter string for OpenFileDialog.
@@ -229,6 +355,10 @@ public class OpenBackstageViewModel : BindableBase
         _settingsService.SetSetting("OpenDialog.DefaultFilterIndex", filterIndex);
     }
 
+    #endregion
+
+    #region Sample Data Loading
+
     private void LoadSampleQuickAccessFolders()
     {
         QuickAccessFolders.Add(new QuickAccessFolder
@@ -255,35 +385,35 @@ public class OpenBackstageViewModel : BindableBase
 
     private void LoadSampleRecentFiles()
     {
-        RecentFiles.Add(new RecentFileEntry
+        _allRecentFiles.Add(new RecentFileEntry
         {
             FilePath = @"C:\Users\Documents\Projects\Proposal_2024.docx",
             LastModified = DateTime.Now.AddHours(-2),
             IsPinned = true
         });
 
-        RecentFiles.Add(new RecentFileEntry
+        _allRecentFiles.Add(new RecentFileEntry
         {
             FilePath = @"C:\Users\Documents\Reports\Q4_Analysis.xlsx",
             LastModified = DateTime.Now.AddHours(-5),
             IsPinned = false
         });
 
-        RecentFiles.Add(new RecentFileEntry
+        _allRecentFiles.Add(new RecentFileEntry
         {
             FilePath = @"C:\Users\Documents\Meeting_Notes.txt",
             LastModified = DateTime.Now.AddDays(-1),
             IsPinned = false
         });
 
-        RecentFiles.Add(new RecentFileEntry
+        _allRecentFiles.Add(new RecentFileEntry
         {
             FilePath = @"C:\Users\Downloads\Invoice_12345.pdf",
             LastModified = DateTime.Now.AddDays(-2),
             IsPinned = true
         });
 
-        RecentFiles.Add(new RecentFileEntry
+        _allRecentFiles.Add(new RecentFileEntry
         {
             FilePath = @"C:\Users\Documents\Projects\Client_Presentation.pptx",
             LastModified = DateTime.Now.AddDays(-3),
@@ -293,22 +423,24 @@ public class OpenBackstageViewModel : BindableBase
 
     private void LoadSampleRecentFolders()
     {
-        RecentFolders.Add(new RecentFolderEntry
+        _allRecentFolders.Add(new RecentFolderEntry
         {
             FolderPath = @"C:\Users\Documents\Projects",
             LastAccessed = DateTime.Now.AddHours(-1)
         });
 
-        RecentFolders.Add(new RecentFolderEntry
+        _allRecentFolders.Add(new RecentFolderEntry
         {
-            FolderPath = @"C:\Users\Downloads",
+            FolderPath = @"C:\Users\Documents\Downloads",
             LastAccessed = DateTime.Now.AddDays(-1)
         });
 
-        RecentFolders.Add(new RecentFolderEntry
+        _allRecentFolders.Add(new RecentFolderEntry
         {
             FolderPath = @"C:\Users\Documents\Reports",
             LastAccessed = DateTime.Now.AddDays(-4)
         });
     }
+
+    #endregion
 }
