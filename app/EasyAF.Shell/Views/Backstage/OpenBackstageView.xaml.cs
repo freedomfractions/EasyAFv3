@@ -1,11 +1,12 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace EasyAF.Shell.Views.Backstage
 {
     /// <summary>
-    /// OpenBackstageView code-behind. Handles scroll event forwarding from ListViews.
+    /// OpenBackstageView code-behind. Handles scroll event forwarding from ListViews and scroll position reset.
     /// </summary>
     public partial class OpenBackstageView : UserControl
     {
@@ -24,10 +25,11 @@ namespace EasyAF.Shell.Views.Backstage
         
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
-            // Subscribe to ViewModel's FocusSearchRequested event
+            // Subscribe to ViewModel's events
             if (DataContext is ViewModels.Backstage.OpenBackstageViewModel vm)
             {
                 vm.FocusSearchRequested += OnFocusSearchRequested;
+                vm.ScrollToTopRequested += OnScrollToTopRequested;
             }
         }
         
@@ -36,6 +38,43 @@ namespace EasyAF.Shell.Views.Backstage
             // Focus the search TextBox
             SearchTextBox.Focus();
             SearchTextBox.SelectAll();
+        }
+        
+        /// <summary>
+        /// Handles scroll-to-top requests from the ViewModel.
+        /// Resets the scroll position of the main ScrollViewer to the top (0,0).
+        /// </summary>
+        private void OnScrollToTopRequested(object? sender, EventArgs e)
+        {
+            // Find the ScrollViewer in the visual tree (it's in Grid.Row="2" of the right column)
+            var scrollViewer = FindVisualChild<ScrollViewer>(this);
+            if (scrollViewer != null)
+            {
+                scrollViewer.ScrollToTop();
+            }
+        }
+
+        /// <summary>
+        /// Finds the first child of a specific type in the visual tree.
+        /// </summary>
+        private static T? FindVisualChild<T>(DependencyObject parent) where T : DependencyObject
+        {
+            if (parent == null)
+                return null;
+
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                
+                if (child is T typedChild)
+                    return typedChild;
+
+                var childOfChild = FindVisualChild<T>(child);
+                if (childOfChild != null)
+                    return childOfChild;
+            }
+
+            return null;
         }
 
         protected override void OnPreviewMouseWheel(MouseWheelEventArgs e)

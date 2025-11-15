@@ -183,6 +183,12 @@ public class OpenBackstageViewModel : BindableBase
     /// The view will handle this to actually move focus.
     /// </summary>
     public event EventHandler? FocusSearchRequested;
+    
+    /// <summary>
+    /// Event raised when the data source changes (mode switch or folder navigation).
+    /// The view should reset the scroll position to the top.
+    /// </summary>
+    public event EventHandler? ScrollToTopRequested;
 
     public OpenBackstageViewModel(IModuleLoader? moduleLoader, ISettingsService settingsService, IRecentFilesService recentFilesService, IBackstageService? backstageService = null)
     {
@@ -240,6 +246,9 @@ public class OpenBackstageViewModel : BindableBase
     {
         Mode = OpenBackstageMode.Recent;
         SelectedQuickAccessFolder = null;
+        
+        // Reset scroll position when switching to Recent mode
+        ScrollToTopRequested?.Invoke(this, EventArgs.Empty);
     }
 
     private void ExecuteSelectQuickAccessFolder(QuickAccessFolder folder)
@@ -252,6 +261,9 @@ public class OpenBackstageViewModel : BindableBase
         CurrentBrowsePath = folder.FolderPath;
         LoadBrowserEntries(CurrentBrowsePath);
         NavigateUpCommand.RaiseCanExecuteChanged();
+        
+        // Reset scroll position when switching to a different Quick Access folder
+        ScrollToTopRequested?.Invoke(this, EventArgs.Empty);
     }
 
     private void ExecuteTogglePin(RecentFileEntry file)
@@ -317,6 +329,9 @@ public class OpenBackstageViewModel : BindableBase
             CurrentBrowsePath = entry.FullPath;
             LoadBrowserEntries(CurrentBrowsePath);
             NavigateUpCommand.RaiseCanExecuteChanged();
+            
+            // Reset scroll position when navigating into subfolder
+            ScrollToTopRequested?.Invoke(this, EventArgs.Empty);
         }
         else
         {
@@ -338,6 +353,9 @@ public class OpenBackstageViewModel : BindableBase
                 CurrentBrowsePath = currentDir.Parent.FullName;
                 LoadBrowserEntries(CurrentBrowsePath);
                 NavigateUpCommand.RaiseCanExecuteChanged();
+                
+                // Reset scroll position when navigating to parent folder
+                ScrollToTopRequested?.Invoke(this, EventArgs.Empty);
             }
         }
         catch (Exception ex)
