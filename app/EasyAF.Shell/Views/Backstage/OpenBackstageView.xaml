@@ -297,6 +297,15 @@
                                                                             <TextBlock Text="&#xE8E5;" FontFamily="Segoe MDL2 Assets"/>
                                                                         </MenuItem.Icon>
                                                                     </MenuItem>
+                                                                    <MenuItem Header="Show in Explorer" 
+                                                                              Command="{Binding PlacementTarget.DataContext.OpenFileLocationCommand, 
+                                                                                        RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                                              CommandParameter="{Binding PlacementTarget.SelectedItem, 
+                                                                                                 RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+                                                                        <MenuItem.Icon>
+                                                                            <TextBlock Text="&#xEC50;" FontFamily="Segoe MDL2 Assets"/>
+                                                                        </MenuItem.Icon>
+                                                                    </MenuItem>
                                                                     <MenuItem Header="Copy Path" 
                                                                               Command="{Binding PlacementTarget.DataContext.CopyPathCommand, 
                                                                                         RelativeSource={RelativeSource AncestorType=ContextMenu}}"

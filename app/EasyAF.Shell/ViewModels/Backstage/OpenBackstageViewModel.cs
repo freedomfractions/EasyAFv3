@@ -161,6 +161,12 @@ public class OpenBackstageViewModel : BindableBase
     public DelegateCommand<RecentFileEntry> RemoveFromListCommand { get; }
     public DelegateCommand<RecentFolderEntry> RemoveFolderFromListCommand { get; }
     public DelegateCommand<FolderBrowserEntry> CopyBrowserPathCommand { get; }
+    
+    // CROSS-MODULE EDIT: 2025-01-15 Option B Polish
+    // Modified for: Add "Show in Explorer" command for Recent Files
+    // Related modules: None
+    // Rollback instructions: Remove OpenFileLocationCommand
+    public DelegateCommand<RecentFileEntry> OpenFileLocationCommand { get; }
 
     /// <summary>
     /// Event raised when a file is selected (via Browse, double-click, etc.)
@@ -205,6 +211,7 @@ public class OpenBackstageViewModel : BindableBase
         RemoveFromListCommand = new DelegateCommand<RecentFileEntry>(ExecuteRemoveFromList);
         RemoveFolderFromListCommand = new DelegateCommand<RecentFolderEntry>(ExecuteRemoveFolderFromListCommand);
         CopyBrowserPathCommand = new DelegateCommand<FolderBrowserEntry>(ExecuteCopyBrowserPath);
+        OpenFileLocationCommand = new DelegateCommand<RecentFileEntry>(ExecuteOpenFileLocation);
 
         // Initialize Quick Access folders and load data
         LoadSampleQuickAccessFolders();
@@ -473,6 +480,43 @@ public class OpenBackstageViewModel : BindableBase
         RecentFolders.Remove(folder);
 
         // TODO: Persist removal to settings via ISettingsService
+    }
+
+    private void ExecuteOpenFileLocation(RecentFileEntry file)
+    {
+        if (file == null) return;
+
+        try
+        {
+            var fullPath = Path.GetFullPath(file.FilePath);
+            if (File.Exists(fullPath))
+            {
+                // Open Explorer and select the file
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = "explorer.exe",
+                    Arguments = $"/select,\"{fullPath}\"",
+                    UseShellExecute = true
+                });
+            }
+            else
+            {
+                // File doesn't exist, just open the directory
+                var directory = Path.GetDirectoryName(fullPath);
+                if (!string.IsNullOrWhiteSpace(directory) && Directory.Exists(directory))
+                {
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = directory,
+                        UseShellExecute = true
+                    });
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error opening file location: {ex.Message}");
+        }
     }
 
     #region Search Implementation

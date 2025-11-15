@@ -320,24 +320,6 @@
 
 ---
 
-### ?? **Option C: Move to Phase 3 (Map Module)** - **RECOMMENDED NEXT**
-**Effort**: Begin Task 12  
-**Rationale**: Backstage is production-ready, time to test with real modules
-
-**Benefits:**
-1. Test complete backstage workflow with real module files
-2. Verify file type filters work with module extensions
-3. Validate DocumentManager integration
-4. See recent files tracking in action
-
-**Tasks:**
-1. Task 12: Create Map Module Structure
-2. Task 13: Implement Map Data Model
-3. Task 14: Build Map Editor View
-4. (Backstage will work immediately - no changes needed!)
-
----
-
 ## ?? What Works Right Now
 
 1. ? **Full UI** - All visual elements render correctly in both themes
