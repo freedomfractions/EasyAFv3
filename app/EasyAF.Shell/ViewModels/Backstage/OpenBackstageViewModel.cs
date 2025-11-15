@@ -168,6 +168,12 @@ public class OpenBackstageViewModel : BindableBase
     // Rollback instructions: Remove OpenFileLocationCommand
     public DelegateCommand<RecentFileEntry> OpenFileLocationCommand { get; }
 
+    // CROSS-MODULE EDIT: 2025-01-15 Option B Polish (2/2)
+    // Modified for: Add Ctrl+F keyboard shortcut to focus search box
+    // Related modules: None
+    // Rollback instructions: Remove FocusSearchCommand
+    public DelegateCommand FocusSearchCommand { get; }
+
     /// <summary>
     /// Event raised when a file is selected (via Browse, double-click, etc.)
     /// The string parameter is the selected file path.
@@ -179,6 +185,12 @@ public class OpenBackstageViewModel : BindableBase
     /// The string parameter is the selected folder path.
     /// </summary>
     public event Action<string>? FolderSelected;
+    
+    /// <summary>
+    /// Event raised when Ctrl+F is pressed to focus the search box.
+    /// The view will handle this to actually move focus.
+    /// </summary>
+    public event EventHandler? FocusSearchRequested;
 
     public OpenBackstageViewModel(IModuleLoader? moduleLoader, ISettingsService settingsService, IRecentFilesService recentFilesService, IBackstageService? backstageService = null)
     {
@@ -212,6 +224,7 @@ public class OpenBackstageViewModel : BindableBase
         RemoveFolderFromListCommand = new DelegateCommand<RecentFolderEntry>(ExecuteRemoveFolderFromListCommand);
         CopyBrowserPathCommand = new DelegateCommand<FolderBrowserEntry>(ExecuteCopyBrowserPath);
         OpenFileLocationCommand = new DelegateCommand<RecentFileEntry>(ExecuteOpenFileLocation);
+        FocusSearchCommand = new DelegateCommand(ExecuteFocusSearch);
 
         // Initialize Quick Access folders and load data
         LoadSampleQuickAccessFolders();
@@ -517,6 +530,12 @@ public class OpenBackstageViewModel : BindableBase
         {
             System.Diagnostics.Debug.WriteLine($"Error opening file location: {ex.Message}");
         }
+    }
+
+    private void ExecuteFocusSearch()
+    {
+        // Raise the FocusSearchRequested event
+        FocusSearchRequested?.Invoke(this, EventArgs.Empty);
     }
 
     #region Search Implementation

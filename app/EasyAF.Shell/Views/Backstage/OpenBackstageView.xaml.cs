@@ -13,8 +13,29 @@ namespace EasyAF.Shell.Views.Backstage
         {
             InitializeComponent();
             
+            // CROSS-MODULE EDIT: 2025-01-15 Option B Polish (2/2)
+            // Modified for: Subscribe to FocusSearchRequested event to focus search box
+            // Rollback instructions: Remove Loaded event handler and FocusSearchRequested subscription
+            this.Loaded += OnLoaded;
+            
             // Handle keyboard navigation for Page Up/Down in ListViews
             this.AddHandler(PreviewKeyDownEvent, new KeyEventHandler(OnPreviewKeyDown), true);
+        }
+        
+        private void OnLoaded(object sender, RoutedEventArgs e)
+        {
+            // Subscribe to ViewModel's FocusSearchRequested event
+            if (DataContext is ViewModels.Backstage.OpenBackstageViewModel vm)
+            {
+                vm.FocusSearchRequested += OnFocusSearchRequested;
+            }
+        }
+        
+        private void OnFocusSearchRequested(object? sender, EventArgs e)
+        {
+            // Focus the search TextBox
+            SearchTextBox.Focus();
+            SearchTextBox.SelectAll();
         }
 
         protected override void OnPreviewMouseWheel(MouseWheelEventArgs e)
