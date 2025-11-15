@@ -657,6 +657,10 @@ public class OpenBackstageViewModel : BindableBase
             var currentIndex = QuickAccessFolders.IndexOf(folder);
             var wasCurrentlySelected = folder == SelectedQuickAccessFolder;
             
+            // Clear the IsSelected state on the folder being removed
+            // This ensures RadioButton bindings don't hold stale state
+            folder.IsSelected = false;
+            
             // Remove the folder
             QuickAccessFolders.Remove(folder);
             SaveQuickAccessFolders();
