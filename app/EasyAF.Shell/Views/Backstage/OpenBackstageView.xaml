@@ -98,6 +98,7 @@
                         <DataTemplate>
                             <RadioButton GroupName="NavMode"
                                          Style="{StaticResource NavigationRadioButtonStyle}"
+                                         IsChecked="{Binding IsSelected, Mode=TwoWay}"
                                          Command="{Binding DataContext.SelectQuickAccessFolderCommand, 
                                                    RelativeSource={RelativeSource AncestorType=UserControl}}"
                                          CommandParameter="{Binding}"
