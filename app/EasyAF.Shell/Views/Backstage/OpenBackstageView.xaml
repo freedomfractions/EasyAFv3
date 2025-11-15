@@ -282,11 +282,7 @@
                     </Grid>
                 </Border>
 
-                <!-- Scrollable Content Host -->
-                <ScrollViewer Grid.Row="2"
-                              VerticalScrollBarVisibility="Auto"
-                              HorizontalScrollBarVisibility="Disabled">
-                    <ContentControl x:Name="ContentHost">
+                <!-- Scrollable Content Host -->`n                <ContentControl x:Name="ContentHost" Grid.Row="2">
                         <!-- Content switches based on Mode -->
                         <ContentControl.Style>
                             <Style TargetType="ContentControl">
@@ -781,7 +777,6 @@
                             </Style>
                         </ContentControl.Style>
                     </ContentControl>
-                </ScrollViewer>
             </Grid>
         </Grid>
     </Grid>
