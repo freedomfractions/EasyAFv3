@@ -4,6 +4,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:conv="clr-namespace:EasyAF.Shell.Converters"
+             xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
              mc:Ignorable="d"
              d:DesignHeight="400" d:DesignWidth="700"
              Background="{DynamicResource PrimaryBackgroundBrush}">
@@ -18,6 +19,12 @@
             <CollectionViewSource.GroupDescriptions>
                 <PropertyGroupDescription PropertyName="DateCategory"/>
             </CollectionViewSource.GroupDescriptions>
+            <CollectionViewSource.SortDescriptions>
+                <!-- Sort by category priority first (Pinned=0, Today=1, etc.) -->
+                <scm:SortDescription PropertyName="DateCategorySortPriority" Direction="Ascending"/>
+                <!-- Then sort within groups by LastModified descending (newest first) -->
+                <scm:SortDescription PropertyName="LastModified" Direction="Descending"/>
+            </CollectionViewSource.SortDescriptions>
         </CollectionViewSource>
     </UserControl.Resources>
     

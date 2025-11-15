@@ -65,6 +65,7 @@ public class RecentFileEntry : INotifyPropertyChanged
                 _isPinned = value;
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(DateCategory)); // Notify that category changed
+                OnPropertyChanged(nameof(DateCategorySortPriority)); // Notify that sort priority changed
             }
         }
     }
@@ -95,6 +96,27 @@ public class RecentFileEntry : INotifyPropertyChanged
                 return "Last Week";
 
             return "Older";
+        }
+    }
+
+    /// <summary>
+    /// Sort priority for the DateCategory to ensure proper group ordering.
+    /// Lower numbers appear first.
+    /// </summary>
+    public int DateCategorySortPriority
+    {
+        get
+        {
+            return DateCategory switch
+            {
+                "Pinned" => 0,
+                "Today" => 1,
+                "Yesterday" => 2,
+                "This Week" => 3,
+                "Last Week" => 4,
+                "Older" => 5,
+                _ => 99
+            };
         }
     }
 
