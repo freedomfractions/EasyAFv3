@@ -122,7 +122,7 @@
                         <TextBlock Text="Recent files limit" 
                                    Foreground="{DynamicResource TextPrimaryBrush}"
                                    Margin="0,8,0,4"/>
-                        <TextBlock Text="Maximum number of recent files to track (3-99)" 
+                        <TextBlock Text="Maximum number of recent files to display (3-250)" 
                                    Foreground="{DynamicResource TextSecondaryBrush}"
                                    FontSize="11"
                                    Margin="0,0,0,8"/>

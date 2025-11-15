@@ -24,7 +24,7 @@ namespace EasyAF.Core.Services;
 /// <para>
 /// Settings keys used:
 /// - "RecentFiles": List of file paths (up to 1000 stored)
-/// - "RecentFiles.MaxCount": Maximum number of entries to DISPLAY (clamped to 3-99, default 15)
+/// - "RecentFiles.MaxCount": Maximum number of entries to DISPLAY (clamped to 3-250, default 25)
 /// </para>
 /// <para>
 /// The service responds to settings hot-reload events. When MaxCount changes, the displayed
@@ -50,7 +50,7 @@ public class RecentFilesService : IRecentFilesService
     public RecentFilesService(ISettingsService settingsService)
     {
         _settingsService = settingsService;
-        _maxEntries = ClampMax(_settingsService.GetSetting<int>(SettingKeyMax, 15));
+        _maxEntries = ClampMax(_settingsService.GetSetting<int>(SettingKeyMax, 25));
         // Write back clamped default so it persists
         _settingsService.SetSetting(SettingKeyMax, _maxEntries);
 
@@ -186,10 +186,10 @@ public class RecentFilesService : IRecentFilesService
     }
 
     /// <summary>
-    /// Clamps the maximum entry count to valid range (3-99).
+    /// Clamps the maximum entry count to valid range (3-250).
     /// </summary>
     /// <param name="value">Desired maximum count.</param>
-    /// <returns>Clamped value between 3 and 99 inclusive.</returns>
+    /// <returns>Clamped value between 3 and 250 inclusive.</returns>
     /// <remarks>
     /// This controls the DISPLAY limit, not the storage limit.
     /// Storage is always capped at 1000 items regardless of this setting.
@@ -197,7 +197,7 @@ public class RecentFilesService : IRecentFilesService
     private static int ClampMax(int value)
     {
         if (value < 3) return 3;
-        if (value > 99) return 99;
+        if (value > 250) return 250;
         return value;
     }
 }

@@ -33,8 +33,8 @@ public class SettingsDialogViewModel : BindableBase
 
         _originalTheme = _themeService.CurrentTheme;
         
-        // Load recent files limit setting (default 15, range 3-99)
-        _originalRecentFilesLimit = _settingsService.GetSetting("RecentFiles.MaxCount", 15);
+        // Load recent files limit setting (default 25, range 3-250)
+        _originalRecentFilesLimit = _settingsService.GetSetting("RecentFiles.MaxCount", 25);
         _recentFilesLimit = ClampRecentFilesLimit(_originalRecentFilesLimit);
 
         // Initialize commands
@@ -74,11 +74,12 @@ public class SettingsDialogViewModel : BindableBase
     }
 
     /// <summary>
-    /// Gets or sets the maximum number of recent files to track (3-99).
+    /// Gets or sets the maximum number of recent files to display (3-250).
     /// </summary>
     /// <remarks>
     /// This setting controls how many recent files are shown in the Open backstage.
-    /// Valid range is 3-99. Values outside this range are automatically clamped.
+    /// Valid range is 3-250. Values outside this range are automatically clamped.
+    /// The service always stores up to 1000 items, this only controls the display count.
     /// </remarks>
     public int RecentFilesLimit
     {
@@ -147,14 +148,14 @@ public class SettingsDialogViewModel : BindableBase
     }
 
     /// <summary>
-    /// Clamps the recent files limit to valid range (3-99).
+    /// Clamps the recent files limit to valid range (3-250).
     /// </summary>
     /// <param name="value">The desired limit.</param>
-    /// <returns>Clamped value between 3 and 99.</returns>
+    /// <returns>Clamped value between 3 and 250.</returns>
     private static int ClampRecentFilesLimit(int value)
     {
         if (value < 3) return 3;
-        if (value > 99) return 99;
+        if (value > 250) return 250;
         return value;
     }
 }

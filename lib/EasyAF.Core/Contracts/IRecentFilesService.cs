@@ -9,13 +9,13 @@ namespace EasyAF.Core.Contracts;
 /// <para>
 /// The service maintains two separate concepts:
 /// - **Storage limit**: Maximum number of items to store (1000 items, hardcoded)
-/// - **Display limit**: Maximum number of items to show in UI (user-configurable, 3-99)
+/// - **Display limit**: Maximum number of items to show in UI (user-configurable, 3-250)
 /// </para>
 /// <para>
 /// This separation allows users to temporarily reduce the display limit without
 /// losing their history. For example, setting display limit to 5 will show only
-/// 5 items in the UI, but all items remain stored. Changing back to 50 will
-/// immediately show 50 items from the stored history.
+/// 5 items in the UI, but all items remain stored. Changing back to 100 will
+/// immediately show 100 items from the stored history.
 /// </para>
 /// </remarks>
 public interface IRecentFilesService
@@ -30,7 +30,7 @@ public interface IRecentFilesService
     ObservableCollection<string> RecentFiles { get; }
     
     /// <summary>
-    /// Gets the maximum number of items to display in the UI (user-configurable, 3-99).
+    /// Gets the maximum number of items to display in the UI (user-configurable, 3-250).
     /// </summary>
     /// <remarks>
     /// This is controlled by the "RecentFiles.MaxCount" setting.
