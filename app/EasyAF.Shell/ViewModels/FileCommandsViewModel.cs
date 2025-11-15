@@ -13,6 +13,24 @@ namespace EasyAF.Shell.ViewModels;
 /// <summary>
 /// Provides New/Open/Save/SaveAs commands for the shell, coordinating with DocumentManager and modules.
 /// </summary>
+/// <remarks>
+/// <para>
+/// This ViewModel serves as the primary coordinator for file operations in the EasyAF Shell.
+/// It bridges the gap between user actions (ribbon buttons, backstage interactions) and the
+/// underlying document management system.
+/// </para>
+/// <para>
+/// Key responsibilities:
+/// - Building dynamic file type filters from loaded modules
+/// - Managing recent files list via IRecentFilesService
+/// - Remembering last used directory for file dialogs
+/// - Coordinating with IDocumentManager for document lifecycle
+/// </para>
+/// <para>
+/// File dialogs use module-provided file type definitions to build filters, ensuring that
+/// only compatible file types are shown for each module.
+/// </para>
+/// </remarks>
 public class FileCommandsViewModel : BindableBase
 {
     private readonly IDocumentManager _documentManager;
@@ -26,6 +44,14 @@ public class FileCommandsViewModel : BindableBase
     // Modified for: Implement Open/Save/SaveAs dialog logic and dynamic module file type associations
     // Related modules: Core (IModule, IDocumentModule, IModuleCatalog, ISettingsService, IRecentFilesService), Shell (MainWindow bindings)
     // Rollback instructions: Remove dialog logic methods (ExecuteOpen/ExecuteSave/ExecuteSaveAs modifications), remove settings usage & related private members
+    
+    /// <summary>
+    /// Initializes a new instance of the <see cref="FileCommandsViewModel"/> class.
+    /// </summary>
+    /// <param name="documentManager">Document lifecycle manager.</param>
+    /// <param name="moduleCatalog">Catalog of loaded modules for file type discovery.</param>
+    /// <param name="recentFilesService">Service for tracking recent files.</param>
+    /// <param name="settingsService">Service for persisting user preferences.</param>
     public FileCommandsViewModel(IDocumentManager documentManager, EasyAF.Core.Contracts.IModuleCatalog moduleCatalog, IRecentFilesService recentFilesService, ISettingsService settingsService)
     {
         _documentManager = documentManager;
@@ -54,30 +80,92 @@ public class FileCommandsViewModel : BindableBase
         _selectedModule = AvailableDocumentModules.FirstOrDefault();
     }
 
+    /// <summary>
+    /// Gets the list of document modules that can create new documents.
+    /// </summary>
+    /// <remarks>
+    /// This list is dynamically populated from the ModuleCatalog and updates automatically
+    /// when modules are loaded or unloaded.
+    /// </remarks>
     public IEnumerable<IDocumentModule> AvailableDocumentModules => _moduleCatalog.DocumentModules;
 
     private IDocumentModule? _selectedModule;
+    
+    /// <summary>
+    /// Gets or sets the currently selected module for New document operations.
+    /// </summary>
+    /// <remarks>
+    /// This property is typically bound to a ComboBox in the Backstage "New" tab,
+    /// allowing users to choose which type of document to create.
+    /// </remarks>
     public IDocumentModule? SelectedModule
     {
         get => _selectedModule;
         set => SetProperty(ref _selectedModule, value);
     }
 
+    /// <summary>
+    /// Gets the collection of recent file paths.
+    /// </summary>
+    /// <remarks>
+    /// This collection is bound to UI elements in the Backstage "Open" tab and welcome screen.
+    /// It automatically updates when files are opened or removed.
+    /// </remarks>
     public ObservableCollection<string> RecentFiles => _recentFiles.RecentFiles;
 
+    // Commands
+    
+    /// <summary>
+    /// Gets the command to create a new document of the selected module type.
+    /// </summary>
     public DelegateCommand NewCommand { get; }
+    
+    /// <summary>
+    /// Gets the command to open a document from disk.
+    /// </summary>
     public DelegateCommand OpenCommand { get; }
+    
+    /// <summary>
+    /// Gets the command to save the active document.
+    /// </summary>
     public DelegateCommand SaveCommand { get; }
+    
+    /// <summary>
+    /// Gets the command to save the active document with a new filename.
+    /// </summary>
     public DelegateCommand SaveAsCommand { get; }
+    
+    /// <summary>
+    /// Gets the command to open a document from the recent files list.
+    /// </summary>
     public DelegateCommand<string?> OpenRecentCommand { get; }
 
-    // New backstage commands
+    // Backstage context menu commands
+    
+    /// <summary>
+    /// Gets the command to remove a file from the recent files list.
+    /// </summary>
     public DelegateCommand<string?> RemoveRecentCommand { get; }
+    
+    /// <summary>
+    /// Gets the command to open the containing folder of a recent file in Windows Explorer.
+    /// </summary>
     public DelegateCommand<string?> OpenRecentLocationCommand { get; }
+    
+    /// <summary>
+    /// Gets the command to clear all recent files.
+    /// </summary>
     public DelegateCommand ClearRecentCommand { get; }
 
+    /// <summary>
+    /// Determines whether the New command can execute.
+    /// </summary>
+    /// <returns>True if a module is selected; otherwise false.</returns>
     private bool CanExecuteNew() => SelectedModule != null;
 
+    /// <summary>
+    /// Executes the New command, creating a new document of the selected module type.
+    /// </summary>
     private void ExecuteNew()
     {
         if (SelectedModule == null) return;
@@ -85,8 +173,19 @@ public class FileCommandsViewModel : BindableBase
         Log.Information("New document created: {Title}", doc.Title);
     }
 
+    /// <summary>
+    /// Determines whether Save/SaveAs commands can execute.
+    /// </summary>
+    /// <returns>True if there is an active document; otherwise false.</returns>
     private bool CanExecuteSave() => _documentManager.ActiveDocument != null;
 
+    /// <summary>
+    /// Executes the Save command.
+    /// </summary>
+    /// <remarks>
+    /// If the document has never been saved (no FilePath), this delegates to SaveAs.
+    /// Otherwise, it saves to the existing file path.
+    /// </remarks>
     private void ExecuteSave()
     {
         var doc = _documentManager.ActiveDocument;
@@ -110,6 +209,18 @@ public class FileCommandsViewModel : BindableBase
         }
     }
 
+    /// <summary>
+    /// Executes the Open command, showing an OpenFileDialog.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The file dialog filter is built dynamically from all loaded modules' supported file types.
+    /// The initial directory is the last directory used in any file dialog, or MyDocuments.
+    /// </para>
+    /// <para>
+    /// On success, the file is opened via DocumentManager and added to recent files.
+    /// </para>
+    /// </remarks>
     private void ExecuteOpen()
     {
         try
@@ -137,6 +248,10 @@ public class FileCommandsViewModel : BindableBase
         }
     }
 
+    /// <summary>
+    /// Executes the OpenRecent command, opening a file from the recent files list.
+    /// </summary>
+    /// <param name="path">Full path to the file to open.</param>
     private void ExecuteOpenRecent(string? path)
     {
         if (string.IsNullOrWhiteSpace(path)) return;
@@ -153,6 +268,18 @@ public class FileCommandsViewModel : BindableBase
         }
     }
 
+    /// <summary>
+    /// Executes the SaveAs command, showing a SaveFileDialog.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The file dialog filter is built from the active document's owning module's file types.
+    /// The suggested filename is derived from the document's Title property.
+    /// </para>
+    /// <para>
+    /// On success, the document is saved to the new location and added to recent files.
+    /// </para>
+    /// </remarks>
     private void ExecuteSaveAs()
     {
         var doc = _documentManager.ActiveDocument;
@@ -193,12 +320,24 @@ public class FileCommandsViewModel : BindableBase
         }
     }
 
+    /// <summary>
+    /// Removes a file from the recent files list.
+    /// </summary>
+    /// <param name="path">Full path of the file to remove.</param>
     private void ExecuteRemoveRecent(string? path)
     {
         if (string.IsNullOrWhiteSpace(path)) return;
         _recentFiles.RemoveRecentFile(path!);
     }
 
+    /// <summary>
+    /// Opens Windows Explorer to the containing folder of a recent file.
+    /// </summary>
+    /// <param name="path">Full path of the file.</param>
+    /// <remarks>
+    /// If the file exists, Explorer will open with the file selected.
+    /// If the file doesn't exist but the directory does, Explorer opens to the directory.
+    /// </remarks>
     private void ExecuteOpenRecentLocation(string? path)
     {
         if (string.IsNullOrWhiteSpace(path)) return;
@@ -229,8 +368,15 @@ public class FileCommandsViewModel : BindableBase
         }
     }
 
+    /// <summary>
+    /// Determines whether the ClearRecent command can execute.
+    /// </summary>
+    /// <returns>True if there are recent files; otherwise false.</returns>
     private bool CanExecuteClearRecent() => _recentFiles.RecentFiles.Count > 0;
 
+    /// <summary>
+    /// Clears all recent files.
+    /// </summary>
     private void ExecuteClearRecent()
     {
         // Prefer service to handle persistence
@@ -253,6 +399,11 @@ public class FileCommandsViewModel : BindableBase
         ClearRecentCommand.RaiseCanExecuteChanged();
     }
 
+    /// <summary>
+    /// Suggests a filename based on the document's Title, replacing invalid characters.
+    /// </summary>
+    /// <param name="doc">The document to suggest a name for.</param>
+    /// <returns>A valid filename (without extension).</returns>
     private string SuggestFileName(IDocument doc)
     {
         // Use existing title or filename, ensure no invalid characters
@@ -264,6 +415,18 @@ public class FileCommandsViewModel : BindableBase
         return baseName;
     }
 
+    /// <summary>
+    /// Builds an OpenFileDialog filter string from all loaded modules' file types.
+    /// </summary>
+    /// <returns>Filter string in format: "Description (*.ext)|*.ext|..."</returns>
+    /// <remarks>
+    /// <para>
+    /// The filter includes:
+    /// - An "All Supported Files" entry combining all extensions
+    /// - Individual entries for each module's file types
+    /// - An "All Files (*.*)" entry
+    /// </para>
+    /// </remarks>
     private string BuildOpenFilter()
     {
         // Build per-module filters + global combined filter
@@ -299,6 +462,11 @@ public class FileCommandsViewModel : BindableBase
         return string.Join("|", moduleFilters);
     }
 
+    /// <summary>
+    /// Builds a SaveFileDialog filter string for a specific module's file types.
+    /// </summary>
+    /// <param name="ownerModule">The module that owns the document being saved.</param>
+    /// <returns>Filter string with the module's supported file types.</returns>
     private string BuildSaveFilter(IDocumentModule ownerModule)
     {
         var filters = new List<string>();
@@ -322,6 +490,12 @@ public class FileCommandsViewModel : BindableBase
         return string.Join("|", filters);
     }
 
+    /// <summary>
+    /// Gets the initial directory for file dialogs.
+    /// </summary>
+    /// <returns>
+    /// The last used directory if it exists, otherwise the user's Documents folder.
+    /// </returns>
     private string GetInitialDirectory()
     {
         var last = _settingsService.GetSetting(LastDirectorySettingKey, string.Empty);
@@ -330,6 +504,10 @@ public class FileCommandsViewModel : BindableBase
         return Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
     }
 
+    /// <summary>
+    /// Remembers the directory of a file path for future file dialogs.
+    /// </summary>
+    /// <param name="path">Full file path.</param>
     private void RememberDirectory(string path)
     {
         try
@@ -343,6 +521,11 @@ public class FileCommandsViewModel : BindableBase
         catch { /* swallow */ }
     }
 
+    /// <summary>
+    /// Gets the default file extension for a module.
+    /// </summary>
+    /// <param name="module">The module to get the extension for.</param>
+    /// <returns>The primary file extension (without the dot), or "dat" if none defined.</returns>
     private string GetDefaultExtension(IDocumentModule module)
     {
         // Get primary extension from module's supported file types

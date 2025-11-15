@@ -23,6 +23,7 @@
         <conv:RecentTabToIndexConverter x:Key="RecentTabToIndexConverter" />
         <conv:PinnedToStarGlyphConverter x:Key="PinnedToStarGlyphConverter" />
         <conv:PinnedToColorConverter x:Key="PinnedToColorConverter" />
+        <conv:QuickAccessFolderToBooleanConverter x:Key="QuickAccessFolderToBooleanConverter" />
         
         <!-- CollectionViewSource for grouped Recent Files -->
         <CollectionViewSource x:Key="GroupedRecentFiles" Source="{Binding RecentFiles}">
@@ -97,6 +98,7 @@
                         <DataTemplate>
                             <RadioButton GroupName="NavMode"
                                          Style="{StaticResource NavigationRadioButtonStyle}"
+                                         IsChecked="{Binding IsSelected, Mode=TwoWay}"
                                          Command="{Binding DataContext.SelectQuickAccessFolderCommand, 
                                                    RelativeSource={RelativeSource AncestorType=UserControl}}"
                                          CommandParameter="{Binding}"
@@ -282,11 +284,7 @@
                     </Grid>
                 </Border>
 
-                <!-- Scrollable Content Host -->
-                <ScrollViewer Grid.Row="2"
-                              VerticalScrollBarVisibility="Auto"
-                              HorizontalScrollBarVisibility="Disabled">
-                    <ContentControl x:Name="ContentHost">
+                <!-- Scrollable Content Host -->                <ContentControl x:Name="ContentHost" Grid.Row="2">
                         <!-- Content switches based on Mode -->
                         <ContentControl.Style>
                             <Style TargetType="ContentControl">
@@ -641,7 +639,7 @@
                                                 <!-- Drag & Drop: Drag files/folders to Quick Access to add them -->
                                                 <ListView Background="Transparent"
                                                           BorderThickness="0"
-                                                          ItemsSource="{Binding BrowserEntries}"
+                                                          ItemsSource="{Binding BrowserEntries}" Style="{StaticResource FrozenHeaderListViewStyle}"
                                                           behaviors:DragToQuickAccessBehavior.IsEnabled="True"
                                                           behaviors:DragToQuickAccessBehavior.QuickAccessTargetName="QuickAccessItemsControl">
                                                     <!-- Keyboard shortcuts for Browser ListView -->
@@ -781,7 +779,6 @@
                             </Style>
                         </ContentControl.Style>
                     </ContentControl>
-                </ScrollViewer>
             </Grid>
         </Grid>
     </Grid>

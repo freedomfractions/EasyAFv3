@@ -183,6 +183,12 @@ public class OpenBackstageViewModel : BindableBase
     /// The view will handle this to actually move focus.
     /// </summary>
     public event EventHandler? FocusSearchRequested;
+    
+    /// <summary>
+    /// Event raised when the data source changes (mode switch or folder navigation).
+    /// The view should reset the scroll position to the top.
+    /// </summary>
+    public event EventHandler? ScrollToTopRequested;
 
     public OpenBackstageViewModel(IModuleLoader? moduleLoader, ISettingsService settingsService, IRecentFilesService recentFilesService, IBackstageService? backstageService = null)
     {
@@ -240,18 +246,40 @@ public class OpenBackstageViewModel : BindableBase
     {
         Mode = OpenBackstageMode.Recent;
         SelectedQuickAccessFolder = null;
+        
+        // Delay scroll reset until ContentControl finishes switching content
+        System.Windows.Application.Current?.Dispatcher.InvokeAsync(() =>
+        {
+            ScrollToTopRequested?.Invoke(this, EventArgs.Empty);
+        }, System.Windows.Threading.DispatcherPriority.Loaded);
     }
 
     private void ExecuteSelectQuickAccessFolder(QuickAccessFolder folder)
     {
         if (folder == null) return;
+        
+        // Clear previous selection
+        if (SelectedQuickAccessFolder != null)
+        {
+            SelectedQuickAccessFolder.IsSelected = false;
+        }
+        
         Mode = OpenBackstageMode.QuickAccessFolder;
         SelectedQuickAccessFolder = folder;
+        
+        // Set new selection
+        folder.IsSelected = true;
         
         // Set the current browse path and load browser entries
         CurrentBrowsePath = folder.FolderPath;
         LoadBrowserEntries(CurrentBrowsePath);
         NavigateUpCommand.RaiseCanExecuteChanged();
+        
+        // Delay scroll reset until ContentControl finishes switching content
+        System.Windows.Application.Current?.Dispatcher.InvokeAsync(() =>
+        {
+            ScrollToTopRequested?.Invoke(this, EventArgs.Empty);
+        }, System.Windows.Threading.DispatcherPriority.Loaded);
     }
 
     private void ExecuteTogglePin(RecentFileEntry file)
@@ -317,6 +345,12 @@ public class OpenBackstageViewModel : BindableBase
             CurrentBrowsePath = entry.FullPath;
             LoadBrowserEntries(CurrentBrowsePath);
             NavigateUpCommand.RaiseCanExecuteChanged();
+            
+            // Delay scroll reset until new content is loaded and rendered
+            System.Windows.Application.Current?.Dispatcher.InvokeAsync(() =>
+            {
+                ScrollToTopRequested?.Invoke(this, EventArgs.Empty);
+            }, System.Windows.Threading.DispatcherPriority.Loaded);
         }
         else
         {
@@ -338,6 +372,12 @@ public class OpenBackstageViewModel : BindableBase
                 CurrentBrowsePath = currentDir.Parent.FullName;
                 LoadBrowserEntries(CurrentBrowsePath);
                 NavigateUpCommand.RaiseCanExecuteChanged();
+                
+                // Delay scroll reset until new content is loaded and rendered
+                System.Windows.Application.Current?.Dispatcher.InvokeAsync(() =>
+                {
+                    ScrollToTopRequested?.Invoke(this, EventArgs.Empty);
+                }, System.Windows.Threading.DispatcherPriority.Loaded);
             }
         }
         catch (Exception ex)
@@ -616,6 +656,10 @@ public class OpenBackstageViewModel : BindableBase
             // Remember the index and selection state before removal
             var currentIndex = QuickAccessFolders.IndexOf(folder);
             var wasCurrentlySelected = folder == SelectedQuickAccessFolder;
+            
+            // Clear the IsSelected state on the folder being removed
+            // This ensures RadioButton bindings don't hold stale state
+            folder.IsSelected = false;
             
             // Remove the folder
             QuickAccessFolders.Remove(folder);
@@ -1034,11 +1078,18 @@ public class OpenBackstageViewModel : BindableBase
     /// <summary>
     /// Loads recent files from IRecentFilesService and converts them to RecentFileEntry objects.
     /// </summary>
+    /// <remarks>
+    /// Takes only MaxDisplayCount items from the service's full list to respect the user's display limit setting.
+    /// </remarks>
     private void LoadRecentFilesFromService()
     {
         _allRecentFiles.Clear();
         
-        foreach (var filePath in _recentFilesService.RecentFiles)
+        // Take only the number of items the user wants to display
+        var itemsToLoad = _recentFilesService.RecentFiles
+            .Take(_recentFilesService.MaxDisplayCount);
+        
+        foreach (var filePath in itemsToLoad)
         {
             if (File.Exists(filePath))
             {

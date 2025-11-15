@@ -1,11 +1,12 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace EasyAF.Shell.Views.Backstage
 {
     /// <summary>
-    /// OpenBackstageView code-behind. Handles scroll event forwarding from ListViews.
+    /// OpenBackstageView code-behind. Handles scroll event forwarding from ListViews and scroll position reset.
     /// </summary>
     public partial class OpenBackstageView : UserControl
     {
@@ -24,10 +25,11 @@ namespace EasyAF.Shell.Views.Backstage
         
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
-            // Subscribe to ViewModel's FocusSearchRequested event
+            // Subscribe to ViewModel's events
             if (DataContext is ViewModels.Backstage.OpenBackstageViewModel vm)
             {
                 vm.FocusSearchRequested += OnFocusSearchRequested;
+                vm.ScrollToTopRequested += OnScrollToTopRequested;
             }
         }
         
@@ -36,6 +38,65 @@ namespace EasyAF.Shell.Views.Backstage
             // Focus the search TextBox
             SearchTextBox.Focus();
             SearchTextBox.SelectAll();
+        }
+        
+        /// <summary>
+        /// Handles scroll-to-top requests from the ViewModel.
+        /// Resets the scroll position of the main content area to the top (0,0).
+        /// </summary>
+        /// <remarks>
+        /// Tries to scroll via ListView.ScrollIntoView first (better for virtualization),
+        /// then falls back to ScrollViewer.ScrollToTop if no ListView is found.
+        /// </remarks>
+        private void OnScrollToTopRequested(object? sender, EventArgs e)
+        {
+            // Try ListView first (better for virtualized collections)
+            var listView = FindVisualChild<ListView>(this);
+            if (listView?.Items.Count > 0)
+            {
+                System.Diagnostics.Debug.WriteLine($"[ScrollReset] ListView found with {listView.Items.Count} items - scrolling to first item");
+                listView.ScrollIntoView(listView.Items[0]);
+                listView.SelectedIndex = -1; // Clear selection
+                return;
+            }
+            
+            System.Diagnostics.Debug.WriteLine("[ScrollReset] No ListView found, trying ScrollViewer...");
+            
+            // Fallback to ScrollViewer
+            var scrollViewer = FindVisualChild<ScrollViewer>(this);
+            if (scrollViewer != null)
+            {
+                System.Diagnostics.Debug.WriteLine($"[ScrollReset] ScrollViewer found - current offset: {scrollViewer.VerticalOffset}");
+                scrollViewer.ScrollToTop();
+                System.Diagnostics.Debug.WriteLine($"[ScrollReset] After reset - offset: {scrollViewer.VerticalOffset}");
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine("[ScrollReset] ERROR: No ScrollViewer found in visual tree!");
+            }
+        }
+
+        /// <summary>
+        /// Finds the first child of a specific type in the visual tree.
+        /// </summary>
+        private static T? FindVisualChild<T>(DependencyObject parent) where T : DependencyObject
+        {
+            if (parent == null)
+                return null;
+
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                
+                if (child is T typedChild)
+                    return typedChild;
+
+                var childOfChild = FindVisualChild<T>(child);
+                if (childOfChild != null)
+                    return childOfChild;
+            }
+
+            return null;
         }
 
         protected override void OnPreviewMouseWheel(MouseWheelEventArgs e)
