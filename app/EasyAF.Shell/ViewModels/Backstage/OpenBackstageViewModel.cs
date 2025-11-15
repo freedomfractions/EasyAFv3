@@ -161,20 +161,8 @@ public class OpenBackstageViewModel : BindableBase
     public DelegateCommand<RecentFileEntry> RemoveFromListCommand { get; }
     public DelegateCommand<RecentFolderEntry> RemoveFolderFromListCommand { get; }
     public DelegateCommand<FolderBrowserEntry> CopyBrowserPathCommand { get; }
-    
-    // CROSS-MODULE EDIT: 2025-01-15 Option B Polish
-    // Modified for: Wire OpenFileLocationCommand to ExecuteOpenFileLocation
-    // Rollback instructions: Remove line below
     public DelegateCommand<RecentFileEntry> OpenFileLocationCommand { get; }
-
-    // CROSS-MODULE EDIT: 2025-01-15 Option B Polish (2/2)
-    // Modified for: Wire FocusSearchCommand to raise event for view
-    // Rollback instructions: Remove line below
     public DelegateCommand FocusSearchCommand { get; }
-    
-    // CROSS-MODULE EDIT: 2025-01-15 Quick Access Enhancement
-    // Modified for: Wire Quick Access add/remove commands
-    // Rollback instructions: Remove lines below
     public DelegateCommand<string> AddToQuickAccessCommand { get; }
     public DelegateCommand<QuickAccessFolder> RemoveFromQuickAccessCommand { get; }
 
@@ -235,11 +223,6 @@ public class OpenBackstageViewModel : BindableBase
         // Initialize Quick Access folders and load data
         LoadSampleQuickAccessFolders();
         
-        // CROSS-MODULE EDIT: 2025-01-15 Option A Step 2
-        // Modified for: Connect to IRecentFilesService for real recent files data
-        // Related modules: Core (IRecentFilesService)
-        // Rollback instructions: Remove RecentFilesService integration, restore LoadSampleRecentFiles/Folders calls
-        
         // Subscribe to RecentFiles changes to keep our list in sync
         _recentFilesService.RecentFiles.CollectionChanged += OnRecentFilesChanged;
         
@@ -250,6 +233,8 @@ public class OpenBackstageViewModel : BindableBase
         // Initial filter (shows all)
         ApplySearchFilter();
     }
+
+    #region Command Execution Methods
 
     private void ExecuteSelectRecent()
     {
@@ -275,7 +260,6 @@ public class OpenBackstageViewModel : BindableBase
         file.IsPinned = !file.IsPinned;
         
         // Force the CollectionViewSource to refresh its grouping
-        // We need to access it through the view's resources
         System.Windows.Application.Current?.Dispatcher.Invoke(() =>
         {
             // Trigger a refresh by removing and re-adding the item
@@ -287,10 +271,6 @@ public class OpenBackstageViewModel : BindableBase
             }
         });
         
-        // CROSS-MODULE EDIT: 2025-01-15 Option A Step 4
-        // Modified for: Persist pin state to settings
-        // Related modules: Core (ISettingsService)
-        // Rollback instructions: Remove SavePinnedFiles call
         SavePinnedFiles();
     }
 
@@ -477,10 +457,6 @@ public class OpenBackstageViewModel : BindableBase
         _allRecentFiles.Remove(file);
         RecentFiles.Remove(file);
 
-        // CROSS-MODULE EDIT: 2025-01-15 Option A Step 2
-        // Modified for: Remove from IRecentFilesService when user removes from list
-        // Related modules: Core (IRecentFilesService)
-        // Rollback instructions: Remove RemoveRecentFile call
         _recentFilesService.RemoveRecentFile(file.FilePath);
         
         // Also remove from pinned files if it was pinned
@@ -593,7 +569,7 @@ public class OpenBackstageViewModel : BindableBase
                 IconGlyph = "\uE8B7" // Folder icon
             });
             
-            // Save to settings
+            // TODO: Implement drag & drop to add folders to Quick Access
             SaveQuickAccessFolders();
             
             System.Diagnostics.Debug.WriteLine($"Added to Quick Access: {fullPath}");
@@ -620,6 +596,8 @@ public class OpenBackstageViewModel : BindableBase
             System.Diagnostics.Debug.WriteLine($"Error removing from Quick Access: {ex.Message}");
         }
     }
+
+    #endregion
 
     #region Search Implementation
 
@@ -1152,24 +1130,13 @@ public class OpenBackstageViewModel : BindableBase
 
     private void LoadSampleQuickAccessFolders()
     {
-        // CROSS-MODULE EDIT: 2025-01-15 Quick Access Enhancement
-        // Modified for: Load Quick Access folders from settings instead of hardcoded
-        // Rollback instructions: Restore hardcoded Documents/Desktop/Downloads logic
-        
         LoadQuickAccessFolders();
     }
 
     private void LoadSampleRecentFolders()
     {
-        // CROSS-MODULE EDIT: 2025-01-15 Option A Step 2
-        // Modified for: Remove sample folders - no real folder tracking service yet
-        // Related modules: None (awaiting IRecentFoldersService implementation)
-        // Rollback instructions: Restore sample folder entries below
-        
         // TODO: Replace with real IRecentFoldersService when implemented
         // For now, Recent Folders tab will be empty until service exists
-        
-        // Keeping this method as a placeholder for when we implement folder tracking
     }
 
     #endregion

@@ -11,12 +11,8 @@
              Focusable="True"
              x:Name="BackstageRoot">
     
-    <!-- CROSS-MODULE EDIT: 2025-01-15 Option B Polish (2/2)
-         Modified for: Add keyboard shortcuts for common actions
-         Shortcuts: Ctrl+F (focus search), Enter (open selected), Delete (remove selected)
-         Rollback instructions: Remove InputBindings and x:Name from UserControl tag -->
+    <!-- Keyboard Shortcuts: Ctrl+F (focus search), Enter (open selected), Delete (remove selected) -->
     <UserControl.InputBindings>
-        <!-- Ctrl+F: Focus search box -->
         <KeyBinding Key="F" Modifiers="Control" 
                     Command="{Binding FocusSearchCommand}"/>
     </UserControl.InputBindings>
@@ -41,7 +37,6 @@
         </CollectionViewSource>
     </UserControl.Resources>
     
-    <!-- Step 3 - Search bar with TextBox and scrollable content host -->
     <Grid Margin="24">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -93,6 +88,7 @@
                            Margin="10,8,10,6"/>
 
                 <!-- Quick Access Folders (data-bound) -->
+                <!-- TODO: Add drag & drop support for reordering Quick Access folders -->
                 <ItemsControl ItemsSource="{Binding QuickAccessFolders}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
@@ -236,7 +232,7 @@
                     </Grid>
                 </Border>
 
-                <!-- Navigation Bar for Browser Mode (OUTSIDE ScrollViewer, in Grid.Row="1") -->
+                <!-- Navigation Bar for Browser Mode -->
                 <Border Grid.Row="1"
                         Background="{DynamicResource ControlBackgroundBrush}"
                         BorderBrush="{DynamicResource ControlBorderBrush}"
@@ -283,7 +279,7 @@
                     </Grid>
                 </Border>
 
-                <!-- Scrollable Content Host (Grid.Row="2") -->
+                <!-- Scrollable Content Host -->
                 <ScrollViewer Grid.Row="2"
                               VerticalScrollBarVisibility="Auto"
                               HorizontalScrollBarVisibility="Disabled">
@@ -298,6 +294,7 @@
                                             <Setter.Value>
                                                 <TabControl SelectedIndex="{Binding RecentTab, Converter={StaticResource RecentTabToIndexConverter}}">
                                                     <TabItem Header="Files">
+                                                        <!-- TODO: Add drag & drop support for dragging files to Quick Access or external apps -->
                                                         <ListView Background="Transparent"
                                                                   BorderThickness="0"
                                                                   ItemsSource="{Binding Source={StaticResource GroupedRecentFiles}}">
