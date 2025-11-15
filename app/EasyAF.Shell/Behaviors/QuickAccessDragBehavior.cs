@@ -112,8 +112,8 @@ public static class QuickAccessDragBehavior
             return;
         }
 
-        // Find the target item
-        var targetElement = GetItemAtPosition(itemsControl, e.GetPosition(itemsControl));
+        // Find the target RadioButton (not inner TextBlock)
+        var targetElement = GetRadioButtonAtPosition(itemsControl, e.GetPosition(itemsControl));
         
         if (targetElement != null)
         {
@@ -148,8 +148,8 @@ public static class QuickAccessDragBehavior
         if (draggedFolder == null)
             return;
 
-        // Find the target item (the one we're dropping on)
-        var targetElement = GetItemAtPosition(itemsControl, e.GetPosition(itemsControl));
+        // Find the target RadioButton (the one we're dropping on)
+        var targetElement = GetRadioButtonAtPosition(itemsControl, e.GetPosition(itemsControl));
         var targetFolder = targetElement?.DataContext as QuickAccessFolder;
 
         if (targetFolder == null || draggedFolder == targetFolder)
@@ -267,6 +267,28 @@ public static class QuickAccessDragBehavior
         {
             if (element is FrameworkElement fe && fe.DataContext is QuickAccessFolder)
                 return fe;
+
+            element = VisualTreeHelper.GetParent(element);
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Gets the RadioButton container at the specified position.
+    /// This ensures we attach the adorner to the entire RadioButton, not just the TextBlock inside.
+    /// </summary>
+    private static RadioButton? GetRadioButtonAtPosition(ItemsControl itemsControl, Point position)
+    {
+        var hitTestResult = VisualTreeHelper.HitTest(itemsControl, position);
+        if (hitTestResult == null)
+            return null;
+
+        var element = hitTestResult.VisualHit as DependencyObject;
+        while (element != null)
+        {
+            if (element is RadioButton rb && rb.DataContext is QuickAccessFolder)
+                return rb;
 
             element = VisualTreeHelper.GetParent(element);
         }
