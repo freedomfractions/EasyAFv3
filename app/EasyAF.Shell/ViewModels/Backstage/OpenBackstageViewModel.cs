@@ -951,38 +951,15 @@ public class OpenBackstageViewModel : BindableBase
 
     private void LoadSampleRecentFolders()
     {
-        var now = DateTime.Now;
-
-        // Recent folders (5 total - enough to show variety)
-        _allRecentFolders.Add(new RecentFolderEntry
-        {
-            FolderPath = @"C:\Users\Documents\Projects",
-            LastAccessed = now.AddHours(-1)
-        });
-
-        _allRecentFolders.Add(new RecentFolderEntry
-        {
-            FolderPath = @"C:\Users\Documents\Reports",
-            LastAccessed = now.AddDays(-1).AddHours(-3)
-        });
-
-        _allRecentFolders.Add(new RecentFolderEntry
-        {
-            FolderPath = @"C:\Users\Documents\Design",
-            LastAccessed = now.AddDays(-4).AddHours(-2)
-        });
-
-        _allRecentFolders.Add(new RecentFolderEntry
-        {
-            FolderPath = @"C:\Users\Documents\Archive",
-            LastAccessed = now.AddDays(-10).AddHours(-3)
-        });
-
-        _allRecentFolders.Add(new RecentFolderEntry
-        {
-            FolderPath = @"C:\Users\Documents\Backup",
-            LastAccessed = now.AddDays(-50)
-        });
+        // CROSS-MODULE EDIT: 2025-01-15 Option A Step 2
+        // Modified for: Remove sample folders - no real folder tracking service yet
+        // Related modules: None (awaiting IRecentFoldersService implementation)
+        // Rollback instructions: Restore sample folder entries below
+        
+        // TODO: Replace with real IRecentFoldersService when implemented
+        // For now, Recent Folders tab will be empty until service exists
+        
+        // Keeping this method as a placeholder for when we implement folder tracking
     }
 
     #endregion

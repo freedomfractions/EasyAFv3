@@ -72,6 +72,67 @@ public class MainWindowViewModel : BindableBase
 
         // Initialize Open Backstage ViewModel
         OpenBackstage = _container.Resolve<EasyAF.Shell.ViewModels.Backstage.OpenBackstageViewModel>();
+        
+        // CROSS-MODULE EDIT: 2025-01-15 Option A Step 3
+        // Modified for: Wire OpenBackstage FileSelected event to DocumentManager
+        // Related modules: Core (IDocumentManager, IRecentFilesService), Shell (OpenBackstageViewModel)
+        // Rollback instructions: Remove FileSelected event subscription below
+        
+        // Subscribe to backstage file selection to open documents
+        OpenBackstage.FileSelected += OnBackstageFileSelected;
+    }
+
+    /// <summary>
+    /// Handles file selection from the Open backstage.
+    /// Attempts to open the file via DocumentManager and adds to recent files.
+    /// </summary>
+    private void OnBackstageFileSelected(string filePath)
+    {
+        if (string.IsNullOrWhiteSpace(filePath))
+        {
+            Log.Warning("BackstageFileSelected received null/empty path");
+            return;
+        }
+
+        try
+        {
+            // Check if file exists
+            if (!File.Exists(filePath))
+            {
+                _dialogService.ShowError($"File not found:\n\n{filePath}", "Open File");
+                Log.Warning("Attempted to open non-existent file: {Path}", filePath);
+                return;
+            }
+
+            // Attempt to open via DocumentManager (will throw if no module can handle it)
+            var document = _documentManager.OpenDocument(filePath);
+            
+            // DocumentManager already adds to recent files via DocumentOpened event handler in FileCommandsViewModel
+            // But we'll add it again here to ensure it's at the top of the list
+            var recentFilesService = _container.Resolve<IRecentFilesService>();
+            recentFilesService.AddRecentFile(filePath);
+            
+            Log.Information("Opened document from backstage: {Path}", filePath);
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("No document module"))
+        {
+            // No module can handle this file type
+            var extension = Path.GetExtension(filePath);
+            _dialogService.ShowMessage(
+                $"No module is available to open '{extension}' files.\n\n" +
+                $"File: {Path.GetFileName(filePath)}\n\n" +
+                $"Please install a module that supports this file type.",
+                "Cannot Open File");
+            Log.Warning("No module found for file: {Path}", filePath);
+        }
+        catch (Exception ex)
+        {
+            // General error opening file
+            _dialogService.ShowError(
+                $"Failed to open file:\n\n{Path.GetFileName(filePath)}\n\nError: {ex.Message}",
+                "Open File Error");
+            Log.Error(ex, "Failed to open file from backstage: {Path}", filePath);
+        }
     }
 
     private void OpenHelp()
