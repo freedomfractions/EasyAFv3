@@ -25,19 +25,6 @@
                 <ResourceDictionary Source="Resources/RecentFoldersTabTemplate.xaml"/>
                 <ResourceDictionary Source="Resources/QuickAccessBrowserTemplate.xaml"/>
             </ResourceDictionary.MergedDictionaries>
-            
-            <!-- CollectionViewSource for grouped Recent Files -->
-            <CollectionViewSource x:Key="GroupedRecentFiles" Source="{Binding RecentFiles}">
-                <CollectionViewSource.GroupDescriptions>
-                    <PropertyGroupDescription PropertyName="DateCategory"/>
-                </CollectionViewSource.GroupDescriptions>
-                <CollectionViewSource.SortDescriptions>
-                    <!-- Sort by category priority first (Pinned=0, Today=1, etc.) -->
-                    <scm:SortDescription PropertyName="DateCategorySortPriority" Direction="Ascending"/>
-                    <!-- Then sort within groups by LastModified descending (newest first) -->
-                    <scm:SortDescription PropertyName="LastModified" Direction="Descending"/>
-                </CollectionViewSource.SortDescriptions>
-            </CollectionViewSource>
         </ResourceDictionary>
     </UserControl.Resources>
     
