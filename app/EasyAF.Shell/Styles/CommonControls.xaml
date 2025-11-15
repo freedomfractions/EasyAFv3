@@ -430,4 +430,52 @@
             </Setter.Value>
         </Setter>
     </Style>
+
+    <!-- CROSS-MODULE EDIT: 2025-01-11 Backstage Scroll Fix -->
+    <!-- Modified for: Frozen GridView headers that don't scroll with content -->
+    <!-- Related modules: OpenBackstageView.xaml (Browser mode ListView) -->
+    <!-- Rollback instructions: Remove this style and use default ListView behavior -->
+    
+    <!-- ListView with Frozen GridView Headers -->
+    <Style x:Key="FrozenHeaderListViewStyle" TargetType="ListView">
+        <Setter Property="Background" Value="{DynamicResource PrimaryBackgroundBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource ControlBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+        <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+        <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ListView">
+                    <Grid Background="{TemplateBinding Background}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>  <!-- Headers (frozen) -->
+                            <RowDefinition Height="*"/>     <!-- Items (scrollable) -->
+                        </Grid.RowDefinitions>
+                        
+                        <!-- Frozen Header Row -->
+                        <GridViewHeaderRowPresenter Grid.Row="0"
+                                                    Columns="{Binding View.Columns, RelativeSource={RelativeSource TemplatedParent}}"
+                                                    ColumnHeaderContainerStyle="{Binding View.ColumnHeaderContainerStyle, RelativeSource={RelativeSource TemplatedParent}}"
+                                                    ColumnHeaderTemplate="{Binding View.ColumnHeaderTemplate, RelativeSource={RelativeSource TemplatedParent}}"
+                                                    ColumnHeaderTemplateSelector="{Binding View.ColumnHeaderTemplateSelector, RelativeSource={RelativeSource TemplatedParent}}"
+                                                    ColumnHeaderStringFormat="{Binding View.ColumnHeaderStringFormat, RelativeSource={RelativeSource TemplatedParent}}"
+                                                    ColumnHeaderContextMenu="{Binding View.ColumnHeaderContextMenu, RelativeSource={RelativeSource TemplatedParent}}"
+                                                    ColumnHeaderToolTip="{Binding View.ColumnHeaderToolTip, RelativeSource={RelativeSource TemplatedParent}}"
+                                                    AllowsColumnReorder="{Binding View.AllowsColumnReorder, RelativeSource={RelativeSource TemplatedParent}}"
+                                                    SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                        
+                        <!-- Scrollable Items -->
+                        <ScrollViewer Grid.Row="1"
+                                      Focusable="False"
+                                      CanContentScroll="{TemplateBinding ScrollViewer.CanContentScroll}"
+                                      HorizontalScrollBarVisibility="{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}"
+                                      VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}">
+                            <ItemsPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                        </ScrollViewer>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 </ResourceDictionary>
