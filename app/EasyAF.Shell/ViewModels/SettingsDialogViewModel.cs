@@ -16,7 +16,9 @@ public class SettingsDialogViewModel : BindableBase
     private readonly IThemeService _themeService;
     private readonly ISettingsService _settingsService;
     private readonly string _originalTheme;
+    private readonly int _originalRecentFilesLimit;
     private IThemeService.ThemeDescriptor? _selectedThemeDescriptor;
+    private int _recentFilesLimit;
     private bool? _dialogResult;
 
     /// <summary>
@@ -30,6 +32,10 @@ public class SettingsDialogViewModel : BindableBase
         _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
 
         _originalTheme = _themeService.CurrentTheme;
+        
+        // Load recent files limit setting (default 15, range 3-99)
+        _originalRecentFilesLimit = _settingsService.GetSetting("RecentFiles.MaxCount", 15);
+        _recentFilesLimit = ClampRecentFilesLimit(_originalRecentFilesLimit);
 
         // Initialize commands
         ApplyCommand = new DelegateCommand(Apply);
@@ -42,7 +48,7 @@ public class SettingsDialogViewModel : BindableBase
         // Set selected theme
         _selectedThemeDescriptor = AvailableThemes.FirstOrDefault(t => t.Name.Equals(_originalTheme, StringComparison.OrdinalIgnoreCase));
 
-        Log.Debug("SettingsDialogViewModel initialized with theme: {Theme}", _originalTheme);
+        Log.Debug("SettingsDialogViewModel initialized with theme: {Theme}, RecentFilesLimit: {Limit}", _originalTheme, _recentFilesLimit);
     }
 
     /// <summary>
@@ -65,6 +71,19 @@ public class SettingsDialogViewModel : BindableBase
                 Log.Debug("Theme preview changed to: {Theme}", value.Name);
             }
         }
+    }
+
+    /// <summary>
+    /// Gets or sets the maximum number of recent files to track (3-99).
+    /// </summary>
+    /// <remarks>
+    /// This setting controls how many recent files are shown in the Open backstage.
+    /// Valid range is 3-99. Values outside this range are automatically clamped.
+    /// </remarks>
+    public int RecentFilesLimit
+    {
+        get => _recentFilesLimit;
+        set => SetProperty(ref _recentFilesLimit, ClampRecentFilesLimit(value));
     }
 
     /// <summary>
@@ -91,13 +110,21 @@ public class SettingsDialogViewModel : BindableBase
         set => SetProperty(ref _dialogResult, value);
     }
 
+    /// <summary>
+    /// Applies current settings to services and persists them.
+    /// </summary>
     private void Apply()
     {
         if (SelectedThemeDescriptor != null)
         {
             _themeService.ApplyTheme(SelectedThemeDescriptor.Name);
-            Log.Information("Settings applied: Theme={Theme}", SelectedThemeDescriptor.Name);
+            _settingsService.SetSetting("Application.Theme", SelectedThemeDescriptor.Name);
         }
+        
+        // Save recent files limit
+        _settingsService.SetSetting("RecentFiles.MaxCount", _recentFilesLimit);
+        
+        Log.Information("Settings applied: Theme={Theme}, RecentFilesLimit={Limit}", SelectedThemeDescriptor?.Name, _recentFilesLimit);
     }
 
     private void Ok()
@@ -111,7 +138,23 @@ public class SettingsDialogViewModel : BindableBase
     {
         // Revert to original theme
         _themeService.ApplyTheme(_originalTheme);
+        
+        // Revert recent files limit (no need to persist, just local state)
+        _recentFilesLimit = _originalRecentFilesLimit;
+        
         DialogResult = false;
         Log.Debug("Settings dialog closed with Cancel, theme reverted to: {Theme}", _originalTheme);
+    }
+
+    /// <summary>
+    /// Clamps the recent files limit to valid range (3-99).
+    /// </summary>
+    /// <param name="value">The desired limit.</param>
+    /// <returns>Clamped value between 3 and 99.</returns>
+    private static int ClampRecentFilesLimit(int value)
+    {
+        if (value < 3) return 3;
+        if (value > 99) return 99;
+        return value;
     }
 }
