@@ -282,7 +282,7 @@
                     </Grid>
                 </Border>
 
-                <!-- Scrollable Content Host -->`n                <ContentControl x:Name="ContentHost" Grid.Row="2">
+                <!-- Scrollable Content Host -->                <ContentControl x:Name="ContentHost" Grid.Row="2">
                         <!-- Content switches based on Mode -->
                         <ContentControl.Style>
                             <Style TargetType="ContentControl">
