@@ -868,60 +868,336 @@ public class OpenBackstageViewModel : BindableBase
 
     private void LoadSampleRecentFiles()
     {
+        var now = DateTime.Now;
+        
+        // Pinned files (3 items)
         _allRecentFiles.Add(new RecentFileEntry
         {
             FilePath = @"C:\Users\Documents\Projects\Proposal_2024.docx",
-            LastModified = DateTime.Now.AddHours(-2),
+            LastModified = now.AddHours(-2),
             IsPinned = true
         });
 
         _allRecentFiles.Add(new RecentFileEntry
         {
+            FilePath = @"C:\Users\Downloads\Invoice_12345.pdf",
+            LastModified = now.AddDays(-2),
+            IsPinned = true
+        });
+
+        _allRecentFiles.Add(new RecentFileEntry
+        {
+            FilePath = @"C:\Users\Documents\Important\Budget_Q1.xlsx",
+            LastModified = now.AddDays(-8),
+            IsPinned = true
+        });
+
+        // Today (5 items)
+        _allRecentFiles.Add(new RecentFileEntry
+        {
             FilePath = @"C:\Users\Documents\Reports\Q4_Analysis.xlsx",
-            LastModified = DateTime.Now.AddHours(-5),
+            LastModified = now.AddHours(-1),
             IsPinned = false
         });
 
         _allRecentFiles.Add(new RecentFileEntry
         {
             FilePath = @"C:\Users\Documents\Meeting_Notes.txt",
-            LastModified = DateTime.Now.AddDays(-1),
+            LastModified = now.AddHours(-3),
             IsPinned = false
         });
 
         _allRecentFiles.Add(new RecentFileEntry
         {
-            FilePath = @"C:\Users\Downloads\Invoice_12345.pdf",
-            LastModified = DateTime.Now.AddDays(-2),
-            IsPinned = true
+            FilePath = @"C:\Users\Desktop\Presentation.pptx",
+            LastModified = now.AddHours(-4),
+            IsPinned = false
         });
 
         _allRecentFiles.Add(new RecentFileEntry
         {
+            FilePath = @"C:\Users\Documents\Contracts\Agreement_Draft.docx",
+            LastModified = now.AddHours(-6),
+            IsPinned = false
+        });
+
+        _allRecentFiles.Add(new RecentFileEntry
+        {
+            FilePath = @"C:\Users\Documents\Specs\Technical_Requirements.pdf",
+            LastModified = now.AddHours(-8),
+            IsPinned = false
+        });
+
+        // Yesterday (4 items)
+        _allRecentFiles.Add(new RecentFileEntry
+        {
             FilePath = @"C:\Users\Documents\Projects\Client_Presentation.pptx",
-            LastModified = DateTime.Now.AddDays(-3),
+            LastModified = now.AddDays(-1).AddHours(-2),
+            IsPinned = false
+        });
+
+        _allRecentFiles.Add(new RecentFileEntry
+        {
+            FilePath = @"C:\Users\Documents\Timesheets\Week_Ending_12_15.xlsx",
+            LastModified = now.AddDays(-1).AddHours(-4),
+            IsPinned = false
+        });
+
+        _allRecentFiles.Add(new RecentFileEntry
+        {
+            FilePath = @"C:\Users\Downloads\Software_License.pdf",
+            LastModified = now.AddDays(-1).AddHours(-6),
+            IsPinned = false
+        });
+
+        _allRecentFiles.Add(new RecentFileEntry
+        {
+            FilePath = @"C:\Users\Documents\Marketing\Campaign_Ideas.docx",
+            LastModified = now.AddDays(-1).AddHours(-10),
+            IsPinned = false
+        });
+
+        // This Week (8 items)
+        _allRecentFiles.Add(new RecentFileEntry
+        {
+            FilePath = @"C:\Users\Documents\Design\Mockups_v2.psd",
+            LastModified = now.AddDays(-2).AddHours(-3),
+            IsPinned = false
+        });
+
+        _allRecentFiles.Add(new RecentFileEntry
+        {
+            FilePath = @"C:\Users\Documents\Code\Algorithm_Notes.txt",
+            LastModified = now.AddDays(-3).AddHours(-1),
+            IsPinned = false
+        });
+
+        _allRecentFiles.Add(new RecentFileEntry
+        {
+            FilePath = @"C:\Users\Documents\HR\Employee_Handbook.pdf",
+            LastModified = now.AddDays(-3).AddHours(-5),
+            IsPinned = false
+        });
+
+        _allRecentFiles.Add(new RecentFileEntry
+        {
+            FilePath = @"C:\Users\Documents\Finance\Expense_Report.xlsx",
+            LastModified = now.AddDays(-4).AddHours(-2),
+            IsPinned = false
+        });
+
+        _allRecentFiles.Add(new RecentFileEntry
+        {
+            FilePath = @"C:\Users\Documents\Training\Onboarding_Slides.pptx",
+            LastModified = now.AddDays(-4).AddHours(-7),
+            IsPinned = false
+        });
+
+        _allRecentFiles.Add(new RecentFileEntry
+        {
+            FilePath = @"C:\Users\Desktop\Notes\Ideas_Brainstorm.txt",
+            LastModified = now.AddDays(-5).AddHours(-3),
+            IsPinned = false
+        });
+
+        _allRecentFiles.Add(new RecentFileEntry
+        {
+            FilePath = @"C:\Users\Documents\Legal\Terms_Conditions.docx",
+            LastModified = now.AddDays(-5).AddHours(-8),
+            IsPinned = false
+        });
+
+        _allRecentFiles.Add(new RecentFileEntry
+        {
+            FilePath = @"C:\Users\Documents\Research\Market_Analysis.pdf",
+            LastModified = now.AddDays(-6).AddHours(-4),
+            IsPinned = false
+        });
+
+        // Last Week (6 items)
+        _allRecentFiles.Add(new RecentFileEntry
+        {
+            FilePath = @"C:\Users\Documents\Archive\Q3_Summary.docx",
+            LastModified = now.AddDays(-8).AddHours(-2),
+            IsPinned = false
+        });
+
+        _allRecentFiles.Add(new RecentFileEntry
+        {
+            FilePath = @"C:\Users\Documents\Data\Customer_Database.xlsx",
+            LastModified = now.AddDays(-9).AddHours(-5),
+            IsPinned = false
+        });
+
+        _allRecentFiles.Add(new RecentFileEntry
+        {
+            FilePath = @"C:\Users\Documents\Proposals\Vendor_Contract.pdf",
+            LastModified = now.AddDays(-10).AddHours(-1),
+            IsPinned = false
+        });
+
+        _allRecentFiles.Add(new RecentFileEntry
+        {
+            FilePath = @"C:\Users\Documents\Reviews\Performance_2024.docx",
+            LastModified = now.AddDays(-11).AddHours(-6),
+            IsPinned = false
+        });
+
+        _allRecentFiles.Add(new RecentFileEntry
+        {
+            FilePath = @"C:\Users\Documents\Planning\Roadmap_Q1.pptx",
+            LastModified = now.AddDays(-12).AddHours(-3),
+            IsPinned = false
+        });
+
+        _allRecentFiles.Add(new RecentFileEntry
+        {
+            FilePath = @"C:\Users\Downloads\Reference_Guide.pdf",
+            LastModified = now.AddDays(-13).AddHours(-7),
+            IsPinned = false
+        });
+
+        // Older (6 items)
+        _allRecentFiles.Add(new RecentFileEntry
+        {
+            FilePath = @"C:\Users\Documents\Old_Projects\Legacy_System.docx",
+            LastModified = now.AddDays(-20),
+            IsPinned = false
+        });
+
+        _allRecentFiles.Add(new RecentFileEntry
+        {
+            FilePath = @"C:\Users\Documents\Archives\Annual_Report_2023.pdf",
+            LastModified = now.AddDays(-30),
+            IsPinned = false
+        });
+
+        _allRecentFiles.Add(new RecentFileEntry
+        {
+            FilePath = @"C:\Users\Documents\History\Meeting_Minutes_Nov.docx",
+            LastModified = now.AddDays(-45),
+            IsPinned = false
+        });
+
+        _allRecentFiles.Add(new RecentFileEntry
+        {
+            FilePath = @"C:\Users\Documents\Backup\Old_Contacts.xlsx",
+            LastModified = now.AddDays(-60),
+            IsPinned = false
+        });
+
+        _allRecentFiles.Add(new RecentFileEntry
+        {
+            FilePath = @"C:\Users\Documents\Templates\Standard_Template.pptx",
+            LastModified = now.AddDays(-75),
+            IsPinned = false
+        });
+
+        _allRecentFiles.Add(new RecentFileEntry
+        {
+            FilePath = @"C:\Users\Documents\Reference\Style_Guide.pdf",
+            LastModified = now.AddDays(-90),
             IsPinned = false
         });
     }
 
     private void LoadSampleRecentFolders()
     {
+        var now = DateTime.Now;
+
+        // Today (3 folders)
         _allRecentFolders.Add(new RecentFolderEntry
         {
             FolderPath = @"C:\Users\Documents\Projects",
-            LastAccessed = DateTime.Now.AddHours(-1)
-        });
-
-        _allRecentFolders.Add(new RecentFolderEntry
-        {
-            FolderPath = @"C:\Users\Documents\Downloads",
-            LastAccessed = DateTime.Now.AddDays(-1)
+            LastAccessed = now.AddHours(-1)
         });
 
         _allRecentFolders.Add(new RecentFolderEntry
         {
             FolderPath = @"C:\Users\Documents\Reports",
-            LastAccessed = DateTime.Now.AddDays(-4)
+            LastAccessed = now.AddHours(-5)
+        });
+
+        _allRecentFolders.Add(new RecentFolderEntry
+        {
+            FolderPath = @"C:\Users\Desktop\WorkFiles",
+            LastAccessed = now.AddHours(-7)
+        });
+
+        // Yesterday (2 folders)
+        _allRecentFolders.Add(new RecentFolderEntry
+        {
+            FolderPath = @"C:\Users\Documents\Downloads",
+            LastAccessed = now.AddDays(-1).AddHours(-3)
+        });
+
+        _allRecentFolders.Add(new RecentFolderEntry
+        {
+            FolderPath = @"C:\Users\Documents\Contracts",
+            LastAccessed = now.AddDays(-1).AddHours(-8)
+        });
+
+        // This Week (4 folders)
+        _allRecentFolders.Add(new RecentFolderEntry
+        {
+            FolderPath = @"C:\Users\Documents\Design",
+            LastAccessed = now.AddDays(-3).AddHours(-2)
+        });
+
+        _allRecentFolders.Add(new RecentFolderEntry
+        {
+            FolderPath = @"C:\Users\Documents\Code",
+            LastAccessed = now.AddDays(-4).AddHours(-6)
+        });
+
+        _allRecentFolders.Add(new RecentFolderEntry
+        {
+            FolderPath = @"C:\Users\Documents\Marketing",
+            LastAccessed = now.AddDays(-5).AddHours(-1)
+        });
+
+        _allRecentFolders.Add(new RecentFolderEntry
+        {
+            FolderPath = @"C:\Users\Documents\Finance",
+            LastAccessed = now.AddDays(-6).AddHours(-4)
+        });
+
+        // Last Week (3 folders)
+        _allRecentFolders.Add(new RecentFolderEntry
+        {
+            FolderPath = @"C:\Users\Documents\Archive",
+            LastAccessed = now.AddDays(-9).AddHours(-3)
+        });
+
+        _allRecentFolders.Add(new RecentFolderEntry
+        {
+            FolderPath = @"C:\Users\Documents\Data",
+            LastAccessed = now.AddDays(-11).AddHours(-7)
+        });
+
+        _allRecentFolders.Add(new RecentFolderEntry
+        {
+            FolderPath = @"C:\Users\Documents\Proposals",
+            LastAccessed = now.AddDays(-12).AddHours(-2)
+        });
+
+        // Older (3 folders)
+        _allRecentFolders.Add(new RecentFolderEntry
+        {
+            FolderPath = @"C:\Users\Documents\Old_Projects",
+            LastAccessed = now.AddDays(-25)
+        });
+
+        _allRecentFolders.Add(new RecentFolderEntry
+        {
+            FolderPath = @"C:\Users\Documents\Backup",
+            LastAccessed = now.AddDays(-50)
+        });
+
+        _allRecentFolders.Add(new RecentFolderEntry
+        {
+            FolderPath = @"C:\Users\Documents\Templates",
+            LastAccessed = now.AddDays(-80)
         });
     }
 
