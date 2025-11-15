@@ -23,6 +23,7 @@
         <conv:RecentTabToIndexConverter x:Key="RecentTabToIndexConverter" />
         <conv:PinnedToStarGlyphConverter x:Key="PinnedToStarGlyphConverter" />
         <conv:PinnedToColorConverter x:Key="PinnedToColorConverter" />
+        <conv:QuickAccessFolderToBooleanConverter x:Key="QuickAccessFolderToBooleanConverter" />
         
         <!-- CollectionViewSource for grouped Recent Files -->
         <CollectionViewSource x:Key="GroupedRecentFiles" Source="{Binding RecentFiles}">

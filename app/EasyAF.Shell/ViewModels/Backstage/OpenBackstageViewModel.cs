@@ -257,8 +257,18 @@ public class OpenBackstageViewModel : BindableBase
     private void ExecuteSelectQuickAccessFolder(QuickAccessFolder folder)
     {
         if (folder == null) return;
+        
+        // Clear previous selection
+        if (SelectedQuickAccessFolder != null)
+        {
+            SelectedQuickAccessFolder.IsSelected = false;
+        }
+        
         Mode = OpenBackstageMode.QuickAccessFolder;
         SelectedQuickAccessFolder = folder;
+        
+        // Set new selection
+        folder.IsSelected = true;
         
         // Set the current browse path and load browser entries
         CurrentBrowsePath = folder.FolderPath;
