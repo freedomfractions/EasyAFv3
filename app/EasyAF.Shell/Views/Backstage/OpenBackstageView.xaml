@@ -102,8 +102,7 @@
                                         <MenuItem Header="Remove from Quick Access"
                                                   Command="{Binding DataContext.RemoveFromQuickAccessCommand, 
                                                             RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                  CommandParameter="{Binding PlacementTarget.DataContext, 
-                                                            RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+                                                  CommandParameter="{Binding}">
                                             <MenuItem.Icon>
                                                 <TextBlock Text="&#xE738;" FontFamily="Segoe MDL2 Assets"/>
                                             </MenuItem.Icon>
