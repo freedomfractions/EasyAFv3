@@ -96,32 +96,35 @@
                 <ItemsControl ItemsSource="{Binding QuickAccessFolders}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <RadioButton GroupName="NavMode"
-                                         Style="{StaticResource NavigationRadioButtonStyle}"
-                                         Command="{Binding DataContext.SelectQuickAccessFolderCommand, 
-                                                   RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                         CommandParameter="{Binding}">
-                                <RadioButton.ContextMenu>
+                            <Grid>
+                                <Grid.ContextMenu>
                                     <ContextMenu>
                                         <MenuItem Header="Remove from Quick Access"
                                                   Command="{Binding DataContext.RemoveFromQuickAccessCommand, 
                                                             RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                  CommandParameter="{Binding}">
+                                                  CommandParameter="{Binding PlacementTarget.DataContext, 
+                                                            RelativeSource={RelativeSource AncestorType=ContextMenu}}">
                                             <MenuItem.Icon>
                                                 <TextBlock Text="&#xE738;" FontFamily="Segoe MDL2 Assets"/>
                                             </MenuItem.Icon>
                                         </MenuItem>
                                     </ContextMenu>
-                                </RadioButton.ContextMenu>
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="{Binding IconGlyph}" 
-                                               FontFamily="Segoe MDL2 Assets" 
-                                               FontSize="14"
-                                                Margin="0,0,8,0" 
-                                               VerticalAlignment="Center"/>
-                                    <TextBlock Text="{Binding FolderName}" VerticalAlignment="Center"/>
-                                </StackPanel>
-                            </RadioButton>
+                                </Grid.ContextMenu>
+                                <RadioButton GroupName="NavMode"
+                                             Style="{StaticResource NavigationRadioButtonStyle}"
+                                             Command="{Binding DataContext.SelectQuickAccessFolderCommand, 
+                                                       RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                             CommandParameter="{Binding}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding IconGlyph}" 
+                                                   FontFamily="Segoe MDL2 Assets" 
+                                                   FontSize="14"
+                                                    Margin="0,0,8,0" 
+                                                   VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding FolderName}" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </RadioButton>
+                            </Grid>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
