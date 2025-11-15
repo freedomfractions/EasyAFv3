@@ -101,6 +101,18 @@
                                          Command="{Binding DataContext.SelectQuickAccessFolderCommand, 
                                                    RelativeSource={RelativeSource AncestorType=UserControl}}"
                                          CommandParameter="{Binding}">
+                                <RadioButton.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="Remove from Quick Access"
+                                                  Command="{Binding DataContext.RemoveFromQuickAccessCommand, 
+                                                            RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                  CommandParameter="{Binding}">
+                                            <MenuItem.Icon>
+                                                <TextBlock Text="&#xE738;" FontFamily="Segoe MDL2 Assets"/>
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                    </ContextMenu>
+                                </RadioButton.ContextMenu>
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="{Binding IconGlyph}" 
                                                FontFamily="Segoe MDL2 Assets" 
@@ -115,7 +127,7 @@
                 </ItemsControl>
 
                 <!-- Empty state (when no Quick Access folders) -->
-                <TextBlock Text="No folders pinned"
+                <TextBlock Text="(No Quick Access Locations)"
                            Foreground="{DynamicResource TextTertiaryBrush}"
                            FontSize="11"
                            FontStyle="Italic"
@@ -350,7 +362,16 @@
                                                                             <TextBlock Text="&#xE840;" FontFamily="Segoe MDL2 Assets"/>
                                                                         </MenuItem.Icon>
                                                                     </MenuItem>
-                                                                    <MenuItem Header="Remove from list" 
+                                                                    <MenuItem Header="Add folder to Quick Access" 
+                                                                              Command="{Binding PlacementTarget.DataContext.AddToQuickAccessCommand, 
+                                                                                        RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                                              CommandParameter="{Binding PlacementTarget.SelectedItem.DirectoryPath, 
+                                                                                                 RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+                                                                        <MenuItem.Icon>
+                                                                            <TextBlock Text="&#xE710;" FontFamily="Segoe MDL2 Assets"/>
+                                                                        </MenuItem.Icon>
+                                                                    </MenuItem>
+                                                                    <MenuItem Header="Remove from list"
                                                                               Command="{Binding PlacementTarget.DataContext.RemoveFromListCommand, 
                                                                                         RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                                                               CommandParameter="{Binding PlacementTarget.SelectedItem, 
@@ -500,6 +521,15 @@
                                                                         </MenuItem.Icon>
                                                                     </MenuItem>
                                                                     <Separator/>
+                                                                    <MenuItem Header="Add to Quick Access" 
+                                                                              Command="{Binding PlacementTarget.DataContext.AddToQuickAccessCommand, 
+                                                                                        RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                                              CommandParameter="{Binding PlacementTarget.SelectedItem.FolderPath, 
+                                                                                                 RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+                                                                        <MenuItem.Icon>
+                                                                            <TextBlock Text="&#xE710;" FontFamily="Segoe MDL2 Assets"/>
+                                                                        </MenuItem.Icon>
+                                                                    </MenuItem>
                                                                     <MenuItem Header="Remove from list" 
                                                                               Command="{Binding PlacementTarget.DataContext.RemoveFolderFromListCommand, 
                                                                                         RelativeSource={RelativeSource AncestorType=ContextMenu}}"
@@ -629,6 +659,16 @@
                                                                                          RelativeSource={RelativeSource AncestorType=ContextMenu}}">
                                                                 <MenuItem.Icon>
                                                                     <TextBlock Text="&#xE8C8;" FontFamily="Segoe MDL2 Assets"/>
+                                                                </MenuItem.Icon>
+                                                            </MenuItem>
+                                                            <Separator/>
+                                                            <MenuItem Header="Add folder to Quick Access" 
+                                                                      Command="{Binding PlacementTarget.DataContext.AddToQuickAccessCommand, 
+                                                                                RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                                      CommandParameter="{Binding PlacementTarget.SelectedItem.DirectoryPath, 
+                                                                                         RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+                                                                <MenuItem.Icon>
+                                                                    <TextBlock Text="&#xE710;" FontFamily="Segoe MDL2 Assets"/>
                                                                 </MenuItem.Icon>
                                                             </MenuItem>
                                                         </ContextMenu>

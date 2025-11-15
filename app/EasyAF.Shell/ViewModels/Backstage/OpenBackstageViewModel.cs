@@ -163,16 +163,20 @@ public class OpenBackstageViewModel : BindableBase
     public DelegateCommand<FolderBrowserEntry> CopyBrowserPathCommand { get; }
     
     // CROSS-MODULE EDIT: 2025-01-15 Option B Polish
-    // Modified for: Add "Show in Explorer" command for Recent Files
-    // Related modules: None
-    // Rollback instructions: Remove OpenFileLocationCommand
+    // Modified for: Wire OpenFileLocationCommand to ExecuteOpenFileLocation
+    // Rollback instructions: Remove line below
     public DelegateCommand<RecentFileEntry> OpenFileLocationCommand { get; }
 
     // CROSS-MODULE EDIT: 2025-01-15 Option B Polish (2/2)
-    // Modified for: Add Ctrl+F keyboard shortcut to focus search box
-    // Related modules: None
-    // Rollback instructions: Remove FocusSearchCommand
+    // Modified for: Wire FocusSearchCommand to raise event for view
+    // Rollback instructions: Remove line below
     public DelegateCommand FocusSearchCommand { get; }
+    
+    // CROSS-MODULE EDIT: 2025-01-15 Quick Access Enhancement
+    // Modified for: Wire Quick Access add/remove commands
+    // Rollback instructions: Remove lines below
+    public DelegateCommand<string> AddToQuickAccessCommand { get; }
+    public DelegateCommand<QuickAccessFolder> RemoveFromQuickAccessCommand { get; }
 
     /// <summary>
     /// Event raised when a file is selected (via Browse, double-click, etc.)
@@ -225,6 +229,8 @@ public class OpenBackstageViewModel : BindableBase
         CopyBrowserPathCommand = new DelegateCommand<FolderBrowserEntry>(ExecuteCopyBrowserPath);
         OpenFileLocationCommand = new DelegateCommand<RecentFileEntry>(ExecuteOpenFileLocation);
         FocusSearchCommand = new DelegateCommand(ExecuteFocusSearch);
+        AddToQuickAccessCommand = new DelegateCommand<string>(ExecuteAddToQuickAccess);
+        RemoveFromQuickAccessCommand = new DelegateCommand<QuickAccessFolder>(ExecuteRemoveFromQuickAccess);
 
         // Initialize Quick Access folders and load data
         LoadSampleQuickAccessFolders();
@@ -536,6 +542,71 @@ public class OpenBackstageViewModel : BindableBase
     {
         // Raise the FocusSearchRequested event
         FocusSearchRequested?.Invoke(this, EventArgs.Empty);
+    }
+    
+    private void ExecuteAddToQuickAccess(string? folderPath)
+    {
+        if (string.IsNullOrWhiteSpace(folderPath)) return;
+        
+        try
+        {
+            // Normalize the path
+            var fullPath = Path.GetFullPath(folderPath);
+            
+            // Check if already in Quick Access
+            if (QuickAccessFolders.Any(f => string.Equals(f.FolderPath, fullPath, StringComparison.OrdinalIgnoreCase)))
+            {
+                System.Diagnostics.Debug.WriteLine($"Folder already in Quick Access: {fullPath}");
+                return;
+            }
+            
+            // Verify directory exists
+            if (!Directory.Exists(fullPath))
+            {
+                System.Diagnostics.Debug.WriteLine($"Directory does not exist: {fullPath}");
+                return;
+            }
+            
+            // Add to collection
+            var folderName = Path.GetFileName(fullPath);
+            if (string.IsNullOrEmpty(folderName))
+            {
+                folderName = fullPath; // Use full path for root drives
+            }
+            
+            QuickAccessFolders.Add(new QuickAccessFolder
+            {
+                FolderName = folderName,
+                FolderPath = fullPath,
+                IconGlyph = "\uE8B7" // Folder icon
+            });
+            
+            // Save to settings
+            SaveQuickAccessFolders();
+            
+            System.Diagnostics.Debug.WriteLine($"Added to Quick Access: {fullPath}");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error adding to Quick Access: {ex.Message}");
+        }
+    }
+    
+    private void ExecuteRemoveFromQuickAccess(QuickAccessFolder? folder)
+    {
+        if (folder == null) return;
+        
+        try
+        {
+            QuickAccessFolders.Remove(folder);
+            SaveQuickAccessFolders();
+            
+            System.Diagnostics.Debug.WriteLine($"Removed from Quick Access: {folder.FolderPath}");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error removing from Quick Access: {ex.Message}");
+        }
     }
 
     #region Search Implementation
@@ -975,12 +1046,60 @@ public class OpenBackstageViewModel : BindableBase
         
         _settingsService.SetSetting("OpenBackstage.PinnedFiles", pinnedFiles);
     }
-
-    #endregion
-
-    #region Sample Data Loading
-
-    private void LoadSampleQuickAccessFolders()
+    
+    /// <summary>
+    /// Saves Quick Access folders to settings.
+    /// </summary>
+    private void SaveQuickAccessFolders()
+    {
+        var folders = QuickAccessFolders
+            .Select(f => f.FolderPath)
+            .ToList();
+        
+        _settingsService.SetSetting("OpenBackstage.QuickAccessFolders", folders);
+    }
+    
+    /// <summary>
+    /// Loads Quick Access folders from settings.
+    /// </summary>
+    private void LoadQuickAccessFolders()
+    {
+        var savedFolders = _settingsService.GetSetting<List<string>>("OpenBackstage.QuickAccessFolders", new List<string>());
+        
+        QuickAccessFolders.Clear();
+        
+        // If no saved folders, use defaults
+        if (savedFolders.Count == 0)
+        {
+            LoadDefaultQuickAccessFolders();
+            return;
+        }
+        
+        // Load saved folders
+        foreach (var folderPath in savedFolders)
+        {
+            if (Directory.Exists(folderPath))
+            {
+                var folderName = Path.GetFileName(folderPath);
+                if (string.IsNullOrEmpty(folderName))
+                {
+                    folderName = folderPath; // Use full path for root drives
+                }
+                
+                QuickAccessFolders.Add(new QuickAccessFolder
+                {
+                    FolderName = folderName,
+                    FolderPath = folderPath,
+                    IconGlyph = "\uE8B7"
+                });
+            }
+        }
+    }
+    
+    /// <summary>
+    /// Loads default Quick Access folders (Documents, Desktop, Downloads).
+    /// </summary>
+    private void LoadDefaultQuickAccessFolders()
     {
         // Use real paths that exist on the system
         var documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
@@ -1010,6 +1129,22 @@ public class OpenBackstageViewModel : BindableBase
                 IconGlyph = "\uE8B7"
             });
         }
+        
+        // Save defaults to settings
+        SaveQuickAccessFolders();
+    }
+
+    #endregion
+
+    #region Sample Data Loading
+
+    private void LoadSampleQuickAccessFolders()
+    {
+        // CROSS-MODULE EDIT: 2025-01-15 Quick Access Enhancement
+        // Modified for: Load Quick Access folders from settings instead of hardcoded
+        // Rollback instructions: Restore hardcoded Documents/Desktop/Downloads logic
+        
+        LoadQuickAccessFolders();
     }
 
     private void LoadSampleRecentFolders()
