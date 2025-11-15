@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using EasyAF.Shell.Models.Backstage;
@@ -16,6 +17,8 @@ public static class QuickAccessDragBehavior
     private static Point _dragStartPoint;
     private static bool _isDragging;
     private static QuickAccessFolder? _draggedItem;
+    private static InsertionAdorner? _insertionAdorner;
+    private static AdornerLayer? _adornerLayer;
 
     #region IsEnabled Attached Property
 
@@ -39,14 +42,18 @@ public static class QuickAccessDragBehavior
         {
             itemsControl.PreviewMouseLeftButtonDown += OnPreviewMouseLeftButtonDown;
             itemsControl.PreviewMouseMove += OnPreviewMouseMove;
+            itemsControl.DragOver += OnDragOver;
             itemsControl.Drop += OnDrop;
+            itemsControl.DragLeave += OnDragLeave;
             itemsControl.AllowDrop = true;
         }
         else
         {
             itemsControl.PreviewMouseLeftButtonDown -= OnPreviewMouseLeftButtonDown;
             itemsControl.PreviewMouseMove -= OnPreviewMouseMove;
+            itemsControl.DragOver -= OnDragOver;
             itemsControl.Drop -= OnDrop;
+            itemsControl.DragLeave -= OnDragLeave;
             itemsControl.AllowDrop = false;
         }
     }
@@ -86,11 +93,50 @@ public static class QuickAccessDragBehavior
 
             _isDragging = false;
             _draggedItem = null;
+            RemoveInsertionAdorner();
         }
+    }
+
+    private static void OnDragOver(object sender, DragEventArgs e)
+    {
+        if (!e.Data.GetDataPresent("QuickAccessFolder"))
+        {
+            RemoveInsertionAdorner();
+            return;
+        }
+
+        var itemsControl = sender as ItemsControl;
+        if (itemsControl == null)
+        {
+            RemoveInsertionAdorner();
+            return;
+        }
+
+        // Find the target item
+        var targetElement = GetItemAtPosition(itemsControl, e.GetPosition(itemsControl));
+        
+        if (targetElement != null)
+        {
+            ShowInsertionAdorner(targetElement, e.GetPosition(targetElement));
+        }
+        else
+        {
+            RemoveInsertionAdorner();
+        }
+
+        e.Effects = DragDropEffects.Move;
+        e.Handled = true;
+    }
+
+    private static void OnDragLeave(object sender, DragEventArgs e)
+    {
+        RemoveInsertionAdorner();
     }
 
     private static void OnDrop(object sender, DragEventArgs e)
     {
+        RemoveInsertionAdorner();
+
         if (!e.Data.GetDataPresent("QuickAccessFolder"))
             return;
 
@@ -127,6 +173,72 @@ public static class QuickAccessDragBehavior
         e.Handled = true;
     }
 
+    #region Insertion Adorner
+
+    private static void ShowInsertionAdorner(FrameworkElement targetElement, Point position)
+    {
+        // Remove old adorner if exists
+        RemoveInsertionAdorner();
+
+        // Get adorner layer
+        _adornerLayer = AdornerLayer.GetAdornerLayer(targetElement);
+        if (_adornerLayer == null)
+            return;
+
+        // Determine if we should insert above or below based on Y position
+        var insertAbove = position.Y < targetElement.ActualHeight / 2;
+
+        // Create and add new adorner
+        _insertionAdorner = new InsertionAdorner(targetElement, insertAbove);
+        _adornerLayer.Add(_insertionAdorner);
+    }
+
+    private static void RemoveInsertionAdorner()
+    {
+        if (_insertionAdorner != null && _adornerLayer != null)
+        {
+            _adornerLayer.Remove(_insertionAdorner);
+            _insertionAdorner = null;
+            _adornerLayer = null;
+        }
+    }
+
+    /// <summary>
+    /// Adorner that draws a horizontal insertion line above or below an element.
+    /// </summary>
+    private class InsertionAdorner : Adorner
+    {
+        private readonly bool _insertAbove;
+
+        public InsertionAdorner(UIElement adornedElement, bool insertAbove) : base(adornedElement)
+        {
+            _insertAbove = insertAbove;
+            IsHitTestVisible = false;
+        }
+
+        protected override void OnRender(DrawingContext drawingContext)
+        {
+            var adornedElement = AdornedElement as FrameworkElement;
+            if (adornedElement == null)
+                return;
+
+            // Get accent color from theme
+            var accentBrush = Application.Current.TryFindResource("AccentBrush") as Brush ?? Brushes.DodgerBlue;
+            var pen = new Pen(accentBrush, 2);
+
+            var width = adornedElement.ActualWidth;
+            var y = _insertAbove ? 0 : adornedElement.ActualHeight;
+
+            // Draw horizontal line
+            drawingContext.DrawLine(pen, new Point(0, y), new Point(width, y));
+
+            // Draw small circle at left end
+            drawingContext.DrawEllipse(accentBrush, pen, new Point(4, y), 4, 4);
+        }
+    }
+
+    #endregion
+
     #region Helper Methods
 
     private static T? FindParent<T>(DependencyObject child) where T : DependencyObject
@@ -138,7 +250,7 @@ public static class QuickAccessDragBehavior
             if (parentObject is T parent)
                 return parent;
 
-            parentObject = System.Windows.Media.VisualTreeHelper.GetParent(parentObject);
+            parentObject = VisualTreeHelper.GetParent(parentObject);
         }
 
         return null;
