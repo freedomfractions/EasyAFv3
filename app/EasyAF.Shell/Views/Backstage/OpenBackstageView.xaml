@@ -5,6 +5,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:conv="clr-namespace:EasyAF.Shell.Converters"
              xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+             xmlns:behaviors="clr-namespace:EasyAF.Shell.Behaviors"
              mc:Ignorable="d"
              d:DesignHeight="400" d:DesignWidth="700"
              Background="{DynamicResource PrimaryBackgroundBrush}"
@@ -88,8 +89,10 @@
                            Margin="10,8,10,6"/>
 
                 <!-- Quick Access Folders (data-bound) -->
-                <!-- TODO: Add drag & drop support for reordering Quick Access folders -->
-                <ItemsControl ItemsSource="{Binding QuickAccessFolders}">
+                <!-- Drag & Drop: Drag WITHIN Quick Access to reorder -->
+                <ItemsControl x:Name="QuickAccessItemsControl"
+                              ItemsSource="{Binding QuickAccessFolders}"
+                              behaviors:QuickAccessDragBehavior.IsEnabled="True">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <RadioButton GroupName="NavMode"
@@ -294,10 +297,12 @@
                                             <Setter.Value>
                                                 <TabControl SelectedIndex="{Binding RecentTab, Converter={StaticResource RecentTabToIndexConverter}}">
                                                     <TabItem Header="Files">
-                                                        <!-- TODO: Add drag & drop support for dragging files to Quick Access or external apps -->
+                                                        <!-- Drag & Drop: Drag files to Quick Access to add parent folder -->
                                                         <ListView Background="Transparent"
                                                                   BorderThickness="0"
-                                                                  ItemsSource="{Binding Source={StaticResource GroupedRecentFiles}}">
+                                                                  ItemsSource="{Binding Source={StaticResource GroupedRecentFiles}}"
+                                                                  behaviors:DragToQuickAccessBehavior.IsEnabled="True"
+                                                                  behaviors:DragToQuickAccessBehavior.QuickAccessTarget="{Binding ElementName=QuickAccessItemsControl}">
                                                             <!-- Keyboard shortcuts for Recent Files ListView -->
                                                             <ListView.InputBindings>
                                                                 <!-- Enter: Open selected file -->
@@ -485,9 +490,12 @@
                                                         </ListView>
                                                     </TabItem>
                                                     <TabItem Header="Folders">
+                                                        <!-- Drag & Drop: Drag folders to Quick Access to add them -->
                                                         <ListView Background="Transparent"
                                                                   BorderThickness="0"
-                                                                  ItemsSource="{Binding RecentFolders}">
+                                                                  ItemsSource="{Binding RecentFolders}"
+                                                                  behaviors:DragToQuickAccessBehavior.IsEnabled="True"
+                                                                  behaviors:DragToQuickAccessBehavior.QuickAccessTarget="{Binding ElementName=QuickAccessItemsControl}">
                                                             <!-- Keyboard shortcuts for Recent Folders ListView -->
                                                             <ListView.InputBindings>
                                                                 <!-- Enter: Open selected folder -->
@@ -630,9 +638,12 @@
                                     <DataTrigger Binding="{Binding Mode}" Value="QuickAccessFolder">
                                         <Setter Property="Content">
                                             <Setter.Value>
+                                                <!-- Drag & Drop: Drag files/folders to Quick Access to add them -->
                                                 <ListView Background="Transparent"
                                                           BorderThickness="0"
-                                                          ItemsSource="{Binding BrowserEntries}">
+                                                          ItemsSource="{Binding BrowserEntries}"
+                                                          behaviors:DragToQuickAccessBehavior.IsEnabled="True"
+                                                          behaviors:DragToQuickAccessBehavior.QuickAccessTarget="{Binding ElementName=QuickAccessItemsControl}">
                                                     <!-- Keyboard shortcuts for Browser ListView -->
                                                     <ListView.InputBindings>
                                                         <!-- Enter: Open selected entry (file or folder) -->

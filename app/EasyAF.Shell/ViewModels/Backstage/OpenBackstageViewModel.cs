@@ -1063,7 +1063,7 @@ public class OpenBackstageViewModel : BindableBase
     /// <summary>
     /// Saves Quick Access folders to settings.
     /// </summary>
-    private void SaveQuickAccessFolders()
+    public void SaveQuickAccessFolders()
     {
         var folders = QuickAccessFolders
             .Select(f => f.FolderPath)
