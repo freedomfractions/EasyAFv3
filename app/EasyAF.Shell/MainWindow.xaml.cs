@@ -1,4 +1,5 @@
 ﻿using Fluent;
+using EasyAF.Shell.Services;
 
 namespace EasyAF.Shell;
 
@@ -7,8 +8,18 @@ namespace EasyAF.Shell;
 /// </summary>
 public partial class MainWindow : RibbonWindow
 {
-    public MainWindow()
+    public MainWindow(IBackstageService backstageService)
     {
         InitializeComponent();
+        
+        // Wire up backstage close request handling
+        backstageService.CloseRequested += (sender, e) =>
+        {
+            // Close the backstage menu (Fluent.Ribbon uses Backstage control)
+            if (MainRibbon?.Menu is Backstage backstage)
+            {
+                backstage.IsOpen = false;
+            }
+        };
     }
 }

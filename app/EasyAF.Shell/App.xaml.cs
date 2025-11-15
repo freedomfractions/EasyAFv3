@@ -125,6 +125,12 @@ public partial class App : PrismApplication
         containerRegistry.RegisterSingleton<IHelpCatalog, HelpCatalog>();
         containerRegistry.RegisterSingleton<IHelpContentLoader, HelpContentLoader>();
 
+        // CROSS-MODULE EDIT: 2025-01-15 Option A Integration Step 1
+        // Modified for: Register BackstageService to handle backstage close requests
+        // Related modules: Shell (BackstageService, OpenBackstageViewModel, MainWindow)
+        // Rollback instructions: Remove BackstageService registration line below
+        containerRegistry.RegisterSingleton<IBackstageService, BackstageService>();
+
         // Register shared log entries collection
         containerRegistry.RegisterInstance(_logEntries);
         

@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using EasyAF.Shell.Models.Backstage;
 using EasyAF.Shell.Helpers;
+using EasyAF.Shell.Services;
 using EasyAF.Core.Contracts;
 using Microsoft.Win32;
 
@@ -24,6 +25,7 @@ public class OpenBackstageViewModel : BindableBase
 {
     private readonly IModuleLoader? _moduleLoader;
     private readonly ISettingsService _settingsService;
+    private readonly IBackstageService? _backstageService;
     private CancellationTokenSource? _searchCancellation;
     private Timer? _searchDebounceTimer;
 
@@ -171,10 +173,11 @@ public class OpenBackstageViewModel : BindableBase
     /// </summary>
     public event Action<string>? FolderSelected;
 
-    public OpenBackstageViewModel(IModuleLoader? moduleLoader, ISettingsService settingsService)
+    public OpenBackstageViewModel(IModuleLoader? moduleLoader, ISettingsService settingsService, IBackstageService? backstageService = null)
     {
         _moduleLoader = moduleLoader;
         _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
+        _backstageService = backstageService;
 
         QuickAccessFolders = new ObservableCollection<QuickAccessFolder>();
         _allRecentFiles = new ObservableCollection<RecentFileEntry>();
@@ -253,45 +256,33 @@ public class OpenBackstageViewModel : BindableBase
     {
         if (file == null) return;
         
-        // Visual feedback for demonstration (remove when integrated with real file system)
-        System.Windows.MessageBox.Show(
-            $"Would open file:\n\n{file.FilePath}\n\nThis event will be handled by MainWindowViewModel to:\n• Close backstage\n• Load file via DocumentManager\n• Update recent files list",
-            "File Double-Click (Demo)",
-            System.Windows.MessageBoxButton.OK,
-            System.Windows.MessageBoxImage.Information);
-        
         // Fire the event for parent integration
         FileSelected?.Invoke(file.FilePath);
+        
+        // Request backstage close
+        _backstageService?.RequestClose();
     }
 
     private void ExecuteOpenFolder(RecentFolderEntry folder)
     {
         if (folder == null) return;
         
-        // Visual feedback for demonstration (remove when integrated with real file system)
-        System.Windows.MessageBox.Show(
-            $"Would open folder:\n\n{folder.FolderPath}\n\nThis event will behandel by MainWindowViewModel to:\n• Navigate to folder in Quick Access view\n• Or open in file explorer",
-            "Folder Double-Click (Demo)",
-            System.Windows.MessageBoxButton.OK,
-            System.Windows.MessageBoxImage.Information);
-        
         // Fire the event for parent integration
         FolderSelected?.Invoke(folder.FolderPath);
+        
+        // Request backstage close
+        _backstageService?.RequestClose();
     }
 
     private void ExecuteOpenFolderFile(FolderFileEntry file)
     {
         if (file == null) return;
         
-        // Visual feedback for demonstration (remove when integrated with real file system)
-        System.Windows.MessageBox.Show(
-            $"Would open file:\n\n{file.FilePath}\n\nThis event will be handled by MainWindowViewModel to:\n• Close backstage\n• Load file via DocumentManager\n• Update recent files list",
-            "Folder File Double-Click (Demo)",
-            System.Windows.MessageBoxButton.OK,
-            System.Windows.MessageBoxImage.Information);
-        
         // Fire the event for parent integration
         FileSelected?.Invoke(file.FilePath);
+        
+        // Request backstage close
+        _backstageService?.RequestClose();
     }
 
     private void ExecuteOpenBrowserEntry(FolderBrowserEntry entry)
@@ -309,6 +300,9 @@ public class OpenBackstageViewModel : BindableBase
         {
             // Open the file
             FileSelected?.Invoke(entry.FullPath);
+            
+            // Request backstage close
+            _backstageService?.RequestClose();
         }
     }
 
@@ -361,6 +355,9 @@ public class OpenBackstageViewModel : BindableBase
 
             // Raise event for parent to handle (close backstage, open file)
             FileSelected?.Invoke(dialog.FileName);
+            
+            // Request backstage close
+            _backstageService?.RequestClose();
         }
     }
 
