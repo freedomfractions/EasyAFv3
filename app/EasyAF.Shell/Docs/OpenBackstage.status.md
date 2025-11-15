@@ -3,7 +3,41 @@
 **Date**: 2025-01-15  
 **Branch**: `backstage`  
 **Total Commits**: 35+  
-**Status**: ? **VISUALLY COMPLETE** (Integration pending)
+**Status**: ? **PRODUCTION READY** (Drag & Drop implementation in progress)
+
+---
+
+## ?? **SAFE POINT MARKER**
+
+**Commit**: `569d616` - "feat(shell): Smart selection when removing current Quick Access folder"  
+**Date**: 2025-11-14 22:04:23  
+**Status**: ? **VERIFIED WORKING** - All core functionality tested and confirmed  
+
+**What works at this commit:**
+- ? Quick Access folders click to navigate
+- ? Context menu "Add to Quick Access" works
+- ? Context menu "Remove from Quick Access" works
+- ? Smart selection on removal (auto-selects next/previous/Recent)
+- ? All keyboard shortcuts functional
+- ? Search, grouping, pinning all working
+- ? Theme switching works
+- ? Settings persistence works
+
+**Rollback command:** `git reset --hard 569d616`
+
+---
+
+## ?? **Current Work: Drag & Drop Implementation**
+
+**Goal**: Implement Steps 4 & 5 from Option B Polish
+- **Step 4**: Drag files/folders FROM Recent/Browser TO Quick Access to add
+- **Step 5**: Drag WITHIN Quick Access to reorder folders
+
+**Previous attempts**: 
+- Commits `6673314` and `d9690cd` - Reverted due to broken Quick Access navigation
+- Issue: Event handlers on RadioButtons in DataTemplates caused command binding failures
+
+**Next approach**: TBD - will implement properly from safe point
 
 ---
 
