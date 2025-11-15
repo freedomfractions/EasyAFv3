@@ -586,10 +586,33 @@ public class OpenBackstageViewModel : BindableBase
         
         try
         {
+            // Remember the index and selection state before removal
+            var currentIndex = QuickAccessFolders.IndexOf(folder);
+            var wasCurrentlySelected = folder == SelectedQuickAccessFolder;
+            
+            // Remove the folder
             QuickAccessFolders.Remove(folder);
             SaveQuickAccessFolders();
             
             System.Diagnostics.Debug.WriteLine($"Removed from Quick Access: {folder.FolderPath}");
+            
+            // If we removed the currently selected folder, auto-select next/previous
+            if (wasCurrentlySelected)
+            {
+                if (QuickAccessFolders.Count > 0)
+                {
+                    // Select next item (same index), or previous if we removed the last item
+                    var newIndex = Math.Min(currentIndex, QuickAccessFolders.Count - 1);
+                    ExecuteSelectQuickAccessFolder(QuickAccessFolders[newIndex]);
+                    System.Diagnostics.Debug.WriteLine($"Auto-selected Quick Access folder at index {newIndex}: {QuickAccessFolders[newIndex].FolderPath}");
+                }
+                else
+                {
+                    // No Quick Access folders left - switch to Recent Files
+                    ExecuteSelectRecent();
+                    System.Diagnostics.Debug.WriteLine("No Quick Access folders remaining - switched to Recent Files");
+                }
+            }
         }
         catch (Exception ex)
         {
