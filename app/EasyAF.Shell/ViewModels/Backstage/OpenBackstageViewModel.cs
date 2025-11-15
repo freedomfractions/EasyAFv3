@@ -553,17 +553,29 @@ public class OpenBackstageViewModel : BindableBase
             // Normalize the path
             var fullPath = Path.GetFullPath(folderPath);
             
+            // If it's a file, get its directory
+            if (File.Exists(fullPath))
+            {
+                var dir = Path.GetDirectoryName(fullPath);
+                if (string.IsNullOrWhiteSpace(dir))
+                {
+                    System.Diagnostics.Debug.WriteLine($"Cannot extract directory from file path: {fullPath}");
+                    return;
+                }
+                fullPath = dir;
+            }
+            
+            // Verify it's a directory
+            if (!Directory.Exists(fullPath))
+            {
+                System.Diagnostics.Debug.WriteLine($"Directory does not exist: {fullPath}");
+                return;
+            }
+            
             // Check if already in Quick Access
             if (QuickAccessFolders.Any(f => string.Equals(f.FolderPath, fullPath, StringComparison.OrdinalIgnoreCase)))
             {
                 System.Diagnostics.Debug.WriteLine($"Folder already in Quick Access: {fullPath}");
-                return;
-            }
-            
-            // Verify directory exists
-            if (!Directory.Exists(fullPath))
-            {
-                System.Diagnostics.Debug.WriteLine($"Directory does not exist: {fullPath}");
                 return;
             }
             

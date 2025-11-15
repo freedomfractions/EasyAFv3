@@ -665,7 +665,7 @@
                                                             <MenuItem Header="Add folder to Quick Access" 
                                                                       Command="{Binding PlacementTarget.DataContext.AddToQuickAccessCommand, 
                                                                                 RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                                                                      CommandParameter="{Binding PlacementTarget.SelectedItem.DirectoryPath, 
+                                                                      CommandParameter="{Binding PlacementTarget.SelectedItem.FullPath, 
                                                                                          RelativeSource={RelativeSource AncestorType=ContextMenu}}">
                                                                 <MenuItem.Icon>
                                                                     <TextBlock Text="&#xE710;" FontFamily="Segoe MDL2 Assets"/>
