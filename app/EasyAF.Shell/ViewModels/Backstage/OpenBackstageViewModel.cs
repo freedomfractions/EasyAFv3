@@ -163,7 +163,7 @@ public class OpenBackstageViewModel : BindableBase
     public DelegateCommand<FolderBrowserEntry> CopyBrowserPathCommand { get; }
     public DelegateCommand<RecentFileEntry> OpenFileLocationCommand { get; }
     public DelegateCommand FocusSearchCommand { get; }
-    public DelegateCommand<string> AddToQuickAccessCommand { get; }
+    public DelegateCommand<object> AddToQuickAccessCommand { get; }
     public DelegateCommand<QuickAccessFolder> RemoveFromQuickAccessCommand { get; }
 
     /// <summary>
@@ -217,7 +217,7 @@ public class OpenBackstageViewModel : BindableBase
         CopyBrowserPathCommand = new DelegateCommand<FolderBrowserEntry>(ExecuteCopyBrowserPath);
         OpenFileLocationCommand = new DelegateCommand<RecentFileEntry>(ExecuteOpenFileLocation);
         FocusSearchCommand = new DelegateCommand(ExecuteFocusSearch);
-        AddToQuickAccessCommand = new DelegateCommand<string>(ExecuteAddToQuickAccess);
+        AddToQuickAccessCommand = new DelegateCommand<object>(ExecuteAddToQuickAccess);
         RemoveFromQuickAccessCommand = new DelegateCommand<QuickAccessFolder>(ExecuteRemoveFromQuickAccess);
 
         // Initialize Quick Access folders and load data
@@ -520,8 +520,26 @@ public class OpenBackstageViewModel : BindableBase
         FocusSearchRequested?.Invoke(this, EventArgs.Empty);
     }
     
-    private void ExecuteAddToQuickAccess(string? folderPath)
+    private void ExecuteAddToQuickAccess(object? parameter)
     {
+        string? folderPath = null;
+        int insertionIndex = -1; // -1 means append to end
+        
+        // Handle both string (from context menu) and tuple (from drag & drop)
+        if (parameter is string str)
+        {
+            folderPath = str;
+        }
+        else if (parameter is ValueTuple<string, int> tuple)
+        {
+            (folderPath, insertionIndex) = tuple;
+        }
+        else
+        {
+            System.Diagnostics.Debug.WriteLine($"Invalid parameter type for AddToQuickAccess: {parameter?.GetType()}");
+            return;
+        }
+        
         if (string.IsNullOrWhiteSpace(folderPath)) return;
         
         try
@@ -555,24 +573,33 @@ public class OpenBackstageViewModel : BindableBase
                 return;
             }
             
-            // Add to collection
+            // Create the folder entry
             var folderName = Path.GetFileName(fullPath);
             if (string.IsNullOrEmpty(folderName))
             {
                 folderName = fullPath; // Use full path for root drives
             }
             
-            QuickAccessFolders.Add(new QuickAccessFolder
+            var newFolder = new QuickAccessFolder
             {
                 FolderName = folderName,
                 FolderPath = fullPath,
                 IconGlyph = "\uE8B7" // Folder icon
-            });
+            };
             
-            // TODO: Implement drag & drop to add folders to Quick Access
+            // Insert at specified index or append to end
+            if (insertionIndex >= 0 && insertionIndex < QuickAccessFolders.Count)
+            {
+                QuickAccessFolders.Insert(insertionIndex, newFolder);
+                System.Diagnostics.Debug.WriteLine($"Inserted to Quick Access at index {insertionIndex}: {fullPath}");
+            }
+            else
+            {
+                QuickAccessFolders.Add(newFolder);
+                System.Diagnostics.Debug.WriteLine($"Added to Quick Access (end of list): {fullPath}");
+            }
+            
             SaveQuickAccessFolders();
-            
-            System.Diagnostics.Debug.WriteLine($"Added to Quick Access: {fullPath}");
         }
         catch (Exception ex)
         {

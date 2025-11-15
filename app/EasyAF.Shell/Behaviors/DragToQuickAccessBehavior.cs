@@ -161,26 +161,16 @@ public static class DragToQuickAccessBehavior
             return;
         }
 
-        // Find the target item and position
-        var position = e.GetPosition(itemsControl);
-        var targetElement = GetItemAtPosition(itemsControl, position);
+        // Find the target item (RadioButton container, not inner TextBlock)
+        var targetElement = GetRadioButtonAtPosition(itemsControl, e.GetPosition(itemsControl));
         
         if (targetElement != null)
         {
             // Determine if we should insert above or below based on Y position
-            var relativePosition = e.GetPosition(targetElement);
-            var insertAbove = relativePosition.Y < targetElement.ActualHeight / 2;
+            var position = e.GetPosition(targetElement);
+            var insertAbove = position.Y < targetElement.ActualHeight / 2;
             
-            ShowInsertionAdorner(targetElement, insertAbove, position);
-        }
-        else if (itemsControl.Items.Count > 0)
-        {
-            // If not over an item but over the control, show at bottom of last item
-            var lastItem = GetLastItemContainer(itemsControl);
-            if (lastItem != null)
-            {
-                ShowInsertionAdorner(lastItem, false, position);
-            }
+            ShowInsertionAdorner(targetElement, insertAbove);
         }
         else
         {
@@ -198,52 +188,36 @@ public static class DragToQuickAccessBehavior
 
     private static void OnTargetDrop(object sender, DragEventArgs e)
     {
+        var itemsControl = sender as ItemsControl;
+        var targetElement = _insertionAdorner?.AdornedElement as FrameworkElement;
+        var insertAbove = _insertionAdorner?._insertAbove ?? false;
+        
         RemoveInsertionAdorner();
 
         if (!e.Data.GetDataPresent("FolderPath"))
             return;
 
-        var itemsControl = sender as ItemsControl;
         if (itemsControl?.DataContext is not ViewModels.Backstage.OpenBackstageViewModel vm)
-            return;
-        
-        if (itemsControl.ItemsSource is not System.Collections.ObjectModel.ObservableCollection<QuickAccessFolder> collection)
             return;
 
         var folderPath = e.Data.GetData("FolderPath") as string;
         if (string.IsNullOrEmpty(folderPath))
             return;
 
-        // Find insertion index based on drop position
-        var position = e.GetPosition(itemsControl);
-        var targetElement = GetItemAtPosition(itemsControl, position);
-        int insertIndex = collection.Count; // Default to end
-
+        // Calculate insertion index based on drop position
+        int insertionIndex = -1;
+        
         if (targetElement?.DataContext is QuickAccessFolder targetFolder)
         {
-            var relativePosition = e.GetPosition(targetElement);
-            var insertAbove = relativePosition.Y < targetElement.ActualHeight / 2;
+            insertionIndex = vm.QuickAccessFolders.IndexOf(targetFolder);
             
-            insertIndex = collection.IndexOf(targetFolder);
+            // If inserting below, add 1 to the index
             if (!insertAbove)
-            {
-                insertIndex++; // Insert after the target
-            }
+                insertionIndex++;
         }
 
-        // Add the folder at the determined position
-        vm.AddToQuickAccessCommand.Execute(folderPath);
-        
-        // If it was added, move it to the correct position
-        if (collection.Count > 0)
-        {
-            var addedFolder = collection[collection.Count - 1]; // Just added at end
-            if (insertIndex < collection.Count - 1)
-            {
-                collection.Move(collection.Count - 1, insertIndex);
-                vm.SaveQuickAccessFolders();
-            }
-        }
+        // Add the folder at the calculated position
+        vm.AddToQuickAccessCommand.Execute((folderPath, insertionIndex));
 
         e.Handled = true;
     }
@@ -252,23 +226,18 @@ public static class DragToQuickAccessBehavior
 
     #region Insertion Adorner
 
-    private static void ShowInsertionAdorner(FrameworkElement targetElement, bool insertAbove, Point dropPosition)
+    private static void ShowInsertionAdorner(FrameworkElement targetElement, bool insertAbove)
     {
         // Remove old adorner if exists
         RemoveInsertionAdorner();
 
-        // Find the RadioButton container (not just the content)
-        var radioButton = FindRadioButtonContainer(targetElement);
-        if (radioButton == null)
-            return;
-
         // Get adorner layer
-        _adornerLayer = AdornerLayer.GetAdornerLayer(radioButton);
+        _adornerLayer = AdornerLayer.GetAdornerLayer(targetElement);
         if (_adornerLayer == null)
             return;
 
         // Create and add new adorner
-        _insertionAdorner = new InsertionAdorner(radioButton, insertAbove);
+        _insertionAdorner = new InsertionAdorner(targetElement, insertAbove);
         _adornerLayer.Add(_insertionAdorner);
     }
 
@@ -287,7 +256,7 @@ public static class DragToQuickAccessBehavior
     /// </summary>
     private class InsertionAdorner : Adorner
     {
-        private readonly bool _insertAbove;
+        public readonly bool _insertAbove;
 
         public InsertionAdorner(UIElement adornedElement, bool insertAbove) : base(adornedElement)
         {
@@ -344,8 +313,8 @@ public static class DragToQuickAccessBehavior
         var element = hitTestResult.VisualHit as DependencyObject;
         while (element != null)
         {
-            if (element is RadioButton rb && rb.DataContext is QuickAccessFolder)
-                return rb;
+            if (element is FrameworkElement fe && fe.DataContext is QuickAccessFolder)
+                return fe;
 
             element = VisualTreeHelper.GetParent(element);
         }
@@ -353,8 +322,17 @@ public static class DragToQuickAccessBehavior
         return null;
     }
 
-    private static RadioButton? FindRadioButtonContainer(DependencyObject element)
+    /// <summary>
+    /// Gets the RadioButton container at the specified position.
+    /// This ensures we attach the adorner to the entire RadioButton, not just the TextBlock inside.
+    /// </summary>
+    private static RadioButton? GetRadioButtonAtPosition(ItemsControl itemsControl, Point position)
     {
+        var hitTestResult = VisualTreeHelper.HitTest(itemsControl, position);
+        if (hitTestResult == null)
+            return null;
+
+        var element = hitTestResult.VisualHit as DependencyObject;
         while (element != null)
         {
             if (element is RadioButton rb && rb.DataContext is QuickAccessFolder)
@@ -364,17 +342,6 @@ public static class DragToQuickAccessBehavior
         }
 
         return null;
-    }
-
-    private static FrameworkElement? GetLastItemContainer(ItemsControl itemsControl)
-    {
-        if (itemsControl.Items.Count == 0)
-            return null;
-
-        var lastItem = itemsControl.Items[itemsControl.Items.Count - 1];
-        var container = itemsControl.ItemContainerGenerator.ContainerFromItem(lastItem) as FrameworkElement;
-        
-        return container;
     }
 
     #endregion
