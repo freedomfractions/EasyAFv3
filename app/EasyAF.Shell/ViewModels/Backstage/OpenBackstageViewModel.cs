@@ -26,6 +26,7 @@ public class OpenBackstageViewModel : BindableBase
     private readonly IModuleLoader? _moduleLoader;
     private readonly ISettingsService _settingsService;
     private readonly IBackstageService? _backstageService;
+    private readonly IRecentFilesService _recentFilesService;
     private CancellationTokenSource? _searchCancellation;
     private Timer? _searchDebounceTimer;
 
@@ -173,10 +174,11 @@ public class OpenBackstageViewModel : BindableBase
     /// </summary>
     public event Action<string>? FolderSelected;
 
-    public OpenBackstageViewModel(IModuleLoader? moduleLoader, ISettingsService settingsService, IBackstageService? backstageService = null)
+    public OpenBackstageViewModel(IModuleLoader? moduleLoader, ISettingsService settingsService, IRecentFilesService recentFilesService, IBackstageService? backstageService = null)
     {
         _moduleLoader = moduleLoader;
         _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
+        _recentFilesService = recentFilesService ?? throw new ArgumentNullException(nameof(recentFilesService));
         _backstageService = backstageService;
 
         QuickAccessFolders = new ObservableCollection<QuickAccessFolder>();
@@ -204,10 +206,20 @@ public class OpenBackstageViewModel : BindableBase
         RemoveFolderFromListCommand = new DelegateCommand<RecentFolderEntry>(ExecuteRemoveFolderFromListCommand);
         CopyBrowserPathCommand = new DelegateCommand<FolderBrowserEntry>(ExecuteCopyBrowserPath);
 
-        // Initialize with sample data
+        // Initialize Quick Access folders and load data
         LoadSampleQuickAccessFolders();
-        LoadSampleRecentFiles();
-        LoadSampleRecentFolders();
+        
+        // CROSS-MODULE EDIT: 2025-01-15 Option A Step 2
+        // Modified for: Connect to IRecentFilesService for real recent files data
+        // Related modules: Core (IRecentFilesService)
+        // Rollback instructions: Remove RecentFilesService integration, restore LoadSampleRecentFiles/Folders calls
+        
+        // Subscribe to RecentFiles changes to keep our list in sync
+        _recentFilesService.RecentFiles.CollectionChanged += OnRecentFilesChanged;
+        
+        // Initial load from service
+        LoadRecentFilesFromService();
+        LoadSampleRecentFolders(); // TODO: Replace with real folder tracking service
 
         // Initial filter (shows all)
         ApplySearchFilter();
@@ -249,7 +261,11 @@ public class OpenBackstageViewModel : BindableBase
             }
         });
         
-        // TODO: Persist to settings via ISettingsService
+        // CROSS-MODULE EDIT: 2025-01-15 Option A Step 4
+        // Modified for: Persist pin state to settings
+        // Related modules: Core (ISettingsService)
+        // Rollback instructions: Remove SavePinnedFiles call
+        SavePinnedFiles();
     }
 
     private void ExecuteOpenFile(RecentFileEntry file)
@@ -435,7 +451,17 @@ public class OpenBackstageViewModel : BindableBase
         _allRecentFiles.Remove(file);
         RecentFiles.Remove(file);
 
-        // TODO: Persist removal to settings via ISettingsService
+        // CROSS-MODULE EDIT: 2025-01-15 Option A Step 2
+        // Modified for: Remove from IRecentFilesService when user removes from list
+        // Related modules: Core (IRecentFilesService)
+        // Rollback instructions: Remove RemoveRecentFile call
+        _recentFilesService.RemoveRecentFile(file.FilePath);
+        
+        // Also remove from pinned files if it was pinned
+        if (file.IsPinned)
+        {
+            SavePinnedFiles();
+        }
     }
 
     private void ExecuteRemoveFolderFromListCommand(RecentFolderEntry folder)
@@ -829,6 +855,66 @@ public class OpenBackstageViewModel : BindableBase
 
     #endregion
 
+    #region Recent Files Service Integration
+
+    /// <summary>
+    /// Loads recent files from IRecentFilesService and converts them to RecentFileEntry objects.
+    /// </summary>
+    private void LoadRecentFilesFromService()
+    {
+        _allRecentFiles.Clear();
+        
+        foreach (var filePath in _recentFilesService.RecentFiles)
+        {
+            if (File.Exists(filePath))
+            {
+                var fileInfo = new FileInfo(filePath);
+                var entry = new RecentFileEntry
+                {
+                    FilePath = filePath,
+                    LastModified = fileInfo.LastWriteTime,
+                    IsPinned = IsPinnedFile(filePath) // Check if pinned in settings
+                };
+                _allRecentFiles.Add(entry);
+            }
+        }
+        
+        ApplySearchFilter();
+    }
+
+    /// <summary>
+    /// Handles changes to the RecentFiles collection from IRecentFilesService.
+    /// </summary>
+    private void OnRecentFilesChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    {
+        // Reload when the service's list changes
+        LoadRecentFilesFromService();
+    }
+
+    /// <summary>
+    /// Checks if a file path is pinned (stored in settings).
+    /// </summary>
+    private bool IsPinnedFile(string filePath)
+    {
+        var pinnedFiles = _settingsService.GetSetting<List<string>>("OpenBackstage.PinnedFiles", new List<string>());
+        return pinnedFiles.Contains(filePath, StringComparer.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Saves pinned file paths to settings.
+    /// </summary>
+    private void SavePinnedFiles()
+    {
+        var pinnedFiles = _allRecentFiles
+            .Where(f => f.IsPinned)
+            .Select(f => f.FilePath)
+            .ToList();
+        
+        _settingsService.SetSetting("OpenBackstage.PinnedFiles", pinnedFiles);
+    }
+
+    #endregion
+
     #region Sample Data Loading
 
     private void LoadSampleQuickAccessFolders()
@@ -861,87 +947,6 @@ public class OpenBackstageViewModel : BindableBase
                 IconGlyph = "\uE8B7"
             });
         }
-    }
-
-    private void LoadSampleRecentFiles()
-    {
-        var now = DateTime.Now;
-        
-        // Pinned files (2 items)
-        _allRecentFiles.Add(new RecentFileEntry
-        {
-            FilePath = @"C:\Users\Documents\Projects\Proposal_2024.docx",
-            LastModified = now.AddHours(-2),
-            IsPinned = true
-        });
-
-        _allRecentFiles.Add(new RecentFileEntry
-        {
-            FilePath = @"C:\Users\Downloads\Invoice_12345.pdf",
-            LastModified = now.AddDays(-2),
-            IsPinned = true
-        });
-
-        // Today (2 items)
-        _allRecentFiles.Add(new RecentFileEntry
-        {
-            FilePath = @"C:\Users\Documents\Reports\Q4_Analysis.xlsx",
-            LastModified = now.AddHours(-1),
-            IsPinned = false
-        });
-
-        _allRecentFiles.Add(new RecentFileEntry
-        {
-            FilePath = @"C:\Users\Documents\Meeting_Notes.txt",
-            LastModified = now.AddHours(-3),
-            IsPinned = false
-        });
-
-        // Yesterday (2 items)
-        _allRecentFiles.Add(new RecentFileEntry
-        {
-            FilePath = @"C:\Users\Documents\Projects\Client_Presentation.pptx",
-            LastModified = now.AddDays(-1).AddHours(-2),
-            IsPinned = false
-        });
-
-        _allRecentFiles.Add(new RecentFileEntry
-        {
-            FilePath = @"C:\Users\Documents\Timesheets\Week_Ending_12_15.xlsx",
-            LastModified = now.AddDays(-1).AddHours(-4),
-            IsPinned = false
-        });
-
-        // This Week (2 items)
-        _allRecentFiles.Add(new RecentFileEntry
-        {
-            FilePath = @"C:\Users\Documents\Design\Mockups_v2.psd",
-            LastModified = now.AddDays(-3).AddHours(-1),
-            IsPinned = false
-        });
-
-        _allRecentFiles.Add(new RecentFileEntry
-        {
-            FilePath = @"C:\Users\Documents\Finance\Expense_Report.xlsx",
-            LastModified = now.AddDays(-5).AddHours(-2),
-            IsPinned = false
-        });
-
-        // Last Week (1 item)
-        _allRecentFiles.Add(new RecentFileEntry
-        {
-            FilePath = @"C:\Users\Documents\Archive\Q3_Summary.docx",
-            LastModified = now.AddDays(-10).AddHours(-1),
-            IsPinned = false
-        });
-
-        // Older (1 item)
-        _allRecentFiles.Add(new RecentFileEntry
-        {
-            FilePath = @"C:\Users\Documents\Archives\Annual_Report_2023.pdf",
-            LastModified = now.AddDays(-30),
-            IsPinned = false
-        });
     }
 
     private void LoadSampleRecentFolders()

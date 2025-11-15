@@ -111,42 +111,39 @@
 - **Note**: Sort dropdown deferred (not in original design)
 
 ### ? Step 10: Browse Integration
-**Status**: **PARTIAL** ??
+**Status**: **COMPLETE** ?
 - ? Browse button wired to command
 - ? OpenFileDialog with module file types
 - ? FileSelected event raised
-- ?? **Missing**: Backstage close after file selection
-- ?? **Missing**: Integration with MainWindowViewModel
-- **Note**: IBackstageService interface created but not fully wired
+- ? **Backstage closes after file selection** _(Option A Step 1 - 2025-01-15)_
+- ? **BackstageService integration** _(Option A Step 1 - 2025-01-15)_
+- ?? **Pending**: Integration with MainWindowViewModel to handle FileSelected event
 
 ### ? Step 11: Sample Data Generation
 **Status**: **COMPLETE**
-- ? **35 Recent Files** across all date groups
-  - 3 Pinned (across different dates)
-  - 5 Today
-  - 4 Yesterday
-  - 8 This Week
-  - 6 Last Week
-  - 6 Older (20-90 days)
-- ? **15 Recent Folders** across all date groups
-  - 3 Today
+- ? **10 Recent Files** (reduced from 35 to prevent Hot Reload issues)
+  - 2 Pinned (across different dates)
+  - 2 Today
   - 2 Yesterday
-  - 4 This Week
-  - 3 Last Week
-  - 3 Older
+  - 2 This Week
+  - 1 Last Week
+  - 1 Older (30 days)
+- ? **5 Recent Folders**
 - ? **3 Quick Access Folders**
   - Documents, Desktop, Downloads (real paths)
 - ? Realistic file paths and names
 - ? Varied file types (.docx, .xlsx, .pptx, .pdf, .txt, .psd)
 
 ### ?? Step 12: Final Integration
-**Status**: **PARTIAL** ??
+**Status**: **IN PROGRESS** ??
 - ? `OpenBackstageView` created and styled
 - ? `OpenBackstageViewModel` registered in container
 - ? MainWindow.xaml references OpenBackstage property
-- ?? **Missing**: Backstage close on file selection
-- ?? **Missing**: Real IRecentFilesService integration
-- ?? **Missing**: DocumentManager integration for opening files
+- ? **Backstage close on file selection** _(Option A Step 1 - COMPLETE)_
+- ?? **In Progress**: Real IRecentFilesService integration _(Option A Step 2)_
+- ?? **Pending**: DocumentManager integration for opening files _(Option A Step 3)_
+- ?? **Pending**: Persist pin state to settings _(Option A Step 4)_
+- ?? **Pending**: Persist Quick Access folders to settings _(Option A Step 5)_
 
 ---
 
