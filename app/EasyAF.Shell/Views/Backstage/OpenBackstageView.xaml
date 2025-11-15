@@ -643,7 +643,7 @@
                                                           BorderThickness="0"
                                                           ItemsSource="{Binding BrowserEntries}"
                                                           behaviors:DragToQuickAccessBehavior.IsEnabled="True"
-                                                          behaviors:DragToQuickAccessBehavior.QuickAccessTarget="{Binding ElementName=QuickAccessItemsControl}">
+                                                          behaviors:DragToQuickAccessBehavior.QuickAccessTargetName="QuickAccessItemsControl">
                                                     <!-- Keyboard shortcuts for Browser ListView -->
                                                     <ListView.InputBindings>
                                                         <!-- Enter: Open selected entry (file or folder) -->

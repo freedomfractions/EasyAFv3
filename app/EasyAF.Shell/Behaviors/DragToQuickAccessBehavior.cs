@@ -37,6 +37,7 @@ public static class DragToQuickAccessBehavior
     /// <summary>
     /// Reference to the Quick Access ItemsControl that will receive drops.
     /// Set this on the ItemsControl that contains Quick Access folders.
+    /// This can be set via binding or direct reference.
     /// </summary>
     public static readonly DependencyProperty QuickAccessTargetProperty = DependencyProperty.RegisterAttached(
         "QuickAccessTarget",
@@ -46,6 +47,19 @@ public static class DragToQuickAccessBehavior
 
     public static ItemsControl? GetQuickAccessTarget(DependencyObject obj) => (ItemsControl?)obj.GetValue(QuickAccessTargetProperty);
     public static void SetQuickAccessTarget(DependencyObject obj, ItemsControl? value) => obj.SetValue(QuickAccessTargetProperty, value);
+
+    /// <summary>
+    /// Fallback property that accepts a string path to find the target in the visual tree.
+    /// Use this when ElementName binding doesn't work (e.g., inside DataTemplates).
+    /// </summary>
+    public static readonly DependencyProperty QuickAccessTargetNameProperty = DependencyProperty.RegisterAttached(
+        "QuickAccessTargetName",
+        typeof(string),
+        typeof(DragToQuickAccessBehavior),
+        new PropertyMetadata(null, OnQuickAccessTargetNameChanged));
+
+    public static string? GetQuickAccessTargetName(DependencyObject obj) => (string?)obj.GetValue(QuickAccessTargetNameProperty);
+    public static void SetQuickAccessTargetName(DependencyObject obj, string? value) => obj.SetValue(QuickAccessTargetNameProperty, value);
 
     #endregion
 
@@ -82,6 +96,45 @@ public static class DragToQuickAccessBehavior
             newTarget.Drop += OnTargetDrop;
             newTarget.DragLeave += OnTargetDragLeave;
             newTarget.AllowDrop = true;
+        }
+    }
+
+    private static void OnQuickAccessTargetNameChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        if (d is not FrameworkElement element || e.NewValue is not string targetName)
+            return;
+
+        // Wait for element to be loaded to find the target by name
+        if (element.IsLoaded)
+        {
+            FindAndSetTarget(element, targetName);
+        }
+        else
+        {
+            element.Loaded += (s, args) => FindAndSetTarget(element, targetName);
+        }
+    }
+
+    private static void FindAndSetTarget(FrameworkElement element, string targetName)
+    {
+        // Walk up the visual tree to find the root (UserControl)
+        var root = element;
+        while (root != null)
+        {
+            var parent = VisualTreeHelper.GetParent(root) as FrameworkElement;
+            if (parent == null)
+                break;
+            root = parent;
+        }
+
+        // Find the named element in the root
+        if (root is UserControl userControl)
+        {
+            var target = userControl.FindName(targetName) as ItemsControl;
+            if (target != null)
+            {
+                SetQuickAccessTarget(element, target);
+            }
         }
     }
 
