@@ -641,7 +641,7 @@
                                                 <!-- Drag & Drop: Drag files/folders to Quick Access to add them -->
                                                 <ListView Background="Transparent"
                                                           BorderThickness="0"
-                                                          ItemsSource="{Binding BrowserEntries}"
+                                                          ItemsSource="{Binding BrowserEntries}" Style="{StaticResource FrozenHeaderListViewStyle}"
                                                           behaviors:DragToQuickAccessBehavior.IsEnabled="True"
                                                           behaviors:DragToQuickAccessBehavior.QuickAccessTargetName="QuickAccessItemsControl">
                                                     <!-- Keyboard shortcuts for Browser ListView -->
