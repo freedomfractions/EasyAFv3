@@ -113,11 +113,15 @@ public static class QuickAccessDragBehavior
         }
 
         // Find the target item
-        var targetElement = GetItemAtPosition(itemsControl, e.GetPosition(itemsControl));
+        var position = e.GetPosition(itemsControl);
+        var targetElement = GetItemAtPosition(itemsControl, position);
         
         if (targetElement != null)
         {
-            ShowInsertionAdorner(targetElement, e.GetPosition(targetElement));
+            var relativePosition = e.GetPosition(targetElement);
+            var insertAbove = relativePosition.Y < targetElement.ActualHeight / 2;
+            
+            ShowInsertionAdorner(targetElement, insertAbove);
         }
         else
         {
@@ -175,7 +179,7 @@ public static class QuickAccessDragBehavior
 
     #region Insertion Adorner
 
-    private static void ShowInsertionAdorner(FrameworkElement targetElement, Point position)
+    private static void ShowInsertionAdorner(FrameworkElement targetElement, bool insertAbove)
     {
         // Remove old adorner if exists
         RemoveInsertionAdorner();
@@ -184,9 +188,6 @@ public static class QuickAccessDragBehavior
         _adornerLayer = AdornerLayer.GetAdornerLayer(targetElement);
         if (_adornerLayer == null)
             return;
-
-        // Determine if we should insert above or below based on Y position
-        var insertAbove = position.Y < targetElement.ActualHeight / 2;
 
         // Create and add new adorner
         _insertionAdorner = new InsertionAdorner(targetElement, insertAbove);
@@ -265,8 +266,8 @@ public static class QuickAccessDragBehavior
         var element = hitTestResult.VisualHit as DependencyObject;
         while (element != null)
         {
-            if (element is FrameworkElement fe && fe.DataContext is QuickAccessFolder)
-                return fe;
+            if (element is RadioButton rb && rb.DataContext is QuickAccessFolder)
+                return rb;
 
             element = VisualTreeHelper.GetParent(element);
         }
