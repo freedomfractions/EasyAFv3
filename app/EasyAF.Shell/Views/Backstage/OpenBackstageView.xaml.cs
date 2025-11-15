@@ -42,15 +42,37 @@ namespace EasyAF.Shell.Views.Backstage
         
         /// <summary>
         /// Handles scroll-to-top requests from the ViewModel.
-        /// Resets the scroll position of the main ScrollViewer to the top (0,0).
+        /// Resets the scroll position of the main content area to the top (0,0).
         /// </summary>
+        /// <remarks>
+        /// Tries to scroll via ListView.ScrollIntoView first (better for virtualization),
+        /// then falls back to ScrollViewer.ScrollToTop if no ListView is found.
+        /// </remarks>
         private void OnScrollToTopRequested(object? sender, EventArgs e)
         {
-            // Find the ScrollViewer in the visual tree (it's in Grid.Row="2" of the right column)
+            // Try ListView first (better for virtualized collections)
+            var listView = FindVisualChild<ListView>(this);
+            if (listView?.Items.Count > 0)
+            {
+                System.Diagnostics.Debug.WriteLine($"[ScrollReset] ListView found with {listView.Items.Count} items - scrolling to first item");
+                listView.ScrollIntoView(listView.Items[0]);
+                listView.SelectedIndex = -1; // Clear selection
+                return;
+            }
+            
+            System.Diagnostics.Debug.WriteLine("[ScrollReset] No ListView found, trying ScrollViewer...");
+            
+            // Fallback to ScrollViewer
             var scrollViewer = FindVisualChild<ScrollViewer>(this);
             if (scrollViewer != null)
             {
+                System.Diagnostics.Debug.WriteLine($"[ScrollReset] ScrollViewer found - current offset: {scrollViewer.VerticalOffset}");
                 scrollViewer.ScrollToTop();
+                System.Diagnostics.Debug.WriteLine($"[ScrollReset] After reset - offset: {scrollViewer.VerticalOffset}");
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine("[ScrollReset] ERROR: No ScrollViewer found in visual tree!");
             }
         }
 

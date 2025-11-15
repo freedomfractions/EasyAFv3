@@ -247,8 +247,11 @@ public class OpenBackstageViewModel : BindableBase
         Mode = OpenBackstageMode.Recent;
         SelectedQuickAccessFolder = null;
         
-        // Reset scroll position when switching to Recent mode
-        ScrollToTopRequested?.Invoke(this, EventArgs.Empty);
+        // Delay scroll reset until ContentControl finishes switching content
+        System.Windows.Application.Current?.Dispatcher.InvokeAsync(() =>
+        {
+            ScrollToTopRequested?.Invoke(this, EventArgs.Empty);
+        }, System.Windows.Threading.DispatcherPriority.Loaded);
     }
 
     private void ExecuteSelectQuickAccessFolder(QuickAccessFolder folder)
@@ -262,8 +265,11 @@ public class OpenBackstageViewModel : BindableBase
         LoadBrowserEntries(CurrentBrowsePath);
         NavigateUpCommand.RaiseCanExecuteChanged();
         
-        // Reset scroll position when switching to a different Quick Access folder
-        ScrollToTopRequested?.Invoke(this, EventArgs.Empty);
+        // Delay scroll reset until ContentControl finishes switching content
+        System.Windows.Application.Current?.Dispatcher.InvokeAsync(() =>
+        {
+            ScrollToTopRequested?.Invoke(this, EventArgs.Empty);
+        }, System.Windows.Threading.DispatcherPriority.Loaded);
     }
 
     private void ExecuteTogglePin(RecentFileEntry file)
@@ -330,8 +336,11 @@ public class OpenBackstageViewModel : BindableBase
             LoadBrowserEntries(CurrentBrowsePath);
             NavigateUpCommand.RaiseCanExecuteChanged();
             
-            // Reset scroll position when navigating into subfolder
-            ScrollToTopRequested?.Invoke(this, EventArgs.Empty);
+            // Delay scroll reset until new content is loaded and rendered
+            System.Windows.Application.Current?.Dispatcher.InvokeAsync(() =>
+            {
+                ScrollToTopRequested?.Invoke(this, EventArgs.Empty);
+            }, System.Windows.Threading.DispatcherPriority.Loaded);
         }
         else
         {
@@ -354,8 +363,11 @@ public class OpenBackstageViewModel : BindableBase
                 LoadBrowserEntries(CurrentBrowsePath);
                 NavigateUpCommand.RaiseCanExecuteChanged();
                 
-                // Reset scroll position when navigating to parent folder
-                ScrollToTopRequested?.Invoke(this, EventArgs.Empty);
+                // Delay scroll reset until new content is loaded and rendered
+                System.Windows.Application.Current?.Dispatcher.InvokeAsync(() =>
+                {
+                    ScrollToTopRequested?.Invoke(this, EventArgs.Empty);
+                }, System.Windows.Threading.DispatcherPriority.Loaded);
             }
         }
         catch (Exception ex)
