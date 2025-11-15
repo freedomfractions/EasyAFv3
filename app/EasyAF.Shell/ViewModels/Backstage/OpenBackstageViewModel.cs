@@ -1034,11 +1034,18 @@ public class OpenBackstageViewModel : BindableBase
     /// <summary>
     /// Loads recent files from IRecentFilesService and converts them to RecentFileEntry objects.
     /// </summary>
+    /// <remarks>
+    /// Takes only MaxDisplayCount items from the service's full list to respect the user's display limit setting.
+    /// </remarks>
     private void LoadRecentFilesFromService()
     {
         _allRecentFiles.Clear();
         
-        foreach (var filePath in _recentFilesService.RecentFiles)
+        // Take only the number of items the user wants to display
+        var itemsToLoad = _recentFilesService.RecentFiles
+            .Take(_recentFilesService.MaxDisplayCount);
+        
+        foreach (var filePath in itemsToLoad)
         {
             if (File.Exists(filePath))
             {
