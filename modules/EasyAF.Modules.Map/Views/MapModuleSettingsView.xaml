@@ -46,7 +46,8 @@
                       AlternatingRowBackground="{DynamicResource SecondaryBackgroundBrush}"
                       Background="{DynamicResource ControlBackgroundBrush}"
                       BorderThickness="0"
-                      SelectionMode="Single">
+                      SelectionMode="Single"
+                      RowHeight="48">
                 
                 <!-- CROSS-MODULE EDIT: 2025-01-16 DataGrid Theme Fix -->
                 <!-- Modified for: Fix unthemed ScrollViewer background in DataGrid -->
@@ -76,7 +77,8 @@
                     <Style TargetType="DataGridCell">
                         <Setter Property="BorderThickness" Value="0"/>
                         <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
-                        <Setter Property="Padding" Value="8,4"/>
+                        <Setter Property="Padding" Value="0"/>
+                        <Setter Property="VerticalContentAlignment" Value="Center"/>
                         <Style.Triggers>
                             <Trigger Property="IsSelected" Value="True">
                                 <Setter Property="Background" Value="{DynamicResource HighlightSelectionBrush}"/>
@@ -94,7 +96,8 @@
                             <DataTemplate>
                                 <CheckBox IsChecked="{Binding IsEnabled, UpdateSourceTrigger=PropertyChanged}"
                                           HorizontalAlignment="Center"
-                                          VerticalAlignment="Center"/>
+                                          VerticalAlignment="Center"
+                                          Margin="8"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -103,7 +106,14 @@
                     <DataGridTextColumn Header="Data Type" 
                                         Binding="{Binding DataTypeName}" 
                                         Width="150"
-                                        IsReadOnly="True"/>
+                                        IsReadOnly="True">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                <Setter Property="Padding" Value="8,0"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
                     
                     <!-- Properties Button -->
                     <DataGridTemplateColumn Header="Properties" Width="*">
@@ -115,8 +125,9 @@
                                         CommandParameter="{Binding}"
                                         Style="{StaticResource BaseButtonStyle}"
                                         HorizontalAlignment="Left"
-                                        Padding="12,4"
-                                        Margin="0,2"/>
+                                        VerticalAlignment="Center"
+                                        Padding="12,6"
+                                        Margin="8,0"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
