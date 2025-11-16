@@ -58,7 +58,7 @@
                       Style="{StaticResource ThemedComboBoxStyle}"
                       ToolTip="Select a table/sheet from your loaded files">
                 
-                <!-- Group Style with ContainerStyle for proper rendering -->
+                <!-- Group Style - SIMPLIFIED: No ContainerStyle, just header and panel -->
                 <ComboBox.GroupStyle>
                     <GroupStyle>
                         <GroupStyle.HeaderTemplate>
@@ -74,33 +74,15 @@
                                 </Border>
                             </DataTemplate>
                         </GroupStyle.HeaderTemplate>
-                        <GroupStyle.ContainerStyle>
-                            <Style TargetType="{x:Type GroupItem}">
-                                <Setter Property="Margin" Value="0"/>
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="{x:Type GroupItem}">
-                                            <VirtualizingStackPanel>
-                                                <!-- Group header -->
-                                                <ContentPresenter x:Name="PART_Header"/>
-                                                <!-- Group items container -->
-                                                <Border Margin="16,0,0,0">
-                                                    <ItemsPresenter x:Name="PART_Items"/>
-                                                </Border>
-                                            </VirtualizingStackPanel>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </GroupStyle.ContainerStyle>
+                        <!-- Let WPF handle the items panel automatically -->
                     </GroupStyle>
                 </ComboBox.GroupStyle>
                 
-                <!-- Item Template - show table name -->
+                <!-- Item Template - show table name with left margin for indenting -->
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding TableName}"
-                                   Padding="4,2"
+                                   Margin="16,4,4,4"
                                    Foreground="{DynamicResource TextPrimaryBrush}"/>
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
