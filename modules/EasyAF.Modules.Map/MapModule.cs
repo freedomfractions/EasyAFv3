@@ -5,6 +5,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using EasyAF.Core.Contracts;
 using EasyAF.Modules.Map.Models;
+using EasyAF.Modules.Map.Services; // For MapSettingsExtensions
 using EasyAF.Import;
 using Unity;
 using Fluent;
@@ -120,7 +121,73 @@ namespace EasyAF.Modules.Map
             container.RegisterSingleton<Services.IPropertyDiscoveryService, Services.PropertyDiscoveryService>();
             container.RegisterType<Services.ColumnExtractionService>(); // Transient - create new instance per use
             
+            // Initialize default settings if not present (first run or corrupted settings)
+            var settingsService = container.Resolve<ISettingsService>();
+            InitializeDefaultSettings(settingsService);
+            
             Log.Information("Map module initialized successfully");
+        }
+
+        /// <summary>
+        /// Initializes default visibility settings for data types and properties.
+        /// </summary>
+        /// <param name="settingsService">The settings service.</param>
+        /// <remarks>
+        /// <para>
+        /// Creates default settings if none exist. This serves as:
+        /// - Initial configuration on first run
+        /// - Fallback if settings are corrupted
+        /// - Template that UI will later override with user preferences
+        /// </para>
+        /// <para>
+        /// <strong>Default Configuration:</strong>
+        /// - All data types: Enabled = true
+        /// - All properties: Wildcard mode ("*" = show all)
+        /// </para>
+        /// <para>
+        /// Users can later customize via Options dialog (when UI is implemented).
+        /// </para>
+        /// </remarks>
+        private void InitializeDefaultSettings(ISettingsService settingsService)
+        {
+            try
+            {
+                var existing = settingsService.GetMapVisibilitySettings();
+                
+                // If settings already exist and have data types configured, don't overwrite
+                if (existing.DataTypes.Count > 0)
+                {
+                    Log.Debug("Map visibility settings already initialized ({Count} data types configured)", existing.DataTypes.Count);
+                    return;
+                }
+
+                Log.Information("Initializing default Map visibility settings (first run or corrupted settings)");
+
+                // Create default settings: all data types enabled with all properties visible
+                var defaults = new Models.DataTypeVisibilitySettings();
+                
+                // List of known data types from EasyAF.Data.Models
+                var dataTypes = new[] { "Bus", "LVCB", "Fuse", "Cable", "ArcFlash", "ShortCircuit" };
+                
+                foreach (var dataType in dataTypes)
+                {
+                    defaults.DataTypes[dataType] = new Models.DataTypeConfig
+                    {
+                        Enabled = true,
+                        EnabledProperties = new List<string> { "*" } // Wildcard = show all properties
+                    };
+                }
+
+                // Save defaults to settings
+                settingsService.SetMapVisibilitySettings(defaults);
+                
+                Log.Information("Default Map visibility settings created: {Count} data types, all properties enabled", dataTypes.Length);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to initialize default Map visibility settings - will use fallback (all enabled)");
+                // Don't throw - module should still function with all properties visible
+            }
         }
 
         /// <summary>
