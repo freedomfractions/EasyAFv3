@@ -8,6 +8,7 @@ using System.Windows.Input;
 using Prism.Commands;
 using Prism.Mvvm;
 using Serilog;
+using MapPropertyInfo = EasyAF.Modules.Map.Models.PropertyInfo;
 
 namespace EasyAF.Modules.Map.ViewModels
 {
@@ -24,6 +25,7 @@ namespace EasyAF.Modules.Map.ViewModels
     /// - Searchable property list
     /// - Select All / Select None / Reset to Defaults
     /// - Shows property count (X of Y enabled)
+    /// - Displays property descriptions from XML documentation
     /// </para>
     /// </remarks>
     public class PropertySelectorViewModel : BindableBase
@@ -37,34 +39,36 @@ namespace EasyAF.Modules.Map.ViewModels
         /// Initializes a new instance of the PropertySelectorViewModel.
         /// </summary>
         /// <param name="dataTypeName">The name of the data type being configured.</param>
-        /// <param name="allProperties">All available properties for this data type.</param>
-        /// <param name="enabledProperties">Currently enabled properties.</param>
-        /// <param name="defaultProperties">Default enabled properties (for reset).</param>
+        /// <param name="allProperties">All available properties for this data type (with descriptions).</param>
+        /// <param name="enabledPropertyNames">Currently enabled property names.</param>
+        /// <param name="defaultPropertyNames">Default enabled property names (for reset).</param>
         public PropertySelectorViewModel(
             string dataTypeName,
-            IEnumerable<string> allProperties,
-            IEnumerable<string> enabledProperties,
-            IEnumerable<string>? defaultProperties = null)
+            IEnumerable<MapPropertyInfo> allProperties,
+            IEnumerable<string> enabledPropertyNames,
+            IEnumerable<string>? defaultPropertyNames = null)
         {
             _dataTypeName = dataTypeName ?? throw new ArgumentNullException(nameof(dataTypeName));
             
             // Store original state for cancel operation
-            _originalEnabledProperties = enabledProperties?.ToList() ?? new List<string>();
-            _defaultEnabledProperties = defaultProperties?.ToList() ?? new List<string> { "*" };
+            _originalEnabledProperties = enabledPropertyNames?.ToList() ?? new List<string>();
+            _defaultEnabledProperties = defaultPropertyNames?.ToList() ?? new List<string> { "*" };
 
-            // Create property items
+            // Create property items with descriptions
             Properties = new ObservableCollection<PropertyItem>();
             
-            var allPropsList = allProperties?.ToList() ?? new List<string>();
+            var allPropsList = allProperties?.ToList() ?? new List<MapPropertyInfo>();
             var enabledSet = new HashSet<string>(_originalEnabledProperties);
             var isWildcard = enabledSet.Contains("*");
 
-            foreach (var propName in allPropsList.OrderBy(p => p))
+            foreach (var propInfo in allPropsList.OrderBy(p => p.PropertyName))
             {
                 Properties.Add(new PropertyItem
                 {
-                    PropertyName = propName,
-                    IsEnabled = isWildcard || enabledSet.Contains(propName)
+                    PropertyName = propInfo.PropertyName,
+                    Description = propInfo.Description,
+                    PropertyType = propInfo.PropertyType,
+                    IsEnabled = isWildcard || enabledSet.Contains(propInfo.PropertyName)
                 });
             }
 
@@ -223,7 +227,7 @@ namespace EasyAF.Modules.Map.ViewModels
         /// Filters properties based on search text.
         /// </summary>
         /// <remarks>
-        /// Uses case-insensitive contains matching (same as Map Editor search).
+        /// Searches both property name and description (case-insensitive).
         /// TODO: Centralize search logic to EasyAF.Core.Utilities.SearchUtility
         /// </remarks>
         private bool FilterProperty(object obj)
@@ -233,10 +237,17 @@ namespace EasyAF.Modules.Map.ViewModels
 
             if (obj is PropertyItem item)
             {
-                return item.PropertyName.Contains(SearchText, StringComparison.OrdinalIgnoreCase);
+                // Search in property name
+                if (item.PropertyName.Contains(SearchText, StringComparison.OrdinalIgnoreCase))
+                    return true;
+
+                // Search in description
+                if (!string.IsNullOrWhiteSpace(item.Description) && 
+                    item.Description.Contains(SearchText, StringComparison.OrdinalIgnoreCase))
+                    return true;
             }
 
-            return true;
+            return false;
         }
 
         #endregion
@@ -269,6 +280,8 @@ namespace EasyAF.Modules.Map.ViewModels
     public class PropertyItem : BindableBase
     {
         private string _propertyName = string.Empty;
+        private string? _description;
+        private string? _propertyType;
         private bool _isEnabled;
 
         /// <summary>
@@ -281,6 +294,24 @@ namespace EasyAF.Modules.Map.ViewModels
         }
 
         /// <summary>
+        /// Gets or sets the property description (from XML documentation).
+        /// </summary>
+        public string? Description
+        {
+            get => _description;
+            set => SetProperty(ref _description, value);
+        }
+
+        /// <summary>
+        /// Gets or sets the property type (e.g., "String", "Double?").
+        /// </summary>
+        public string? PropertyType
+        {
+            get => _propertyType;
+            set => SetProperty(ref _propertyType, value);
+        }
+
+        /// <summary>
         /// Gets or sets whether this property is enabled for mapping.
         /// </summary>
         public bool IsEnabled
@@ -288,5 +319,10 @@ namespace EasyAF.Modules.Map.ViewModels
             get => _isEnabled;
             set => SetProperty(ref _isEnabled, value);
         }
+
+        /// <summary>
+        /// Gets whether this property has a description.
+        /// </summary>
+        public bool HasDescription => !string.IsNullOrWhiteSpace(Description);
     }
 }

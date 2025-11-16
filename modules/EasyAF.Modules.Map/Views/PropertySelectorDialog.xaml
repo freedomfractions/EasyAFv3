@@ -110,17 +110,32 @@
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <CheckBox IsChecked="{Binding IsEnabled}"
-                                  Content="{Binding PropertyName}"
-                                  Margin="4,2"
+                                  Margin="4,4"
                                   Foreground="{DynamicResource TextPrimaryBrush}">
-                            <CheckBox.ToolTip>
-                                <ToolTip>
-                                    <TextBlock>
-                                        <Run Text="Property: "/>
-                                        <Run Text="{Binding PropertyName}" FontWeight="Bold"/>
+                            <CheckBox.Content>
+                                <StackPanel Margin="4,0">
+                                    <!-- Property Name -->
+                                    <TextBlock Text="{Binding PropertyName}"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                    
+                                    <!-- Property Description (if available) -->
+                                    <TextBlock Text="{Binding Description}"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource TextSecondaryBrush}"
+                                               TextWrapping="Wrap"
+                                               Margin="0,2,0,0"
+                                               Visibility="{Binding HasDescription, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                    
+                                    <!-- Property Type -->
+                                    <TextBlock FontSize="10"
+                                               Foreground="{DynamicResource TextTertiaryBrush}"
+                                               Margin="0,2,0,0">
+                                        <Run Text="Type:"/>
+                                        <Run Text="{Binding PropertyType}" FontFamily="Consolas"/>
                                     </TextBlock>
-                                </ToolTip>
-                            </CheckBox.ToolTip>
+                                </StackPanel>
+                            </CheckBox.Content>
                         </CheckBox>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
@@ -130,10 +145,20 @@
                         <Setter Property="Template">
                             <Setter.Value>
                                 <ControlTemplate TargetType="ListBoxItem">
-                                    <ContentPresenter/>
+                                    <Border Background="{TemplateBinding Background}"
+                                            BorderBrush="{TemplateBinding BorderBrush}"
+                                            BorderThickness="{TemplateBinding BorderThickness}"
+                                            Padding="4,2">
+                                        <ContentPresenter/>
+                                    </Border>
                                 </ControlTemplate>
                             </Setter.Value>
                         </Setter>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource HoverBackgroundBrush}"/>
+                            </Trigger>
+                        </Style.Triggers>
                     </Style>
                 </ListBox.ItemContainerStyle>
             </ListBox>

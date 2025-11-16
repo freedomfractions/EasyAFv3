@@ -134,9 +134,12 @@ namespace EasyAF.Modules.Map.ViewModels
             {
                 var defaultProperties = new List<string> { "*" }; // Default: all properties enabled
 
+                // Get all properties with descriptions
+                var allPropertiesWithInfo = _propertyDiscovery.GetAllPropertiesForType(item.DataTypeName);
+
                 var viewModel = new PropertySelectorViewModel(
                     item.DataTypeName,
-                    item.AllProperties,
+                    allPropertiesWithInfo,  // Pass full PropertyInfo objects with descriptions
                     item.EnabledProperties,
                     defaultProperties);
 
