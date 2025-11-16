@@ -52,6 +52,17 @@ namespace EasyAF.Modules.Map.ViewModels
             // Subscribe to document changes
             _document.PropertyChanged += OnDocumentPropertyChanged;
 
+            // CROSS-MODULE EDIT: 2025-01-16 Task 15 Map Ribbon Tabs
+            // Modified for: Add ribbon command implementations
+            // Related modules: Map (MapModule.GetRibbonTabs, DataTypeMappingViewModel)
+            // Rollback instructions: Remove these command initializations
+            
+            // Initialize ribbon commands
+            LoadFromFileCommand = new DelegateCommand(ExecuteLoadFromFile);
+            AutoMapCommand = new DelegateCommand(ExecuteAutoMap);
+            ValidateMappingsCommand = new DelegateCommand(ExecuteValidateMappings);
+            ClearAllMappingsCommand = new DelegateCommand(ExecuteClearAllMappings, CanExecuteClearAllMappings);
+
             // Initialize tabs
             InitializeTabs();
 
@@ -99,6 +110,98 @@ namespace EasyAF.Modules.Map.ViewModels
         /// Gets the title for the document window.
         /// </summary>
         public string DocumentTitle => _document.Title + (_document.IsDirty ? "*" : "");
+
+        #endregion
+
+        #region Commands
+
+        /// <summary>
+        /// Gets the command to load a sample data file.
+        /// </summary>
+        public ICommand LoadFromFileCommand { get; }
+
+        /// <summary>
+        /// Gets the command to automatically map columns using intelligent matching.
+        /// </summary>
+        public ICommand AutoMapCommand { get; }
+
+        /// <summary>
+        /// Gets the command to validate all mappings.
+        /// </summary>
+        public ICommand ValidateMappingsCommand { get; }
+
+        /// <summary>
+        /// Gets the command to clear all mappings.
+        /// </summary>
+        public ICommand ClearAllMappingsCommand { get; }
+
+        #endregion
+
+        #region Command Implementations
+
+        private void ExecuteLoadFromFile()
+        {
+            // Delegate to currently selected data type tab
+            if (SelectedTabContent is DataTypeMappingViewModel dataTypeVm)
+            {
+                dataTypeVm.LoadFromFileCommand.Execute(null);
+            }
+            else
+            {
+                // If on Summary tab, show message
+                Log.Information("Load From File: Please select a data type tab first");
+                // TODO: Show user dialog
+            }
+        }
+
+        private void ExecuteAutoMap()
+        {
+            // Delegate to currently selected data type tab
+            if (SelectedTabContent is DataTypeMappingViewModel dataTypeVm)
+            {
+                dataTypeVm.AutoMapCommand.Execute(null);
+            }
+            else
+            {
+                Log.Information("Auto-Map: Please select a data type tab first");
+                // TODO: Show user dialog
+            }
+        }
+
+        private void ExecuteValidateMappings()
+        {
+            // TODO: Implement validation across all data types
+            Log.Information("Validate Mappings requested - validation feature to be implemented");
+            
+            // For now, just log mapping status for each data type
+            foreach (var tab in TabHeaders.Where(t => t.DataType != null))
+            {
+                if (tab.DataType == null) continue;
+                
+                var status = CalculateMappingStatus(tab.DataType);
+                Log.Information("{DataType} mapping status: {Status}", tab.DataType, status);
+            }
+        }
+
+        private bool CanExecuteClearAllMappings()
+        {
+            // Enable if any mappings exist
+            return _document.MappingsByDataType.Values.Any(m => m.Count > 0);
+        }
+
+        private void ExecuteClearAllMappings()
+        {
+            // Delegate to currently selected data type tab
+            if (SelectedTabContent is DataTypeMappingViewModel dataTypeVm)
+            {
+                dataTypeVm.ClearMappingsCommand.Execute(null);
+            }
+            else
+            {
+                Log.Information("Clear Mappings: Please select a data type tab first");
+                // TODO: Show user dialog
+            }
+        }
 
         #endregion
 

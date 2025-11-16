@@ -383,7 +383,6 @@ namespace EasyAF.Modules.Map
         /// Returns contextual ribbon tabs based on the active document state.
         /// Tabs include:
         /// - <strong>Mapping</strong>: Load samples, auto-detect, validate, clear
-        /// - <strong>File Operations</strong>: Save mapping, export sample
         /// </para>
         /// <para>
         /// Commands are data-bound to the MapDocument's ViewModel.
@@ -392,8 +391,149 @@ namespace EasyAF.Modules.Map
         public RibbonTabItem[] GetRibbonTabs(IDocument activeDocument)
         {
             Log.Debug("Generating ribbon tabs for Map module");
-            // TODO Task 15: Implement ribbon tab creation
-            throw new NotImplementedException("Task 15: Create Map Ribbon Tabs");
+            
+            if (activeDocument is not MapDocument mapDoc)
+            {
+                Log.Warning("Active document is not a MapDocument");
+                return Array.Empty<RibbonTabItem>();
+            }
+
+            var viewModel = mapDoc.ViewModel as ViewModels.MapDocumentViewModel;
+            if (viewModel == null)
+            {
+                Log.Warning("MapDocument has no ViewModel");
+                return Array.Empty<RibbonTabItem>();
+            }
+
+            // Create Mapping tab
+            var mappingTab = CreateMappingTab(viewModel);
+
+            Log.Debug("Created {Count} ribbon tabs for Map module", 1);
+            return new[] { mappingTab };
+        }
+
+        /// <summary>
+        /// Creates the Mapping ribbon tab with sample loading and mapping tools.
+        /// </summary>
+        private RibbonTabItem CreateMappingTab(ViewModels.MapDocumentViewModel viewModel)
+        {
+            var tab = new RibbonTabItem
+            {
+                Header = "Mapping",
+                DataContext = viewModel
+            };
+
+            // Create ribbon groups
+            var samplesGroup = CreateSamplesGroup();
+            var toolsGroup = CreateToolsGroup();
+
+            tab.Groups.Add(samplesGroup);
+            tab.Groups.Add(toolsGroup);
+
+            return tab;
+        }
+
+        /// <summary>
+        /// Creates the Samples group with Load Sample button.
+        /// </summary>
+        private RibbonGroupBox CreateSamplesGroup()
+        {
+            var group = new RibbonGroupBox
+            {
+                Header = "Samples"
+            };
+
+            // Load Sample button
+            var loadSampleButton = new Fluent.Button
+            {
+                Header = "Load Sample",
+                Icon = CreateGlyphIcon("\uE8E5"), // OpenFile glyph
+                LargeIcon = CreateGlyphIcon("\uE8E5", 32),
+                SizeDefinition = "Large",
+                ToolTip = "Load a sample data file to preview columns"
+            };
+            loadSampleButton.SetBinding(Fluent.Button.CommandProperty, new System.Windows.Data.Binding("LoadFromFileCommand"));
+
+            group.Items.Add(loadSampleButton);
+            
+            return group;
+        }
+
+        /// <summary>
+        /// Creates the Tools group with Auto-Map, Validate, and Clear buttons.
+        /// </summary>
+        private RibbonGroupBox CreateToolsGroup()
+        {
+            var group = new RibbonGroupBox
+            {
+                Header = "Mapping Tools"
+            };
+
+            // Auto-Map button
+            var autoMapButton = new Fluent.Button
+            {
+                Header = "Auto-Map",
+                Icon = CreateGlyphIcon("\uE895"), // Link glyph
+                LargeIcon = CreateGlyphIcon("\uE895", 32),
+                SizeDefinition = "Large",
+                ToolTip = "Automatically match columns to properties using intelligent algorithms"
+            };
+            autoMapButton.SetBinding(Fluent.Button.CommandProperty, new System.Windows.Data.Binding("AutoMapCommand"));
+
+            // Validate button
+            var validateButton = new Fluent.Button
+            {
+                Header = "Validate",
+                Icon = CreateGlyphIcon("\uE73E"), // Checkmark glyph
+                LargeIcon = CreateGlyphIcon("\uE73E", 32),
+                SizeDefinition = "Large",
+                ToolTip = "Check mapping completeness and identify issues"
+            };
+            validateButton.SetBinding(Fluent.Button.CommandProperty, new System.Windows.Data.Binding("ValidateMappingsCommand"));
+
+            // Clear button
+            var clearButton = new Fluent.Button
+            {
+                Header = "Clear",
+                Icon = CreateGlyphIcon("\uE894"), // Delete glyph
+                LargeIcon = CreateGlyphIcon("\uE894", 32),
+                SizeDefinition = "Large",
+                ToolTip = "Remove all mappings"
+            };
+            clearButton.SetBinding(Fluent.Button.CommandProperty, new System.Windows.Data.Binding("ClearAllMappingsCommand"));
+
+            group.Items.Add(autoMapButton);
+            group.Items.Add(validateButton);
+            group.Items.Add(clearButton);
+
+            return group;
+        }
+
+        /// <summary>
+        /// Creates a glyph icon from Segoe MDL2 Assets font.
+        /// </summary>
+        private System.Windows.Media.ImageSource CreateGlyphIcon(string glyph, int size = 16)
+        {
+            var visual = new System.Windows.Media.DrawingVisual();
+            using (var context = visual.RenderOpen())
+            {
+                var formattedText = new System.Windows.Media.FormattedText(
+                    glyph,
+                    System.Globalization.CultureInfo.CurrentCulture,
+                    System.Windows.FlowDirection.LeftToRight,
+                    new System.Windows.Media.Typeface("Segoe MDL2 Assets"),
+                    size,
+                    System.Windows.Media.Brushes.Black,
+                    System.Windows.Media.VisualTreeHelper.GetDpi(visual).PixelsPerDip);
+
+                context.DrawText(formattedText, new System.Windows.Point(0, 0));
+            }
+
+            var bitmap = new System.Windows.Media.Imaging.RenderTargetBitmap(
+                size, size, 96, 96, System.Windows.Media.PixelFormats.Pbgra32);
+            bitmap.Render(visual);
+
+            return bitmap;
         }
 
         /// <summary>
