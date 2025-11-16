@@ -31,6 +31,12 @@ namespace EasyAF.Modules.Map.Models
         /// </summary>
         public event PropertyChangedEventHandler? PropertyChanged;
 
+        /// <summary>
+        /// Gets or sets the ViewModel for this document.
+        /// Used by the Shell to display the document's UI.
+        /// </summary>
+        public object? ViewModel { get; set; }
+
         #region IDocument Implementation
 
         /// <summary>

@@ -52,6 +52,8 @@ namespace EasyAF.Modules.Map
     /// </example>
     public class MapModule : IDocumentModule
     {
+        private IUnityContainer? _container;
+        
         /// <summary>
         /// Gets the unique name of this module.
         /// </summary>
@@ -106,13 +108,12 @@ namespace EasyAF.Modules.Map
         /// </remarks>
         public void Initialize(IUnityContainer container)
         {
+            _container = container;
             Log.Information("Initializing Map module v{Version}", ModuleVersion);
 
             // Register services
             container.RegisterSingleton<Services.IPropertyDiscoveryService, Services.PropertyDiscoveryService>();
             container.RegisterType<Services.ColumnExtractionService>(); // Transient - create new instance per use
-            
-            // TODO Task 16: Register view models
             
             Log.Information("Map module initialized successfully");
         }
@@ -145,8 +146,20 @@ namespace EasyAF.Modules.Map
             {
                 MapName = "Untitled Map",
                 SoftwareVersion = "3.0.0",
-                IsDirty = true // New documents are dirty until saved
+                IsDirty = true, // New documents are dirty until saved
+                OwnerModule = this
             };
+
+            // Create ViewModel for this document
+            if (_container != null)
+            {
+                var viewModel = new ViewModels.MapDocumentViewModel(
+                    document,
+                    _container.Resolve<Services.IPropertyDiscoveryService>()
+                );
+                document.ViewModel = viewModel;
+                Log.Debug("Created ViewModel for new map document");
+            }
             
             Log.Debug("New map document created with default settings");
             return document;
@@ -188,6 +201,18 @@ namespace EasyAF.Modules.Map
                 // Convert to MapDocument
                 var document = MapDocument.FromMappingConfig(config, filePath);
                 document.MapName = Path.GetFileNameWithoutExtension(filePath);
+                document.OwnerModule = this;
+
+                // Create ViewModel for this document
+                if (_container != null)
+                {
+                    var viewModel = new ViewModels.MapDocumentViewModel(
+                        document,
+                        _container.Resolve<Services.IPropertyDiscoveryService>()
+                    );
+                    document.ViewModel = viewModel;
+                    Log.Debug("Created ViewModel for opened map document");
+                }
                 
                 Log.Information("Successfully opened map document: {MapName}", document.MapName);
                 return document;
