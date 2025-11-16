@@ -26,16 +26,18 @@
         </Grid.RowDefinitions>
         
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="360"/> <!-- Dataset Columns (LEFT) - Fixed Width -->
-            <ColumnDefinition Width="Auto"/> <!-- Buttons -->
-            <ColumnDefinition Width="360"/> <!-- Target Properties (RIGHT) - Fixed Width -->
-            <ColumnDefinition Width="*"/>   <!-- Remaining space -->
+            <ColumnDefinition Width="360" MinWidth="360" MaxWidth="720"/> <!-- Target Properties (LEFT) - Resizable -->
+            <ColumnDefinition Width="Auto"/> <!-- GridSplitter -->
+            <ColumnDefinition Width="Auto"/> <!-- Map/Unmap Buttons -->
+            <ColumnDefinition Width="Auto"/> <!-- GridSplitter -->
+            <ColumnDefinition Width="360" MinWidth="360" MaxWidth="720"/> <!-- Source Columns (RIGHT) - Resizable -->
+            <ColumnDefinition Width="*"/>   <!-- Remaining space (pushes everything left) -->
         </Grid.ColumnDefinitions>
         
-        <!-- Toolbar - Spans across both columns only -->
+        <!-- Toolbar - Spans across visible columns only -->
         <ToolBar Grid.Row="0" 
                  Grid.Column="0"
-                 Grid.ColumnSpan="3"
+                 Grid.ColumnSpan="5"
                  Background="{DynamicResource SecondaryBackgroundBrush}"
                  BorderBrush="{DynamicResource ControlBorderBrush}">
             <Button Command="{Binding AutoMapCommand}" 
@@ -110,7 +112,8 @@
                   Margin="0,10,0,0"
                   Header="{Binding DataType, StringFormat='Target Properties ({0})'}"
                   Foreground="{DynamicResource TextPrimaryBrush}"
-                  BorderBrush="{DynamicResource ControlBorderBrush}">
+                  BorderBrush="{DynamicResource ControlBorderBrush}"
+                  HorizontalAlignment="Stretch">
             <Grid Margin="4">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/> <!-- Filter -->
@@ -240,9 +243,20 @@
             </Grid>
         </GroupBox>
         
+        <!-- GridSplitter between Target Properties and Buttons -->
+        <GridSplitter Grid.Row="1"
+                      Grid.Column="1"
+                      Width="4"
+                      Margin="2,10,2,0"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Stretch"
+                      Background="{DynamicResource ControlBorderBrush}"
+                      ShowsPreview="True"
+                      ResizeDirection="Columns"/>
+        
         <!-- Mapping Buttons (Center) -->
         <StackPanel Grid.Row="1"
-                    Grid.Column="1"
+                    Grid.Column="2"
                     VerticalAlignment="Center"
                     Margin="10,0">
             <Button Content="Map ?"
@@ -261,13 +275,25 @@
                     ToolTip="Remove mapping from selected property"/>
         </StackPanel>
         
+        <!-- GridSplitter between Buttons and Source Columns -->
+        <GridSplitter Grid.Row="1"
+                      Grid.Column="3"
+                      Width="4"
+                      Margin="2,10,2,0"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Stretch"
+                      Background="{DynamicResource ControlBorderBrush}"
+                      ShowsPreview="True"
+                      ResizeDirection="Columns"/>
+        
         <!-- Source Columns (RIGHT Pane) -->
         <GroupBox Grid.Row="1" 
-                  Grid.Column="2"
+                  Grid.Column="4"
                   Margin="0,10,0,0"
                   Header="Available Columns (Source)"
                   Foreground="{DynamicResource TextPrimaryBrush}"
-                  BorderBrush="{DynamicResource ControlBorderBrush}">
+                  BorderBrush="{DynamicResource ControlBorderBrush}"
+                  HorizontalAlignment="Stretch">
             <Grid Margin="4">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/> <!-- Filter -->

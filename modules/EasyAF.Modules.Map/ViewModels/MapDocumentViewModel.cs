@@ -62,6 +62,9 @@ namespace EasyAF.Modules.Map.ViewModels
             ValidateMappingsCommand = new DelegateCommand(ExecuteValidateMappings);
             ClearAllMappingsCommand = new DelegateCommand(ExecuteClearAllMappings, CanExecuteClearAllMappings);
 
+            // Subscribe to settings changes for live property visibility updates
+            _settingsService.SettingsReloaded += OnSettingsReloaded;
+
             // Initialize tabs
             InitializeTabs();
 
