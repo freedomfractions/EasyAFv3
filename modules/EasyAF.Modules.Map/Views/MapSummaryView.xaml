@@ -188,14 +188,14 @@
                                  BorderBrush="{DynamicResource ControlBorderBrush}">
                             <Button Command="{Binding AddFileCommand}" 
                                     Content="Add File"
-                                    Padding="8,4"/>
+                                    Style="{StaticResource ToolBarButtonStyle}"/>
                             <Button Command="{Binding RemoveFileCommand}" 
                                     Content="Remove"
-                                    Padding="8,4"/>
-                            <Separator/>
+                                    Style="{StaticResource ToolBarButtonStyle}"/>
+                            <Separator Style="{StaticResource ToolBarSeparatorStyle}"/>
                             <Button Command="{Binding BrowseFileCommand}" 
                                     Content="Browse..."
-                                    Padding="8,4"/>
+                                    Style="{StaticResource ToolBarButtonStyle}"/>
                         </ToolBar>
                         
                         <!-- Files DataGrid -->
@@ -239,7 +239,7 @@
                                  BorderBrush="{DynamicResource ControlBorderBrush}">
                             <Button Command="{Binding RefreshStatusCommand}"
                                     Content="Refresh Status"
-                                    Padding="8,4"/>
+                                    Style="{StaticResource ToolBarButtonStyle}"/>
                         </ToolBar>
                         
                         <!-- Status DataGrid -->
