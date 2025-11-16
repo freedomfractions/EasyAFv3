@@ -55,7 +55,6 @@
                       SelectedItem="{Binding SelectedTable}"
                       MinWidth="250"
                       MaxDropDownHeight="400"
-                      DisplayMemberPath="DisplayName"
                       Style="{StaticResource ThemedComboBoxStyle}"
                       ToolTip="Select a table/sheet from your loaded files">
                 
@@ -96,7 +95,7 @@
                 <!-- Item Template for individual tables -->
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
-                        <TextBlock Text="{Binding TableName}"
+                        <TextBlock Text="{Binding DisplayName}"
                                    Padding="4,2"
                                    Foreground="{DynamicResource TextPrimaryBrush}"/>
                     </DataTemplate>
