@@ -49,6 +49,8 @@
     <!-- Highlight Colors -->
     <Color x:Key="HighlightSelectionColor">#FFE0F2FF</Color>
     <Color x:Key="ReadonlyBackgroundColor">#FFF9FAFB</Color>
+    <Color x:Key="HoverBackgroundColor">#FFF8F9FA</Color>
+    <Color x:Key="AccentBackgroundColor">#FFEFF6FF</Color>
 
     <!-- Log Level Colors (Light Theme - optimized for contrast on light backgrounds) -->
     <Color x:Key="LogVerboseColor">#FF6B7280</Color>
@@ -98,6 +100,8 @@
     
     <SolidColorBrush x:Key="HighlightSelectionBrush" Color="{StaticResource HighlightSelectionColor}"/>
     <SolidColorBrush x:Key="ReadonlyBackgroundBrush" Color="{StaticResource ReadonlyBackgroundColor}"/>
+    <SolidColorBrush x:Key="HoverBackgroundBrush" Color="{StaticResource HoverBackgroundColor}"/>
+    <SolidColorBrush x:Key="AccentBackgroundBrush" Color="{StaticResource AccentBackgroundColor}"/>
 
     <!-- Log Level Brushes -->
     <SolidColorBrush x:Key="LogVerboseBrush" Color="{StaticResource LogVerboseColor}"/>
