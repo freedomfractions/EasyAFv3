@@ -35,7 +35,17 @@ namespace EasyAF.Modules.Map.Views
             // Check if the dragged data contains files
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
-                e.Effects = DragDropEffects.Copy;
+                // Check if any of the files have valid extensions
+                var files = (string[])e.Data.GetData(DataFormats.FileDrop);
+                var supportedExtensions = new[] { ".csv", ".xlsx", ".xls" };
+                
+                var hasValidFiles = files != null && files.Any(f =>
+                {
+                    var ext = System.IO.Path.GetExtension(f).ToLowerInvariant();
+                    return supportedExtensions.Contains(ext);
+                });
+
+                e.Effects = hasValidFiles ? DragDropEffects.Copy : DragDropEffects.None;
             }
             else
             {
