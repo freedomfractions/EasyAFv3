@@ -270,8 +270,53 @@ namespace EasyAF.Modules.Map.ViewModels
         /// </summary>
         public void RefreshTargetProperties()
         {
+            // Get the current list of visible properties (after settings filter)
+            var visibleProperties = _propertyDiscovery.GetPropertiesForType(_dataType);
+            var visiblePropertyNames = new HashSet<string>(visibleProperties.Select(p => p.PropertyName));
+
+            // Remove mappings to properties that are no longer visible
+            if (_document.MappingsByDataType.TryGetValue(_dataType, out var existingMappings))
+            {
+                var mappingsToRemove = existingMappings
+                    .Where(m => !visiblePropertyNames.Contains(m.PropertyName))
+                    .ToList();
+
+                foreach (var mapping in mappingsToRemove)
+                {
+                    _document.RemoveMapping(_dataType, mapping.PropertyName);
+                    Log.Information("Removed mapping to hidden property: {DataType}.{Property} (was mapped to {Column})", 
+                        _dataType, mapping.PropertyName, mapping.ColumnHeader);
+                }
+
+                if (mappingsToRemove.Any())
+                {
+                    // Update source columns to clear their mapping indicators
+                    foreach (var mapping in mappingsToRemove)
+                    {
+                        var sourceCol = SourceColumns.FirstOrDefault(c => c.ColumnName == mapping.ColumnHeader);
+                        if (sourceCol != null)
+                        {
+                            sourceCol.IsMapped = false;
+                            sourceCol.MappedTo = null;
+                        }
+                    }
+                }
+            }
+
+            // Now reload the properties list (only visible properties)
             LoadTargetProperties();
-            Log.Information("Refreshed properties for {DataType} based on updated settings", _dataType);
+
+            // Refresh views to update UI
+            SourceColumnsView.Refresh();
+            TargetPropertiesView.Refresh();
+            RaisePropertyChanged(nameof(MappedCount));
+            RaisePropertyChanged(nameof(AvailableCount));
+
+            // Update parent tab status
+            UpdateTabStatus();
+
+            Log.Information("Refreshed properties for {DataType} based on updated settings ({Visible} visible, {Mapped} mapped)", 
+                _dataType, visibleProperties.Count, MappedCount);
         }
 
         #endregion
