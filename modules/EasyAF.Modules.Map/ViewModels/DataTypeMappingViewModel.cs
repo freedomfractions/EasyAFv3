@@ -37,7 +37,7 @@ namespace EasyAF.Modules.Map.ViewModels
         private string _targetFilter = string.Empty;
         private ColumnInfo? _selectedSourceColumn;
         private MapPropertyInfo? _selectedTargetProperty;
-        private string? _selectedTable;
+        private TableReference _selectedTable;
 
         /// <summary>
         /// Initializes a new instance of the DataTypeMappingViewModel.
@@ -57,7 +57,7 @@ namespace EasyAF.Modules.Map.ViewModels
             // Initialize collections
             SourceColumns = new ObservableCollection<ColumnInfo>();
             TargetProperties = new ObservableCollection<MapPropertyInfo>();
-            AvailableTables = new ObservableCollection<string>();
+            AvailableTables = new ObservableCollection<TableReference>();
 
             // Setup collection views for filtering
             SourceColumnsView = CollectionViewSource.GetDefaultView(SourceColumns);
@@ -71,7 +71,6 @@ namespace EasyAF.Modules.Map.ViewModels
             UnmapSelectedCommand = new DelegateCommand(ExecuteUnmapSelected, CanExecuteUnmapSelected);
             AutoMapCommand = new DelegateCommand(ExecuteAutoMap);
             ClearMappingsCommand = new DelegateCommand(ExecuteClearMappings);
-            LoadFromFileCommand = new DelegateCommand(ExecuteLoadFromFile);
 
             // Load initial data
             LoadTargetProperties();
@@ -108,9 +107,9 @@ namespace EasyAF.Modules.Map.ViewModels
         public ICollectionView TargetPropertiesView { get; }
 
         /// <summary>
-        /// Gets the collection of available table names.
+        /// Gets the collection of available table references grouped by file.
         /// </summary>
-        public ObservableCollection<string> AvailableTables { get; }
+        public ObservableCollection<TableReference> AvailableTables { get; }
 
         /// <summary>
         /// Gets or sets the source column filter text.
@@ -173,9 +172,9 @@ namespace EasyAF.Modules.Map.ViewModels
         }
 
         /// <summary>
-        /// Gets or sets the selected table/sheet name.
+        /// Gets or sets the selected table reference.
         /// </summary>
-        public string? SelectedTable
+        public TableReference SelectedTable
         {
             get => _selectedTable;
             set
@@ -223,11 +222,6 @@ namespace EasyAF.Modules.Map.ViewModels
         /// Command to clear all mappings for this data type.
         /// </summary>
         public ICommand ClearMappingsCommand { get; }
-
-        /// <summary>
-        /// Command to load columns from a file.
-        /// </summary>
-        public ICommand LoadFromFileCommand { get; }
 
         #endregion
 
@@ -289,9 +283,9 @@ namespace EasyAF.Modules.Map.ViewModels
                     var columns = _columnExtraction.ExtractColumns(file.FilePath);
                     foreach (var tableName in columns.Keys)
                     {
-                        if (!AvailableTables.Contains(tableName))
+                        if (!AvailableTables.Any(t => t.TableName == tableName && t.FilePath == file.FilePath))
                         {
-                            AvailableTables.Add(tableName);
+                            AvailableTables.Add(new TableReference { TableName = tableName, FilePath = file.FilePath });
                         }
                     }
                 }
@@ -301,34 +295,37 @@ namespace EasyAF.Modules.Map.ViewModels
                 }
             }
 
+            // Auto-select first table if none selected
+            if (AvailableTables.Count > 0 && SelectedTable == null)
+            {
+                SelectedTable = AvailableTables[0];
+                Log.Debug("Auto-selected table '{Table}' from '{File}'", 
+                    SelectedTable.TableName, SelectedTable.FileName);
+            }
+
             Log.Debug("Loaded {Count} available tables", AvailableTables.Count);
         }
 
         /// <summary>
         /// Handles table selection change.
         /// </summary>
-        private void OnTableChanged(string? newTable)
+        private void OnTableChanged(TableReference? tableRef)
         {
-            if (string.IsNullOrEmpty(newTable)) return;
+            if (tableRef == null || string.IsNullOrEmpty(tableRef.TableName)) return;
 
-            // Find the file containing this table
-            foreach (var file in _document.ReferencedFiles)
+            try
             {
-                try
+                var columns = _columnExtraction.ExtractColumns(tableRef.FilePath);
+                if (columns.TryGetValue(tableRef.TableName, out var columnList))
                 {
-                    var columns = _columnExtraction.ExtractColumns(file.FilePath);
-                    if (columns.TryGetValue(newTable, out var columnList))
-                    {
-                        LoadSourceColumns(columnList);
-                        Log.Information("Loaded {Count} columns from table '{Table}'", 
-                            columnList.Count, newTable);
-                        return;
-                    }
+                    LoadSourceColumns(columnList);
+                    Log.Information("Loaded {Count} columns from table '{Table}' in file '{File}'", 
+                        columnList.Count, tableRef.TableName, tableRef.FileName);
                 }
-                catch (Exception ex)
-                {
-                    Log.Warning(ex, "Error loading table {Table} from {File}", newTable, file.FilePath);
-                }
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Error loading table {Table} from {File}", tableRef.TableName, tableRef.FileName);
             }
         }
 
@@ -508,44 +505,6 @@ namespace EasyAF.Modules.Map.ViewModels
             catch (Exception ex)
             {
                 Log.Error(ex, "Failed to clear mappings");
-            }
-        }
-
-        private void ExecuteLoadFromFile()
-        {
-            var dialog = new Microsoft.Win32.OpenFileDialog
-            {
-                Filter = "Data Files (*.csv;*.xlsx;*.xls)|*.csv;*.xlsx;*.xls",
-                Title = "Load Sample File"
-            };
-
-            if (dialog.ShowDialog() == true)
-            {
-                try
-                {
-                    var columns = _columnExtraction.ExtractColumns(dialog.FileName);
-                    
-                    // Add tables to available list
-                    foreach (var tableName in columns.Keys)
-                    {
-                        if (!AvailableTables.Contains(tableName))
-                        {
-                            AvailableTables.Add(tableName);
-                        }
-                    }
-
-                    // Load first table by default
-                    if (columns.Count > 0)
-                    {
-                        SelectedTable = columns.Keys.First();
-                    }
-
-                    Log.Information("Loaded file with {Count} tables", columns.Count);
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex, "Failed to load file: {FilePath}", dialog.FileName);
-                }
             }
         }
 

@@ -52,13 +52,7 @@ namespace EasyAF.Modules.Map.ViewModels
             // Subscribe to document changes
             _document.PropertyChanged += OnDocumentPropertyChanged;
 
-            // CROSS-MODULE EDIT: 2025-01-16 Task 15 Map Ribbon Tabs
-            // Modified for: Add ribbon command implementations
-            // Related modules: Map (MapModule.GetRibbonTabs, DataTypeMappingViewModel)
-            // Rollback instructions: Remove these command initializations
-            
             // Initialize ribbon commands
-            LoadFromFileCommand = new DelegateCommand(ExecuteLoadFromFile);
             AutoMapCommand = new DelegateCommand(ExecuteAutoMap);
             ValidateMappingsCommand = new DelegateCommand(ExecuteValidateMappings);
             ClearAllMappingsCommand = new DelegateCommand(ExecuteClearAllMappings, CanExecuteClearAllMappings);
@@ -116,11 +110,6 @@ namespace EasyAF.Modules.Map.ViewModels
         #region Commands
 
         /// <summary>
-        /// Gets the command to load a sample data file.
-        /// </summary>
-        public ICommand LoadFromFileCommand { get; }
-
-        /// <summary>
         /// Gets the command to automatically map columns using intelligent matching.
         /// </summary>
         public ICommand AutoMapCommand { get; }
@@ -138,21 +127,6 @@ namespace EasyAF.Modules.Map.ViewModels
         #endregion
 
         #region Command Implementations
-
-        private void ExecuteLoadFromFile()
-        {
-            // Delegate to currently selected data type tab
-            if (SelectedTabContent is DataTypeMappingViewModel dataTypeVm)
-            {
-                dataTypeVm.LoadFromFileCommand.Execute(null);
-            }
-            else
-            {
-                // If on Summary tab, show message
-                Log.Information("Load From File: Please select a data type tab first");
-                // TODO: Show user dialog
-            }
-        }
 
         private void ExecuteAutoMap()
         {

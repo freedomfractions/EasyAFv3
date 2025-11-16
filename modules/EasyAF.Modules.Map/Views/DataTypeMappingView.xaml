@@ -54,12 +54,9 @@
             <ComboBox ItemsSource="{Binding AvailableTables}"
                       SelectedItem="{Binding SelectedTable}"
                       MinWidth="200"
-                      Style="{StaticResource ThemedComboBoxStyle}"/>
-            <Separator Style="{StaticResource ToolBarSeparatorStyle}"/>
-            <Button Command="{Binding LoadFromFileCommand}"
-                    Content="Load File..."
-                    Style="{StaticResource ToolBarButtonStyle}"
-                    ToolTip="Load columns from a sample file"/>
+                      DisplayMemberPath="DisplayName"
+                      Style="{StaticResource ThemedComboBoxStyle}"
+                      ToolTip="Select a table/sheet from your loaded files"/>
         </ToolBar>
         
         <!-- Dataset Columns (LEFT Pane) -->
