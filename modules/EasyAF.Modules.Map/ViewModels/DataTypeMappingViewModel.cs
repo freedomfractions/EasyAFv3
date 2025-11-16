@@ -67,6 +67,10 @@ namespace EasyAF.Modules.Map.ViewModels
             TargetPropertiesView = CollectionViewSource.GetDefaultView(TargetProperties);
             TargetPropertiesView.Filter = FilterTargetProperty;
 
+            // Setup grouped view for AvailableTables
+            AvailableTablesView = CollectionViewSource.GetDefaultView(AvailableTables);
+            AvailableTablesView.GroupDescriptions.Add(new PropertyGroupDescription(nameof(TableReference.FileName)));
+
             // Initialize commands
             MapSelectedCommand = new DelegateCommand(ExecuteMapSelected, CanExecuteMapSelected);
             UnmapSelectedCommand = new DelegateCommand(ExecuteUnmapSelected, CanExecuteUnmapSelected);
@@ -111,6 +115,11 @@ namespace EasyAF.Modules.Map.ViewModels
         /// Gets the collection of available table references.
         /// </summary>
         public ObservableCollection<TableReference> AvailableTables { get; }
+
+        /// <summary>
+        /// Gets the grouped view of available tables.
+        /// </summary>
+        public ICollectionView AvailableTablesView { get; }
 
         /// <summary>
         /// Gets or sets the source column filter text.
