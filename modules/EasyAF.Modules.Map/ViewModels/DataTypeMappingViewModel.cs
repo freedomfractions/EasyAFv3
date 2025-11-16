@@ -231,6 +231,21 @@ namespace EasyAF.Modules.Map.ViewModels
 
         #endregion
 
+        #region Public Methods for Refreshing
+
+        /// <summary>
+        /// Refreshes the available tables from the document's referenced files.
+        /// </summary>
+        /// <remarks>
+        /// This should be called whenever files are added/removed from the document.
+        /// </remarks>
+        public void RefreshAvailableTables()
+        {
+            LoadAvailableTables();
+        }
+
+        #endregion
+
         #region Data Loading
 
         /// <summary>

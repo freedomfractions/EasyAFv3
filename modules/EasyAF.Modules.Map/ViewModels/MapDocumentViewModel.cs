@@ -334,6 +334,12 @@ namespace EasyAF.Modules.Map.ViewModels
                     MappingStatus.Complete => "?",
                     _ => "?"
                 };
+
+                // Refresh available tables when files are added/removed
+                if (tab.ViewModel is DataTypeMappingViewModel dataTypeVm)
+                {
+                    dataTypeVm.RefreshAvailableTables();
+                }
             }
         }
 
