@@ -4,13 +4,19 @@
              xmlns:converters="clr-namespace:EasyAF.Modules.Map.Converters"
              Background="{DynamicResource PrimaryBackgroundBrush}">
     
-    <!-- Converters -->
+    <!-- Converters and Styles -->
     <UserControl.Resources>
-        <!-- BoolToVisibility Converter -->
-        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
-        
-        <!-- NullToVisibility Converter -->
-        <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/EasyAF.Modules.Map;component/Styles/MapEditorStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            
+            <!-- BoolToVisibility Converter -->
+            <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+            
+            <!-- NullToVisibility Converter -->
+            <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
+        </ResourceDictionary>
     </UserControl.Resources>
     
     <Grid Margin="10">
@@ -117,9 +123,7 @@
                     <ListBox Grid.Row="1"
                              ItemsSource="{Binding SourceColumnsView}"
                              SelectedItem="{Binding SelectedSourceColumn}"
-                             Background="{DynamicResource ControlBackgroundBrush}"
-                             Foreground="{DynamicResource TextPrimaryBrush}"
-                             BorderBrush="{DynamicResource ControlBorderBrush}">
+                             Style="{StaticResource MappingListBoxStyle}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Border Padding="4"
@@ -129,10 +133,10 @@
                                         <Style TargetType="Border">
                                             <Setter Property="Background" Value="Transparent"/>
                                             <Style.Triggers>
-                                                <!-- Highlight mapped columns -->
+                                                <!-- Highlight mapped columns using theme brushes -->
                                                 <DataTrigger Binding="{Binding IsMapped}" Value="True">
-                                                    <Setter Property="Background" Value="#20008000"/>
-                                                    <Setter Property="BorderBrush" Value="Green"/>
+                                                    <Setter Property="Background" Value="{DynamicResource MappedHighlightBrush}"/>
+                                                    <Setter Property="BorderBrush" Value="{DynamicResource MappedBorderBrush}"/>
                                                     <Setter Property="BorderThickness" Value="1"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
@@ -152,16 +156,7 @@
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                         <ListBox.ItemContainerStyle>
-                            <Style TargetType="ListBoxItem">
-                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                                <Setter Property="Background" Value="Transparent"/>
-                                <Setter Property="BorderThickness" Value="0"/>
-                                <Style.Triggers>
-                                    <Trigger Property="IsSelected" Value="True">
-                                        <Setter Property="Background" Value="{DynamicResource AccentBackgroundBrush}"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
+                            <Style TargetType="ListBoxItem" BasedOn="{StaticResource MappingListBoxItemStyle}"/>
                         </ListBox.ItemContainerStyle>
                     </ListBox>
                     
@@ -254,9 +249,7 @@
                     <ListBox Grid.Row="1"
                              ItemsSource="{Binding TargetPropertiesView}"
                              SelectedItem="{Binding SelectedTargetProperty}"
-                             Background="{DynamicResource ControlBackgroundBrush}"
-                             Foreground="{DynamicResource TextPrimaryBrush}"
-                             BorderBrush="{DynamicResource ControlBorderBrush}">
+                             Style="{StaticResource MappingListBoxStyle}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Border Padding="4"
@@ -268,10 +261,10 @@
                                             <Setter Property="Background" Value="Transparent"/>
                                             <Setter Property="BorderBrush" Value="Transparent"/>
                                             <Style.Triggers>
-                                                <!-- Highlight mapped properties -->
+                                                <!-- Highlight mapped properties using theme brushes -->
                                                 <DataTrigger Binding="{Binding IsMapped}" Value="True">
-                                                    <Setter Property="Background" Value="#20008000"/>
-                                                    <Setter Property="BorderBrush" Value="Green"/>
+                                                    <Setter Property="Background" Value="{DynamicResource MappedHighlightBrush}"/>
+                                                    <Setter Property="BorderBrush" Value="{DynamicResource MappedBorderBrush}"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
@@ -289,7 +282,7 @@
                                                        Foreground="{DynamicResource TextPrimaryBrush}"/>
                                             <TextBlock Text="{Binding MappedColumn}"
                                                        FontSize="10"
-                                                       Foreground="Green"
+                                                       Foreground="{DynamicResource SuccessBrush}"
                                                        Visibility="{Binding IsMapped, Converter={StaticResource BoolToVisibilityConverter}}"/>
                                             <TextBlock Text="{Binding Description}"
                                                        FontSize="10"
@@ -302,7 +295,7 @@
                                         <TextBlock Grid.Column="1"
                                                    Text="?"
                                                    FontSize="16"
-                                                   Foreground="Green"
+                                                   Foreground="{DynamicResource SuccessBrush}"
                                                    VerticalAlignment="Center"
                                                    Margin="4,0,0,0"
                                                    Visibility="{Binding IsMapped, Converter={StaticResource BoolToVisibilityConverter}}"/>
@@ -311,16 +304,7 @@
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                         <ListBox.ItemContainerStyle>
-                            <Style TargetType="ListBoxItem">
-                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                                <Setter Property="Background" Value="Transparent"/>
-                                <Setter Property="BorderThickness" Value="0"/>
-                                <Style.Triggers>
-                                    <Trigger Property="IsSelected" Value="True">
-                                        <Setter Property="Background" Value="{DynamicResource AccentBackgroundBrush}"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
+                            <Style TargetType="ListBoxItem" BasedOn="{StaticResource MappingListBoxItemStyle}"/>
                         </ListBox.ItemContainerStyle>
                     </ListBox>
                     

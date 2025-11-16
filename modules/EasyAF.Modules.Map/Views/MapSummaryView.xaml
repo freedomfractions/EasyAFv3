@@ -3,6 +3,15 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Background="{DynamicResource PrimaryBackgroundBrush}">
     
+    <UserControl.Resources>
+        <!-- Merge Map Editor themed styles -->
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/EasyAF.Modules.Map;component/Styles/MapEditorStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    
     <ScrollViewer VerticalScrollBarVisibility="Auto"
                   HorizontalScrollBarVisibility="Disabled">
         <Grid Margin="20">
@@ -125,11 +134,7 @@
                               IsReadOnly="True"
                               CanUserAddRows="False"
                               CanUserDeleteRows="False"
-                              Background="{DynamicResource ControlBackgroundBrush}"
-                              Foreground="{DynamicResource TextPrimaryBrush}"
-                              BorderBrush="{DynamicResource ControlBorderBrush}"
-                              GridLinesVisibility="Horizontal"
-                              HorizontalGridLinesBrush="{DynamicResource ControlBorderBrush}">
+                              RowStyle="{StaticResource MapDataGridRowStyle}">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="File Name" 
                                                 Binding="{Binding FileName}" 
@@ -141,20 +146,6 @@
                                                 Binding="{Binding Status}" 
                                                 Width="100"/>
                         </DataGrid.Columns>
-                        <DataGrid.RowStyle>
-                            <Style TargetType="DataGridRow">
-                                <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}"/>
-                                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
-                                <Style.Triggers>
-                                    <Trigger Property="IsSelected" Value="True">
-                                        <Setter Property="Background" Value="{DynamicResource AccentBackgroundBrush}"/>
-                                    </Trigger>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="{DynamicResource HoverBackgroundBrush}"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </DataGrid.RowStyle>
                     </DataGrid>
                 </Grid>
             </GroupBox>
@@ -187,11 +178,7 @@
                               IsReadOnly="True"
                               CanUserAddRows="False"
                               CanUserDeleteRows="False"
-                              Background="{DynamicResource ControlBackgroundBrush}"
-                              Foreground="{DynamicResource TextPrimaryBrush}"
-                              BorderBrush="{DynamicResource ControlBorderBrush}"
-                              GridLinesVisibility="Horizontal"
-                              HorizontalGridLinesBrush="{DynamicResource ControlBorderBrush}">
+                              RowStyle="{StaticResource MapDataGridRowStyle}">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Data Type" 
                                                 Binding="{Binding TypeName}" 
@@ -227,7 +214,8 @@
                                                          BorderBrush="{DynamicResource ControlBorderBrush}"/>
                                             <TextBlock HorizontalAlignment="Center"
                                                        VerticalAlignment="Center"
-                                                       FontSize="10">
+                                                       FontSize="10"
+                                                       Foreground="{DynamicResource TextPrimaryBrush}">
                                                 <TextBlock.Text>
                                                     <MultiBinding StringFormat="{}{0}/{1}">
                                                         <Binding Path="FieldsMapped"/>
@@ -240,20 +228,6 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
                         </DataGrid.Columns>
-                        <DataGrid.RowStyle>
-                            <Style TargetType="DataGridRow">
-                                <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}"/>
-                                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
-                                <Style.Triggers>
-                                    <Trigger Property="IsSelected" Value="True">
-                                        <Setter Property="Background" Value="{DynamicResource AccentBackgroundBrush}"/>
-                                    </Trigger>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="{DynamicResource HoverBackgroundBrush}"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </DataGrid.RowStyle>
                     </DataGrid>
                 </Grid>
             </GroupBox>

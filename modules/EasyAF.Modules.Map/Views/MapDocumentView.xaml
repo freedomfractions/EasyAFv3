@@ -6,14 +6,21 @@
              Background="{DynamicResource PrimaryBackgroundBrush}">
     
     <UserControl.Resources>
-        <!-- DataTemplates to map ViewModels to Views -->
-        <DataTemplate DataType="{x:Type vm:MapSummaryViewModel}">
-            <views:MapSummaryView/>
-        </DataTemplate>
-        
-        <DataTemplate DataType="{x:Type vm:DataTypeMappingViewModel}">
-            <views:DataTypeMappingView/>
-        </DataTemplate>
+        <!-- Merge Map Editor themed styles -->
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/EasyAF.Modules.Map;component/Styles/MapEditorStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            
+            <!-- DataTemplates to map ViewModels to Views -->
+            <DataTemplate DataType="{x:Type vm:MapSummaryViewModel}">
+                <views:MapSummaryView/>
+            </DataTemplate>
+            
+            <DataTemplate DataType="{x:Type vm:DataTypeMappingViewModel}">
+                <views:DataTypeMappingView/>
+            </DataTemplate>
+        </ResourceDictionary>
     </UserControl.Resources>
     
     <Grid>
@@ -31,20 +38,20 @@
                         <TextBlock Text="{Binding Status}" 
                                    FontSize="14"
                                    Margin="0,0,6,0"
-                                   VerticalAlignment="Center"
-                                   Foreground="{DynamicResource TextSecondaryBrush}">
+                                   VerticalAlignment="Center">
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
                                     <Style.Triggers>
-                                        <!-- Color coding for status -->
+                                        <!-- Color coding for status using theme brushes -->
                                         <DataTrigger Binding="{Binding Status}" Value="?">
-                                            <Setter Property="Foreground" Value="Red"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource StatusUnmappedBrush}"/>
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding Status}" Value="?">
-                                            <Setter Property="Foreground" Value="Orange"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource StatusPartialBrush}"/>
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding Status}" Value="?">
-                                            <Setter Property="Foreground" Value="Green"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource StatusCompleteBrush}"/>
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>

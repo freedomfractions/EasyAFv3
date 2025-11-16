@@ -1,0 +1,147 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    
+    <!-- CROSS-MODULE EDIT: 2025-01-15 Map Module Theme Refinement -->
+    <!-- Modified for: Comprehensive theming for Map Editor controls -->
+    <!-- Related modules: Shell (Theme resources) -->
+    <!-- Rollback instructions: Delete this file and remove ResourceDictionary.MergedDictionaries references from views -->
+    
+    <!-- Status Color Brushes (replaces hard-coded colors) -->
+    <SolidColorBrush x:Key="StatusUnmappedBrush" Color="{DynamicResource ErrorColor}"/>
+    <SolidColorBrush x:Key="StatusPartialBrush" Color="{DynamicResource WarningColor}"/>
+    <SolidColorBrush x:Key="StatusCompleteBrush" Color="{DynamicResource SuccessColor}"/>
+    
+    <!-- Mapped Item Highlight Brush (replaces hard-coded green) -->
+    <SolidColorBrush x:Key="MappedHighlightBrush" Color="#20059669" />
+    <SolidColorBrush x:Key="MappedBorderBrush" Color="{DynamicResource SuccessColor}"/>
+    
+    <!-- GroupBox Style -->
+    <Style TargetType="GroupBox">
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource ControlBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="8"/>
+        <Setter Property="Margin" Value="0,0,0,12"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="GroupBox">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        
+                        <!-- Header -->
+                        <Border Grid.Row="0"
+                                Background="{DynamicResource SecondaryBackgroundBrush}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="1,1,1,0"
+                                Padding="8,4">
+                            <ContentPresenter ContentSource="Header"
+                                            TextElement.Foreground="{TemplateBinding Foreground}"
+                                            TextElement.FontWeight="SemiBold"/>
+                        </Border>
+                        
+                        <!-- Content -->
+                        <Border Grid.Row="1"
+                                Background="{DynamicResource PrimaryBackgroundBrush}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="1"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter/>
+                        </Border>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    
+    <!-- ToolBar Style -->
+    <Style TargetType="ToolBar">
+        <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource ControlBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="4"/>
+        <Setter Property="Margin" Value="0,0,0,8"/>
+    </Style>
+    
+    <!-- DataGrid Style -->
+    <Style TargetType="DataGrid">
+        <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource ControlBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="GridLinesVisibility" Value="Horizontal"/>
+        <Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource ControlBorderBrush}"/>
+        <Setter Property="RowBackground" Value="{DynamicResource ControlBackgroundBrush}"/>
+        <Setter Property="AlternatingRowBackground" Value="{DynamicResource PrimaryBackgroundBrush}"/>
+        <Setter Property="HeadersVisibility" Value="Column"/>
+        <Setter Property="ColumnHeaderStyle">
+            <Setter.Value>
+                <Style TargetType="DataGridColumnHeader">
+                    <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource ControlBorderBrush}"/>
+                    <Setter Property="BorderThickness" Value="0,0,1,1"/>
+                    <Setter Property="Padding" Value="8,4"/>
+                    <Setter Property="FontWeight" Value="SemiBold"/>
+                </Style>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    
+    <!-- DataGrid Row Style -->
+    <Style x:Key="MapDataGridRowStyle" TargetType="DataGridRow">
+        <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+        <Style.Triggers>
+            <Trigger Property="IsSelected" Value="True">
+                <Setter Property="Background" Value="{DynamicResource AccentBackgroundBrush}"/>
+                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+            </Trigger>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{DynamicResource HoverBackgroundBrush}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+    
+    <!-- ListBox Style (for mapping lists) -->
+    <Style x:Key="MappingListBoxStyle" TargetType="ListBox">
+        <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource ControlBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+    </Style>
+    
+    <!-- ListBoxItem Style (for mapping items) -->
+    <Style x:Key="MappingListBoxItemStyle" TargetType="ListBoxItem">
+        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Padding" Value="0"/>
+        <Style.Triggers>
+            <Trigger Property="IsSelected" Value="True">
+                <Setter Property="Background" Value="{DynamicResource AccentBackgroundBrush}"/>
+                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+    
+    <!-- ComboBox Style -->
+    <Style TargetType="ComboBox">
+        <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource ControlBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="8,4"/>
+    </Style>
+    
+    <!-- ProgressBar Style -->
+    <Style TargetType="ProgressBar">
+        <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+        <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource ControlBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+    </Style>
+
+</ResourceDictionary>
