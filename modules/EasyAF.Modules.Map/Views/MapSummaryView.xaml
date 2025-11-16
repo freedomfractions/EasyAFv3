@@ -1,0 +1,262 @@
+<UserControl x:Class="EasyAF.Modules.Map.Views.MapSummaryView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="{DynamicResource PrimaryBackgroundBrush}">
+    
+    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled">
+        <Grid Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/> <!-- Map Information -->
+                <RowDefinition Height="Auto"/> <!-- Referenced Files -->
+                <RowDefinition Height="*"/>    <!-- Data Type Status -->
+            </Grid.RowDefinitions>
+            
+            <!-- Map Information Section -->
+            <GroupBox Grid.Row="0" 
+                      Header="Map Information" 
+                      Margin="0,0,0,20"
+                      Foreground="{DynamicResource TextPrimaryBrush}"
+                      BorderBrush="{DynamicResource ControlBorderBrush}">
+                <Grid Margin="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="140"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    
+                    <!-- Map Name -->
+                    <TextBlock Grid.Row="0" Grid.Column="0" 
+                               Text="Map Name:" 
+                               VerticalAlignment="Center"
+                               Margin="0,0,0,8"
+                               Foreground="{DynamicResource TextPrimaryBrush}"/>
+                    <TextBox Grid.Row="0" Grid.Column="1" 
+                             Text="{Binding MapName, UpdateSourceTrigger=PropertyChanged}"
+                             VerticalAlignment="Center"
+                             Margin="0,0,0,8"
+                             Background="{DynamicResource ControlBackgroundBrush}"
+                             Foreground="{DynamicResource TextPrimaryBrush}"
+                             BorderBrush="{DynamicResource ControlBorderBrush}"/>
+                    
+                    <!-- Software Version -->
+                    <TextBlock Grid.Row="1" Grid.Column="0" 
+                               Text="Software Version:" 
+                               VerticalAlignment="Center"
+                               Margin="0,0,0,8"
+                               Foreground="{DynamicResource TextPrimaryBrush}"/>
+                    <TextBox Grid.Row="1" Grid.Column="1" 
+                             Text="{Binding SoftwareVersion, UpdateSourceTrigger=PropertyChanged}"
+                             VerticalAlignment="Center"
+                             Margin="0,0,0,8"
+                             Background="{DynamicResource ControlBackgroundBrush}"
+                             Foreground="{DynamicResource TextPrimaryBrush}"
+                             BorderBrush="{DynamicResource ControlBorderBrush}"/>
+                    
+                    <!-- Date Modified (Read-only) -->
+                    <TextBlock Grid.Row="2" Grid.Column="0" 
+                               Text="Date Modified:" 
+                               VerticalAlignment="Center"
+                               Margin="0,0,0,8"
+                               Foreground="{DynamicResource TextPrimaryBrush}"/>
+                    <TextBlock Grid.Row="2" Grid.Column="1" 
+                               Text="{Binding DateModified, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}"
+                               VerticalAlignment="Center"
+                               Margin="0,0,0,8"
+                               Foreground="{DynamicResource TextSecondaryBrush}"/>
+                    
+                    <!-- Description -->
+                    <TextBlock Grid.Row="3" Grid.Column="0" 
+                               Text="Description:" 
+                               VerticalAlignment="Top" 
+                               Margin="0,4,0,0"
+                               Foreground="{DynamicResource TextPrimaryBrush}"/>
+                    <TextBox Grid.Row="3" Grid.Column="1" 
+                             Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
+                             TextWrapping="Wrap"
+                             AcceptsReturn="True"
+                             MinHeight="60"
+                             MaxHeight="120"
+                             VerticalScrollBarVisibility="Auto"
+                             Background="{DynamicResource ControlBackgroundBrush}"
+                             Foreground="{DynamicResource TextPrimaryBrush}"
+                             BorderBrush="{DynamicResource ControlBorderBrush}"/>
+                </Grid>
+            </GroupBox>
+            
+            <!-- Referenced Files Section -->
+            <GroupBox Grid.Row="1" 
+                      Header="Referenced Sample Files" 
+                      Margin="0,0,0,20"
+                      Foreground="{DynamicResource TextPrimaryBrush}"
+                      BorderBrush="{DynamicResource ControlBorderBrush}">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="150"/>
+                    </Grid.RowDefinitions>
+                    
+                    <!-- Toolbar -->
+                    <ToolBar Grid.Row="0" 
+                             Background="{DynamicResource SecondaryBackgroundBrush}"
+                             BorderBrush="{DynamicResource ControlBorderBrush}">
+                        <Button Command="{Binding AddFileCommand}" 
+                                Content="Add File"
+                                Padding="8,4"/>
+                        <Button Command="{Binding RemoveFileCommand}" 
+                                Content="Remove"
+                                Padding="8,4"/>
+                        <Separator/>
+                        <Button Command="{Binding BrowseFileCommand}" 
+                                Content="Browse..."
+                                Padding="8,4"/>
+                    </ToolBar>
+                    
+                    <!-- Files DataGrid -->
+                    <DataGrid Grid.Row="1" 
+                              ItemsSource="{Binding ReferencedFiles}"
+                              SelectedItem="{Binding SelectedFile}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              CanUserAddRows="False"
+                              CanUserDeleteRows="False"
+                              Background="{DynamicResource ControlBackgroundBrush}"
+                              Foreground="{DynamicResource TextPrimaryBrush}"
+                              BorderBrush="{DynamicResource ControlBorderBrush}"
+                              GridLinesVisibility="Horizontal"
+                              HorizontalGridLinesBrush="{DynamicResource ControlBorderBrush}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="File Name" 
+                                                Binding="{Binding FileName}" 
+                                                Width="200"/>
+                            <DataGridTextColumn Header="Path" 
+                                                Binding="{Binding FilePath}" 
+                                                Width="*"/>
+                            <DataGridTextColumn Header="Status" 
+                                                Binding="{Binding Status}" 
+                                                Width="100"/>
+                        </DataGrid.Columns>
+                        <DataGrid.RowStyle>
+                            <Style TargetType="DataGridRow">
+                                <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter Property="Background" Value="{DynamicResource AccentBackgroundBrush}"/>
+                                    </Trigger>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="{DynamicResource HoverBackgroundBrush}"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.RowStyle>
+                    </DataGrid>
+                </Grid>
+            </GroupBox>
+            
+            <!-- Data Type Mapping Status Section -->
+            <GroupBox Grid.Row="2" 
+                      Header="Data Type Mapping Status"
+                      Foreground="{DynamicResource TextPrimaryBrush}"
+                      BorderBrush="{DynamicResource ControlBorderBrush}">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    
+                    <!-- Refresh Button -->
+                    <ToolBar Grid.Row="0"
+                             Background="{DynamicResource SecondaryBackgroundBrush}"
+                             BorderBrush="{DynamicResource ControlBorderBrush}">
+                        <Button Command="{Binding RefreshStatusCommand}"
+                                Content="Refresh Status"
+                                Padding="8,4"/>
+                    </ToolBar>
+                    
+                    <!-- Status DataGrid -->
+                    <DataGrid Grid.Row="1"
+                              ItemsSource="{Binding DataTypeProperties}"
+                              SelectedItem="{Binding SelectedDataType}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              CanUserAddRows="False"
+                              CanUserDeleteRows="False"
+                              Background="{DynamicResource ControlBackgroundBrush}"
+                              Foreground="{DynamicResource TextPrimaryBrush}"
+                              BorderBrush="{DynamicResource ControlBorderBrush}"
+                              GridLinesVisibility="Horizontal"
+                              HorizontalGridLinesBrush="{DynamicResource ControlBorderBrush}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Data Type" 
+                                                Binding="{Binding TypeName}" 
+                                                Width="150"/>
+                            
+                            <!-- Status Indicator Column -->
+                            <DataGridTemplateColumn Header="Status" Width="60">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Ellipse Width="12" Height="12" 
+                                                 Fill="{Binding StatusColor}"
+                                                 HorizontalAlignment="Center"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            
+                            <DataGridTextColumn Header="Available" 
+                                                Binding="{Binding FieldsAvailable}" 
+                                                Width="80"/>
+                            <DataGridTextColumn Header="Mapped" 
+                                                Binding="{Binding FieldsMapped}" 
+                                                Width="80"/>
+                            
+                            <!-- Progress Column -->
+                            <DataGridTemplateColumn Header="Progress" Width="*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Grid>
+                                            <ProgressBar Value="{Binding FieldsMapped}"
+                                                         Maximum="{Binding FieldsAvailable}"
+                                                         Height="16"
+                                                         BorderThickness="1"
+                                                         BorderBrush="{DynamicResource ControlBorderBrush}"/>
+                                            <TextBlock HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center"
+                                                       FontSize="10">
+                                                <TextBlock.Text>
+                                                    <MultiBinding StringFormat="{}{0}/{1}">
+                                                        <Binding Path="FieldsMapped"/>
+                                                        <Binding Path="FieldsAvailable"/>
+                                                    </MultiBinding>
+                                                </TextBlock.Text>
+                                            </TextBlock>
+                                        </Grid>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                        <DataGrid.RowStyle>
+                            <Style TargetType="DataGridRow">
+                                <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter Property="Background" Value="{DynamicResource AccentBackgroundBrush}"/>
+                                    </Trigger>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="{DynamicResource HoverBackgroundBrush}"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.RowStyle>
+                    </DataGrid>
+                </Grid>
+            </GroupBox>
+        </Grid>
+    </ScrollViewer>
+</UserControl>
