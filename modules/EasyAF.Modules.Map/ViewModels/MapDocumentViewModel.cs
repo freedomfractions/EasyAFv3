@@ -22,11 +22,13 @@ namespace EasyAF.Modules.Map.ViewModels
     /// - Document-level state
     /// - Communication between child VMs
     /// </remarks>
-    public class MapDocumentViewModel : BindableBase
+    public class MapDocumentViewModel : BindableBase, IDisposable
     {
         private readonly MapDocument _document;
         private readonly IPropertyDiscoveryService _propertyDiscovery;
+        private readonly IUserDialogService _dialogService;
         private readonly ISettingsService _settingsService;
+        private bool _disposed;
         private object? _selectedTabContent;
         private int _selectedTabIndex;
 
@@ -35,15 +37,18 @@ namespace EasyAF.Modules.Map.ViewModels
         /// </summary>
         /// <param name="document">The map document this VM represents.</param>
         /// <param name="propertyDiscovery">Service for discovering data type properties.</param>
+        /// <param name="dialogService">Service for showing user dialogs.</param>
         /// <param name="settingsService">Service for accessing module settings.</param>
         /// <exception cref="ArgumentNullException">If document, propertyDiscovery, or settingsService is null.</exception>
         public MapDocumentViewModel(
             MapDocument document,
             IPropertyDiscoveryService propertyDiscovery,
+            IUserDialogService dialogService,
             ISettingsService settingsService)
         {
             _document = document ?? throw new ArgumentNullException(nameof(document));
             _propertyDiscovery = propertyDiscovery ?? throw new ArgumentNullException(nameof(propertyDiscovery));
+            _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
             _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
 
             // Initialize collections
@@ -354,25 +359,38 @@ namespace EasyAF.Modules.Map.ViewModels
             }
         }
 
+        /// <summary>
+        /// Handles settings reload event to refresh property visibility in all tabs.
+        /// </summary>
+        private void OnSettingsReloaded(object? sender, EventArgs e)
+        {
+            Log.Information("Settings reloaded, refreshing property visibility for all data types");
+            
+            foreach (var tab in TabHeaders.Where(t => t.ViewModel is DataTypeMappingViewModel))
+            {
+                if (tab.ViewModel is DataTypeMappingViewModel dataTypeVm)
+                {
+                    dataTypeVm.RefreshTargetProperties();
+                }
+            }
+        }
+
         #endregion
 
         #region Cleanup
 
         /// <summary>
-        /// Cleans up resources when the VM is disposed.
+        /// Disposes resources and unsubscribes from events.
         /// </summary>
         public void Dispose()
         {
-            _document.PropertyChanged -= OnDocumentPropertyChanged;
-            
-            // Dispose child VMs if they implement IDisposable
-            foreach (var tab in TabHeaders)
-            {
-                if (tab.ViewModel is IDisposable disposable)
-                {
-                    disposable.Dispose();
-                }
-            }
+            if (_disposed) return;
+
+            // Unsubscribe from settings events
+            _settingsService.SettingsReloaded -= OnSettingsReloaded;
+
+            _disposed = true;
+            GC.SuppressFinalize(this);
         }
 
         #endregion

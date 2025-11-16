@@ -231,6 +231,7 @@ namespace EasyAF.Modules.Map
                 var viewModel = new ViewModels.MapDocumentViewModel(
                     document,
                     _container.Resolve<Services.IPropertyDiscoveryService>(),
+                    _container.Resolve<IUserDialogService>(),
                     _container.Resolve<ISettingsService>()
                 );
                 document.ViewModel = viewModel;
@@ -285,6 +286,7 @@ namespace EasyAF.Modules.Map
                     var viewModel = new ViewModels.MapDocumentViewModel(
                         document,
                         _container.Resolve<Services.IPropertyDiscoveryService>(),
+                        _container.Resolve<IUserDialogService>(),
                         _container.Resolve<ISettingsService>()
                     );
                     document.ViewModel = viewModel;

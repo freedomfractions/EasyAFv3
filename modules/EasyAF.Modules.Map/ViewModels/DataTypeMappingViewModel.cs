@@ -265,6 +265,15 @@ namespace EasyAF.Modules.Map.ViewModels
             LoadAvailableTables();
         }
 
+        /// <summary>
+        /// Refreshes the property list for this data type (called when settings change).
+        /// </summary>
+        public void RefreshTargetProperties()
+        {
+            LoadTargetProperties();
+            Log.Information("Refreshed properties for {DataType} based on updated settings", _dataType);
+        }
+
         #endregion
 
         #region Data Loading
