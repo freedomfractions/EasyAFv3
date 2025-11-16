@@ -54,9 +54,7 @@
             <ComboBox ItemsSource="{Binding AvailableTables}"
                       SelectedItem="{Binding SelectedTable}"
                       MinWidth="200"
-                      Background="{DynamicResource ControlBackgroundBrush}"
-                      Foreground="{DynamicResource TextPrimaryBrush}"
-                      BorderBrush="{DynamicResource ControlBorderBrush}"/>
+                      Style="{StaticResource ThemedComboBoxStyle}"/>
             <Separator Style="{StaticResource ToolBarSeparatorStyle}"/>
             <Button Command="{Binding LoadFromFileCommand}"
                     Content="Load File..."

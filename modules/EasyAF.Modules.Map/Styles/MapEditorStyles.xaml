@@ -258,7 +258,7 @@
     </Style>
     
     <!-- ComboBox Style with complete template override -->
-    <Style TargetType="ComboBox">
+    <Style x:Key="ThemedComboBoxStyle" TargetType="ComboBox">
         <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}"/>
         <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource ControlBorderBrush}"/>
