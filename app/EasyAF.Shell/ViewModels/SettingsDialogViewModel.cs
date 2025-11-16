@@ -26,16 +26,23 @@ public class SettingsDialogViewModel : BindableBase
     /// </summary>
     /// <param name="themeService">The theme service.</param>
     /// <param name="settingsService">The settings service.</param>
-    public SettingsDialogViewModel(IThemeService themeService, ISettingsService settingsService)
+    /// <param name="mapSettingsViewModel">The Map module settings view model (optional).</param>
+    public SettingsDialogViewModel(
+        IThemeService themeService,
+        ISettingsService settingsService,
+        object? mapSettingsViewModel = null)
     {
         _themeService = themeService ?? throw new ArgumentNullException(nameof(themeService));
         _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
 
         _originalTheme = _themeService.CurrentTheme;
-        
+
         // Load recent files limit setting (default 25, range 3-250)
         _originalRecentFilesLimit = _settingsService.GetSetting("RecentFiles.MaxCount", 25);
         _recentFilesLimit = ClampRecentFilesLimit(_originalRecentFilesLimit);
+
+        // Store Map module settings VM if provided
+        MapSettingsViewModel = mapSettingsViewModel;
 
         // Initialize commands
         ApplyCommand = new DelegateCommand(Apply);
@@ -88,6 +95,11 @@ public class SettingsDialogViewModel : BindableBase
     }
 
     /// <summary>
+    /// Gets the Map module settings view model (null if Map module not loaded).
+    /// </summary>
+    public object? MapSettingsViewModel { get; }
+
+    /// <summary>
     /// Gets the Apply command (applies settings without closing dialog).
     /// </summary>
     public ICommand ApplyCommand { get; }
@@ -121,10 +133,22 @@ public class SettingsDialogViewModel : BindableBase
             _themeService.ApplyTheme(SelectedThemeDescriptor.Name);
             _settingsService.SetSetting("Application.Theme", SelectedThemeDescriptor.Name);
         }
-        
+
         // Save recent files limit
         _settingsService.SetSetting("RecentFiles.MaxCount", _recentFilesLimit);
-        
+
+        // CROSS-MODULE EDIT: 2025-01-16 Map Module Settings Feature - Step 8
+        // Modified for: Save Map module settings when user clicks OK/Apply
+        // Related modules: Map (MapModuleSettingsViewModel)
+        // Rollback instructions: Remove this block and MapSettingsViewModel property
+
+        // Save Map module settings if available
+        if (MapSettingsViewModel is EasyAF.Modules.Map.ViewModels.MapModuleSettingsViewModel mapVm)
+        {
+            mapVm.SaveSettings();
+            Log.Debug("Map module settings saved");
+        }
+
         Log.Information("Settings applied: Theme={Theme}, RecentFilesLimit={Limit}", SelectedThemeDescriptor?.Name, _recentFilesLimit);
     }
 
@@ -139,10 +163,17 @@ public class SettingsDialogViewModel : BindableBase
     {
         // Revert to original theme
         _themeService.ApplyTheme(_originalTheme);
-        
+
         // Revert recent files limit (no need to persist, just local state)
         _recentFilesLimit = _originalRecentFilesLimit;
-        
+
+        // Reload Map module settings if available (discard changes)
+        if (MapSettingsViewModel is EasyAF.Modules.Map.ViewModels.MapModuleSettingsViewModel mapVm)
+        {
+            mapVm.ReloadSettings();
+            Log.Debug("Map module settings reloaded (changes discarded)");
+        }
+
         DialogResult = false;
         Log.Debug("Settings dialog closed with Cancel, theme reverted to: {Theme}", _originalTheme);
     }

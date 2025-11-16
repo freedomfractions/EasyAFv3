@@ -12,5 +12,15 @@
     <DataTemplate DataType="{x:Type mapVM:MapDocumentViewModel}">
         <mapView:MapDocumentView />
     </DataTemplate>
+
+    <!-- CROSS-MODULE EDIT: 2025-01-16 Map Module Settings Feature - Step 8 -->
+    <!-- Modified for: Register DataTemplate for Map module settings view -->
+    <!-- Related modules: Map (MapModuleSettingsViewModel, MapModuleSettingsView) -->
+    <!-- Rollback instructions: Remove this DataTemplate -->
+    
+    <!-- Map Module Settings View Template -->
+    <DataTemplate DataType="{x:Type mapVM:MapModuleSettingsViewModel}">
+        <mapView:MapModuleSettingsView />
+    </DataTemplate>
     
 </ResourceDictionary>

@@ -121,6 +121,9 @@ namespace EasyAF.Modules.Map
             container.RegisterSingleton<Services.IPropertyDiscoveryService, Services.PropertyDiscoveryService>();
             container.RegisterType<Services.ColumnExtractionService>(); // Transient - create new instance per use
             
+            // Register settings ViewModel (singleton - one instance for Options dialog)
+            container.RegisterSingleton<ViewModels.MapModuleSettingsViewModel>();
+            
             // Initialize default settings if not present (first run or corrupted settings)
             var settingsService = container.Resolve<ISettingsService>();
             InitializeDefaultSettings(settingsService);
