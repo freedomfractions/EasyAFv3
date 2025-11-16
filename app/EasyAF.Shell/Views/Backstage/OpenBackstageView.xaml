@@ -21,10 +21,30 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Resources/BackstageConverters.xaml"/>
-                <ResourceDictionary Source="Resources/RecentFilesTabTemplate.xaml"/>
+                <!-- TEMPORARY: Comment out until templates are implemented -->
+                <!--<ResourceDictionary Source="Resources/RecentFilesTabTemplate.xaml"/>
                 <ResourceDictionary Source="Resources/RecentFoldersTabTemplate.xaml"/>
-                <ResourceDictionary Source="Resources/QuickAccessBrowserTemplate.xaml"/>
+                <ResourceDictionary Source="Resources/QuickAccessBrowserTemplate.xaml"/>-->
             </ResourceDictionary.MergedDictionaries>
+            
+            <!-- Temporary inline templates as placeholders -->
+            <DataTemplate x:Key="RecentFilesTabTemplate">
+                <TextBlock Text="Recent Files (Template Not Yet Implemented)" 
+                           Margin="20"
+                           Foreground="{DynamicResource TextSecondaryBrush}"/>
+            </DataTemplate>
+            
+            <DataTemplate x:Key="RecentFoldersTabTemplate">
+                <TextBlock Text="Recent Folders (Template Not Yet Implemented)" 
+                           Margin="20"
+                           Foreground="{DynamicResource TextSecondaryBrush}"/>
+            </DataTemplate>
+            
+            <DataTemplate x:Key="QuickAccessBrowserTemplate">
+                <TextBlock Text="Quick Access Browser (Template Not Yet Implemented)" 
+                           Margin="20"
+                           Foreground="{DynamicResource TextSecondaryBrush}"/>
+            </DataTemplate>
         </ResourceDictionary>
     </UserControl.Resources>
     
