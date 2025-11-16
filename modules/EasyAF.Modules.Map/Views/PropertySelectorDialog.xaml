@@ -126,14 +126,6 @@
                                                TextWrapping="Wrap"
                                                Margin="0,2,0,0"
                                                Visibility="{Binding HasDescription, Converter={StaticResource BoolToVisibilityConverter}}"/>
-                                    
-                                    <!-- Property Type -->
-                                    <TextBlock FontSize="10"
-                                               Foreground="{DynamicResource TextTertiaryBrush}"
-                                               Margin="0,2,0,0">
-                                        <Run Text="Type:"/>
-                                        <Run Text="{Binding PropertyType}" FontFamily="Consolas"/>
-                                    </TextBlock>
                                 </StackPanel>
                             </CheckBox.Content>
                         </CheckBox>
