@@ -1,0 +1,194 @@
+{
+  "$schema": "https://easyaf.app/schemas/mapping-v3.json",
+  "SoftwareVersion": "3.0.0",
+  "MapVersion": "1.0",
+  "ImportMap": [
+    {
+      "TargetType": "Bus",
+      "PropertyName": "Id",
+      "ColumnHeader": "Bus ID",
+      "Required": true,
+      "Severity": "Error",
+      "Aliases": ["BusId", "Bus_ID", "ID"]
+    },
+    {
+      "TargetType": "Bus",
+      "PropertyName": "Name",
+      "ColumnHeader": "Bus Name",
+      "Required": true,
+      "Severity": "Error",
+      "Aliases": ["BusName", "Name"]
+    },
+    {
+      "TargetType": "Bus",
+      "PropertyName": "Voltage",
+      "ColumnHeader": "Nominal Voltage",
+      "Required": false,
+      "Severity": "Warning",
+      "DefaultValue": "0.48",
+      "Aliases": ["Voltage", "kV", "Nom_Voltage", "Nominal_kV"]
+    },
+    {
+      "TargetType": "ArcFlash",
+      "PropertyName": "Bus",
+      "ColumnHeader": "Bus ID",
+      "Required": true,
+      "Severity": "Error"
+    },
+    {
+      "TargetType": "ArcFlash",
+      "PropertyName": "Scenario",
+      "ColumnHeader": "Fault Scenario",
+      "Required": false,
+      "Severity": "Warning",
+      "DefaultValue": "Main-Min",
+      "Aliases": ["Scenario", "Case", "Fault_Case"]
+    },
+    {
+      "TargetType": "ArcFlash",
+      "PropertyName": "FaultType",
+      "ColumnHeader": "Fault Type",
+      "Required": false,
+      "DefaultValue": "3PH",
+      "Aliases": ["FaultType", "Type", "Fault"]
+    },
+    {
+      "TargetType": "ArcFlash",
+      "PropertyName": "IncidentEnergy",
+      "ColumnHeader": "IE (cal/cm²)",
+      "Required": false,
+      "Aliases": ["Incident Energy", "IE", "Energy"]
+    },
+    {
+      "TargetType": "ArcFlash",
+      "PropertyName": "ArcFlashBoundary",
+      "ColumnHeader": "AFB (inches)",
+      "Required": false,
+      "Aliases": ["Arc Flash Boundary", "AFB", "Boundary"]
+    },
+    {
+      "TargetType": "ShortCircuit",
+      "PropertyName": "Bus",
+      "ColumnHeader": "Bus ID",
+      "Required": true,
+      "Severity": "Error"
+    },
+    {
+      "TargetType": "ShortCircuit",
+      "PropertyName": "Scenario",
+      "ColumnHeader": "Fault Scenario",
+      "Required": false,
+      "DefaultValue": "Main-Max"
+    },
+    {
+      "TargetType": "ShortCircuit",
+      "PropertyName": "FaultType",
+      "ColumnHeader": "Fault Type",
+      "Required": false,
+      "DefaultValue": "3PH"
+    },
+    {
+      "TargetType": "ShortCircuit",
+      "PropertyName": "DutyKA",
+      "ColumnHeader": "Duty (kA)",
+      "Required": false,
+      "Aliases": ["Duty", "SC_Current", "Short_Circuit_Current"]
+    },
+    {
+      "TargetType": "LVCB",
+      "PropertyName": "Id",
+      "ColumnHeader": "Device ID",
+      "Required": true,
+      "Severity": "Error"
+    },
+    {
+      "TargetType": "LVCB",
+      "PropertyName": "Manufacturer",
+      "ColumnHeader": "Manufacturer",
+      "Required": false
+    },
+    {
+      "TargetType": "LVCB",
+      "PropertyName": "Style",
+      "ColumnHeader": "Breaker Style",
+      "Required": false,
+      "Aliases": ["Style", "Model", "Frame"]
+    },
+    {
+      "TargetType": "LVCB.TripUnit",
+      "PropertyName": "LongTimePickup",
+      "ColumnHeader": "LT Pickup (A)",
+      "Required": false,
+      "Aliases": ["LT_Pickup", "Long_Time_Pickup"]
+    },
+    {
+      "TargetType": "LVCB.TripUnit",
+      "PropertyName": "ShortTimePickup",
+      "ColumnHeader": "ST Pickup (A)",
+      "Required": false,
+      "Aliases": ["ST_Pickup", "Short_Time_Pickup"]
+    },
+    {
+      "TargetType": "LVCB.TripUnit",
+      "PropertyName": "InstantaneousPickup",
+      "ColumnHeader": "Inst Pickup (A)",
+      "Required": false,
+      "Aliases": ["Inst_Pickup", "I_Pickup", "Instantaneous"]
+    },
+    {
+      "TargetType": "Fuse",
+      "PropertyName": "Id",
+      "ColumnHeader": "Device ID",
+      "Required": true,
+      "Severity": "Error"
+    },
+    {
+      "TargetType": "Fuse",
+      "PropertyName": "Manufacturer",
+      "ColumnHeader": "Manufacturer",
+      "Required": false
+    },
+    {
+      "TargetType": "Fuse",
+      "PropertyName": "Style",
+      "ColumnHeader": "Fuse Style",
+      "Required": false,
+      "Aliases": ["Style", "Type", "Class"]
+    },
+    {
+      "TargetType": "Fuse",
+      "PropertyName": "Rating",
+      "ColumnHeader": "Fuse Rating (A)",
+      "Required": false,
+      "Aliases": ["Rating", "Amperage", "Amps"]
+    },
+    {
+      "TargetType": "Cable",
+      "PropertyName": "Id",
+      "ColumnHeader": "Cable ID",
+      "Required": true,
+      "Severity": "Error"
+    },
+    {
+      "TargetType": "Cable",
+      "PropertyName": "Size",
+      "ColumnHeader": "Conductor Size",
+      "Required": false,
+      "Aliases": ["Size", "AWG", "kcmil"]
+    },
+    {
+      "TargetType": "Cable",
+      "PropertyName": "Insulation",
+      "ColumnHeader": "Insulation Type",
+      "Required": false,
+      "Aliases": ["Insulation", "Ins_Type", "Type"]
+    },
+    {
+      "TargetType": "Cable",
+      "PropertyName": "Ampacity",
+      "ColumnHeader": "Ampacity (A)",
+      "Required": false,
+      "Aliases": ["Ampacity", "Rating", "Capacity"]
+    }
+  ]
+}

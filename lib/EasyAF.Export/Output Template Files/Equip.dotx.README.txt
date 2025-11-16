@@ -1,0 +1,19 @@
+Equip.dotx placeholder documentation:
+This text file indicates that the Equip.dotx Word template must contain at least one paragraph/table
+with plain text content controls (SDT) whose Tag values start with ShortCircuit. (e.g. ShortCircuit.Id)
+or Project. (e.g. Project.StudyDate) for EquipmentDutyLabelGenerator to function.
+
+Expected minimal tags in prototype block:
+  ShortCircuit.Id
+  ShortCircuit.Bus
+  ShortCircuit.Scenario
+  ShortCircuit.FaultType
+  ShortCircuit.Voltage
+  ShortCircuit.RatingKA
+  ShortCircuit.DutyKA
+  ShortCircuit.DutyPercent
+  ShortCircuit.EquipmentTypeDisplay
+  ShortCircuit.RatingDutyLine
+  Project.StudyDate
+
+Add additional tags as needed. The generator clones the prototype for each NON over-dutied entry by default.

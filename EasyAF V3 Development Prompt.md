@@ -342,6 +342,159 @@ Next Task: [What should be worked on next]
 **NOTE: Newest entries appear at the top**
 
 ```
+Date: 2025-01-15T15:30:00-06:00
+Task: Task 12 - Create Map Module Structure
+Status: Complete
+Blocking Issue: None
+Cross-Module Edits:
+- modules\EasyAF.Modules.Map\EasyAF.Modules.Map.csproj: New WPF class library project (net8.0-windows)
+- modules\EasyAF.Modules.Map\MapModule.cs: IDocumentModule implementation with complete XML documentation
+- EasyAFv3.sln: Added Map module project to solution
+Notes:
+✅ COMPLETE: Map module project structure created
+- Created WPF class library targeting net8.0-windows
+- Added project references: EasyAF.Core, EasyAF.Import, EasyAF.Data
+- Added NuGet packages: Prism.Unity (9.0.537), Serilog (3.1.1)
+- Created folder structure: ViewModels/, Views/, Models/, Services/
+- Implemented MapModule class with IDocumentModule interface:
+  - ModuleName: "Map Editor"
+  - ModuleVersion: "3.0.0"
+  - SupportedFileExtensions: ["ezmap"]
+  - SupportedFileTypes: EasyAF Mapping Configuration Files (.ezmap)
+  - All public members fully documented with XML comments
+  - Placeholder implementations with TODO markers for Tasks 13-16
+  - CanHandleFile: Extension-based validation for .ezmap files
+- Module follows strict MVVM principles (zero code-behind mandate)
+- Module isolation maintained (no references to other modules)
+BUILD STATUS: ✅ Successful compilation
+ARCHITECTURE NOTES:
+- Module registered with solution but NOT yet wired to shell's ModuleLoader
+- Shell will discover module automatically once module DLL is copied to Modules/ folder
+- Module icon placeholder (null) - can add embedded resource later
+- Initialize() method ready for service registration in Task 13
+- Document view hosting will use DataTemplate approach (per shell architecture decision)
+Next Task: Task 13 - Implement Map Data Model
+```
+
+```
+Date: 2025-01-15T14:00:00-06:00
+Task: ARCHITECTURE REVIEW - Single-Phase Multi-Scenario Limitation
+Status: Documented
+Blocking Issue: None
+Cross-Module Edits: None (documentation only)
+Notes:
+SINGLE-PHASE POWER SYSTEM EDGE CASE IDENTIFIED:
+
+BACKGROUND:
+- EasyAF performs engineering studies for power systems (3-phase and single-phase)
+- Simulation software exports data files for analysis
+- 3-Phase systems: Can export multiple scenarios (Main-Min, Main-Max, Service-Min, Service-Max) into single export file
+- Single-Phase systems: CANNOT export multiple scenarios - limited to one scenario per export file
+
+IMPACT ON DATA MODEL:
+- Current DataSet model ALREADY supports multiple scenarios via composite keys:
+  - ArcFlash: keyed by (Id, Scenario)
+  - ShortCircuit: keyed by (Id, Bus, Scenario)
+- No changes needed to DataSet structure
+- Composite key design already accommodates scenario stitching
+
+IMPACT ON IMPORT WORKFLOW:
+- 3-Phase Projects: Import workflow unchanged
+  1. User selects single CSV/Excel export file
+  2. Apply mapping configuration
+  3. Populate DataSet with all scenarios from file
+  
+- Single-Phase Projects: Requires multi-file stitching
+  1. User must import MULTIPLE export files (one per scenario)
+  2. Each file contains same equipment IDs but different scenario name
+  3. Import process must MERGE data into single DataSet
+  4. Example:
+     - File 1: "Main-Min.csv" → populates entries with Scenario="Main-Min"
+     - File 2: "Main-Max.csv" → populates entries with Scenario="Main-Max"
+     - Result: Single DataSet with both scenarios
+
+AFFECTED MODULES:
+- ✅ EasyAF.Data (Models): NO CHANGES NEEDED - composite keys already support this
+- ✅ EasyAF.Import (Mapping): NO CHANGES NEEDED - mapping is just column→property, scenario-agnostic
+- ⚠️ Project Module (Phase 4): REQUIRES UI for multi-file import workflow
+  - Task 19 (Design Project Data Model): Already complete - DataSet supports multi-scenario
+  - Task 22 (Build Project Ribbon Interface): Will need "Import Additional Scenario" command
+  - New UI requirement: Allow user to import multiple files sequentially into same DataSet
+  
+IMPLEMENTATION NOTES FOR PHASE 4 (Project Module):
+
+1. Import Command Options:
+   - "Import New Data..." → Replaces NewData entirely (standard workflow)
+   - "Import Additional Scenario..." → MERGES into existing NewData
+   - "Import Old Data..." → Replaces OldData entirely
+   - "Import Additional Scenario (Old)..." → MERGES into existing OldData
+
+2. Merge Logic (ImportManager enhancement):
+   - Standard import: Creates new DataSet, populates from file
+   - Additional scenario import: 
+     a. Load existing DataSet from Project
+     b. Import file into TEMP DataSet
+     c. Merge TEMP into existing using composite key logic
+     d. Detect/warn on key collisions (same Id+Scenario already exists)
+
+3. UI Workflow (Project Module):
+   - User clicks "Import Additional Scenario..."
+   - File dialog: "Select scenario export file"
+   - Mapping selection: Use same mapping as initial import OR allow different mapping
+   - Merge confirmation: "Add 15 ArcFlash entries, 42 ShortCircuit entries to existing dataset?"
+   - Result: Project.NewData now contains COMBINED scenarios
+
+4. Validation Requirements:
+   - Warn if scenario name already exists (potential overwrite)
+   - Warn if equipment IDs don't match between scenarios (user error)
+   - Allow user to rename scenario during import ("Main-Max" → "Service-Max")
+
+5. Diff Impact:
+   - DataSetDiff already handles multi-scenario via composite keys
+   - No changes needed to diff logic
+   - Diff results will show additions per scenario: "ArcFlash:BUS-001|Main-Max added"
+
+DECISION POINTS DEFERRED TO PHASE 4:
+- [ ] Should single-phase projects be flagged in metadata? (Project.IsSinglePhase property?)
+- [ ] Should UI detect phase count automatically from import data?
+- [ ] Should "Import Additional Scenario" be available for 3-phase projects too? (Yes for flexibility)
+- [ ] Should we support REMOVING individual scenarios from DataSet?
+
+BENEFITS OF CURRENT ARCHITECTURE:
+✅ Composite key design already supports this use case
+✅ No breaking changes to data models
+✅ DataSet diff handles multi-scenario comparison automatically
+✅ JSON serialization already works (ProjectPersist converts composite keys to lists)
+✅ Mapping system is scenario-agnostic (just maps columns to properties)
+
+RISKS MITIGATED:
+✅ No need to refactor DataSet structure
+✅ No performance concerns (composite key lookups are O(1))
+✅ No serialization issues (ProjectPersist handles tuple keys)
+✅ No diff logic changes needed
+
+TESTING CONSIDERATIONS FOR PHASE 4:
+- [ ] Test importing single scenario into empty DataSet
+- [ ] Test importing additional scenario into populated DataSet
+- [ ] Test key collision detection (same Id+Scenario imported twice)
+- [ ] Test diff between datasets with different scenario sets
+- [ ] Test JSON save/load with multiple scenarios
+- [ ] Test report generation with multi-scenario data (ensure all scenarios accessible)
+
+DOCUMENTATION UPDATES NEEDED:
+- [x] Add journal entry to prompt.md (this entry)
+- [ ] Update Phase 4 Task 22 description to include multi-file import commands
+- [ ] Add usage example to DataSet.cs showing multi-scenario stitching workflow
+- [ ] Document in Project Module help pages (Phase 4)
+
+RECOMMENDATION:
+Proceed with Phase 3 (Map Module) as planned. No architectural changes needed.
+Address multi-file import UI in Phase 4 Task 22 (Project Ribbon Interface).
+
+Rollback Instructions: N/A (documentation only)
+```
+
+```
 Date: 2025-11-11T22:00:00-06:00
 Task: SANITY CHECK - Pre-Phase 3 Review
 Status: Paused
