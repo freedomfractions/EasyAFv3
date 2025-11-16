@@ -51,12 +51,58 @@
                        VerticalAlignment="Center" 
                        Margin="4,0,4,0"
                        Foreground="{DynamicResource TextPrimaryBrush}"/>
-            <ComboBox ItemsSource="{Binding AvailableTables}"
+            <ComboBox ItemsSource="{Binding AvailableTablesView}"
                       SelectedItem="{Binding SelectedTable}"
-                      MinWidth="200"
+                      MinWidth="250"
+                      MaxDropDownHeight="400"
                       DisplayMemberPath="DisplayName"
                       Style="{StaticResource ThemedComboBoxStyle}"
-                      ToolTip="Select a table/sheet from your loaded files"/>
+                      ToolTip="Select a table/sheet from your loaded files">
+                
+                <!-- Group Style for File Headers -->
+                <ComboBox.GroupStyle>
+                    <GroupStyle>
+                        <GroupStyle.HeaderTemplate>
+                            <DataTemplate>
+                                <Border Background="{DynamicResource SecondaryBackgroundBrush}"
+                                        Padding="6,4"
+                                        Margin="0,2,0,0">
+                                    <TextBlock Text="{Binding Name}" 
+                                               FontWeight="SemiBold"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                </Border>
+                            </DataTemplate>
+                        </GroupStyle.HeaderTemplate>
+                        <GroupStyle.ContainerStyle>
+                            <Style TargetType="GroupItem">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="GroupItem">
+                                            <StackPanel>
+                                                <!-- Group Header -->
+                                                <ContentPresenter />
+                                                <!-- Group Items (indented) -->
+                                                <ItemsPresenter Margin="12,0,0,0"/>
+                                            </StackPanel>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </GroupStyle.ContainerStyle>
+                    </GroupStyle>
+                </ComboBox.GroupStyle>
+                
+                <!-- Item Template for individual tables -->
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding TableName}"
+                                   Padding="4,2"
+                                   Foreground="{DynamicResource TextPrimaryBrush}"/>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <Separator Style="{StaticResource ToolBarSeparatorStyle}"/>
         </ToolBar>
         
         <!-- Dataset Columns (LEFT Pane) -->
