@@ -161,24 +161,6 @@
                 </ScrollViewer>
             </TabItem>
 
-            <!-- Module Settings Tab (Placeholder for dynamic module tabs) -->
-            <TabItem Header="Modules" IsEnabled="False">
-                <TabItem.HeaderTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding}" 
-                                   Foreground="{DynamicResource TextSecondaryBrush}"
-                                   FontWeight="SemiBold"
-                                   Padding="12,8"/>
-                    </DataTemplate>
-                </TabItem.HeaderTemplate>
-                <StackPanel Margin="20" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <TextBlock Text="No modules loaded" 
-                               Foreground="{DynamicResource TextSecondaryBrush}"
-                               FontStyle="Italic"
-                               HorizontalAlignment="Center"/>
-                </StackPanel>
-            </TabItem>
-
             <!-- CROSS-MODULE EDIT: 2025-01-16 Map Module Settings Feature - Step 8 -->
             <!-- Modified for: Add Map Editor settings tab -->
             <!-- Related modules: Map (MapModuleSettingsView, MapModuleSettingsViewModel) -->
