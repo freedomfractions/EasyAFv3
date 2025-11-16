@@ -17,6 +17,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\lib\EasyAF.Core\EasyAF.Core.csproj" />
+    <!-- Module References (for automatic discovery) -->
+    <ProjectReference Include="..\..\modules\EasyAF.Modules.Map\EasyAF.Modules.Map.csproj">
+      <Private>true</Private> <!-- Ensures DLL is copied to output -->
+    </ProjectReference>
   </ItemGroup>
 
   <ItemGroup>

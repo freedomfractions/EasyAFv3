@@ -13,6 +13,7 @@ public class ModuleLoader : IModuleLoader
     private readonly IModuleCatalog _catalog;
     private readonly ISettingsService _settings;
     private readonly List<IModule> _loaded = new();
+    private Unity.IUnityContainer? _container; // Store container reference
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ModuleLoader"/> class.
@@ -28,6 +29,15 @@ public class ModuleLoader : IModuleLoader
 
     /// <inheritdoc />
     public IEnumerable<IModule> LoadedModules => _loaded;
+
+    /// <summary>
+    /// Sets the Unity container for module initialization.
+    /// </summary>
+    /// <param name="container">The Unity container.</param>
+    public void SetContainer(Unity.IUnityContainer container)
+    {
+        _container = container;
+    }
 
     /// <inheritdoc />
     public void DiscoverAndLoadModules(string? searchPath = null)
@@ -89,9 +99,16 @@ public class ModuleLoader : IModuleLoader
                         // Create instance
                         var module = (IModule)Activator.CreateInstance(t)!;
 
-                        // Initialize (DI integration can be added later when container available)
-                        // For now pass null container - modules should handle gracefully until Task 8 pipeline extended
-                        module.Initialize(null!);
+                        // Initialize with container (if available)
+                        if (_container != null)
+                        {
+                            module.Initialize(_container);
+                        }
+                        else
+                        {
+                            Log.Warning("Module {ModuleName} initialized without container - services may not be available", module.ModuleName);
+                            module.Initialize(null!); // Fallback for early initialization
+                        }
 
                         _catalog.RegisterModule(module);
                         _loaded.Add(module);
