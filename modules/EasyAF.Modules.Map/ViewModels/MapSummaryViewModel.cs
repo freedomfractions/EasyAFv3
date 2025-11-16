@@ -243,12 +243,16 @@ namespace EasyAF.Modules.Map.ViewModels
             {
                 Filter = "Data Files (*.csv;*.xlsx;*.xls)|*.csv;*.xlsx;*.xls|All Files (*.*)|*.*",
                 Title = "Add Sample File for Mapping",
-                Multiselect = false
+                Multiselect = true  // Enable multi-select
             };
 
             if (dialog.ShowDialog() == true)
             {
-                AddReferencedFile(dialog.FileName);
+                // Add all selected files
+                foreach (var filePath in dialog.FileNames)
+                {
+                    AddReferencedFile(filePath);
+                }
             }
         }
 
@@ -361,6 +365,26 @@ namespace EasyAF.Modules.Map.ViewModels
             _parentViewModel.RefreshAllTabStatuses();
 
             Log.Debug("Refreshed mapping status for all data types");
+        }
+
+        /// <summary>
+        /// Adds multiple files from a drag-and-drop operation.
+        /// </summary>
+        /// <param name="filePaths">Array of file paths to add.</param>
+        /// <remarks>
+        /// This method is called from the View's drop event handler.
+        /// It processes each file and adds it to the referenced files collection.
+        /// </remarks>
+        public void AddFilesFromDrop(string[] filePaths)
+        {
+            if (filePaths == null || filePaths.Length == 0) return;
+
+            Log.Information("Processing {Count} files from drag-and-drop", filePaths.Length);
+
+            foreach (var filePath in filePaths)
+            {
+                AddReferencedFile(filePath);
+            }
         }
 
         #endregion

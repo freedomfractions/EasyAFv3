@@ -200,12 +200,16 @@
                         
                         <!-- Files DataGrid -->
                         <DataGrid Grid.Row="1" 
+                                  x:Name="FilesDataGrid"
                                   ItemsSource="{Binding ReferencedFiles}"
                                   SelectedItem="{Binding SelectedFile}"
                                   AutoGenerateColumns="False"
                                   IsReadOnly="True"
                                   CanUserAddRows="False"
                                   CanUserDeleteRows="False"
+                                  AllowDrop="True"
+                                  DragOver="FilesDataGrid_DragOver"
+                                  Drop="FilesDataGrid_Drop"
                                   RowStyle="{StaticResource MapDataGridRowStyle}">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="File Name" 
