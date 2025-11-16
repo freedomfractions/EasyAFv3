@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
@@ -66,6 +67,12 @@ namespace EasyAF.Modules.Map.ViewModels
             TargetPropertiesView = CollectionViewSource.GetDefaultView(TargetProperties);
             TargetPropertiesView.Filter = FilterTargetProperty;
 
+            // Setup collection view for AvailableTables with smart grouping
+            // Only group multi-table files (Excel with multiple sheets)
+            AvailableTablesView = CollectionViewSource.GetDefaultView(AvailableTables);
+            var groupDescription = new System.Windows.Data.PropertyGroupDescription(nameof(TableReference.FileName));
+            AvailableTablesView.GroupDescriptions.Add(groupDescription);
+
             // Initialize commands
             MapSelectedCommand = new DelegateCommand(ExecuteMapSelected, CanExecuteMapSelected);
             UnmapSelectedCommand = new DelegateCommand(ExecuteUnmapSelected, CanExecuteUnmapSelected);
@@ -110,6 +117,11 @@ namespace EasyAF.Modules.Map.ViewModels
         /// Gets the collection of available table references grouped by file.
         /// </summary>
         public ObservableCollection<TableReference> AvailableTables { get; }
+
+        /// <summary>
+        /// Gets the grouped view of available tables (groups multi-table files only).
+        /// </summary>
+        public ICollectionView AvailableTablesView { get; }
 
         /// <summary>
         /// Gets or sets the source column filter text.
@@ -276,22 +288,44 @@ namespace EasyAF.Modules.Map.ViewModels
         {
             AvailableTables.Clear();
 
+            // First pass: count tables per file
+            var tablesByFile = new Dictionary<string, List<TableReference>>();
+            
             foreach (var file in _document.ReferencedFiles)
             {
                 try
                 {
                     var columns = _columnExtraction.ExtractColumns(file.FilePath);
+                    
+                    if (!tablesByFile.ContainsKey(file.FilePath))
+                    {
+                        tablesByFile[file.FilePath] = new List<TableReference>();
+                    }
+                    
                     foreach (var tableName in columns.Keys)
                     {
-                        if (!AvailableTables.Any(t => t.TableName == tableName && t.FilePath == file.FilePath))
-                        {
-                            AvailableTables.Add(new TableReference { TableName = tableName, FilePath = file.FilePath });
-                        }
+                        tablesByFile[file.FilePath].Add(new TableReference 
+                        { 
+                            TableName = tableName, 
+                            FilePath = file.FilePath 
+                        });
                     }
                 }
                 catch (Exception ex)
                 {
                     Log.Warning(ex, "Failed to extract columns from {FilePath}", file.FilePath);
+                }
+            }
+
+            // Second pass: mark multi-table files and add to collection
+            foreach (var fileGroup in tablesByFile)
+            {
+                bool isMultiTable = fileGroup.Value.Count > 1;
+                
+                foreach (var tableRef in fileGroup.Value)
+                {
+                    tableRef.IsMultiTableFile = isMultiTable;
+                    AvailableTables.Add(tableRef);
                 }
             }
 
@@ -303,7 +337,8 @@ namespace EasyAF.Modules.Map.ViewModels
                     SelectedTable.TableName, SelectedTable.FileName);
             }
 
-            Log.Debug("Loaded {Count} available tables", AvailableTables.Count);
+            Log.Debug("Loaded {Count} available tables from {FileCount} files", 
+                AvailableTables.Count, tablesByFile.Count);
         }
 
         /// <summary>

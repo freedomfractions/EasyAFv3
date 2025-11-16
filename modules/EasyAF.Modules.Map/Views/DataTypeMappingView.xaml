@@ -51,27 +51,83 @@
                        VerticalAlignment="Center" 
                        Margin="4,0,4,0"
                        Foreground="{DynamicResource TextPrimaryBrush}"/>
-            <ComboBox ItemsSource="{Binding AvailableTables}"
+            <ComboBox ItemsSource="{Binding AvailableTablesView}"
                       SelectedItem="{Binding SelectedTable}"
                       MinWidth="250"
                       MaxDropDownHeight="400"
                       Style="{StaticResource ThemedComboBoxStyle}"
                       ToolTip="Select a table/sheet from your loaded files">
                 
-                <!-- Item Template with conditional display -->
+                <!-- Group Style - Only show header for multi-table files -->
+                <ComboBox.GroupStyle>
+                    <GroupStyle>
+                        <GroupStyle.HeaderTemplate>
+                            <DataTemplate>
+                                <!-- Only show header if this is a multi-table file -->
+                                <Border Background="{DynamicResource SecondaryBackgroundBrush}"
+                                        Padding="6,4"
+                                        Margin="0,2,0,0">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <!-- Hide header for single-table files -->
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Items[0].IsMultiTableFile}" Value="False">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <TextBlock Text="{Binding Name}" 
+                                               FontWeight="SemiBold"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                </Border>
+                            </DataTemplate>
+                        </GroupStyle.HeaderTemplate>
+                        <GroupStyle.ContainerStyle>
+                            <Style TargetType="GroupItem">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="GroupItem">
+                                            <StackPanel>
+                                                <!-- Group Header (visible only for multi-table) -->
+                                                <ContentPresenter />
+                                                <!-- Group Items -->
+                                                <ItemsPresenter>
+                                                    <ItemsPresenter.Style>
+                                                        <Style TargetType="ItemsPresenter">
+                                                            <!-- Indent only if multi-table -->
+                                                            <Setter Property="Margin" Value="0"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Items[0].IsMultiTableFile}" Value="True">
+                                                                    <Setter Property="Margin" Value="12,0,0,0"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </ItemsPresenter.Style>
+                                                </ItemsPresenter>
+                                            </StackPanel>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </GroupStyle.ContainerStyle>
+                    </GroupStyle>
+                </ComboBox.GroupStyle>
+                
+                <!-- Item Template - smart display -->
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
-                        <!-- For CSV: just show filename -->
-                        <!-- For Excel single sheet: show filename -->
-                        <!-- For Excel multiple sheets: show "filename ? SheetName" -->
                         <TextBlock Padding="4,2"
                                    Foreground="{DynamicResource TextPrimaryBrush}">
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock">
-                                    <Setter Property="Text" Value="{Binding DisplayName}"/>
-                                    <!-- If CSV file or single-sheet Excel, just show filename -->
+                                    <!-- Default: show just table name if multi-table -->
+                                    <Setter Property="Text" Value="{Binding TableName}"/>
+                                    <!-- If single-table file, show filename instead -->
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsCsvFile}" Value="True">
+                                        <DataTrigger Binding="{Binding IsMultiTableFile}" Value="False">
                                             <Setter Property="Text" Value="{Binding FileName}"/>
                                         </DataTrigger>
                                     </Style.Triggers>

@@ -13,6 +13,7 @@ namespace EasyAF.Modules.Map.Models
     {
         private string _tableName = string.Empty;
         private string _filePath = string.Empty;
+        private bool _isMultiTableFile;
 
         /// <summary>
         /// Gets or sets the name of the table/sheet (e.g., "Sheet1", "BusData").
@@ -30,6 +31,15 @@ namespace EasyAF.Modules.Map.Models
         {
             get => _filePath;
             set => SetProperty(ref _filePath, value);
+        }
+
+        /// <summary>
+        /// Gets or sets whether this table is from a file containing multiple tables.
+        /// </summary>
+        public bool IsMultiTableFile
+        {
+            get => _isMultiTableFile;
+            set => SetProperty(ref _isMultiTableFile, value);
         }
 
         /// <summary>
