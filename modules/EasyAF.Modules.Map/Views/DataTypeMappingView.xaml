@@ -64,26 +64,30 @@
                         <GroupStyle.HeaderTemplate>
                             <DataTemplate>
                                 <!-- File header (non-selectable) -->
-                                <TextBlock Text="{Binding Name}" 
-                                           FontWeight="SemiBold"
-                                           FontSize="11"
-                                           Foreground="{DynamicResource TextSecondaryBrush}"
-                                           Background="{DynamicResource SecondaryBackgroundBrush}"
-                                           Padding="6,4"
-                                           Margin="0,2,0,0"/>
+                                <Border Background="{DynamicResource SecondaryBackgroundBrush}"
+                                        Padding="6,4"
+                                        Margin="0,2,0,0">
+                                    <TextBlock Text="{Binding Name}" 
+                                               FontWeight="SemiBold"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                </Border>
                             </DataTemplate>
                         </GroupStyle.HeaderTemplate>
                         <GroupStyle.ContainerStyle>
                             <Style TargetType="{x:Type GroupItem}">
+                                <Setter Property="Margin" Value="0"/>
                                 <Setter Property="Template">
                                     <Setter.Value>
                                         <ControlTemplate TargetType="{x:Type GroupItem}">
-                                            <StackPanel>
+                                            <VirtualizingStackPanel>
                                                 <!-- Group header -->
-                                                <ContentPresenter />
-                                                <!-- Group items -->
-                                                <ItemsPresenter Margin="16,0,0,0"/>
-                                            </StackPanel>
+                                                <ContentPresenter x:Name="PART_Header"/>
+                                                <!-- Group items container -->
+                                                <Border Margin="16,0,0,0">
+                                                    <ItemsPresenter x:Name="PART_Items"/>
+                                                </Border>
+                                            </VirtualizingStackPanel>
                                         </ControlTemplate>
                                     </Setter.Value>
                                 </Setter>
