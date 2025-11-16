@@ -38,6 +38,16 @@ namespace EasyAF.Modules.Map.Models
         public string FileName => Path.GetFileName(FilePath);
 
         /// <summary>
+        /// Gets the file extension (e.g., ".csv", ".xlsx").
+        /// </summary>
+        public string FileExtension => Path.GetExtension(FilePath).ToLowerInvariant();
+
+        /// <summary>
+        /// Gets whether this is a CSV file (single table, no grouping needed).
+        /// </summary>
+        public bool IsCsvFile => FileExtension == ".csv";
+
+        /// <summary>
         /// Gets a composite display name combining file and table (e.g., "data.xlsx ? Sheet1").
         /// </summary>
         public string DisplayName => $"{FileName} ? {TableName}";

@@ -51,53 +51,33 @@
                        VerticalAlignment="Center" 
                        Margin="4,0,4,0"
                        Foreground="{DynamicResource TextPrimaryBrush}"/>
-            <ComboBox ItemsSource="{Binding AvailableTablesView}"
+            <ComboBox ItemsSource="{Binding AvailableTables}"
                       SelectedItem="{Binding SelectedTable}"
                       MinWidth="250"
                       MaxDropDownHeight="400"
                       Style="{StaticResource ThemedComboBoxStyle}"
                       ToolTip="Select a table/sheet from your loaded files">
                 
-                <!-- Group Style for File Headers -->
-                <ComboBox.GroupStyle>
-                    <GroupStyle>
-                        <GroupStyle.HeaderTemplate>
-                            <DataTemplate>
-                                <Border Background="{DynamicResource SecondaryBackgroundBrush}"
-                                        Padding="6,4"
-                                        Margin="0,2,0,0">
-                                    <TextBlock Text="{Binding Name}" 
-                                               FontWeight="SemiBold"
-                                               FontSize="11"
-                                               Foreground="{DynamicResource TextSecondaryBrush}"/>
-                                </Border>
-                            </DataTemplate>
-                        </GroupStyle.HeaderTemplate>
-                        <GroupStyle.ContainerStyle>
-                            <Style TargetType="GroupItem">
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="GroupItem">
-                                            <StackPanel>
-                                                <!-- Group Header -->
-                                                <ContentPresenter />
-                                                <!-- Group Items (indented) -->
-                                                <ItemsPresenter Margin="12,0,0,0"/>
-                                            </StackPanel>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </GroupStyle.ContainerStyle>
-                    </GroupStyle>
-                </ComboBox.GroupStyle>
-                
-                <!-- Item Template for individual tables -->
+                <!-- Item Template with conditional display -->
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
-                        <TextBlock Text="{Binding DisplayName}"
-                                   Padding="4,2"
-                                   Foreground="{DynamicResource TextPrimaryBrush}"/>
+                        <!-- For CSV: just show filename -->
+                        <!-- For Excel single sheet: show filename -->
+                        <!-- For Excel multiple sheets: show "filename ? SheetName" -->
+                        <TextBlock Padding="4,2"
+                                   Foreground="{DynamicResource TextPrimaryBrush}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Text" Value="{Binding DisplayName}"/>
+                                    <!-- If CSV file or single-sheet Excel, just show filename -->
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsCsvFile}" Value="True">
+                                            <Setter Property="Text" Value="{Binding FileName}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
