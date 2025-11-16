@@ -77,36 +77,6 @@
                                     VerticalContentAlignment="Stretch"/>
                 </DataTemplate>
             </TabControl.ContentTemplate>
-            
-            <!-- Tab Control Style -->
-            <TabControl.Style>
-                <Style TargetType="TabControl">
-                    <Setter Property="Background" Value="{DynamicResource PrimaryBackgroundBrush}"/>
-                    <Setter Property="BorderBrush" Value="{DynamicResource ControlBorderBrush}"/>
-                </Style>
-            </TabControl.Style>
-            
-            <!-- Tab Item Style -->
-            <TabControl.ItemContainerStyle>
-                <Style TargetType="TabItem">
-                    <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
-                    <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
-                    <Setter Property="BorderBrush" Value="{DynamicResource ControlBorderBrush}"/>
-                    <Setter Property="BorderThickness" Value="1,1,1,0"/>
-                    <Setter Property="Padding" Value="12,6"/>
-                    <Setter Property="Margin" Value="2,0,0,0"/>
-                    <Style.Triggers>
-                        <Trigger Property="IsSelected" Value="True">
-                            <Setter Property="Background" Value="{DynamicResource PrimaryBackgroundBrush}"/>
-                            <Setter Property="BorderThickness" Value="1,1,1,0"/>
-                            <Setter Property="Margin" Value="2,0,0,-1"/>
-                        </Trigger>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" Value="{DynamicResource HoverBackgroundBrush}"/>
-                        </Trigger>
-                    </Style.Triggers>
-                </Style>
-            </TabControl.ItemContainerStyle>
         </TabControl>
     </Grid>
 </UserControl>
