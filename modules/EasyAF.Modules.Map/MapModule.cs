@@ -111,7 +111,12 @@ namespace EasyAF.Modules.Map
             _container = container;
             Log.Information("Initializing Map module v{Version}", ModuleVersion);
 
-            // Register services
+            // CROSS-MODULE EDIT: 2025-01-16 Map Module Settings Feature
+            // Modified for: Add property visibility settings filtering
+            // Related modules: Core (ISettingsService), Map (PropertyDiscoveryService, MapDocumentViewModel, MapSettingsExtensions)
+            // Rollback instructions: Remove DataTypeVisibilitySettings, MapSettingsExtensions, PropertySelectorDialog, MapModuleSettingsView files
+
+            // Register services - PropertyDiscoveryService now requires ISettingsService
             container.RegisterSingleton<Services.IPropertyDiscoveryService, Services.PropertyDiscoveryService>();
             container.RegisterType<Services.ColumnExtractionService>(); // Transient - create new instance per use
             

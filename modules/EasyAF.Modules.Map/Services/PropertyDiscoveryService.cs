@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Xml.Linq;
 using System.IO;
 using Serilog;
+using EasyAF.Core.Contracts;
 using MapPropertyInfo = EasyAF.Modules.Map.Models.PropertyInfo;
 
 namespace EasyAF.Modules.Map.Services
@@ -22,6 +23,7 @@ namespace EasyAF.Modules.Map.Services
         private readonly Dictionary<string, Type> _typeCache = new();
         private readonly Dictionary<string, List<MapPropertyInfo>> _propertyCache = new();
         private readonly Dictionary<string, XDocument?> _xmlDocCache = new();
+        private readonly ISettingsService _settingsService;
 
         /// <summary>
         /// Initializes a new instance of the PropertyDiscoveryService.
@@ -30,8 +32,9 @@ namespace EasyAF.Modules.Map.Services
         /// Discovers and caches all available types from EasyAF.Data.Models on construction.
         /// This is a one-time operation per service instance.
         /// </remarks>
-        public PropertyDiscoveryService()
+        public PropertyDiscoveryService(ISettingsService settingsService)
         {
+            _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
             DiscoverTypes();
         }
 
@@ -44,9 +47,38 @@ namespace EasyAF.Modules.Map.Services
         }
 
         /// <summary>
-        /// Gets all properties for a specific data type.
+        /// Gets enabled properties for a specific data type (filtered by settings).
         /// </summary>
+        /// <remarks>
+        /// This method respects the user's property visibility settings.
+        /// Only properties marked as enabled in settings will be returned.
+        /// </remarks>
         public List<MapPropertyInfo> GetPropertiesForType(string dataTypeName)
+        {
+            // Get all properties first
+            var allProperties = GetAllPropertiesForType(dataTypeName);
+            
+            // Filter based on settings
+            var enabledPropertyNames = _settingsService.GetEnabledProperties(dataTypeName);
+            
+            // If wildcard is present, return all
+            if (enabledPropertyNames.Contains("*"))
+                return allProperties;
+            
+            // Otherwise filter to enabled properties only
+            return allProperties
+                .Where(p => enabledPropertyNames.Contains(p.PropertyName))
+                .ToList();
+        }
+
+        /// <summary>
+        /// Gets ALL properties for a data type, ignoring visibility settings.
+        /// </summary>
+        /// <remarks>
+        /// This method is used by the settings UI to show all available properties
+        /// for configuration, regardless of current visibility settings.
+        /// </remarks>
+        public List<MapPropertyInfo> GetAllPropertiesForType(string dataTypeName)
         {
             // Check cache first
             if (_propertyCache.TryGetValue(dataTypeName, out var cached))

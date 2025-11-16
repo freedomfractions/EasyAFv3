@@ -25,7 +25,7 @@ namespace EasyAF.Modules.Map.Services
         List<string> GetAvailableDataTypes();
 
         /// <summary>
-        /// Gets all properties for a specific data type.
+        /// Gets enabled properties for a specific data type (filtered by settings).
         /// </summary>
         /// <param name="dataTypeName">The name of the data type (e.g., "Bus", "LVCB").</param>
         /// <returns>
@@ -37,6 +37,21 @@ namespace EasyAF.Modules.Map.Services
         /// comments when available to help users understand what each field represents.
         /// </remarks>
         List<PropertyInfo> GetPropertiesForType(string dataTypeName);
+
+        /// <summary>
+        /// Gets ALL properties for a data type, ignoring visibility settings.
+        /// Used by settings UI to show all available properties for configuration.
+        /// </summary>
+        /// <param name="dataTypeName">The name of the data type (e.g., "Bus", "LVCB").</param>
+        /// <returns>
+        /// List of PropertyInfo objects describing each property, including name, type, and description.
+        /// Returns empty list if the data type is not found.
+        /// </returns>
+        /// <remarks>
+        /// Results are cached after first retrieval. Properties include XML documentation
+        /// comments when available to help users understand what each field represents.
+        /// </remarks>
+        List<PropertyInfo> GetAllPropertiesForType(string dataTypeName);
 
         /// <summary>
         /// Gets nested properties for complex types (e.g., LVCB.TripUnit).

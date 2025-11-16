@@ -25,8 +25,17 @@
             <RowDefinition Height="*"/>    <!-- Mapping Area -->
         </Grid.RowDefinitions>
         
-        <!-- Toolbar -->
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="360"/> <!-- Dataset Columns (LEFT) - Fixed Width -->
+            <ColumnDefinition Width="Auto"/> <!-- Buttons -->
+            <ColumnDefinition Width="360"/> <!-- Target Properties (RIGHT) - Fixed Width -->
+            <ColumnDefinition Width="*"/>   <!-- Remaining space -->
+        </Grid.ColumnDefinitions>
+        
+        <!-- Toolbar - Spans across both columns only -->
         <ToolBar Grid.Row="0" 
+                 Grid.Column="0"
+                 Grid.ColumnSpan="3"
                  Background="{DynamicResource SecondaryBackgroundBrush}"
                  BorderBrush="{DynamicResource ControlBorderBrush}">
             <Button Command="{Binding AutoMapCommand}" 
@@ -55,273 +64,269 @@
                     ToolTip="Load columns from a sample file"/>
         </ToolBar>
         
-        <!-- Mapping Area - Dual Pane Layout -->
-        <Grid Grid.Row="1" Margin="0,10,0,0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="2*"/> <!-- Source Columns -->
-                <ColumnDefinition Width="Auto"/> <!-- Buttons -->
-                <ColumnDefinition Width="2*"/> <!-- Target Properties -->
-            </Grid.ColumnDefinitions>
-            
-            <!-- Source Columns (Left Pane) -->
-            <GroupBox Grid.Column="0" 
-                      Header="Available Columns (Source)"
-                      Foreground="{DynamicResource TextPrimaryBrush}"
-                      BorderBrush="{DynamicResource ControlBorderBrush}">
-                <Grid Margin="8">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/> <!-- Filter -->
-                        <RowDefinition Height="*"/>    <!-- List -->
-                        <RowDefinition Height="Auto"/> <!-- Count -->
-                    </Grid.RowDefinitions>
-                    
-                    <!-- Filter TextBox -->
-                    <TextBox Grid.Row="0" 
-                             Text="{Binding SourceFilter, UpdateSourceTrigger=PropertyChanged}"
-                             Margin="0,0,0,8"
-                             Background="{DynamicResource ControlBackgroundBrush}"
-                             Foreground="{DynamicResource TextPrimaryBrush}"
-                             BorderBrush="{DynamicResource ControlBorderBrush}">
-                        <TextBox.Style>
-                            <Style TargetType="TextBox">
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="TextBox">
-                                            <Border Background="{TemplateBinding Background}"
-                                                    BorderBrush="{TemplateBinding BorderBrush}"
-                                                    BorderThickness="1"
-                                                    CornerRadius="3">
-                                                <Grid>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="Auto"/>
-                                                        <ColumnDefinition Width="*"/>
-                                                    </Grid.ColumnDefinitions>
-                                                    
-                                                    <!-- Search Icon -->
-                                                    <TextBlock Grid.Column="0"
-                                                               Text="&#xE721;"
-                                                               FontFamily="Segoe MDL2 Assets"
-                                                               FontSize="14"
-                                                               Margin="6,0,4,0"
-                                                               VerticalAlignment="Center"
-                                                               Foreground="{DynamicResource TextSecondaryBrush}"/>
-                                                    
-                                                    <ScrollViewer Grid.Column="1" 
-                                                                  x:Name="PART_ContentHost"
-                                                                  VerticalAlignment="Center"
-                                                                  Margin="0,2"/>
-                                                </Grid>
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </TextBox.Style>
-                    </TextBox>
-                    
-                    <!-- Source Columns List -->
-                    <ListBox Grid.Row="1"
-                             ItemsSource="{Binding SourceColumnsView}"
-                             SelectedItem="{Binding SelectedSourceColumn}"
-                             Style="{StaticResource MappingListBoxStyle}">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <Border Padding="4"
-                                        Margin="2"
-                                        CornerRadius="3">
-                                    <Border.Style>
-                                        <Style TargetType="Border">
-                                            <Setter Property="Background" Value="Transparent"/>
-                                            <Style.Triggers>
-                                                <!-- Highlight mapped columns using theme brushes -->
-                                                <DataTrigger Binding="{Binding IsMapped}" Value="True">
-                                                    <Setter Property="Background" Value="{DynamicResource MappedHighlightBrush}"/>
-                                                    <Setter Property="BorderBrush" Value="{DynamicResource MappedBorderBrush}"/>
-                                                    <Setter Property="BorderThickness" Value="1"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Border.Style>
+        <!-- Dataset Columns (LEFT Pane) -->
+        <GroupBox Grid.Row="1" 
+                  Grid.Column="0"
+                  Margin="0,10,0,0"
+                  Header="{Binding DataType, StringFormat='Target Properties ({0})'}"
+                  Foreground="{DynamicResource TextPrimaryBrush}"
+                  BorderBrush="{DynamicResource ControlBorderBrush}">
+            <Grid Margin="4">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/> <!-- Filter -->
+                    <RowDefinition Height="*"/>    <!-- List -->
+                    <RowDefinition Height="Auto"/> <!-- Count -->
+                </Grid.RowDefinitions>
+                
+                <!-- Filter TextBox -->
+                <TextBox Grid.Row="0" 
+                         Text="{Binding TargetFilter, UpdateSourceTrigger=PropertyChanged}"
+                         Margin="0,0,0,4"
+                         Background="{DynamicResource ControlBackgroundBrush}"
+                         Foreground="{DynamicResource TextPrimaryBrush}"
+                         BorderBrush="{DynamicResource ControlBorderBrush}">
+                    <TextBox.Style>
+                        <Style TargetType="TextBox">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="TextBox">
+                                        <Border Background="{TemplateBinding Background}"
+                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                BorderThickness="1"
+                                                CornerRadius="3">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                
+                                                <!-- Search Icon -->
+                                                <TextBlock Grid.Column="0"
+                                                           Text="&#xE721;"
+                                                           FontFamily="Segoe MDL2 Assets"
+                                                           FontSize="14"
+                                                           Margin="6,0,4,0"
+                                                           VerticalAlignment="Center"
+                                                           Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                                
+                                                <ScrollViewer Grid.Column="1" 
+                                                              x:Name="PART_ContentHost"
+                                                              VerticalAlignment="Center"
+                                                              Margin="0,2"/>
+                                            </Grid>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </TextBox.Style>
+                </TextBox>
+                
+                <!-- Target Properties List -->
+                <ListBox Grid.Row="1"
+                         ItemsSource="{Binding TargetPropertiesView}"
+                         SelectedItem="{Binding SelectedTargetProperty}"
+                         Style="{StaticResource MappingListBoxStyle}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Border Padding="4"
+                                    Margin="2"
+                                    CornerRadius="3"
+                                    BorderThickness="1">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Background" Value="Transparent"/>
+                                        <Setter Property="BorderBrush" Value="Transparent"/>
+                                        <Style.Triggers>
+                                            <!-- Highlight mapped properties using theme brushes -->
+                                            <DataTrigger Binding="{Binding IsMapped}" Value="True">
+                                                <Setter Property="Background" Value="{DynamicResource MappedHighlightBrush}"/>
+                                                <Setter Property="BorderBrush" Value="{DynamicResource MappedBorderBrush}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
                                     
-                                    <StackPanel>
-                                        <TextBlock Text="{Binding ColumnName}"
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="{Binding PropertyName}"
                                                    FontWeight="SemiBold"
                                                    Foreground="{DynamicResource TextPrimaryBrush}"/>
-                                        <TextBlock Text="{Binding MappedTo}"
+                                        <TextBlock Text="{Binding MappedColumn}"
                                                    FontSize="10"
-                                                   Foreground="{DynamicResource TextSecondaryBrush}"
-                                                   Visibility="{Binding IsMapped, Converter={StaticResource BoolToVisibilityConverter}}"/>
-                                    </StackPanel>
-                                </Border>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                        <ListBox.ItemContainerStyle>
-                            <Style TargetType="ListBoxItem" BasedOn="{StaticResource MappingListBoxItemStyle}"/>
-                        </ListBox.ItemContainerStyle>
-                    </ListBox>
-                    
-                    <!-- Column Count -->
-                    <TextBlock Grid.Row="2"
-                               Margin="0,4,0,0"
-                               Foreground="{DynamicResource TextSecondaryBrush}"
-                               FontSize="11">
-                        <Run Text="Columns:"/>
-                        <Run Text="{Binding SourceColumns.Count, Mode=OneWay}"/>
-                    </TextBlock>
-                </Grid>
-            </GroupBox>
-            
-            <!-- Mapping Buttons (Center) -->
-            <StackPanel Grid.Column="1" 
-                        VerticalAlignment="Center"
-                        Margin="10,0">
-                <Button Content="Map ?"
-                        Command="{Binding MapSelectedCommand}"
-                        Padding="12,8"
-                        Margin="0,4"
-                        MinWidth="80"
-                        ToolTip="Map selected column to selected property"/>
-                <Button Content="? Unmap"
-                        Command="{Binding UnmapSelectedCommand}"
-                        Padding="12,8"
-                        Margin="0,4"
-                        MinWidth="80"
-                        ToolTip="Remove mapping from selected property"/>
-            </StackPanel>
-            
-            <!-- Target Properties (Right Pane) -->
-            <GroupBox Grid.Column="2" 
-                      Header="{Binding DataType, StringFormat='Target Properties ({0})'}"
-                      Foreground="{DynamicResource TextPrimaryBrush}"
-                      BorderBrush="{DynamicResource ControlBorderBrush}">
-                <Grid Margin="8">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/> <!-- Filter -->
-                        <RowDefinition Height="*"/>    <!-- List -->
-                        <RowDefinition Height="Auto"/> <!-- Count -->
-                    </Grid.RowDefinitions>
-                    
-                    <!-- Filter TextBox -->
-                    <TextBox Grid.Row="0" 
-                             Text="{Binding TargetFilter, UpdateSourceTrigger=PropertyChanged}"
-                             Margin="0,0,0,8"
-                             Background="{DynamicResource ControlBackgroundBrush}"
-                             Foreground="{DynamicResource TextPrimaryBrush}"
-                             BorderBrush="{DynamicResource ControlBorderBrush}">
-                        <TextBox.Style>
-                            <Style TargetType="TextBox">
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="TextBox">
-                                            <Border Background="{TemplateBinding Background}"
-                                                    BorderBrush="{TemplateBinding BorderBrush}"
-                                                    BorderThickness="1"
-                                                    CornerRadius="3">
-                                                <Grid>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="Auto"/>
-                                                        <ColumnDefinition Width="*"/>
-                                                    </Grid.ColumnDefinitions>
-                                                    
-                                                    <!-- Search Icon -->
-                                                    <TextBlock Grid.Column="0"
-                                                               Text="&#xE721;"
-                                                               FontFamily="Segoe MDL2 Assets"
-                                                               FontSize="14"
-                                                               Margin="6,0,4,0"
-                                                               VerticalAlignment="Center"
-                                                               Foreground="{DynamicResource TextSecondaryBrush}"/>
-                                                    
-                                                    <ScrollViewer Grid.Column="1" 
-                                                                  x:Name="PART_ContentHost"
-                                                                  VerticalAlignment="Center"
-                                                                  Margin="0,2"/>
-                                                </Grid>
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </TextBox.Style>
-                    </TextBox>
-                    
-                    <!-- Target Properties List -->
-                    <ListBox Grid.Row="1"
-                             ItemsSource="{Binding TargetPropertiesView}"
-                             SelectedItem="{Binding SelectedTargetProperty}"
-                             Style="{StaticResource MappingListBoxStyle}">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <Border Padding="4"
-                                        Margin="2"
-                                        CornerRadius="3"
-                                        BorderThickness="1">
-                                    <Border.Style>
-                                        <Style TargetType="Border">
-                                            <Setter Property="Background" Value="Transparent"/>
-                                            <Setter Property="BorderBrush" Value="Transparent"/>
-                                            <Style.Triggers>
-                                                <!-- Highlight mapped properties using theme brushes -->
-                                                <DataTrigger Binding="{Binding IsMapped}" Value="True">
-                                                    <Setter Property="Background" Value="{DynamicResource MappedHighlightBrush}"/>
-                                                    <Setter Property="BorderBrush" Value="{DynamicResource MappedBorderBrush}"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Border.Style>
-                                    
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-                                        
-                                        <StackPanel Grid.Column="0">
-                                            <TextBlock Text="{Binding PropertyName}"
-                                                       FontWeight="SemiBold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
-                                            <TextBlock Text="{Binding MappedColumn}"
-                                                       FontSize="10"
-                                                       Foreground="{DynamicResource SuccessBrush}"
-                                                       Visibility="{Binding IsMapped, Converter={StaticResource BoolToVisibilityConverter}}"/>
-                                            <TextBlock Text="{Binding Description}"
-                                                       FontSize="10"
-                                                       TextWrapping="Wrap"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}"
-                                                       Visibility="{Binding Description, Converter={StaticResource NullToVisibilityConverter}}"/>
-                                        </StackPanel>
-                                        
-                                        <!-- Mapping Indicator -->
-                                        <TextBlock Grid.Column="1"
-                                                   Text="?"
-                                                   FontSize="16"
                                                    Foreground="{DynamicResource SuccessBrush}"
-                                                   VerticalAlignment="Center"
-                                                   Margin="4,0,0,0"
                                                    Visibility="{Binding IsMapped, Converter={StaticResource BoolToVisibilityConverter}}"/>
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                        <ListBox.ItemContainerStyle>
-                            <Style TargetType="ListBoxItem" BasedOn="{StaticResource MappingListBoxItemStyle}"/>
-                        </ListBox.ItemContainerStyle>
-                    </ListBox>
-                    
-                    <!-- Property Count & Status -->
-                    <StackPanel Grid.Row="2"
-                                Margin="0,4,0,0"
-                                Orientation="Horizontal">
-                        <TextBlock Foreground="{DynamicResource TextSecondaryBrush}"
-                                   FontSize="11">
-                            <Run Text="Properties:"/>
-                            <Run Text="{Binding MappedCount, Mode=OneWay}"/>
-                            <Run Text="/"/>
-                            <Run Text="{Binding AvailableCount, Mode=OneWay}"/>
-                        </TextBlock>
-                    </StackPanel>
-                </Grid>
-            </GroupBox>
-        </Grid>
+                                        <TextBlock Text="{Binding Description}"
+                                                   FontSize="10"
+                                                   TextWrapping="Wrap"
+                                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                                   Visibility="{Binding Description, Converter={StaticResource NullToVisibilityConverter}}"/>
+                                    </StackPanel>
+                                    
+                                    <!-- Mapping Indicator -->
+                                    <TextBlock Grid.Column="1"
+                                               Text="?"
+                                               FontSize="16"
+                                               Foreground="{DynamicResource SuccessBrush}"
+                                               VerticalAlignment="Center"
+                                               Margin="4,0,0,0"
+                                               Visibility="{Binding IsMapped, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem" BasedOn="{StaticResource MappingListBoxItemStyle}"/>
+                    </ListBox.ItemContainerStyle>
+                </ListBox>
+                
+                <!-- Property Count & Status -->
+                <StackPanel Grid.Row="2"
+                            Margin="0,4,0,0"
+                            Orientation="Horizontal">
+                    <TextBlock Foreground="{DynamicResource TextSecondaryBrush}"
+                               FontSize="11">
+                        <Run Text="Properties:"/>
+                        <Run Text="{Binding MappedCount, Mode=OneWay}"/>
+                        <Run Text="/"/>
+                        <Run Text="{Binding AvailableCount, Mode=OneWay}"/>
+                    </TextBlock>
+                </StackPanel>
+            </Grid>
+        </GroupBox>
+        
+        <!-- Mapping Buttons (Center) -->
+        <StackPanel Grid.Row="1"
+                    Grid.Column="1"
+                    VerticalAlignment="Center"
+                    Margin="10,0">
+            <Button Content="Map ?"
+                    Command="{Binding MapSelectedCommand}"
+                    Padding="12,8"
+                    Margin="0,4"
+                    MinWidth="80"
+                    ToolTip="Map selected property to selected column"/>
+            <Button Content="? Unmap"
+                    Command="{Binding UnmapSelectedCommand}"
+                    Padding="12,8"
+                    Margin="0,4"
+                    MinWidth="80"
+                    ToolTip="Remove mapping from selected property"/>
+        </StackPanel>
+        
+        <!-- Source Columns (RIGHT Pane) -->
+        <GroupBox Grid.Row="1" 
+                  Grid.Column="2"
+                  Margin="0,10,0,0"
+                  Header="Available Columns (Source)"
+                  Foreground="{DynamicResource TextPrimaryBrush}"
+                  BorderBrush="{DynamicResource ControlBorderBrush}">
+            <Grid Margin="4">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/> <!-- Filter -->
+                    <RowDefinition Height="*"/>    <!-- List -->
+                    <RowDefinition Height="Auto"/> <!-- Count -->
+                </Grid.RowDefinitions>
+                
+                <!-- Filter TextBox -->
+                <TextBox Grid.Row="0" 
+                         Text="{Binding SourceFilter, UpdateSourceTrigger=PropertyChanged}"
+                         Margin="0,0,0,4"
+                         Background="{DynamicResource ControlBackgroundBrush}"
+                         Foreground="{DynamicResource TextPrimaryBrush}"
+                         BorderBrush="{DynamicResource ControlBorderBrush}">
+                    <TextBox.Style>
+                        <Style TargetType="TextBox">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="TextBox">
+                                        <Border Background="{TemplateBinding Background}"
+                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                BorderThickness="1"
+                                                CornerRadius="3">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                
+                                                <!-- Search Icon -->
+                                                <TextBlock Grid.Column="0"
+                                                           Text="&#xE721;"
+                                                           FontFamily="Segoe MDL2 Assets"
+                                                           FontSize="14"
+                                                           Margin="6,0,4,0"
+                                                           VerticalAlignment="Center"
+                                                           Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                                
+                                                <ScrollViewer Grid.Column="1" 
+                                                              x:Name="PART_ContentHost"
+                                                              VerticalAlignment="Center"
+                                                              Margin="0,2"/>
+                                            </Grid>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </TextBox.Style>
+                </TextBox>
+                
+                <!-- Source Columns List -->
+                <ListBox Grid.Row="1"
+                         ItemsSource="{Binding SourceColumnsView}"
+                         SelectedItem="{Binding SelectedSourceColumn}"
+                         Style="{StaticResource MappingListBoxStyle}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Border Padding="4"
+                                    Margin="2"
+                                    CornerRadius="3">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Background" Value="Transparent"/>
+                                        <Style.Triggers>
+                                            <!-- Highlight mapped columns using theme brushes -->
+                                            <DataTrigger Binding="{Binding IsMapped}" Value="True">
+                                                <Setter Property="Background" Value="{DynamicResource MappedHighlightBrush}"/>
+                                                <Setter Property="BorderBrush" Value="{DynamicResource MappedBorderBrush}"/>
+                                                <Setter Property="BorderThickness" Value="1"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                
+                                <StackPanel>
+                                    <TextBlock Text="{Binding ColumnName}"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                    <TextBlock Text="{Binding MappedTo}"
+                                               FontSize="10"
+                                               Foreground="{DynamicResource TextSecondaryBrush}"
+                                               Visibility="{Binding IsMapped, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem" BasedOn="{StaticResource MappingListBoxItemStyle}"/>
+                    </ListBox.ItemContainerStyle>
+                </ListBox>
+                
+                <!-- Column Count -->
+                <TextBlock Grid.Row="2"
+                           Margin="0,4,0,0"
+                           Foreground="{DynamicResource TextSecondaryBrush}"
+                           FontSize="11">
+                    <Run Text="Columns:"/>
+                    <Run Text="{Binding SourceColumns.Count, Mode=OneWay}"/>
+                </TextBlock>
+            </Grid>
+        </GroupBox>
     </Grid>
 </UserControl>
