@@ -5,6 +5,7 @@ using System.Linq;
 using System.Windows.Input;
 using Prism.Mvvm;
 using Prism.Commands;
+using EasyAF.Core.Contracts;
 using EasyAF.Modules.Map.Models;
 using EasyAF.Modules.Map.Services;
 using Serilog;
@@ -25,6 +26,7 @@ namespace EasyAF.Modules.Map.ViewModels
     {
         private readonly MapDocument _document;
         private readonly IPropertyDiscoveryService _propertyDiscovery;
+        private readonly ISettingsService _settingsService;
         private object? _selectedTabContent;
         private int _selectedTabIndex;
 
@@ -33,13 +35,16 @@ namespace EasyAF.Modules.Map.ViewModels
         /// </summary>
         /// <param name="document">The map document this VM represents.</param>
         /// <param name="propertyDiscovery">Service for discovering data type properties.</param>
-        /// <exception cref="ArgumentNullException">If document or propertyDiscovery is null.</exception>
+        /// <param name="settingsService">Service for accessing module settings.</param>
+        /// <exception cref="ArgumentNullException">If document, propertyDiscovery, or settingsService is null.</exception>
         public MapDocumentViewModel(
             MapDocument document,
-            IPropertyDiscoveryService propertyDiscovery)
+            IPropertyDiscoveryService propertyDiscovery,
+            ISettingsService settingsService)
         {
             _document = document ?? throw new ArgumentNullException(nameof(document));
             _propertyDiscovery = propertyDiscovery ?? throw new ArgumentNullException(nameof(propertyDiscovery));
+            _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
 
             // Initialize collections
             TabHeaders = new ObservableCollection<TabHeaderInfo>();
@@ -100,8 +105,14 @@ namespace EasyAF.Modules.Map.ViewModels
         #region Tab Management
 
         /// <summary>
-        /// Initializes the tab collection with Summary + all data type tabs.
+        /// Initializes the tab collection with Summary + enabled data type tabs.
         /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Only creates tabs for data types where Enabled = true in settings.
+        /// This allows users to hide data types they don't use (e.g., ShortCircuit).
+        /// </para>
+        /// </remarks>
         private void InitializeTabs()
         {
             TabHeaders.Clear();
@@ -116,12 +127,24 @@ namespace EasyAF.Modules.Map.ViewModels
                 DataType = null
             });
 
-            // Data type tabs (one per discovered type)
+            // Data type tabs (one per discovered type, filtered by settings)
             var dataTypes = _propertyDiscovery.GetAvailableDataTypes();
-            Log.Information("Creating tabs for {Count} data types", dataTypes.Count);
+            Log.Information("Creating tabs for enabled data types (total discovered: {Count})", dataTypes.Count);
 
             foreach (var dataType in dataTypes)
             {
+                // CROSS-MODULE EDIT: 2025-01-16 Map Module Settings Feature - Step 5
+                // Modified for: Check IsDataTypeEnabled before creating tabs
+                // Related modules: Core (ISettingsService), Map (DataTypeVisibilitySettings, MapSettingsExtensions)
+                // Rollback instructions: Remove IsDataTypeEnabled check, revert to creating all tabs
+                
+                // Skip disabled data types
+                if (!_settingsService.IsDataTypeEnabled(dataType))
+                {
+                    Log.Debug("Skipping tab for disabled data type: {DataType}", dataType);
+                    continue;
+                }
+
                 var dataTypeVm = new DataTypeMappingViewModel(_document, dataType, _propertyDiscovery, this);
                 
                 TabHeaders.Add(new TabHeaderInfo
@@ -131,7 +154,11 @@ namespace EasyAF.Modules.Map.ViewModels
                     ViewModel = dataTypeVm,
                     DataType = dataType
                 });
+                
+                Log.Debug("Created tab for enabled data type: {DataType}", dataType);
             }
+
+            Log.Information("Tab initialization complete: {EnabledCount} tabs created", TabHeaders.Count);
 
             // Select summary tab by default
             if (TabHeaders.Count > 0)

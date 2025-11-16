@@ -227,7 +227,8 @@ namespace EasyAF.Modules.Map
             {
                 var viewModel = new ViewModels.MapDocumentViewModel(
                     document,
-                    _container.Resolve<Services.IPropertyDiscoveryService>()
+                    _container.Resolve<Services.IPropertyDiscoveryService>(),
+                    _container.Resolve<ISettingsService>()
                 );
                 document.ViewModel = viewModel;
                 Log.Debug("Created ViewModel for new map document");
@@ -280,7 +281,8 @@ namespace EasyAF.Modules.Map
                 {
                     var viewModel = new ViewModels.MapDocumentViewModel(
                         document,
-                        _container.Resolve<Services.IPropertyDiscoveryService>()
+                        _container.Resolve<Services.IPropertyDiscoveryService>(),
+                        _container.Resolve<ISettingsService>()
                     );
                     document.ViewModel = viewModel;
                     Log.Debug("Created ViewModel for opened map document");
