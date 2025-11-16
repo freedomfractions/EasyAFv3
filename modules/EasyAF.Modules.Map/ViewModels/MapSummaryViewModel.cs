@@ -296,6 +296,9 @@ namespace EasyAF.Modules.Map.ViewModels
 
                 // Refresh UI
                 UpdateReferencedFilesCollection();
+                
+                // Notify DataType tabs to refresh their table lists
+                _parentViewModel.RefreshAllTabStatuses();
 
                 Log.Information("Added referenced file: {FileName} with {TableCount} tables",
                     referencedFile.FileName, columns.Count);
@@ -385,6 +388,9 @@ namespace EasyAF.Modules.Map.ViewModels
             {
                 AddReferencedFile(filePath);
             }
+            
+            // Refresh happens in AddReferencedFile for each file
+            // No need to call RefreshAllTabStatuses here as it's already called per file
         }
 
         #endregion
