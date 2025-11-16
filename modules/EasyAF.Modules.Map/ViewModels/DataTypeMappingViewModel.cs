@@ -67,12 +67,6 @@ namespace EasyAF.Modules.Map.ViewModels
             TargetPropertiesView = CollectionViewSource.GetDefaultView(TargetProperties);
             TargetPropertiesView.Filter = FilterTargetProperty;
 
-            // Setup collection view for AvailableTables with smart grouping
-            // Only group multi-table files (Excel with multiple sheets)
-            AvailableTablesView = CollectionViewSource.GetDefaultView(AvailableTables);
-            var groupDescription = new System.Windows.Data.PropertyGroupDescription(nameof(TableReference.FileName));
-            AvailableTablesView.GroupDescriptions.Add(groupDescription);
-
             // Initialize commands
             MapSelectedCommand = new DelegateCommand(ExecuteMapSelected, CanExecuteMapSelected);
             UnmapSelectedCommand = new DelegateCommand(ExecuteUnmapSelected, CanExecuteUnmapSelected);
@@ -114,14 +108,9 @@ namespace EasyAF.Modules.Map.ViewModels
         public ICollectionView TargetPropertiesView { get; }
 
         /// <summary>
-        /// Gets the collection of available table references grouped by file.
+        /// Gets the collection of available table references.
         /// </summary>
         public ObservableCollection<TableReference> AvailableTables { get; }
-
-        /// <summary>
-        /// Gets the grouped view of available tables (groups multi-table files only).
-        /// </summary>
-        public ICollectionView AvailableTablesView { get; }
 
         /// <summary>
         /// Gets or sets the source column filter text.
@@ -345,9 +334,6 @@ namespace EasyAF.Modules.Map.ViewModels
 
             Log.Information("Loaded {Count} available tables from {FileCount} files", 
                 AvailableTables.Count, tablesByFile.Count);
-            
-            // Refresh the collection view to ensure grouping is applied
-            AvailableTablesView.Refresh();
         }
 
         /// <summary>
