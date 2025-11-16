@@ -40,13 +40,13 @@
                  BorderBrush="{DynamicResource ControlBorderBrush}">
             <Button Command="{Binding AutoMapCommand}" 
                     Content="Auto-Map"
-                    Padding="8,4"
+                    Style="{StaticResource ToolBarButtonStyle}"
                     ToolTip="Automatically map columns based on intelligent matching"/>
             <Button Command="{Binding ClearMappingsCommand}" 
                     Content="Clear All"
-                    Padding="8,4"
+                    Style="{StaticResource ToolBarButtonStyle}"
                     ToolTip="Remove all mappings for this data type"/>
-            <Separator/>
+            <Separator Style="{StaticResource ToolBarSeparatorStyle}"/>
             <TextBlock Text="Source Table:" 
                        VerticalAlignment="Center" 
                        Margin="4,0,4,0"
@@ -57,10 +57,10 @@
                       Background="{DynamicResource ControlBackgroundBrush}"
                       Foreground="{DynamicResource TextPrimaryBrush}"
                       BorderBrush="{DynamicResource ControlBorderBrush}"/>
-            <Separator/>
+            <Separator Style="{StaticResource ToolBarSeparatorStyle}"/>
             <Button Command="{Binding LoadFromFileCommand}"
                     Content="Load File..."
-                    Padding="8,4"
+                    Style="{StaticResource ToolBarButtonStyle}"
                     ToolTip="Load columns from a sample file"/>
         </ToolBar>
         
