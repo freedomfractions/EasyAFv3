@@ -59,6 +59,7 @@ namespace EasyAF.Modules.Map.ViewModels
             SourceColumns = new ObservableCollection<ColumnInfo>();
             TargetProperties = new ObservableCollection<MapPropertyInfo>();
             AvailableTables = new ObservableCollection<TableReference>();
+            ComboBoxItems = new ObservableCollection<ComboBoxItemBase>();
 
             // Setup collection views for filtering
             SourceColumnsView = CollectionViewSource.GetDefaultView(SourceColumns);
@@ -66,10 +67,6 @@ namespace EasyAF.Modules.Map.ViewModels
 
             TargetPropertiesView = CollectionViewSource.GetDefaultView(TargetProperties);
             TargetPropertiesView.Filter = FilterTargetProperty;
-
-            // Setup grouped view for AvailableTables
-            AvailableTablesView = CollectionViewSource.GetDefaultView(AvailableTables);
-            AvailableTablesView.GroupDescriptions.Add(new PropertyGroupDescription(nameof(TableReference.FileName)));
 
             // Initialize commands
             MapSelectedCommand = new DelegateCommand(ExecuteMapSelected, CanExecuteMapSelected);
@@ -117,9 +114,29 @@ namespace EasyAF.Modules.Map.ViewModels
         public ObservableCollection<TableReference> AvailableTables { get; }
 
         /// <summary>
-        /// Gets the grouped view of available tables.
+        /// Gets the flat collection of ComboBox items (headers + tables).
         /// </summary>
-        public ICollectionView AvailableTablesView { get; }
+        public ObservableCollection<ComboBoxItemBase> ComboBoxItems { get; }
+
+        /// <summary>
+        /// Gets or sets the selected ComboBox item (will be a TableItem when selected).
+        /// </summary>
+        private ComboBoxItemBase? _selectedComboBoxItem;
+        public ComboBoxItemBase? SelectedComboBoxItem
+        {
+            get => _selectedComboBoxItem;
+            set
+            {
+                if (SetProperty(ref _selectedComboBoxItem, value))
+                {
+                    // Extract the TableReference if it's a TableItem
+                    if (value is TableItem tableItem)
+                    {
+                        SelectedTable = tableItem.TableReference;
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// Gets or sets the source column filter text.
@@ -285,6 +302,7 @@ namespace EasyAF.Modules.Map.ViewModels
         private void LoadAvailableTables()
         {
             AvailableTables.Clear();
+            ComboBoxItems.Clear();
 
             // First pass: count tables per file
             var tablesByFile = new Dictionary<string, List<TableReference>>();
@@ -315,19 +333,29 @@ namespace EasyAF.Modules.Map.ViewModels
                 }
             }
 
-            // Second pass: mark multi-table files and add to collection
-            foreach (var fileGroup in tablesByFile)
+            // Second pass: build flat list with headers and items
+            foreach (var fileGroup in tablesByFile.OrderBy(kvp => System.IO.Path.GetFileName(kvp.Key)))
             {
                 bool isMultiTable = fileGroup.Value.Count > 1;
+                string fileName = System.IO.Path.GetFileName(fileGroup.Key);
                 
                 Log.Debug("File {FileName} has {Count} tables (IsMultiTable={IsMultiTable})", 
-                    System.IO.Path.GetFileName(fileGroup.Key), fileGroup.Value.Count, isMultiTable);
+                    fileName, fileGroup.Value.Count, isMultiTable);
+                
+                // Add file header for multi-table files
+                if (isMultiTable)
+                {
+                    ComboBoxItems.Add(new FileHeaderItem { FileName = fileName });
+                }
                 
                 foreach (var tableRef in fileGroup.Value)
                 {
                     tableRef.IsMultiTableFile = isMultiTable;
                     AvailableTables.Add(tableRef);
                     
+                    // Add table item to ComboBox (indented if multi-table)
+                    ComboBoxItems.Add(new TableItem(tableRef));
+
                     Log.Debug("  Added table: {TableName} (IsMultiTable={IsMultiTable})", 
                         tableRef.TableName, tableRef.IsMultiTableFile);
                 }
@@ -337,12 +365,14 @@ namespace EasyAF.Modules.Map.ViewModels
             if (AvailableTables.Count > 0 && SelectedTable == null)
             {
                 SelectedTable = AvailableTables[0];
+                SelectedComboBoxItem = ComboBoxItems.OfType<TableItem>().FirstOrDefault();
+                
                 Log.Debug("Auto-selected table '{Table}' from '{File}'", 
                     SelectedTable.TableName, SelectedTable.FileName);
             }
 
-            Log.Information("Loaded {Count} available tables from {FileCount} files", 
-                AvailableTables.Count, tablesByFile.Count);
+            Log.Information("Loaded {Count} available tables from {FileCount} files ({ItemCount} ComboBox items)", 
+                AvailableTables.Count, tablesByFile.Count, ComboBoxItems.Count);
         }
 
         /// <summary>

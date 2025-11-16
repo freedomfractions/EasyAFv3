@@ -51,41 +51,51 @@
                        VerticalAlignment="Center" 
                        Margin="4,0,4,0"
                        Foreground="{DynamicResource TextPrimaryBrush}"/>
-            <ComboBox ItemsSource="{Binding AvailableTablesView}"
-                      SelectedItem="{Binding SelectedTable}"
+            <ComboBox ItemsSource="{Binding ComboBoxItems}"
+                      SelectedItem="{Binding SelectedComboBoxItem}"
                       MinWidth="250"
                       MaxDropDownHeight="400"
                       Style="{StaticResource ThemedComboBoxStyle}"
                       ToolTip="Select a table/sheet from your loaded files">
                 
-                <!-- Group Style - SIMPLIFIED: No ContainerStyle, just header and panel -->
-                <ComboBox.GroupStyle>
-                    <GroupStyle>
-                        <GroupStyle.HeaderTemplate>
-                            <DataTemplate>
-                                <!-- File header (non-selectable) -->
-                                <Border Background="{DynamicResource SecondaryBackgroundBrush}"
-                                        Padding="6,4"
-                                        Margin="0,2,0,0">
-                                    <TextBlock Text="{Binding Name}" 
-                                               FontWeight="SemiBold"
-                                               FontSize="11"
-                                               Foreground="{DynamicResource TextSecondaryBrush}"/>
-                                </Border>
-                            </DataTemplate>
-                        </GroupStyle.HeaderTemplate>
-                        <!-- Let WPF handle the items panel automatically -->
-                    </GroupStyle>
-                </ComboBox.GroupStyle>
-                
-                <!-- Item Template - show table name with left margin for indenting -->
+                <!-- Item Template with visual differentiation for headers vs items -->
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
-                        <TextBlock Text="{Binding TableName}"
-                                   Margin="16,4,4,4"
-                                   Foreground="{DynamicResource TextPrimaryBrush}"/>
+                        <TextBlock Text="{Binding DisplayText}"
+                                   Foreground="{DynamicResource TextPrimaryBrush}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <!-- Default style for table items (selectable) -->
+                                    <Setter Property="Margin" Value="16,4,4,4"/>
+                                    <Setter Property="FontWeight" Value="Normal"/>
+                                    <Style.Triggers>
+                                        <!-- Header style (non-selectable) -->
+                                        <DataTrigger Binding="{Binding IsSelectable}" Value="False">
+                                            <Setter Property="Margin" Value="0,6,0,2"/>
+                                            <Setter Property="FontWeight" Value="SemiBold"/>
+                                            <Setter Property="FontSize" Value="11"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                                            <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
+                                            <Setter Property="Padding" Value="6,4"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
+                
+                <!-- Custom ItemContainerStyle to prevent selecting headers -->
+                <ComboBox.ItemContainerStyle>
+                    <Style TargetType="ComboBoxItem">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsSelectable}" Value="False">
+                                <Setter Property="IsEnabled" Value="False"/>
+                                <Setter Property="Focusable" Value="False"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ComboBox.ItemContainerStyle>
             </ComboBox>
             <Separator Style="{StaticResource ToolBarSeparatorStyle}"/>
         </ToolBar>
