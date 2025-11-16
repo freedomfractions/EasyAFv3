@@ -44,7 +44,12 @@ namespace EasyAF.Modules.Map.Models
 
         public override bool IsSelectable => true;
 
-        public override string DisplayText => TableReference.TableName;
+        /// <summary>
+        /// Gets the display text - shows filename for single-table files, table name for multi-table files.
+        /// </summary>
+        public override string DisplayText => TableReference.IsMultiTableFile 
+            ? TableReference.TableName 
+            : TableReference.FileName;
 
         /// <summary>
         /// Gets whether this table should be indented (from a multi-table file).
