@@ -103,18 +103,41 @@ namespace EasyAF.Modules.Map.Services
         }
 
         /// <summary>
-        /// Discovers all public classes in EasyAF.Data.Models namespace.
+        /// Discovers all public classes in EasyAF.Data.Models namespace that are actual data types in a DataSet.
         /// </summary>
+        /// <remarks>
+        /// Only discovers the 6 core data types that exist as collections in a DataSet:
+        /// - Bus (electrical buses/switchgear)
+        /// - LVCB (low voltage circuit breakers)
+        /// - Fuse (fuse protection devices)
+        /// - Cable (cable/conductor data)
+        /// - ArcFlash (arc flash study results)
+        /// - ShortCircuit (short circuit study results)
+        /// 
+        /// Excludes helper classes, enums, and other non-data types.
+        /// </remarks>
         private void DiscoverTypes()
         {
             try
             {
+                // Only discover the 6 actual data types that exist in a DataSet
+                var allowedTypes = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    "Bus",
+                    "LVCB",
+                    "Fuse",
+                    "Cable",
+                    "ArcFlash",
+                    "ShortCircuit"
+                };
+
                 var assembly = Assembly.Load("EasyAF.Data");
                 var modelTypes = assembly.GetTypes()
                     .Where(t => t.Namespace == "EasyAF.Data.Models" 
                              && t.IsClass 
                              && t.IsPublic
-                             && !t.IsAbstract)
+                             && !t.IsAbstract
+                             && allowedTypes.Contains(t.Name))
                     .ToList();
 
                 foreach (var type in modelTypes)
@@ -123,7 +146,7 @@ namespace EasyAF.Modules.Map.Services
                     Log.Debug("Discovered data type: {TypeName}", type.Name);
                 }
 
-                Log.Information("Property discovery complete: found {Count} data types", _typeCache.Count);
+                Log.Information("Property discovery complete: found {Count} data types (Bus, LVCB, Fuse, Cable, ArcFlash, ShortCircuit)", _typeCache.Count);
             }
             catch (Exception ex)
             {
