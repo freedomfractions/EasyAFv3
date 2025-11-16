@@ -192,6 +192,11 @@ public class SettingsManager : ISettingsService, IDisposable
                 _fileWatcher.EnableRaisingEvents = true;
             }
         }
+
+        // Raise SettingsReloaded event to notify subscribers that settings have changed
+        // This ensures open editors refresh immediately after user clicks OK/Apply
+        SettingsReloaded?.Invoke(this, EventArgs.Empty);
+        Log.Debug("SettingsReloaded event raised after save");
     }
 
     /// <inheritdoc/>

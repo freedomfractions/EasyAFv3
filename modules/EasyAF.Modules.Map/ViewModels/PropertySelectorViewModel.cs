@@ -63,13 +63,18 @@ namespace EasyAF.Modules.Map.ViewModels
 
             foreach (var propInfo in allPropsList.OrderBy(p => p.PropertyName))
             {
-                Properties.Add(new PropertyItem
+                var item = new PropertyItem
                 {
                     PropertyName = propInfo.PropertyName,
                     Description = propInfo.Description,
                     PropertyType = propInfo.PropertyType,
                     IsEnabled = isWildcard || enabledSet.Contains(propInfo.PropertyName)
-                });
+                };
+
+                // Subscribe to property changes to update EnabledCount
+                item.PropertyChanged += OnPropertyItemChanged;
+
+                Properties.Add(item);
             }
 
             // Setup filtered view
@@ -248,6 +253,21 @@ namespace EasyAF.Modules.Map.ViewModels
             }
 
             return false;
+        }
+
+        #endregion
+
+        #region Event Handlers
+
+        /// <summary>
+        /// Handles property changes on individual PropertyItem instances.
+        /// </summary>
+        private void OnPropertyItemChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(PropertyItem.IsEnabled))
+            {
+                RaisePropertyChanged(nameof(EnabledCount));
+            }
         }
 
         #endregion
