@@ -322,10 +322,16 @@ namespace EasyAF.Modules.Map.ViewModels
             {
                 bool isMultiTable = fileGroup.Value.Count > 1;
                 
+                Log.Debug("File {FileName} has {Count} tables (IsMultiTable={IsMultiTable})", 
+                    System.IO.Path.GetFileName(fileGroup.Key), fileGroup.Value.Count, isMultiTable);
+                
                 foreach (var tableRef in fileGroup.Value)
                 {
                     tableRef.IsMultiTableFile = isMultiTable;
                     AvailableTables.Add(tableRef);
+                    
+                    Log.Debug("  Added table: {TableName} (IsMultiTable={IsMultiTable})", 
+                        tableRef.TableName, tableRef.IsMultiTableFile);
                 }
             }
 
@@ -337,8 +343,11 @@ namespace EasyAF.Modules.Map.ViewModels
                     SelectedTable.TableName, SelectedTable.FileName);
             }
 
-            Log.Debug("Loaded {Count} available tables from {FileCount} files", 
+            Log.Information("Loaded {Count} available tables from {FileCount} files", 
                 AvailableTables.Count, tablesByFile.Count);
+            
+            // Refresh the collection view to ensure grouping is applied
+            AvailableTablesView.Refresh();
         }
 
         /// <summary>

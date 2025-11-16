@@ -63,21 +63,10 @@
                     <GroupStyle>
                         <GroupStyle.HeaderTemplate>
                             <DataTemplate>
-                                <!-- Only show header if this is a multi-table file -->
+                                <!-- File header -->
                                 <Border Background="{DynamicResource SecondaryBackgroundBrush}"
                                         Padding="6,4"
                                         Margin="0,2,0,0">
-                                    <Border.Style>
-                                        <Style TargetType="Border">
-                                            <!-- Hide header for single-table files -->
-                                            <Setter Property="Visibility" Value="Visible"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Items[0].IsMultiTableFile}" Value="False">
-                                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Border.Style>
                                     <TextBlock Text="{Binding Name}" 
                                                FontWeight="SemiBold"
                                                FontSize="11"
@@ -91,22 +80,10 @@
                                     <Setter.Value>
                                         <ControlTemplate TargetType="GroupItem">
                                             <StackPanel>
-                                                <!-- Group Header (visible only for multi-table) -->
+                                                <!-- Group Header -->
                                                 <ContentPresenter />
-                                                <!-- Group Items -->
-                                                <ItemsPresenter>
-                                                    <ItemsPresenter.Style>
-                                                        <Style TargetType="ItemsPresenter">
-                                                            <!-- Indent only if multi-table -->
-                                                            <Setter Property="Margin" Value="0"/>
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding Items[0].IsMultiTableFile}" Value="True">
-                                                                    <Setter Property="Margin" Value="12,0,0,0"/>
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </ItemsPresenter.Style>
-                                                </ItemsPresenter>
+                                                <!-- Group Items (always indented) -->
+                                                <ItemsPresenter Margin="12,0,0,0"/>
                                             </StackPanel>
                                         </ControlTemplate>
                                     </Setter.Value>
@@ -116,24 +93,12 @@
                     </GroupStyle>
                 </ComboBox.GroupStyle>
                 
-                <!-- Item Template - smart display -->
+                <!-- Item Template - just show table name -->
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
-                        <TextBlock Padding="4,2"
-                                   Foreground="{DynamicResource TextPrimaryBrush}">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
-                                    <!-- Default: show just table name if multi-table -->
-                                    <Setter Property="Text" Value="{Binding TableName}"/>
-                                    <!-- If single-table file, show filename instead -->
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsMultiTableFile}" Value="False">
-                                            <Setter Property="Text" Value="{Binding FileName}"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
+                        <TextBlock Text="{Binding TableName}"
+                                   Padding="4,2"
+                                   Foreground="{DynamicResource TextPrimaryBrush}"/>
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
