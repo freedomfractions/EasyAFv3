@@ -80,7 +80,7 @@
                                         <ControlTemplate TargetType="{x:Type GroupItem}">
                                             <StackPanel>
                                                 <!-- Group header -->
-                                                <ContentPresenter ContentSource="Header"/>
+                                                <ContentPresenter />
                                                 <!-- Group items -->
                                                 <ItemsPresenter Margin="16,0,0,0"/>
                                             </StackPanel>
