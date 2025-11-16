@@ -52,7 +52,8 @@ public class FileCommandsViewModel : BindableBase
     /// <param name="moduleCatalog">Catalog of loaded modules for file type discovery.</param>
     /// <param name="recentFilesService">Service for tracking recent files.</param>
     /// <param name="settingsService">Service for persisting user preferences.</param>
-    public FileCommandsViewModel(IDocumentManager documentManager, EasyAF.Core.Contracts.IModuleCatalog moduleCatalog, IRecentFilesService recentFilesService, ISettingsService settingsService)
+    /// <param name="moduleLoader">Module loader to subscribe to module loading events.</param>
+    public FileCommandsViewModel(IDocumentManager documentManager, EasyAF.Core.Contracts.IModuleCatalog moduleCatalog, IRecentFilesService recentFilesService, ISettingsService settingsService, IModuleLoader moduleLoader)
     {
         _documentManager = documentManager;
         _moduleCatalog = moduleCatalog;
@@ -75,6 +76,24 @@ public class FileCommandsViewModel : BindableBase
 
         // Requery Clear when the list changes
         _recentFiles.RecentFiles.CollectionChanged += (_, __) => ClearRecentCommand.RaiseCanExecuteChanged();
+
+        // CROSS-MODULE EDIT: 2025-01-15 Map Module New Command Fix
+        // Modified for: Subscribe to module loaded events to update SelectedModule when modules are discovered
+        // Related modules: Core (IModuleLoader, IModuleCatalog), Map (MapModule)
+        // Rollback instructions: Remove moduleLoader parameter and ModuleLoaded subscription below
+        
+        // Subscribe to module loading to update available modules
+        moduleLoader.ModuleLoaded += (_, __) =>
+        {
+            // When a new module is loaded, notify that AvailableDocumentModules changed
+            RaisePropertyChanged(nameof(AvailableDocumentModules));
+            
+            // If no module is selected yet, select the first available one
+            if (SelectedModule == null)
+            {
+                SelectedModule = AvailableDocumentModules.FirstOrDefault();
+            }
+        };
 
         // Default selected module (first available) for convenience
         _selectedModule = AvailableDocumentModules.FirstOrDefault();
