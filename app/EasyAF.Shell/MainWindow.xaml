@@ -311,7 +311,7 @@
 
                 <!-- Document Content Container (will be populated by document tabs) -->
                 <ContentControl x:Name="DocumentContentContainer"
-                              Content="{Binding SelectedDocument}"
+                              Content="{Binding SelectedDocument.ViewModel}"
                               Visibility="{Binding Documents.Count, Converter={StaticResource NonZeroToVisibilityConverter}}"/>
             </Grid>
         </Grid>
