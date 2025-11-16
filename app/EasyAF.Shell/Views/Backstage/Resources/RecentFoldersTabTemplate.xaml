@@ -1,0 +1,159 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:behaviors="clr-namespace:EasyAF.Shell.Behaviors">
+    
+    <!-- CROSS-MODULE EDIT: 2025-01-15 MVVM Optimization (3/4) -->
+    <!-- Modified for: Extract Recent Folders tab template from OpenBackstageView.xaml -->
+    <!-- Rollback instructions: Merge back into OpenBackstageView.xaml TabControl second TabItem -->
+    
+    <!-- Recent Folders Tab Template -->
+    <DataTemplate x:Key="RecentFoldersTabTemplate">
+        <!-- Drag & Drop: Drag folders to Quick Access -->
+        <ListView Background="Transparent"
+                  BorderThickness="0"
+                  ItemsSource="{Binding RecentFolders}"
+                  behaviors:DragToQuickAccessBehavior.IsEnabled="True"
+                  behaviors:DragToQuickAccessBehavior.QuickAccessTarget="{Binding ElementName=QuickAccessItemsControl, Source={RelativeSource AncestorType=UserControl}}">
+            
+            <!-- Keyboard shortcuts -->
+            <ListView.InputBindings>
+                <KeyBinding Key="Return"
+                            Command="{Binding OpenFolderCommand}"
+                            CommandParameter="{Binding SelectedItem, RelativeSource={RelativeSource AncestorType=ListView}}"/>
+                <KeyBinding Key="Delete"
+                            Command="{Binding RemoveFolderFromListCommand}"
+                            CommandParameter="{Binding SelectedItem, RelativeSource={RelativeSource AncestorType=ListView}}"/>
+            </ListView.InputBindings>
+            
+            <!-- Context Menu -->
+            <ListView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Open folder" 
+                              Command="{Binding PlacementTarget.DataContext.OpenFolderCommand, 
+                                        RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                              CommandParameter="{Binding PlacementTarget.SelectedItem, 
+                                                 RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+                        <MenuItem.Icon>
+                            <TextBlock Text="&#xE8B7;" FontFamily="Segoe MDL2 Assets"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="Copy Path" 
+                              Command="{Binding PlacementTarget.DataContext.CopyFolderPathCommand, 
+                                        RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                              CommandParameter="{Binding PlacementTarget.SelectedItem, 
+                                                 RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+                        <MenuItem.Icon>
+                            <TextBlock Text="&#xE8C8;" FontFamily="Segoe MDL2 Assets"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <Separator/>
+                    <MenuItem Header="Add to Quick Access" 
+                              Command="{Binding PlacementTarget.DataContext.AddToQuickAccessCommand, 
+                                        RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                              CommandParameter="{Binding PlacementTarget.SelectedItem.FolderPath, 
+                                                 RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+                        <MenuItem.Icon>
+                            <TextBlock Text="&#xE710;" FontFamily="Segoe MDL2 Assets"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="Remove from list"
+                              Command="{Binding PlacementTarget.DataContext.RemoveFolderFromListCommand, 
+                                        RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                              CommandParameter="{Binding PlacementTarget.SelectedItem, 
+                                                 RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+                        <MenuItem.Icon>
+                            <TextBlock Text="&#xE738;" FontFamily="Segoe MDL2 Assets"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                </ContextMenu>
+            </ListView.ContextMenu>
+            
+            <!-- GridView Columns -->
+            <ListView.View>
+                <GridView>
+                    <!-- Icon Column -->
+                    <GridViewColumn Width="40">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="&#xE8B7;" 
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="20"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    
+                    <!-- Name Column (two-line) -->
+                    <GridViewColumn Width="370" Header="Folder">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding FolderName}" 
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                    <TextBlock Text="{Binding ParentPath}" 
+                                               FontSize="11"
+                                               Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    
+                    <!-- Date Accessed Column -->
+                    <GridViewColumn Width="120" Header="Last accessed">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding LastAccessedDisplay}" 
+                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                           VerticalAlignment="Center"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                </GridView>
+            </ListView.View>
+            
+            <!-- Item Container Style -->
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="BorderThickness" Value="0"/>
+                    <Setter Property="Padding" Value="0"/>
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                    <Setter Property="MinHeight" Value="52"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="ListViewItem">
+                                <Border x:Name="ItemBorder"
+                                        Background="{TemplateBinding Background}"
+                                        BorderBrush="Transparent"
+                                        BorderThickness="0"
+                                        Padding="{TemplateBinding Padding}">
+                                    <Border.InputBindings>
+                                        <MouseBinding MouseAction="LeftDoubleClick"
+                                                      Command="{Binding DataContext.OpenFolderCommand, 
+                                                                RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                      CommandParameter="{Binding}"/>
+                                    </Border.InputBindings>
+                                    <GridViewRowPresenter VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource HighlightSelectionBrush}"/>
+                                    </Trigger>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource HighlightSelectionBrush}"/>
+                                        <Setter TargetName="ItemBorder" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                                        <Setter TargetName="ItemBorder" Property="BorderThickness" Value="2,0,0,0"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </ListView.ItemContainerStyle>
+        </ListView>
+    </DataTemplate>
+    
+</ResourceDictionary>
