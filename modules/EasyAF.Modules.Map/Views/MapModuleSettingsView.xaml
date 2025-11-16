@@ -44,8 +44,20 @@
                       GridLinesVisibility="Horizontal"
                       RowBackground="{DynamicResource ControlBackgroundBrush}"
                       AlternatingRowBackground="{DynamicResource SecondaryBackgroundBrush}"
+                      Background="{DynamicResource ControlBackgroundBrush}"
                       BorderThickness="0"
                       SelectionMode="Single">
+                
+                <!-- CROSS-MODULE EDIT: 2025-01-16 DataGrid Theme Fix -->
+                <!-- Modified for: Fix unthemed ScrollViewer background in DataGrid -->
+                <!-- Rollback instructions: Remove this Style element -->
+                
+                <!-- Style for DataGrid to theme the ScrollViewer background -->
+                <DataGrid.Resources>
+                    <Style TargetType="ScrollViewer">
+                        <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}"/>
+                    </Style>
+                </DataGrid.Resources>
                 
                 <!-- Style for headers -->
                 <DataGrid.ColumnHeaderStyle>
