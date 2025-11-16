@@ -45,5 +45,10 @@ namespace EasyAF.Modules.Map.Models
         public override bool IsSelectable => true;
 
         public override string DisplayText => TableReference.TableName;
+
+        /// <summary>
+        /// Gets whether this table should be indented (from a multi-table file).
+        /// </summary>
+        public bool ShouldIndent => TableReference.IsMultiTableFile;
     }
 }

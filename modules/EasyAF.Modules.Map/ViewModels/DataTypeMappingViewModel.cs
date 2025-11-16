@@ -342,10 +342,11 @@ namespace EasyAF.Modules.Map.ViewModels
                 Log.Debug("File {FileName} has {Count} tables (IsMultiTable={IsMultiTable})", 
                     fileName, fileGroup.Value.Count, isMultiTable);
                 
-                // Add file header for multi-table files
+                // Add file header ONLY for multi-table files
                 if (isMultiTable)
                 {
                     ComboBoxItems.Add(new FileHeaderItem { FileName = fileName });
+                    Log.Debug("  Added header for multi-table file: {FileName}", fileName);
                 }
                 
                 foreach (var tableRef in fileGroup.Value)
@@ -353,11 +354,11 @@ namespace EasyAF.Modules.Map.ViewModels
                     tableRef.IsMultiTableFile = isMultiTable;
                     AvailableTables.Add(tableRef);
                     
-                    // Add table item to ComboBox (indented if multi-table)
+                    // Add table item to ComboBox
                     ComboBoxItems.Add(new TableItem(tableRef));
 
-                    Log.Debug("  Added table: {TableName} (IsMultiTable={IsMultiTable})", 
-                        tableRef.TableName, tableRef.IsMultiTableFile);
+                    Log.Debug("  Added table: {TableName} (IsMultiTable={IsMultiTable}, indented={Indented})", 
+                        tableRef.TableName, tableRef.IsMultiTableFile, isMultiTable);
                 }
             }
 
