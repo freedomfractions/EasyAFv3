@@ -439,6 +439,40 @@ namespace EasyAF.Modules.Map.ViewModels
         {
             Log.Information("Settings reloaded, refreshing property visibility for all data types");
             
+            // CROSS-MODULE EDIT: 2025-01-16 Invalid Mapping Detection
+            // Modified for: Detect and clean up mappings to hidden properties after settings change
+            // Related modules: Map (InvalidMappingDetector)
+            // Rollback instructions: Remove invalid mapping detection logic
+            
+            // Check for invalid mappings BEFORE refreshing tabs
+            // (properties may have been hidden, leaving orphaned mappings)
+            var invalidDetector = new InvalidMappingDetector(_propertyDiscovery);
+            var invalidMappings = invalidDetector.FindInvalidMappings(_document);
+            
+            if (invalidMappings.Any())
+            {
+                var totalInvalid = invalidMappings.Sum(kvp => kvp.Value.Count);
+                var summary = invalidDetector.GetInvalidMappingsSummary(invalidMappings);
+                
+                var confirmed = _dialogService.Confirm(
+                    $"Invalid Mappings Detected\n\n" +
+                    $"{summary}" +
+                    $"Total: {totalInvalid} mapping(s) reference hidden properties.\n\n" +
+                    $"Remove these invalid mappings?",
+                    "Remove Invalid Mappings?");
+                
+                if (confirmed)
+                {
+                    var removedCount = invalidDetector.RemoveInvalidMappings(_document, invalidMappings);
+                    Log.Information("Removed {Count} invalid mappings after settings change", removedCount);
+                }
+                else
+                {
+                    Log.Information("User chose to keep {Count} invalid mappings", totalInvalid);
+                }
+            }
+            
+            // Now refresh tabs (this will update UI to reflect property visibility changes)
             foreach (var tab in TabHeaders.Where(t => t.ViewModel is DataTypeMappingViewModel))
             {
                 if (tab.ViewModel is DataTypeMappingViewModel dataTypeVm)
@@ -472,63 +506,102 @@ namespace EasyAF.Modules.Map.ViewModels
             if (missingFiles.Count == 0)
             {
                 Log.Debug("All referenced files are valid");
-                return;
+                // Don't return yet - continue to check for invalid mappings
             }
-
-            Log.Warning("Found {Count} missing referenced files", missingFiles.Count);
-
-            // Show missing files dialog
-            try
+            else
             {
-                var dialogVm = new MissingFilesDialogViewModel(missingFiles);
-                var dialog = new Views.MissingFilesDialog
-                {
-                    DataContext = dialogVm,
-                    Owner = System.Windows.Application.Current?.MainWindow
-                };
+                Log.Warning("Found {Count} missing referenced files", missingFiles.Count);
 
-                var result = dialog.ShowDialog();
-                
-                if (result != true)
+                // Show missing files dialog
+                try
                 {
-                    Log.Information("User cancelled missing files resolution");
-                    return;
-                }
-
-                // Process user actions
-                foreach (var entry in dialogVm.MissingFiles)
-                {
-                    switch (entry.Status)
+                    var dialogVm = new MissingFilesDialogViewModel(missingFiles);
+                    var dialog = new Views.MissingFilesDialog
                     {
-                        case "Resolved":
-                            // User located the file - update path in document
-                            if (!string.IsNullOrEmpty(entry.NewPath))
+                        DataContext = dialogVm,
+                        Owner = System.Windows.Application.Current?.MainWindow
+                    };
+
+                    var result = dialog.ShowDialog();
+                    
+                    if (result != true)
+                    {
+                        Log.Information("User cancelled missing files resolution");
+                        // Continue to check invalid mappings anyway
+                    }
+                    else
+                    {
+                        // Process user actions
+                        foreach (var entry in dialogVm.MissingFiles)
+                        {
+                            switch (entry.Status)
                             {
-                                _document.UpdateReferencedFilePath(entry.OriginalPath, entry.NewPath);
-                                Log.Information("Updated file reference: {Old} -> {New}", entry.OriginalPath, entry.NewPath);
+                                case "Resolved":
+                                    // User located the file - update path in document
+                                    if (!string.IsNullOrEmpty(entry.NewPath))
+                                    {
+                                        _document.UpdateReferencedFilePath(entry.OriginalPath, entry.NewPath);
+                                        Log.Information("Updated file reference: {Old} -> {New}", entry.OriginalPath, entry.NewPath);
+                                    }
+                                    break;
+
+                                case "Removed":
+                                    // User wants to remove this file reference
+                                    _document.RemoveReferencedFile(entry.OriginalPath);
+                                    Log.Information("Removed missing file reference: {Path}", entry.OriginalPath);
+                                    break;
+
+                                case "Missing":
+                                    // User chose to continue with missing file - leave as is
+                                    Log.Warning("Continuing with missing file: {Path}", entry.OriginalPath);
+                                    break;
                             }
-                            break;
-
-                        case "Removed":
-                            // User wants to remove this file reference
-                            _document.RemoveReferencedFile(entry.OriginalPath);
-                            Log.Information("Removed missing file reference: {Path}", entry.OriginalPath);
-                            break;
-
-                        case "Missing":
-                            // User chose to continue with missing file - leave as is
-                            Log.Warning("Continuing with missing file: {Path}", entry.OriginalPath);
-                            break;
+                        }
                     }
                 }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Error showing missing files dialog");
+                }
+            }
 
-                // Refresh the UI after changes
-                RefreshAllTabStatuses();
-            }
-            catch (Exception ex)
+            // CROSS-MODULE EDIT: 2025-01-16 Invalid Mapping Detection
+            // Modified for: Check for invalid mappings on document load
+            // Related modules: Map (InvalidMappingDetector)
+            // Rollback instructions: Remove invalid mapping detection logic below
+            
+            // Check for mappings to properties that are now hidden (settings may have changed since save)
+            var invalidDetector = new InvalidMappingDetector(_propertyDiscovery);
+            var invalidMappings = invalidDetector.FindInvalidMappings(_document);
+            
+            if (invalidMappings.Any())
             {
-                Log.Error(ex, "Error showing missing files dialog");
+                var totalInvalid = invalidMappings.Sum(kvp => kvp.Value.Count);
+                var summary = invalidDetector.GetInvalidMappingsSummary(invalidMappings);
+                
+                Log.Warning("Found {Count} invalid mappings on document load", totalInvalid);
+                
+                var confirmed = _dialogService.Confirm(
+                    $"Invalid Mappings Detected\n\n" +
+                    $"{summary}" +
+                    $"Total: {totalInvalid} mapping(s) reference properties that are currently hidden in settings.\n\n" +
+                    $"This may occur if settings were changed since this map was saved.\n\n" +
+                    $"Remove these invalid mappings?",
+                    "Remove Invalid Mappings?");
+                
+                if (confirmed)
+                {
+                    var removedCount = invalidDetector.RemoveInvalidMappings(_document, invalidMappings);
+                    Log.Information("Removed {Count} invalid mappings on document load", removedCount);
+                }
+                else
+                {
+                    Log.Information("User chose to keep {Count} invalid mappings (properties remain hidden)", totalInvalid);
+                }
             }
+
+            // Refresh the UI after any changes
+            RefreshAllTabStatuses();
         }
 
         #endregion
