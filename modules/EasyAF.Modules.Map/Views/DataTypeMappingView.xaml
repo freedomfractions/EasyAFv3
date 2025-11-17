@@ -106,9 +106,9 @@
               Margin="0,10,0,0"
               HorizontalAlignment="Stretch">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="360*" MinWidth="360" MaxWidth="700"/> <!-- Target Properties (LEFT) - proportional -->
+                <ColumnDefinition Width="*" MinWidth="360" MaxWidth="700"/> <!-- Target Properties (LEFT) - equal share -->
                 <ColumnDefinition Width="100" MinWidth="100"/> <!-- Map/Unmap Buttons - fixed min -->
-                <ColumnDefinition Width="360*" MinWidth="360" MaxWidth="700"/> <!-- Source Columns (RIGHT) - proportional -->
+                <ColumnDefinition Width="*" MinWidth="360" MaxWidth="700"/> <!-- Source Columns (RIGHT) - equal share -->
             </Grid.ColumnDefinitions>
             
             <!-- Target Properties (LEFT Pane) -->
