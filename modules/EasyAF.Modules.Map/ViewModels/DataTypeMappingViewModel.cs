@@ -672,15 +672,7 @@ namespace EasyAF.Modules.Map.ViewModels
                     Owner = System.Windows.Application.Current.MainWindow
                 };
 
-                // Subscribe to DialogResult changes
-                viewModel.PropertyChanged += (s, e) =>
-                {
-                    if (e.PropertyName == nameof(PropertySelectorViewModel.DialogResult))
-                    {
-                        dialog.DialogResult = viewModel.DialogResult;
-                    }
-                };
-
+                // Dialog code-behind handles DialogResult via PropertyChanged subscription
                 var result = dialog.ShowDialog();
 
                 if (result == true)
