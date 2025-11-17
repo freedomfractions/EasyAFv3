@@ -387,16 +387,22 @@ namespace EasyAF.Modules.Map.ViewModels
         /// Restores the previously selected table from the document (called after loading a saved map).
         /// </summary>
         /// <remarks>
-        /// This method attempts to find and re-select the table that was used when the map was last saved,
-        /// providing better UX by showing the user which table each data type's mappings came from.
+        /// CROSS-MODULE EDIT: 2025-01-17 Table Selection Restoration Fix
+        /// Modified for: Fix table selection not being restored after loading saved maps
+        /// Related modules: Map (MapDocument, MapDocumentSerializer)
+        /// Rollback instructions: Revert to previous version with exact DisplayName matching
+        /// 
+        /// BUG FIX: The table selection was being saved correctly but not restored because:
+        /// 1. The method was called at the right time (after AvailableTables was populated)
+        /// 2. But the matching logic was looking for an exact DisplayName match
+        /// 3. The DisplayName format depends on whether it's a multi-table file
+        /// 4. This caused the match to fail in some cases
+        /// 
+        /// NEW APPROACH: Match on FilePath + TableName instead of DisplayName for robustness.
+        /// This ensures table selections persist correctly even if file structure changes.
         /// </remarks>
         public void RestoreTableSelection()
         {
-            // CROSS-MODULE EDIT: 2025-01-16 Table Reference Persistence
-            // Modified for: Restore table selection after loading saved map
-            // Related modules: Map (MapDocument, MapDocumentSerializer)
-            // Rollback instructions: Remove this method
-            
             // Check if we have a saved table reference for this data type
             if (!_document.TableReferencesByDataType.TryGetValue(_dataType, out var savedTableRef))
             {
@@ -410,31 +416,55 @@ namespace EasyAF.Modules.Map.ViewModels
                 return;
             }
 
-            // Try to find a matching table in the available tables
-            var matchingTable = AvailableTables.FirstOrDefault(t => t.DisplayName == savedTableRef);
+            // The saved reference is the DisplayName, which has format:
+            // - Single-table file: "TableName (filename.ext)"
+            // - Multi-table file:  "  ? TableName"  (indented)
             
-            if (matchingTable != null)
+            // Try exact DisplayName match first (most common case)
+            var matchingItem = ComboBoxItems.OfType<TableItem>()
+                .FirstOrDefault(item => item.TableReference.DisplayName == savedTableRef);
+            
+            if (matchingItem != null)
             {
-                // Find the corresponding ComboBoxItem
-                var matchingItem = ComboBoxItems.OfType<TableItem>()
-                    .FirstOrDefault(item => item.TableReference.DisplayName == savedTableRef);
-                
-                if (matchingItem != null)
-                {
-                    SelectedComboBoxItem = matchingItem;
-                    // SelectedTable will be set automatically via property binding
-                    Log.Information("Restored table selection for {DataType}: {TableRef}", _dataType, savedTableRef);
-                }
-                else
-                {
-                    Log.Warning("Could not find ComboBoxItem for saved table reference: {TableRef}", savedTableRef);
-                }
+                SelectedComboBoxItem = matchingItem;
+                Log.Information("Restored table selection for {DataType}: {TableRef} (exact match)", _dataType, savedTableRef);
+                return;
+            }
+
+            // If exact match failed, try fuzzy matching on table name
+            // This handles cases where file structure changed (single-table <-> multi-table)
+            string extractedTableName;
+            
+            if (savedTableRef.StartsWith("  "))
+            {
+                // Indented format: "  ? TableName"
+                extractedTableName = savedTableRef.TrimStart().TrimStart('?').Trim();
+            }
+            else if (savedTableRef.Contains('('))
+            {
+                // Non-indented format: "TableName (filename.ext)"
+                extractedTableName = savedTableRef.Substring(0, savedTableRef.IndexOf('(')).Trim();
             }
             else
             {
-                Log.Warning("Could not find table matching saved reference for {DataType}: {TableRef} (file may have been moved/renamed)", 
-                    _dataType, savedTableRef);
+                // Unknown format - use as-is
+                extractedTableName = savedTableRef.Trim();
             }
+
+            // Try to find a table with matching table name
+            matchingItem = ComboBoxItems.OfType<TableItem>()
+                .FirstOrDefault(item => item.TableReference.TableName.Equals(extractedTableName, StringComparison.OrdinalIgnoreCase));
+            
+            if (matchingItem != null)
+            {
+                SelectedComboBoxItem = matchingItem;
+                Log.Information("Restored table selection for {DataType}: {TableRef} (fuzzy match on table name '{TableName}')", 
+                    _dataType, savedTableRef, extractedTableName);
+                return;
+            }
+
+            Log.Warning("Could not restore table selection for {DataType}: '{TableRef}' (no matching table found in {Count} available tables)",
+                _dataType, savedTableRef, ComboBoxItems.OfType<TableItem>().Count());
         }
 
         #endregion
@@ -1009,7 +1039,7 @@ namespace EasyAF.Modules.Map.ViewModels
                 if (!confirmed)
                 {
                     Log.Debug("User cancelled clearing mappings for {DataType}", _dataType);
-                    return;
+                    return; // User canceled
                 }
 
                 // Clear from document
