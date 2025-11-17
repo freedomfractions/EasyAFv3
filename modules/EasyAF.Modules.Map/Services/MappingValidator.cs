@@ -4,6 +4,7 @@ using System.Linq;
 using EasyAF.Import;
 using EasyAF.Modules.Map.Models;
 using EasyAF.Modules.Map.Services;
+using EasyAF.Core.Contracts;
 using Serilog;
 
 namespace EasyAF.Modules.Map.Services
@@ -29,17 +30,29 @@ namespace EasyAF.Modules.Map.Services
     public class MappingValidator
     {
         private readonly IPropertyDiscoveryService _propertyDiscovery;
+        private readonly ISettingsService _settingsService;
 
-        public MappingValidator(IPropertyDiscoveryService propertyDiscovery)
+        public MappingValidator(IPropertyDiscoveryService propertyDiscovery, ISettingsService settingsService)
         {
             _propertyDiscovery = propertyDiscovery ?? throw new ArgumentNullException(nameof(propertyDiscovery));
+            _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
         }
 
         /// <summary>
-        /// Validates that all required properties are mapped across all data types.
+        /// Validates that all required properties are mapped across all ENABLED data types.
         /// </summary>
         /// <param name="document">The map document to validate.</param>
         /// <returns>Validation result with details of any unmapped required properties.</returns>
+        /// <remarks>
+        /// CROSS-MODULE EDIT: 2025-01-16 Required Field Validation Filter Fix
+        /// Modified for: Skip disabled data types during validation (e.g., Cable)
+        /// Related modules: Core (ISettingsService), Map (MapSettingsExtensions)
+        /// Rollback instructions: Remove IsDataTypeEnabled check and settingsService dependency
+        /// 
+        /// BUG FIX: Previously validated ALL data types regardless of enabled/disabled state.
+        /// This caused errors like "Cable.Id required" even when Cable was disabled in settings.
+        /// Now only validates data types that are actually enabled and visible to the user.
+        /// </remarks>
         public ValidationResult ValidateRequiredMappings(MapDocument document)
         {
             var unmappedRequired = new Dictionary<string, List<string>>();
@@ -51,6 +64,14 @@ namespace EasyAF.Modules.Map.Services
 
                 foreach (var dataType in dataTypes)
                 {
+                    // SKIP disabled data types - they don't need validation
+                    // If Cable is disabled in settings, we don't care if its required fields are mapped
+                    if (!_settingsService.IsDataTypeEnabled(dataType))
+                    {
+                        Log.Debug("Skipping validation for disabled data type: {DataType}", dataType);
+                        continue;
+                    }
+
                     // Get all properties for this type (including required flag)
                     var allProperties = _propertyDiscovery.GetPropertiesForType(dataType);
                     var requiredProperties = allProperties

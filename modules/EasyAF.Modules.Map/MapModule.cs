@@ -370,7 +370,8 @@ namespace EasyAF.Modules.Map
                 if (_container != null)
                 {
                     var propertyDiscovery = _container.Resolve<Services.IPropertyDiscoveryService>();
-                    var validator = new Services.MappingValidator(propertyDiscovery);
+                    var settingsService = _container.Resolve<ISettingsService>();
+                    var validator = new Services.MappingValidator(propertyDiscovery, settingsService);
                     var validationResult = validator.ValidateRequiredMappings(mapDoc);
                     
                     if (!validationResult.IsValid)

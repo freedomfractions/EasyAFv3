@@ -422,8 +422,17 @@ namespace EasyAF.Modules.Map.ViewModels
         /// Asynchronously refreshes mapping status for all data types.
         /// </summary>
         /// <remarks>
+        /// CROSS-MODULE EDIT: 2025-01-16 Summary Statistics Filter Update Fix
+        /// Modified for: Refresh FieldsAvailable count when property filters change
+        /// Related modules: Map (PropertyDiscoveryService)
+        /// Rollback instructions: Remove FieldsAvailable update logic
+        /// 
         /// This method is called automatically when the Summary tab is activated.
         /// It runs on a background thread to avoid blocking the UI during tab transitions.
+        /// 
+        /// BUG FIX: Previously only updated FieldsMapped but not FieldsAvailable,
+        /// causing stale property counts when user changed property visibility filters.
+        /// Now recalculates both counts from current filtered property list.
         /// </remarks>
         public async Task RefreshStatusAsync()
         {
@@ -434,6 +443,11 @@ namespace EasyAF.Modules.Map.ViewModels
                 // Process each data type summary
                 foreach (var summary in DataTypeProperties)
                 {
+                    // Recalculate BOTH counts from current filtered properties
+                    // This ensures counts update when user changes property visibility
+                    var properties = _propertyDiscovery.GetPropertiesForType(summary.TypeName);
+                    var availableCount = properties.Count;
+                    
                     var mappedCount = _document.MappingsByDataType.TryGetValue(summary.TypeName, out var mappings)
                         ? mappings.Count
                         : 0;
@@ -441,8 +455,9 @@ namespace EasyAF.Modules.Map.ViewModels
                     // Update on UI thread
                     System.Windows.Application.Current?.Dispatcher.Invoke(() =>
                     {
+                        summary.FieldsAvailable = availableCount;  // UPDATE THIS TOO!
                         summary.FieldsMapped = mappedCount;
-                        summary.StatusColor = GetStatusColor(mappedCount, summary.FieldsAvailable);
+                        summary.StatusColor = GetStatusColor(mappedCount, availableCount);
                     });
                 }
 
