@@ -906,42 +906,53 @@ namespace EasyAF.Modules.Map.ViewModels
         /// <remarks>
         /// <para>
         /// This command performs the following actions:
-        /// 1. Clears the selected table (sets SelectedTable to null)
-        /// 2. Clears the selected ComboBox item
-        /// 3. Triggers the welcome overlay to reappear
-        /// 4. Triggers the glow effect on the table dropdown
-        /// 5. Clears the source columns list
+        /// 1. Prompts user to confirm (if mappings exist)
+        /// 2. Clears ALL mappings for this data type
+        /// 3. Clears the selected table (sets SelectedTable to null)
+        /// 4. Clears the selected ComboBox item
+        /// 5. Triggers the welcome overlay to reappear
+        /// 6. Triggers the glow effect on the table dropdown
+        /// 7. Clears the source columns list
         /// </para>
         /// <para>
-        /// Note: This does NOT clear any existing mappings. Mappings remain intact
-        /// and will be restored if the user selects a table again. To clear mappings,
-        /// use the "Clear All" button.
+        /// This is a "fresh start" operation - user can select a different table
+        /// and create new mappings from scratch.
         /// </para>
         /// </remarks>
         private void ExecuteResetTable()
         {
             try
             {
-                // CROSS-MODULE EDIT: 2025-01-16 Reset Table Confirmation
-                // Modified for: Add confirmation prompt to prevent accidental resets
-                // Related modules: Core (IUserDialogService)
-                // Rollback instructions: Remove confirmation dialog block
+                // CROSS-MODULE EDIT: 2025-01-16 Reset Table with Mapping Cleanup
+                // Modified for: Clear all mappings when resetting table (fresh start)
+                // Related modules: Core (IUserDialogService), Map (MapDocument)
+                // Rollback instructions: Remove mapping cleanup logic, only clear table selection
                 
-                // Check if there are any mappings - if so, warn user
+                // Check if there are any mappings - if so, warn user they will be lost
                 if (MappedCount > 0)
                 {
                     var confirmed = _dialogService.Confirm(
                         $"Reset table selection for {_dataType}?\n\n" +
-                        $"Your {MappedCount} mapping(s) will remain intact, but you'll need to re-select " +
-                        $"a table to see the source columns again.\n\n" +
+                        $"This will DELETE all {MappedCount} mapping(s) for this data type.\n" +
+                        $"You'll start fresh with a blank slate.\n\n" +
                         $"Are you sure you want to continue?",
-                        "Reset Table Selection?");
+                        "Reset Table and Clear Mappings?");
                     
                     if (!confirmed)
                     {
                         Log.Debug("User canceled table reset for {DataType}", _dataType);
                         return; // User canceled
                     }
+                }
+                
+                // Clear ALL mappings for this data type
+                _document.ClearMappings(_dataType);
+                
+                // Update UI state for target properties
+                foreach (var prop in TargetProperties)
+                {
+                    prop.IsMapped = false;
+                    prop.MappedColumn = null;
                 }
                 
                 // Clear table selection
@@ -951,11 +962,18 @@ namespace EasyAF.Modules.Map.ViewModels
                 // Clear source columns (will happen automatically via SelectedTable setter, but explicit is clearer)
                 SourceColumns.Clear();
                 
+                // Refresh views
+                TargetPropertiesView.Refresh();
+                RaisePropertyChanged(nameof(MappedCount));
+                
                 // Update command states
                 UpdateCommandStates();
                 (ResetTableCommand as DelegateCommand)?.RaiseCanExecuteChanged();
                 
-                Log.Information("Reset table selection for {DataType}", _dataType);
+                // Update parent tab status
+                UpdateTabStatus();
+                
+                Log.Information("Reset table selection and cleared {Count} mappings for {DataType}", MappedCount, _dataType);
             }
             catch (Exception ex)
             {
