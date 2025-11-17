@@ -312,6 +312,10 @@
                 <!-- Document Content Container (will be populated by document tabs) -->
                 <ContentControl x:Name="DocumentContentContainer"
                               Content="{Binding SelectedDocument.ViewModel}"
+                              HorizontalAlignment="Stretch"
+                              HorizontalContentAlignment="Stretch"
+                              VerticalAlignment="Stretch"
+                              VerticalContentAlignment="Stretch"
                               Visibility="{Binding Documents.Count, Converter={StaticResource NonZeroToVisibilityConverter}}"/>
             </Grid>
         </Grid>
