@@ -445,6 +445,89 @@ namespace EasyAF.Modules.Map.ViewModels
 
         #endregion
 
+        #region File Validation
+
+        /// <summary>
+        /// Checks for missing referenced files and shows a resolution dialog if any are found.
+        /// </summary>
+        /// <remarks>
+        /// This method should be called after loading a document to ensure all referenced files are accessible.
+        /// If missing files are detected, a dialog is shown allowing the user to browse for relocated files,
+        /// remove missing references, or continue anyway.
+        /// </remarks>
+        public void ValidateMissingFiles()
+        {
+            // CROSS-MODULE EDIT: 2025-01-16 Missing File Detection
+            // Modified for: Add file validation on document load with resolution dialog
+            // Related modules: Map (MapDocument, MissingFilesDialogViewModel, MissingFilesDialog)
+            // Rollback instructions: Remove this method and related dialog files
+            
+            var missingFiles = _document.ValidateReferencedFiles();
+            
+            if (missingFiles.Count == 0)
+            {
+                Log.Debug("All referenced files are valid");
+                return;
+            }
+
+            Log.Warning("Found {Count} missing referenced files", missingFiles.Count);
+
+            // Show missing files dialog
+            try
+            {
+                var dialogVm = new MissingFilesDialogViewModel(missingFiles);
+                var dialog = new Views.MissingFilesDialog
+                {
+                    DataContext = dialogVm,
+                    Owner = System.Windows.Application.Current?.MainWindow
+                };
+
+                var result = dialog.ShowDialog();
+                
+                if (result != true)
+                {
+                    Log.Information("User cancelled missing files resolution");
+                    return;
+                }
+
+                // Process user actions
+                foreach (var entry in dialogVm.MissingFiles)
+                {
+                    switch (entry.Status)
+                    {
+                        case "Resolved":
+                            // User located the file - update path in document
+                            if (!string.IsNullOrEmpty(entry.NewPath))
+                            {
+                                _document.UpdateReferencedFilePath(entry.OriginalPath, entry.NewPath);
+                                Log.Information("Updated file reference: {Old} -> {New}", entry.OriginalPath, entry.NewPath);
+                            }
+                            break;
+
+                        case "Removed":
+                            // User wants to remove this file reference
+                            _document.RemoveReferencedFile(entry.OriginalPath);
+                            Log.Information("Removed missing file reference: {Path}", entry.OriginalPath);
+                            break;
+
+                        case "Missing":
+                            // User chose to continue with missing file - leave as is
+                            Log.Warning("Continuing with missing file: {Path}", entry.OriginalPath);
+                            break;
+                    }
+                }
+
+                // Refresh the UI after changes
+                RefreshAllTabStatuses();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error showing missing files dialog");
+            }
+        }
+
+        #endregion
+
         #region Cleanup
 
         /// <summary>

@@ -291,6 +291,14 @@ namespace EasyAF.Modules.Map
                     );
                     document.ViewModel = viewModel;
                     Log.Debug("Created ViewModel for opened map document");
+
+                    // CROSS-MODULE EDIT: 2025-01-16 Missing File Detection
+                    // Modified for: Validate referenced files after document load
+                    // Related modules: Map (MapDocument, MapDocumentViewModel, MissingFilesDialog)
+                    // Rollback instructions: Remove ValidateMissingFiles call below
+                    
+                    // Check for missing referenced files and show resolution dialog if needed
+                    viewModel.ValidateMissingFiles();
                 }
                 
                 Log.Information("Successfully opened map document: {MapName} ({MappingCount} mappings)", 

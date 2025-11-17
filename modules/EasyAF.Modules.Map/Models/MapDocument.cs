@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using EasyAF.Core.Contracts;
 using EasyAF.Import;
+using Serilog;
 
 namespace EasyAF.Modules.Map.Models
 {
@@ -345,6 +347,135 @@ namespace EasyAF.Modules.Map.Models
             }
 
             return doc;
+        }
+
+        #endregion
+
+        #region File Validation
+
+        /// <summary>
+        /// Validates all referenced files and updates their status.
+        /// </summary>
+        /// <returns>A list of missing file paths, or empty list if all files are valid.</returns>
+        /// <remarks>
+        /// <para>
+        /// This method checks each referenced file's existence and accessibility.
+        /// Status is updated to one of:
+        /// - "Valid": File exists and is accessible
+        /// - "Missing": File does not exist (moved/deleted)
+        /// - "Inaccessible": File exists but cannot be read (permissions, locked, etc.)
+        /// </para>
+        /// <para>
+        /// Should be called after loading a document or when file references change.
+        /// </para>
+        /// </remarks>
+        public List<string> ValidateReferencedFiles()
+        {
+            var missingFiles = new List<string>();
+
+            foreach (var file in ReferencedFiles)
+            {
+                try
+                {
+                    if (!File.Exists(file.FilePath))
+                    {
+                        file.Status = "Missing";
+                        missingFiles.Add(file.FilePath);
+                        Log.Warning("Referenced file not found: {Path}", file.FilePath);
+                    }
+                    else
+                    {
+                        // Try to open the file to verify it's accessible
+                        using (var stream = File.OpenRead(file.FilePath))
+                        {
+                            file.Status = "Valid";
+                        }
+                    }
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    file.Status = "Inaccessible";
+                    Log.Warning("Referenced file is inaccessible (permissions): {Path}", file.FilePath);
+                }
+                catch (IOException)
+                {
+                    file.Status = "Inaccessible";
+                    Log.Warning("Referenced file is inaccessible (locked or in use): {Path}", file.FilePath);
+                }
+                catch (Exception ex)
+                {
+                    file.Status = "Inaccessible";
+                    Log.Warning(ex, "Error accessing referenced file: {Path}", file.FilePath);
+                }
+            }
+
+            if (missingFiles.Count > 0)
+            {
+                Log.Information("Validation found {Count} missing referenced files", missingFiles.Count);
+            }
+            else
+            {
+                Log.Debug("All {Count} referenced files are valid", ReferencedFiles.Count);
+            }
+
+            return missingFiles;
+        }
+
+        /// <summary>
+        /// Updates the file path for a referenced file (used when user relocates a file).
+        /// </summary>
+        /// <param name="oldPath">The old file path to replace.</param>
+        /// <param name="newPath">The new file path.</param>
+        /// <returns>True if the file was found and updated; false otherwise.</returns>
+        public bool UpdateReferencedFilePath(string oldPath, string newPath)
+        {
+            var file = ReferencedFiles.FirstOrDefault(f => 
+                string.Equals(f.FilePath, oldPath, StringComparison.OrdinalIgnoreCase));
+
+            if (file == null)
+            {
+                Log.Warning("Could not find referenced file to update: {OldPath}", oldPath);
+                return false;
+            }
+
+            file.FilePath = newPath;
+            file.FileName = Path.GetFileName(newPath);
+            file.Status = File.Exists(newPath) ? "Valid" : "Missing";
+            
+            MarkDirty();
+            Log.Information("Updated referenced file path: {OldPath} -> {NewPath}", oldPath, newPath);
+            
+            return true;
+        }
+
+        /// <summary>
+        /// Removes a referenced file from the document.
+        /// </summary>
+        /// <param name="filePath">The file path to remove.</param>
+        /// <returns>True if the file was found and removed; false otherwise.</returns>
+        /// <remarks>
+        /// <para>
+        /// WARNING: This does not remove mappings that reference columns from this file.
+        /// Those mappings will become orphaned and may cause issues.
+        /// Consider using RemoveReferencedFileAndCleanup() instead.
+        /// </para>
+        /// </remarks>
+        public bool RemoveReferencedFile(string filePath)
+        {
+            var file = ReferencedFiles.FirstOrDefault(f => 
+                string.Equals(f.FilePath, filePath, StringComparison.OrdinalIgnoreCase));
+
+            if (file == null)
+            {
+                Log.Warning("Could not find referenced file to remove: {Path}", filePath);
+                return false;
+            }
+
+            ReferencedFiles.Remove(file);
+            MarkDirty();
+            Log.Information("Removed referenced file: {Path}", filePath);
+            
+            return true;
         }
 
         #endregion
