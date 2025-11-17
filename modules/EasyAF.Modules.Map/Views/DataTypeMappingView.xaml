@@ -100,9 +100,9 @@
               Margin="0,10,0,0"
               HorizontalAlignment="Stretch">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" MinWidth="360" MaxWidth="700"/> <!-- Target Properties (LEFT) -->
+                <ColumnDefinition Width="*" MinWidth="20" MaxWidth="4000"/> <!-- Target Properties (LEFT) - wide range for testing -->
                 <ColumnDefinition Width="100" MinWidth="100"/> <!-- Map/Unmap Buttons -->
-                <ColumnDefinition Width="*" MinWidth="360" MaxWidth="700"/> <!-- Source Columns (RIGHT) -->
+                <ColumnDefinition Width="*" MinWidth="20" MaxWidth="4000"/> <!-- Source Columns (RIGHT) - wide range for testing -->
             </Grid.ColumnDefinitions>
             
             <!-- Target Properties (LEFT Pane) -->
