@@ -30,6 +30,8 @@
         <TabControl ItemsSource="{Binding TabHeaders}"
                     SelectedIndex="{Binding SelectedTabIndex}"
                     BorderThickness="0"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Stretch"
                     Background="{DynamicResource PrimaryBackgroundBrush}">
             
             <!-- Tab Header Template -->
