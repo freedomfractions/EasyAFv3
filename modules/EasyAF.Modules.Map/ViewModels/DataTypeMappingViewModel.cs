@@ -416,17 +416,15 @@ namespace EasyAF.Modules.Map.ViewModels
                 }
             }
 
-            // Auto-select first table if none selected
-            if (AvailableTables.Count > 0 && SelectedTable == null)
-            {
-                SelectedTable = AvailableTables[0];
-                SelectedComboBoxItem = ComboBoxItems.OfType<TableItem>().FirstOrDefault();
-                
-                Log.Debug("Auto-selected table '{Table}' from '{File}'", 
-                    SelectedTable.TableName, SelectedTable.FileName);
-            }
+            // DO NOT auto-select any table - require explicit user selection
+            // This prevents accidental mappings to the wrong table
+            SelectedTable = null;
+            SelectedComboBoxItem = null;
+            
+            // Clear source columns since no table is selected
+            SourceColumns.Clear();
 
-            Log.Information("Loaded {Count} available tables from {FileCount} files ({ItemCount} ComboBox items)", 
+            Log.Information("Loaded {Count} available tables from {FileCount} files ({ItemCount} ComboBox items) - No table pre-selected", 
                 AvailableTables.Count, tablesByFile.Count, ComboBoxItems.Count);
         }
 

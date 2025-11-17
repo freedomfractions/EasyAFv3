@@ -389,8 +389,8 @@ namespace EasyAF.Modules.Map.ViewModels
                 Log.Debug("Async status refresh complete");
             });
 
-            // Refresh parent tab statuses (already async-friendly)
-            _parentViewModel.RefreshAllTabStatuses();
+            // Refresh parent tab statuses asynchronously
+            await _parentViewModel.RefreshAllTabStatusesAsync();
         }
 
         /// <summary>

@@ -2,6 +2,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using Prism.Mvvm;
 using Prism.Commands;
@@ -334,6 +335,48 @@ namespace EasyAF.Modules.Map.ViewModels
                     dataTypeVm.RefreshAvailableTables();
                 }
             }
+        }
+
+        /// <summary>
+        /// Asynchronously refreshes the status for all data type tabs.
+        /// </summary>
+        /// <remarks>
+        /// This version runs on a background thread to avoid blocking the UI.
+        /// Used by the Summary tab auto-refresh to prevent lag.
+        /// </remarks>
+        public async Task RefreshAllTabStatusesAsync()
+        {
+            await Task.Run(() =>
+            {
+                foreach (var tab in TabHeaders.Where(t => t.DataType != null))
+                {
+                    if (tab.DataType == null) continue;
+
+                    var status = CalculateMappingStatus(tab.DataType);
+                    var statusIcon = status switch
+                    {
+                        MappingStatus.Unmapped => "?",
+                        MappingStatus.Partial => "?",
+                        MappingStatus.Complete => "?",
+                        _ => "?"
+                    };
+
+                    // Update on UI thread
+                    System.Windows.Application.Current?.Dispatcher.Invoke(() =>
+                    {
+                        tab.Status = statusIcon;
+                    });
+
+                    // Refresh available tables when files are added/removed (on UI thread)
+                    if (tab.ViewModel is DataTypeMappingViewModel dataTypeVm)
+                    {
+                        System.Windows.Application.Current?.Dispatcher.Invoke(() =>
+                        {
+                            dataTypeVm.RefreshAvailableTables();
+                        });
+                    }
+                }
+            });
         }
 
         /// <summary>
