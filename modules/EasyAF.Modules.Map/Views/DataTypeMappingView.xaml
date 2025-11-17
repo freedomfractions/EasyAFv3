@@ -111,7 +111,7 @@
                                         <Setter Property="Margin" Value="4"/>
                                         <Setter Property="FontWeight" Value="Normal"/>
                                         <Style.Triggers>
-                                            <!-- Header style (non-selectable) -->
+                                            <!-- Header style (non-selectable) - includes placeholder -->
                                             <DataTrigger Binding="{Binding IsSelectable}" Value="False">
                                                 <Setter Property="Margin" Value="0,6,0,2"/>
                                                 <Setter Property="FontWeight" Value="SemiBold"/>
@@ -119,6 +119,12 @@
                                                 <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
                                                 <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
                                                 <Setter Property="Padding" Value="6,4"/>
+                                                <!-- CROSS-MODULE EDIT: 2025-01-16 Empty Files Placeholder -->
+                                                <!-- Modified for: Make placeholder text wrap and italic -->
+                                                <!-- Related modules: Map (DataTypeMappingViewModel) -->
+                                                <!-- Rollback instructions: Remove TextWrapping and FontStyle setters -->
+                                                <Setter Property="TextWrapping" Value="Wrap"/>
+                                                <Setter Property="FontStyle" Value="Italic"/>
                                             </DataTrigger>
                                             <!-- Indent multi-table items -->
                                             <DataTrigger Binding="{Binding ShouldIndent}" Value="True">

@@ -502,6 +502,28 @@ namespace EasyAF.Modules.Map.ViewModels
                 }
             }
 
+            // CROSS-MODULE EDIT: 2025-01-16 Empty Files Placeholder
+            // Modified for: Show helpful placeholder when no files are loaded
+            // Related modules: Map (ComboBoxItemBase, FileHeaderItem)
+            // Rollback instructions: Remove this empty check and placeholder logic
+            
+            // Check if no files were loaded
+            if (tablesByFile.Count == 0)
+            {
+                // Add placeholder item instructing user to load files
+                ComboBoxItems.Add(new FileHeaderItem 
+                { 
+                    FileName = "?? No sample files loaded - Add files in Summary tab" 
+                });
+                
+                SelectedTable = null;
+                SelectedComboBoxItem = null;
+                SourceColumns.Clear();
+                
+                Log.Information("No sample files loaded - showing placeholder in table dropdown");
+                return; // Early exit since there are no tables to show
+            }
+
             // Second pass: build flat list with headers and items
             foreach (var fileGroup in tablesByFile.OrderBy(kvp => System.IO.Path.GetFileName(kvp.Key)))
             {
