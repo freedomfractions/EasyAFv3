@@ -7,6 +7,7 @@ using Microsoft.Win32;
 using System.Linq;
 using System.IO;
 using System.Diagnostics;
+using EasyAF.Shell.Services; // For IBackstageService
 
 namespace EasyAF.Shell.ViewModels;
 
@@ -37,6 +38,7 @@ public class FileCommandsViewModel : BindableBase
     private readonly EasyAF.Core.Contracts.IModuleCatalog _moduleCatalog;
     private readonly IRecentFilesService _recentFiles;
     private readonly ISettingsService _settingsService;
+    private readonly IBackstageService _backstageService;
 
     private const string LastDirectorySettingKey = "FileDialogs.LastDirectory";
 
@@ -53,12 +55,14 @@ public class FileCommandsViewModel : BindableBase
     /// <param name="recentFilesService">Service for tracking recent files.</param>
     /// <param name="settingsService">Service for persisting user preferences.</param>
     /// <param name="moduleLoader">Module loader to subscribe to module loading events.</param>
-    public FileCommandsViewModel(IDocumentManager documentManager, EasyAF.Core.Contracts.IModuleCatalog moduleCatalog, IRecentFilesService recentFilesService, ISettingsService settingsService, IModuleLoader moduleLoader)
+    /// <param name="backstageService">Service for backstage control.</param>
+    public FileCommandsViewModel(IDocumentManager documentManager, EasyAF.Core.Contracts.IModuleCatalog moduleCatalog, IRecentFilesService recentFilesService, ISettingsService settingsService, IModuleLoader moduleLoader, IBackstageService backstageService)
     {
         _documentManager = documentManager;
         _moduleCatalog = moduleCatalog;
         _recentFiles = recentFilesService;
         _settingsService = settingsService;
+        _backstageService = backstageService;
 
         NewCommand = new DelegateCommand(ExecuteNew, CanExecuteNew).ObservesProperty(() => SelectedModule);
         OpenCommand = new DelegateCommand(ExecuteOpen);
@@ -188,8 +192,17 @@ public class FileCommandsViewModel : BindableBase
     private void ExecuteNew()
     {
         if (SelectedModule == null) return;
+        
+        // CROSS-MODULE EDIT: 2025-01-16 New Document Backstage Close
+        // Modified for: Close backstage after creating new document
+        // Related modules: Shell (BackstageService), Core (IDocumentManager)
+        // Rollback instructions: Remove backstageService parameter and RequestClose call
+        
         var doc = _documentManager.CreateNewDocument(SelectedModule);
         Log.Information("New document created: {Title}", doc.Title);
+        
+        // Close backstage after creating document
+        _backstageService.RequestClose();
     }
 
     /// <summary>
