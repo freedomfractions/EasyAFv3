@@ -73,8 +73,7 @@ namespace EasyAF.Modules.Map.Services
 
             try
             {
-                // Update DateModified before saving
-                document.DateModified = DateTime.Now;
+                // DateModified is automatically updated by MarkDirty() - no need to set it here
 
                 // Build the JSON structure
                 var json = new
@@ -166,7 +165,6 @@ namespace EasyAF.Modules.Map.Services
                 // Extract metadata (with defaults for backward compatibility)
                 var mapName = json["MapName"]?.ToString() ?? Path.GetFileNameWithoutExtension(filePath);
                 var description = json["Description"]?.ToString() ?? string.Empty;
-                var dateModified = json["DateModified"]?.ToObject<DateTime>() ?? File.GetLastWriteTime(filePath);
                 var softwareVersion = json["SoftwareVersion"]?.ToString() ?? "Unknown";
 
                 // Extract referenced files (may not exist in older files)
@@ -189,7 +187,7 @@ namespace EasyAF.Modules.Map.Services
                 }
 
                 // Extract mappings using MappingConfig for compatibility
-                var mappingsByDataType = new Dictionary<string, List<Mapping>>();
+                var mappingsByDataType = new Dictionary<string, List<MappingEntry>>();
                 
                 if (json["ImportMap"] is JArray importMapArray)
                 {
@@ -211,11 +209,12 @@ namespace EasyAF.Modules.Map.Services
                         // Group mappings by data type
                         if (!mappingsByDataType.ContainsKey(targetType))
                         {
-                            mappingsByDataType[targetType] = new List<Mapping>();
+                            mappingsByDataType[targetType] = new List<MappingEntry>();
                         }
 
-                        mappingsByDataType[targetType].Add(new Mapping
+                        mappingsByDataType[targetType].Add(new MappingEntry
                         {
+                            TargetType = targetType,
                             PropertyName = propertyName,
                             ColumnHeader = columnHeader
                         });
@@ -227,8 +226,8 @@ namespace EasyAF.Modules.Map.Services
                 {
                     MapName = mapName,
                     Description = description,
-                    DateModified = dateModified,
                     SoftwareVersion = softwareVersion
+                    // DateModified will be set automatically to DateTime.Now by the constructor
                 };
 
                 // Add referenced files
