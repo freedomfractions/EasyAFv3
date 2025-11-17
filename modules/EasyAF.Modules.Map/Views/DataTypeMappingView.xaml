@@ -103,7 +103,8 @@
         <!-- Mapping Interface Grid - Proportional columns that scale with window -->
         <Grid Grid.Row="1" 
               Grid.Column="0"
-              Margin="0,10,0,0">
+              Margin="0,10,0,0"
+              HorizontalAlignment="Stretch">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="360*" MinWidth="360" MaxWidth="700"/> <!-- Target Properties (LEFT) - proportional -->
                 <ColumnDefinition Width="100" MinWidth="100"/> <!-- Map/Unmap Buttons - fixed min -->
