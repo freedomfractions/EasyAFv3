@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using EasyAF.Core.Contracts;
@@ -248,15 +249,14 @@ namespace EasyAF.Modules.Map
         /// <param name="filePath">Path to the .ezmap file to open.</param>
         /// <returns>A <see cref="IDocument"/> instance representing the loaded mapping.</returns>
         /// <exception cref="System.IO.FileNotFoundException">If the specified file does not exist.</exception>
-        /// <exception cref="Newtonsoft.Json.JsonException">If the file content is not valid JSON.</exception>
+        /// <exception cref="InvalidDataException">If the file content is not valid JSON or has invalid schema.</exception>
         /// <remarks>
         /// <para>
-        /// Deserializes the mapping configuration from JSON format and validates it.
-        /// If validation fails, warnings are logged but the document is still loaded
-        /// to allow the user to fix issues.
+        /// Deserializes the mapping configuration from JSON format including Map Editor metadata.
+        /// Uses MapDocumentSerializer to load both mappings and metadata (MapName, Description, etc.).
         /// </para>
         /// <para>
-        /// <strong>File Format:</strong> See <see cref="EasyAF.Import.MappingConfig"/> for details.
+        /// <strong>Backward Compatibility:</strong> Can load files created by older tools (missing metadata defaults to empty).
         /// </para>
         /// </remarks>
         public IDocument OpenDocument(string filePath)
@@ -271,14 +271,14 @@ namespace EasyAF.Modules.Map
 
             try
             {
-                // Load and validate the mapping config
-                var config = MappingConfig.Load(filePath);
-                Log.Debug("Loaded mapping config with {Count} entries", config.ImportMap.Count);
-
-                // Convert to MapDocument
-                var document = MapDocument.FromMappingConfig(config, filePath);
-                document.MapName = Path.GetFileNameWithoutExtension(filePath);
+                // Use MapDocumentSerializer to load the document
+                var serializer = new MapDocumentSerializer();
+                var document = serializer.Load(filePath);
+                
+                // Set file path and module reference
+                document.FilePath = filePath;
                 document.OwnerModule = this;
+                document.IsDirty = false; // Freshly loaded = clean
 
                 // Create ViewModel for this document
                 if (_container != null)
@@ -293,13 +293,14 @@ namespace EasyAF.Modules.Map
                     Log.Debug("Created ViewModel for opened map document");
                 }
                 
-                Log.Information("Successfully opened map document: {MapName}", document.MapName);
+                Log.Information("Successfully opened map document: {MapName} ({MappingCount} mappings)", 
+                    document.MapName, document.MappingsByDataType.Values.Sum(v => v.Count));
                 return document;
             }
             catch (InvalidDataException ex)
             {
                 Log.Error(ex, "Invalid map file format: {FilePath}", filePath);
-                throw new InvalidDataException($"Invalid map file format: {ex.Message}", ex);
+                throw;
             }
             catch (JsonException ex)
             {
@@ -318,12 +319,11 @@ namespace EasyAF.Modules.Map
         /// <exception cref="System.IO.IOException">If the file cannot be written.</exception>
         /// <remarks>
         /// <para>
-        /// Serializes the mapping configuration to JSON format with indentation for readability.
-        /// Validates the mapping before saving and logs any warnings.
+        /// Serializes the mapping configuration to JSON format including Map Editor metadata.
+        /// Uses MapDocumentSerializer to save both mappings and metadata (MapName, Description, ReferencedFiles, etc.).
         /// </para>
         /// <para>
-        /// <strong>Atomicity:</strong> Writes to a temporary file first, then replaces the original
-        /// to prevent data loss if the write operation fails.
+        /// <strong>Format Compatibility:</strong> Saved files can be loaded by ImportManager (metadata is ignored).
         /// </para>
         /// </remarks>
         public void SaveDocument(IDocument document, string filePath)
@@ -341,27 +341,16 @@ namespace EasyAF.Modules.Map
 
             try
             {
-                // Convert to MappingConfig
-                var config = mapDoc.ToMappingConfig();
-                Log.Debug("Converted MapDocument to MappingConfig with {Count} entries", config.ImportMap.Count);
-
-                // Serialize to JSON
-                var json = JsonConvert.SerializeObject(config, Formatting.Indented);
-                
-                // Atomic write: write to temp file first, then replace
-                var tempPath = filePath + ".tmp";
-                File.WriteAllText(tempPath, json);
-                
-                if (File.Exists(filePath))
-                    File.Delete(filePath);
-                    
-                File.Move(tempPath, filePath);
+                // Use MapDocumentSerializer to save the document
+                var serializer = new MapDocumentSerializer();
+                serializer.Save(mapDoc, filePath);
                 
                 // Update document state
                 mapDoc.FilePath = filePath;
                 mapDoc.IsDirty = false;
                 
-                Log.Information("Map saved successfully: {FilePath}", filePath);
+                Log.Information("Map saved successfully: {FilePath} ({MappingCount} mappings)",
+                    filePath, mapDoc.MappingsByDataType.Values.Sum(v => v.Count));
             }
             catch (IOException ex)
             {
