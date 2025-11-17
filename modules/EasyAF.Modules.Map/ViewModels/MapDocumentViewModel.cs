@@ -57,6 +57,10 @@ namespace EasyAF.Modules.Map.ViewModels
             // Subscribe to document changes
             _document.PropertyChanged += OnDocumentPropertyChanged;
 
+            // SUBSCRIBE to settings reload so tabs/properties refresh after Options changes
+            // (removes mappings to newly hidden properties and updates lists)
+            _settingsService.SettingsReloaded += OnSettingsReloaded;
+
             // Initialize ribbon commands
             AutoMapCommand = new DelegateCommand(ExecuteAutoMap);
             ValidateMappingsCommand = new DelegateCommand(ExecuteValidateMappings);
