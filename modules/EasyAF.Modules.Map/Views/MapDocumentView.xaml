@@ -16,12 +16,26 @@
             
             <!-- DataTemplates to map ViewModels to Views -->
             <DataTemplate DataType="{x:Type vm:MapSummaryViewModel}">
-                <views:MapSummaryView/>
+                <views:MapSummaryView HorizontalAlignment="Stretch" 
+                                      VerticalAlignment="Stretch"/>
             </DataTemplate>
             
             <DataTemplate DataType="{x:Type vm:DataTypeMappingViewModel}">
-                <views:DataTypeMappingView/>
+                <views:DataTypeMappingView HorizontalAlignment="Stretch" 
+                                           VerticalAlignment="Stretch"/>
             </DataTemplate>
+            
+            <!-- TabControl Style to ensure content stretches -->
+            <Style TargetType="TabControl">
+                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+            </Style>
+            
+            <!-- TabItem Style to ensure each tab's content area stretches -->
+            <Style TargetType="TabItem" BasedOn="{StaticResource {x:Type TabItem}}">
+                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+            </Style>
         </ResourceDictionary>
     </UserControl.Resources>
     
@@ -31,7 +45,7 @@
                     SelectedIndex="{Binding SelectedTabIndex}"
                     BorderThickness="0"
                     HorizontalAlignment="Stretch"
-                    HorizontalContentAlignment="Stretch"
+                    VerticalAlignment="Stretch"
                     Background="{DynamicResource PrimaryBackgroundBrush}">
             
             <!-- Tab Header Template -->
@@ -77,6 +91,8 @@
                     <!-- The ViewModel property contains the actual VM (MapSummaryViewModel or DataTypeMappingViewModel) -->
                     <!-- WPF will automatically use the DataTemplate from Resources based on the ViewModel type -->
                     <ContentControl Content="{Binding ViewModel}"
+                                    HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Stretch"
                                     HorizontalContentAlignment="Stretch"
                                     VerticalContentAlignment="Stretch"/>
                 </DataTemplate>
