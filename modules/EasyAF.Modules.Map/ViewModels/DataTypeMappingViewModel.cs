@@ -650,8 +650,8 @@ namespace EasyAF.Modules.Map.ViewModels
         {
             try
             {
-                // Get all properties (including hidden ones) for this data type
-                var allProperties = _propertyDiscovery.GetPropertiesForType(_dataType);
+                // Get ALL properties (including hidden ones) for this data type
+                var allProperties = _propertyDiscovery.GetAllPropertiesForType(_dataType);
                 
                 // Get current enabled properties from settings
                 var enabledProperties = _settingsService.GetEnabledProperties(_dataType);
