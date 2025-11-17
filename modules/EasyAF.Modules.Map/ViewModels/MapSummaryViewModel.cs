@@ -7,6 +7,7 @@ using Prism.Mvvm;
 using Prism.Commands;
 using EasyAF.Modules.Map.Models;
 using EasyAF.Modules.Map.Services;
+using EasyAF.Core.Contracts;
 using Microsoft.Win32;
 using Serilog;
 
@@ -25,6 +26,7 @@ namespace EasyAF.Modules.Map.ViewModels
     {
         private readonly MapDocument _document;
         private readonly IPropertyDiscoveryService _propertyDiscovery;
+        private readonly ISettingsService _settingsService;
         private readonly MapDocumentViewModel _parentViewModel;
         private readonly ColumnExtractionService _columnExtraction;
         private ReferencedFile? _selectedFile;
@@ -36,10 +38,12 @@ namespace EasyAF.Modules.Map.ViewModels
         public MapSummaryViewModel(
             MapDocument document,
             IPropertyDiscoveryService propertyDiscovery,
+            ISettingsService settingsService,
             MapDocumentViewModel parentViewModel)
         {
             _document = document ?? throw new ArgumentNullException(nameof(document));
             _propertyDiscovery = propertyDiscovery ?? throw new ArgumentNullException(nameof(propertyDiscovery));
+            _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
             _parentViewModel = parentViewModel ?? throw new ArgumentNullException(nameof(parentViewModel));
             _columnExtraction = new ColumnExtractionService();
 
@@ -183,6 +187,12 @@ namespace EasyAF.Modules.Map.ViewModels
         /// <summary>
         /// Initializes the data type summaries collection.
         /// </summary>
+        /// <remarks>
+        /// CROSS-MODULE EDIT: 2025-01-16 Hide Disabled Data Types from Summary
+        /// Modified for: Only show statistics for enabled data types (respects user settings)
+        /// Related modules: Core (ISettingsService), Map (MapSettingsExtensions)
+        /// Rollback instructions: Remove IsDataTypeEnabled check
+        /// </remarks>
         private void InitializeDataTypeSummaries()
         {
             DataTypeProperties.Clear();
@@ -192,6 +202,14 @@ namespace EasyAF.Modules.Map.ViewModels
 
             foreach (var dataType in dataTypes)
             {
+                // Skip disabled data types (same filter used for tabs)
+                // If Cable is disabled in settings, don't show its statistics
+                if (!_settingsService.IsDataTypeEnabled(dataType))
+                {
+                    Log.Debug("Skipping summary for disabled data type: {DataType}", dataType);
+                    continue;
+                }
+
                 var properties = _propertyDiscovery.GetPropertiesForType(dataType);
                 var mappedCount = _document.MappingsByDataType.TryGetValue(dataType, out var mappings)
                     ? mappings.Count

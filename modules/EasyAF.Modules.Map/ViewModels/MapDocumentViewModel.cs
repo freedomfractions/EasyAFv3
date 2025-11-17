@@ -219,7 +219,7 @@ namespace EasyAF.Modules.Map.ViewModels
             TabHeaders.Clear();
 
             // Summary tab (always first)
-            var summaryVm = new MapSummaryViewModel(_document, _propertyDiscovery, this);
+            var summaryVm = new MapSummaryViewModel(_document, _propertyDiscovery, _settingsService, this);
             TabHeaders.Add(new TabHeaderInfo
             {
                 Header = "Summary",
