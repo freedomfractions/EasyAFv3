@@ -242,7 +242,12 @@ namespace EasyAF.Modules.Map.ViewModels
                     continue;
                 }
 
-                var dataTypeVm = new DataTypeMappingViewModel(_document, dataType, _propertyDiscovery, this, _settingsService);
+                // CROSS-MODULE EDIT: 2025-01-16 Duplicate Mapping Prevention
+                // Modified for: Pass IUserDialogService to DataTypeMappingViewModel for confirmation dialogs
+                // Related modules: Core (IUserDialogService), Map (DataTypeMappingViewModel)
+                // Rollback instructions: Remove _dialogService parameter from constructor call
+                
+                var dataTypeVm = new DataTypeMappingViewModel(_document, dataType, _propertyDiscovery, this, _settingsService, _dialogService);
                 
                 TabHeaders.Add(new TabHeaderInfo
                 {

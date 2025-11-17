@@ -35,6 +35,7 @@ namespace EasyAF.Modules.Map.ViewModels
         private readonly MapDocumentViewModel _parentViewModel;
         private readonly ColumnExtractionService _columnExtraction;
         private readonly ISettingsService _settingsService;
+        private readonly IUserDialogService _dialogService;
 
         private string _sourceFilter = string.Empty;
         private string _targetFilter = string.Empty;
@@ -50,13 +51,16 @@ namespace EasyAF.Modules.Map.ViewModels
             string dataType,
             IPropertyDiscoveryService propertyDiscovery,
             MapDocumentViewModel parentViewModel,
-            ISettingsService settingsService)
+            ISettingsService settingsService,
+            IUserDialogService dialogService)
         {
             _document = document ?? throw new ArgumentNullException(nameof(document));
             _dataType = dataType ?? throw new ArgumentNullException(nameof(dataType));
             _propertyDiscovery = propertyDiscovery ?? throw new ArgumentNullException(nameof(propertyDiscovery));
             _parentViewModel = parentViewModel ?? throw new ArgumentNullException(nameof(parentViewModel));
             _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
+            _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
+
             _columnExtraction = new ColumnExtractionService();
 
             // Initialize collections
@@ -615,6 +619,37 @@ namespace EasyAF.Modules.Map.ViewModels
         private void ExecuteMapSelected()
         {
             if (SelectedSourceColumn == null || SelectedTargetProperty == null) return;
+
+            // CROSS-MODULE EDIT: 2025-01-16 Duplicate Mapping Prevention
+            // Modified for: Detect and warn when mapping would create duplicate column mappings
+            // Related modules: Core (IUserDialogService)
+            // Rollback instructions: Remove duplicate detection logic below
+            
+            // Check if the selected property is already mapped to a different column
+            if (SelectedTargetProperty.IsMapped && SelectedTargetProperty.MappedColumn != SelectedSourceColumn.ColumnName)
+            {
+                var confirmed = _dialogService.Confirm(
+                    $"Property '{SelectedTargetProperty.PropertyName}' is already mapped to column '{SelectedTargetProperty.MappedColumn}'.\n\n" +
+                    $"Do you want to replace the existing mapping with '{SelectedSourceColumn.ColumnName}'?",
+                    "Replace Existing Mapping?");
+                
+                if (!confirmed)
+                {
+                    Log.Debug("User canceled replacing mapping for {Property}", SelectedTargetProperty.PropertyName);
+                    return; // User canceled
+                }
+                
+                // Clear the old mapping from the source column
+                var oldColumn = SourceColumns.FirstOrDefault(c => c.ColumnName == SelectedTargetProperty.MappedColumn);
+                if (oldColumn != null)
+                {
+                    oldColumn.IsMapped = false;
+                    oldColumn.MappedTo = null;
+                }
+                
+                Log.Information("Replacing mapping for {Property}: {OldColumn} ? {NewColumn}",
+                    SelectedTargetProperty.PropertyName, SelectedTargetProperty.MappedColumn, SelectedSourceColumn.ColumnName);
+            }
 
             try
             {
