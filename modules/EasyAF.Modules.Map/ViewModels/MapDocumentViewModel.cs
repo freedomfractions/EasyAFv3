@@ -29,6 +29,7 @@ namespace EasyAF.Modules.Map.ViewModels
         private readonly IPropertyDiscoveryService _propertyDiscovery;
         private readonly IUserDialogService _dialogService;
         private readonly ISettingsService _settingsService;
+        private readonly IFuzzyMatcher _fuzzyMatcher;  // Fuzzy search for Auto-Map
         private bool _disposed;
         private object? _selectedTabContent;
         private int _selectedTabIndex;
@@ -40,17 +41,20 @@ namespace EasyAF.Modules.Map.ViewModels
         /// <param name="propertyDiscovery">Service for discovering data type properties.</param>
         /// <param name="dialogService">Service for showing user dialogs.</param>
         /// <param name="settingsService">Service for accessing module settings.</param>
+        /// <param name="fuzzyMatcher">Service for fuzzy string matching (Auto-Map).</param>
         /// <exception cref="ArgumentNullException">If document, propertyDiscovery, or settingsService is null.</exception>
         public MapDocumentViewModel(
             MapDocument document,
             IPropertyDiscoveryService propertyDiscovery,
             IUserDialogService dialogService,
-            ISettingsService settingsService)
+            ISettingsService settingsService,
+            IFuzzyMatcher fuzzyMatcher)
         {
             _document = document ?? throw new ArgumentNullException(nameof(document));
             _propertyDiscovery = propertyDiscovery ?? throw new ArgumentNullException(nameof(propertyDiscovery));
             _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
             _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
+            _fuzzyMatcher = fuzzyMatcher ?? throw new ArgumentNullException(nameof(fuzzyMatcher));
 
             // Initialize collections
             TabHeaders = new ObservableCollection<TabHeaderInfo>();
@@ -247,7 +251,12 @@ namespace EasyAF.Modules.Map.ViewModels
                 // Related modules: Core (IUserDialogService), Map (DataTypeMappingViewModel)
                 // Rollback instructions: Remove _dialogService parameter from constructor call
                 
-                var dataTypeVm = new DataTypeMappingViewModel(_document, dataType, _propertyDiscovery, this, _settingsService, _dialogService);
+                // CROSS-MODULE EDIT: 2025-01-16 Auto-Map Intelligence
+                // Modified for: Pass IFuzzyMatcher to DataTypeMappingViewModel for intelligent auto-mapping
+                // Related modules: Core (IFuzzyMatcher), Map (DataTypeMappingViewModel)
+                // Rollback instructions: Remove _fuzzyMatcher parameter from constructor call
+                
+                var dataTypeVm = new DataTypeMappingViewModel(_document, dataType, _propertyDiscovery, this, _settingsService, _dialogService, _fuzzyMatcher);
                 
                 TabHeaders.Add(new TabHeaderInfo
                 {

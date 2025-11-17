@@ -229,12 +229,18 @@ namespace EasyAF.Modules.Map
             // Create ViewModel for this document
             if (_container != null)
             {
+                // CROSS-MODULE EDIT: 2025-01-16 Auto-Map Intelligence
+                // Modified for: Resolve IFuzzyMatcher and pass to MapDocumentViewModel
+                // Related modules: Core (IFuzzyMatcher), Map (DataTypeMappingViewModel)
+                // Rollback instructions: Remove fuzzyMatcher resolution
+                
+                var fuzzyMatcher = _container.Resolve<IFuzzyMatcher>();
                 var viewModel = new ViewModels.MapDocumentViewModel(
                     document,
                     _container.Resolve<Services.IPropertyDiscoveryService>(),
                     _container.Resolve<IUserDialogService>(),
-                    _container.Resolve<ISettingsService>()
-                );
+                    _container.Resolve<ISettingsService>(),
+                    fuzzyMatcher);
                 document.ViewModel = viewModel;
                 Log.Debug("Created ViewModel for new map document");
             }
@@ -283,12 +289,18 @@ namespace EasyAF.Modules.Map
                 // Create ViewModel for this document
                 if (_container != null)
                 {
+                    // CROSS-MODULE EDIT: 2025-01-16 Auto-Map Intelligence
+                    // Modified for: Resolve IFuzzyMatcher and pass to MapDocumentViewModel
+                    // Related modules: Core (IFuzzyMatcher), Map (DataTypeMappingViewModel)
+                    // Rollback instructions: Remove fuzzyMatcher resolution
+                    
+                    var fuzzyMatcher = _container.Resolve<IFuzzyMatcher>();
                     var viewModel = new ViewModels.MapDocumentViewModel(
                         document,
                         _container.Resolve<Services.IPropertyDiscoveryService>(),
                         _container.Resolve<IUserDialogService>(),
-                        _container.Resolve<ISettingsService>()
-                    );
+                        _container.Resolve<ISettingsService>(),
+                        fuzzyMatcher);
                     document.ViewModel = viewModel;
                     Log.Debug("Created ViewModel for opened map document");
 

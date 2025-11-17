@@ -33,9 +33,10 @@ namespace EasyAF.Modules.Map.ViewModels
         private readonly string _dataType;
         private readonly IPropertyDiscoveryService _propertyDiscovery;
         private readonly MapDocumentViewModel _parentViewModel;
-        private readonly ColumnExtractionService _columnExtraction;
         private readonly ISettingsService _settingsService;
         private readonly IUserDialogService _dialogService;
+        private readonly IFuzzyMatcher _fuzzyMatcher; // Fuzzy search for Auto-Map
+        private readonly ColumnExtractionService _columnExtraction; // Extract columns from files
 
         private string _sourceFilter = string.Empty;
         private string _targetFilter = string.Empty;
@@ -52,7 +53,8 @@ namespace EasyAF.Modules.Map.ViewModels
             IPropertyDiscoveryService propertyDiscovery,
             MapDocumentViewModel parentViewModel,
             ISettingsService settingsService,
-            IUserDialogService dialogService)
+            IUserDialogService dialogService,
+            IFuzzyMatcher fuzzyMatcher)
         {
             _document = document ?? throw new ArgumentNullException(nameof(document));
             _dataType = dataType ?? throw new ArgumentNullException(nameof(dataType));
@@ -60,6 +62,7 @@ namespace EasyAF.Modules.Map.ViewModels
             _parentViewModel = parentViewModel ?? throw new ArgumentNullException(nameof(parentViewModel));
             _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
             _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
+            _fuzzyMatcher = fuzzyMatcher ?? throw new ArgumentNullException(nameof(fuzzyMatcher));
 
             _columnExtraction = new ColumnExtractionService();
 
@@ -798,20 +801,221 @@ namespace EasyAF.Modules.Map.ViewModels
             }
         }
 
+        /// <summary>
+        /// Executes the auto-map command using intelligent fuzzy matching.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// CROSS-MODULE EDIT: 2025-01-16 Auto-Map Intelligence (Safeguard #9)
+        /// Modified for: Implement intelligent column-to-property matching using fuzzy search
+        /// Related modules: Core (IFuzzyMatcher service with Levenshtein + Jaro-Winkler)
+        /// Rollback instructions: Revert to stub implementation (just log message)
+        /// </para>
+        /// <para>
+        /// Auto-Map Algorithm:
+        /// 1. Get all unmapped properties (target properties with no mapping)
+        /// 2. Get all unmapped columns (source columns with no mapping)
+        /// 3. For each unmapped property:
+        ///    - Use FuzzyMatcher to find best matching column names
+        ///    - If best match score >= 0.6 (60% confidence), create mapping
+        ///    - Track results (success, low confidence, no match)
+        /// 4. Show summary dialog with results
+        /// 5. Update UI to reflect new mappings
+        /// </para>
+        /// <para>
+        /// Threshold: 0.6 (60%) chosen as sweet spot:
+        /// - Too low (0.4): Many false positives
+        /// - Too high (0.8): Misses good matches like "Name" ? "BUS_NAME"
+        /// - 0.6: Balances precision and recall
+        /// </para>
+        /// </remarks>
         private void ExecuteAutoMap()
         {
-            // TODO: Implement auto-mapping logic using AutoMappingService
-            Log.Information("Auto-mapping requested for {DataType} - Not yet implemented", _dataType);
+            try
+            {
+                if (SourceColumns.Count == 0)
+                {
+                    _dialogService.ShowMessage(
+                        "No source columns available.\n\n" +
+                        "Please select a table from the dropdown first.",
+                        "Auto-Map");
+                    Log.Information("Auto-Map: No source columns available for {DataType}", _dataType);
+                    return;
+                }
+
+                Log.Information("Starting Auto-Map for {DataType} with {ColumnCount} columns and {PropertyCount} properties",
+                    _dataType, SourceColumns.Count, TargetProperties.Count);
+
+                // Get unmapped properties (targets)
+                var unmappedProperties = TargetProperties
+                    .Where(p => !p.IsMapped)
+                    .ToList();
+
+                // Get unmapped column names (sources)
+                var unmappedColumnNames = SourceColumns
+                    .Where(c => !c.IsMapped)
+                    .Select(c => c.ColumnName)
+                    .ToList();
+
+                if (unmappedProperties.Count == 0)
+                {
+                    _dialogService.ShowMessage(
+                        "All properties are already mapped!",
+                        "Auto-Map");
+                    Log.Information("Auto-Map: All properties already mapped for {DataType}", _dataType);
+                    return;
+                }
+
+                // Track results for summary
+                var successfulMappings = new List<(string Property, string Column, double Score)>();
+                var lowConfidenceMappings = new List<(string Property, string Column, double Score)>();
+                var noMatchProperties = new List<string>();
+
+                const double confidenceThreshold = 0.6;
+
+                // Match each unmapped property to best column
+                foreach (var property in unmappedProperties)
+                {
+                    // Find best matching columns using fuzzy search
+                    var matches = _fuzzyMatcher.FindBestMatches(
+                        query: property.PropertyName,
+                        candidates: unmappedColumnNames,
+                        maxResults: 1, // Only need the best match
+                        minScore: 0.4, // Lower threshold for reporting (we filter to 0.6 for mapping)
+                        caseSensitive: false);
+
+                    if (!matches.Any())
+                    {
+                        noMatchProperties.Add(property.PropertyName);
+                        Log.Debug("Auto-Map: No match found for property '{Property}'", property.PropertyName);
+                        continue;
+                    }
+
+                    var bestMatch = matches[0];
+
+                    if (bestMatch.Score >= confidenceThreshold)
+                    {
+                        // High confidence - create mapping automatically
+                        var sourceColumn = SourceColumns.FirstOrDefault(c => c.ColumnName == bestMatch.Target);
+                        if (sourceColumn != null)
+                        {
+                            CreateMapping(property, sourceColumn);
+                            successfulMappings.Add((property.PropertyName, bestMatch.Target, bestMatch.Score));
+                            
+                            // Remove from unmapped list so it's not used again
+                            unmappedColumnNames.Remove(bestMatch.Target);
+
+                            Log.Information("Auto-Map: Mapped '{Property}' ? '{Column}' (score: {Score:P0}, reason: {Reason})",
+                                property.PropertyName, bestMatch.Target, bestMatch.Score, bestMatch.Reason);
+                        }
+                    }
+                    else
+                    {
+                        // Low confidence - don't map, but report it
+                        lowConfidenceMappings.Add((property.PropertyName, bestMatch.Target, bestMatch.Score));
+                        Log.Debug("Auto-Map: Low confidence match for '{Property}' ? '{Column}' (score: {Score:P0})",
+                            property.PropertyName, bestMatch.Target, bestMatch.Score);
+                    }
+                }
+
+                // Show summary dialog
+                ShowAutoMapResults(successfulMappings, lowConfidenceMappings, noMatchProperties);
+
+                Log.Information("Auto-Map complete for {DataType}: {Success} mapped, {LowConf} low confidence, {NoMatch} no match",
+                    _dataType, successfulMappings.Count, lowConfidenceMappings.Count, noMatchProperties.Count);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error during Auto-Map for {DataType}", _dataType);
+                _dialogService.ShowMessage(
+                    $"An error occurred during Auto-Map:\n\n{ex.Message}",
+                    "Auto-Map Error");
+            }
         }
 
+        /// <summary>
+        /// Shows the Auto-Map results summary dialog.
+        /// </summary>
+        private void ShowAutoMapResults(
+            List<(string Property, string Column, double Score)> successfulMappings,
+            List<(string Property, string Column, double Score)> lowConfidenceMappings,
+            List<string> noMatchProperties)
+        {
+            var summary = new System.Text.StringBuilder();
+            summary.AppendLine($"Auto-Map Results for {_dataType}\n");
+
+            if (successfulMappings.Any())
+            {
+                summary.AppendLine($"? Successfully Mapped ({successfulMappings.Count}):");
+                foreach (var (property, column, score) in successfulMappings.OrderBy(m => m.Property))
+                {
+                    summary.AppendLine($"  • {property} ? {column} ({score:P0} confidence)");
+                }
+                summary.AppendLine();
+            }
+
+            if (lowConfidenceMappings.Any())
+            {
+                summary.AppendLine($"? Low Confidence - Not Mapped ({lowConfidenceMappings.Count}):");
+                foreach (var (property, column, score) in lowConfidenceMappings.OrderBy(m => m.Property))
+                {
+                    summary.AppendLine($"  • {property} ? {column}? ({score:P0} confidence - below 60% threshold)");
+                }
+                summary.AppendLine();
+            }
+
+            if (noMatchProperties.Any())
+            {
+                summary.AppendLine($"? No Match Found ({noMatchProperties.Count}):");
+                foreach (var property in noMatchProperties.OrderBy(p => p))
+                {
+                    summary.AppendLine($"  • {property}");
+                }
+                summary.AppendLine();
+            }
+
+            if (!successfulMappings.Any() && !lowConfidenceMappings.Any() && !noMatchProperties.Any())
+            {
+                summary.AppendLine("No unmapped properties found.");
+            }
+
+            _dialogService.ShowMessage(summary.ToString(), "Auto-Map Results");
+        }
+        
+        /// <summary>
+        /// Executes the clear mappings command.
+        /// </summary>
+        /// <remarks>
+        /// This command clears ALL mappings for this data type.
+        /// Prompts the user for confirmation before proceeding.
+        /// </remarks>
         private void ExecuteClearMappings()
         {
             try
             {
-                // Clear document mappings
+                if (MappedCount == 0)
+                {
+                    _dialogService.ShowMessage(
+                        "No mappings to clear for this data type.",
+                        "Clear Mappings");
+                    return;
+                }
+
+                var confirmed = _dialogService.Confirm(
+                    $"Clear all {MappedCount} mapping(s) for {_dataType}?\n\n" +
+                    $"This cannot be undone.",
+                    "Clear All Mappings?");
+                
+                if (!confirmed)
+                {
+                    Log.Debug("User cancelled clearing mappings for {DataType}", _dataType);
+                    return;
+                }
+
+                // Clear from document
                 _document.ClearMappings(_dataType);
 
-                // Reset UI state
+                // Update UI
                 foreach (var prop in TargetProperties)
                 {
                     prop.IsMapped = false;
@@ -836,10 +1040,10 @@ namespace EasyAF.Modules.Map.ViewModels
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Failed to clear mappings");
+                Log.Error(ex, "Failed to clear mappings for {DataType}", _dataType);
             }
         }
-
+        
         /// <summary>
         /// Executes the manage fields command to open the property selector dialog.
         /// </summary>
@@ -1004,6 +1208,46 @@ namespace EasyAF.Modules.Map.ViewModels
                          MappingStatus.Partial;
 
             _parentViewModel.UpdateTabStatus(_dataType, status);
+        }
+
+        /// <summary>
+        /// Creates a mapping between the specified property and column, updating the document and UI.
+        /// </summary>
+        /// <remarks>
+        /// This method performs the following actions:
+        /// - Updates the document mapping
+        /// - Updates the target property's mapping state
+        /// - Updates the source column's mapping state
+        /// - Refreshes the relevant collection views
+        /// - Updates the mapped count property
+        /// - Updates the command states
+        /// - Updates the parent tab status
+        /// </remarks>
+        /// <param name="property">The target property to map.</param>
+        /// <param name="column">The source column to map to the property.</param>
+        private void CreateMapping(MapPropertyInfo property, ColumnInfo column)
+        {
+            // Update document mapping
+            _document.UpdateMapping(_dataType, property.PropertyName, column.ColumnName);
+
+            // Update target property state
+            property.IsMapped = true;
+            property.MappedColumn = column.ColumnName;
+
+            // Update source column state
+            column.IsMapped = true;
+            column.MappedTo = $"{_dataType}.{property.PropertyName}";
+
+            // Refresh views
+            SourceColumnsView.Refresh();
+            TargetPropertiesView.Refresh();
+            RaisePropertyChanged(nameof(MappedCount));
+
+            // Update command states immediately
+            UpdateCommandStates();
+
+            // Update parent tab status
+            UpdateTabStatus();
         }
 
         #endregion
