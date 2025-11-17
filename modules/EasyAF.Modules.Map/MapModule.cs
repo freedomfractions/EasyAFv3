@@ -349,6 +349,48 @@ namespace EasyAF.Modules.Map
 
             try
             {
+                // CROSS-MODULE EDIT: 2025-01-16 Required Property Validation
+                // Modified for: Validate required properties before saving
+                // Related modules: Map (MappingValidator service, PropertyDiscoveryService)
+                // Rollback instructions: Remove validation check below
+                
+                // Validate that all required properties are mapped before saving
+                if (_container != null)
+                {
+                    var propertyDiscovery = _container.Resolve<Services.IPropertyDiscoveryService>();
+                    var validator = new Services.MappingValidator(propertyDiscovery);
+                    var validationResult = validator.ValidateRequiredMappings(mapDoc);
+                    
+                    if (!validationResult.IsValid)
+                    {
+                        var summary = validator.GetValidationSummary(validationResult);
+                        var totalUnmapped = validationResult.UnmappedRequired.Sum(kvp => kvp.Value.Count);
+                        
+                        Log.Warning("Validation failed: {Count} required properties unmapped", totalUnmapped);
+                        
+                        // Show warning dialog to user
+                        var dialogService = _container.Resolve<IUserDialogService>();
+                        var confirmed = dialogService.Confirm(
+                            $"Incomplete Mapping Detected\n\n" +
+                            $"{summary}\n" +
+                            $"Saving this map without mapping all required properties may cause import errors.\n\n" +
+                            $"Do you want to save anyway?",
+                            "Required Properties Not Mapped");
+                        
+                        if (!confirmed)
+                        {
+                            Log.Information("User cancelled save due to validation warnings");
+                            return; // User chose not to save
+                        }
+                        
+                        Log.Information("User chose to save despite validation warnings");
+                    }
+                    else
+                    {
+                        Log.Debug("Validation passed: all required properties are mapped");
+                    }
+                }
+
                 // Use MapDocumentSerializer to save the document
                 var serializer = new MapDocumentSerializer();
                 serializer.Save(mapDoc, filePath);

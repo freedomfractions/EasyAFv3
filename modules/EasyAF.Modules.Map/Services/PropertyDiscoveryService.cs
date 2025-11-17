@@ -2,281 +2,345 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Xml.Linq;
-using System.IO;
-using Serilog;
+using EasyAF.Modules.Map.Models;
+using EasyAF.Data.Models;
 using EasyAF.Core.Contracts;
+using Serilog;
 using MapPropertyInfo = EasyAF.Modules.Map.Models.PropertyInfo;
 
 namespace EasyAF.Modules.Map.Services
 {
     /// <summary>
-    /// Discovers mappable properties from EasyAF.Data.Models classes via reflection.
+    /// Service for discovering properties on data types that can be mapped.
     /// </summary>
     /// <remarks>
-    /// This service uses reflection to discover all public classes in the EasyAF.Data.Models
-    /// namespace and their public properties. Results are cached for performance.
-    /// XML documentation is extracted when available to provide helpful descriptions.
+    /// This service uses reflection to discover public properties on classes in the
+    /// EasyAF.Data.Models namespace. It also applies settings-based filtering to hide
+    /// properties the user doesn't want to see.
     /// </remarks>
     public class PropertyDiscoveryService : IPropertyDiscoveryService
     {
-        private readonly Dictionary<string, Type> _typeCache = new();
-        private readonly Dictionary<string, List<MapPropertyInfo>> _propertyCache = new();
-        private readonly Dictionary<string, XDocument?> _xmlDocCache = new();
         private readonly ISettingsService _settingsService;
+        private readonly Dictionary<string, List<MapPropertyInfo>> _propertyCache;
 
+        // CROSS-MODULE EDIT: 2025-01-16 Required Property Validation
+        // Modified for: Define universal and type-specific required properties
+        // Related modules: Map (PropertyInfo model)
+        // Rollback instructions: Remove UniversalRequiredProperties and DefaultRequiredProperties constants
+        
         /// <summary>
-        /// Initializes a new instance of the PropertyDiscoveryService.
+        /// Properties that are required for ALL data types.
         /// </summary>
         /// <remarks>
-        /// Discovers and caches all available types from EasyAF.Data.Models on construction.
-        /// This is a one-time operation per service instance.
+        /// These are foundational properties that every EasyAF data type must have mapped:
+        /// - Id: Primary key for uniquely identifying equipment
+        /// - Name: Human-readable identifier for equipment
         /// </remarks>
+        private static readonly string[] UniversalRequiredProperties = { "Id", "Name" };
+
+        /// <summary>
+        /// Type-specific required properties beyond the universal ones.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// These properties are critical for specific data types:
+        /// - Bus.kV: Voltage rating required for electrical calculations
+        /// - LVCB.Type: Breaker type affects protection logic
+        /// - ArcFlash.Scenario: Required for multi-scenario differentiation
+        /// - ArcFlash.AFBoundary: Arc flash boundary is safety-critical
+        /// - ShortCircuit.Bus: Location reference required for composite key
+        /// - ShortCircuit.Scenario: Required for multi-scenario differentiation
+        /// </para>
+        /// <para>
+        /// Future Enhancement: Allow settings.json to override these defaults:
+        /// {
+        ///   "Map": {
+        ///     "RequiredProperties": {
+        ///       "Bus": ["Id", "Name", "kV", "CustomField"]
+        ///     }
+        ///   }
+        /// }
+        /// </para>
+        /// </remarks>
+        private static readonly Dictionary<string, string[]> DefaultRequiredProperties = new()
+        {
+            { "Bus", new[] { "kV" } },
+            { "LVCB", new[] { "Type" } },
+            { "ArcFlash", new[] { "Scenario", "AFBoundary" } },
+            { "ShortCircuit", new[] { "Bus", "Scenario" } }
+        };
+
         public PropertyDiscoveryService(ISettingsService settingsService)
         {
             _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
-            DiscoverTypes();
+            _propertyCache = new Dictionary<string, List<MapPropertyInfo>>();
         }
 
         /// <summary>
-        /// Gets all available data types that can be mapped to.
+        /// Gets the list of available data types (classes in EasyAF.Data.Models).
         /// </summary>
         public List<string> GetAvailableDataTypes()
         {
-            return _typeCache.Keys.OrderBy(k => k).ToList();
+            try
+            {
+                var dataModelTypes = typeof(Bus).Assembly
+                    .GetTypes()
+                    .Where(t => t.Namespace == "EasyAF.Data.Models" && 
+                                t.IsClass && 
+                                !t.IsAbstract &&
+                                t != typeof(DataSet))
+                    .Select(t => t.Name)
+                    .OrderBy(name => name)
+                    .ToList();
+
+                Log.Debug("Discovered {Count} data types via reflection", dataModelTypes.Count);
+                return dataModelTypes;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to discover data types");
+                return new List<string>();
+            }
         }
 
         /// <summary>
-        /// Gets enabled properties for a specific data type (filtered by settings).
+        /// Gets the list of properties for a specific data type that are currently visible.
         /// </summary>
+        /// <param name="dataTypeName">The data type name (e.g., "Bus", "LVCB").</param>
+        /// <returns>List of visible properties with metadata.</returns>
         /// <remarks>
-        /// This method respects the user's property visibility settings.
-        /// Only properties marked as enabled in settings will be returned.
+        /// This method applies settings-based filtering. Properties hidden via settings
+        /// will not appear in the returned list.
         /// </remarks>
         public List<MapPropertyInfo> GetPropertiesForType(string dataTypeName)
         {
-            // Get all properties first
-            var allProperties = GetAllPropertiesForType(dataTypeName);
-            
-            // Filter based on settings
-            var enabledPropertyNames = _settingsService.GetEnabledProperties(dataTypeName);
-            
-            // If wildcard is present, return all
-            if (enabledPropertyNames.Contains("*"))
-                return allProperties;
-            
-            // Otherwise filter to enabled properties only
-            return allProperties
-                .Where(p => enabledPropertyNames.Contains(p.PropertyName))
-                .ToList();
+            try
+            {
+                // Get all properties (including hidden ones)
+                var allProperties = GetAllPropertiesForType(dataTypeName);
+
+                // Filter based on enabled properties setting
+                var enabledProperties = _settingsService.GetEnabledProperties(dataTypeName);
+
+                // If wildcard "*" is enabled, return all properties
+                if (enabledProperties.Contains("*"))
+                {
+                    Log.Debug("Wildcard enabled for {DataType}, returning all {Count} properties", 
+                        dataTypeName, allProperties.Count);
+                    return allProperties;
+                }
+
+                // Otherwise filter to only enabled properties
+                var filtered = allProperties
+                    .Where(p => enabledProperties.Contains(p.PropertyName))
+                    .ToList();
+
+                Log.Debug("Filtered {DataType} properties: {Total} total, {Visible} visible", 
+                    dataTypeName, allProperties.Count, filtered.Count);
+
+                return filtered;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to get properties for {DataType}", dataTypeName);
+                return new List<MapPropertyInfo>();
+            }
         }
 
         /// <summary>
-        /// Gets ALL properties for a data type, ignoring visibility settings.
+        /// Gets ALL properties for a data type, including those hidden by settings.
         /// </summary>
+        /// <param name="dataTypeName">The data type name (e.g., "Bus", "LVCB").</param>
+        /// <returns>Complete list of properties with metadata.</returns>
         /// <remarks>
-        /// This method is used by the settings UI to show all available properties
-        /// for configuration, regardless of current visibility settings.
+        /// This method is used by:
+        /// - Property selector dialog (shows all properties so user can enable/disable them)
+        /// - Settings management (needs to know what properties exist)
+        /// Unlike GetPropertiesForType(), this ignores the enabled properties filter.
         /// </remarks>
         public List<MapPropertyInfo> GetAllPropertiesForType(string dataTypeName)
         {
             // Check cache first
             if (_propertyCache.TryGetValue(dataTypeName, out var cached))
-                return new List<MapPropertyInfo>(cached); // Return copy to prevent mutation
-
-            if (!_typeCache.TryGetValue(dataTypeName, out var type))
             {
-                Log.Warning("Data type not found: {DataType}", dataTypeName);
+                Log.Debug("Returning cached properties for {DataType} ({Count} properties)", 
+                    dataTypeName, cached.Count);
+                return cached;
+            }
+
+            try
+            {
+                var type = typeof(Bus).Assembly
+                    .GetTypes()
+                    .FirstOrDefault(t => t.Name == dataTypeName && t.Namespace == "EasyAF.Data.Models");
+
+                if (type == null)
+                {
+                    Log.Warning("Data type not found: {DataType}", dataTypeName);
+                    return new List<MapPropertyInfo>();
+                }
+
+                // CROSS-MODULE EDIT: 2025-01-16 Required Property Validation
+                // Modified for: Mark properties as required based on universal + type-specific rules
+                // Related modules: Map (PropertyInfo model with IsRequired property)
+                // Rollback instructions: Remove GetRequiredPropertyNames call and IsRequired assignment
+                
+                // Get the set of required property names for this data type
+                var requiredNames = GetRequiredPropertyNames(dataTypeName);
+
+                var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                    .Where(p => p.CanRead && p.CanWrite)
+                    .Select(p => new MapPropertyInfo
+                    {
+                        PropertyName = p.Name,
+                        PropertyType = GetFriendlyTypeName(p.PropertyType),
+                        Description = GetPropertyDescription(p),
+                        IsRequired = requiredNames.Contains(p.Name)  // Mark as required if in the set
+                    })
+                    .OrderBy(p => p.PropertyName)
+                    .ToList();
+
+                // Cache the results
+                _propertyCache[dataTypeName] = properties;
+
+                Log.Information("Discovered {Count} properties for {DataType} ({RequiredCount} required)", 
+                    properties.Count, dataTypeName, properties.Count(p => p.IsRequired));
+
+                return properties;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to discover properties for {DataType}", dataTypeName);
                 return new List<MapPropertyInfo>();
             }
-
-            var properties = new List<MapPropertyInfo>();
-            var props = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-
-            // Load XML documentation for this type's assembly
-            var xmlDoc = GetXmlDocumentation(type.Assembly);
-
-            foreach (var prop in props)
-            {
-                var propInfo = new MapPropertyInfo
-                {
-                    PropertyName = prop.Name,
-                    DataType = dataTypeName,
-                    PropertyType = GetFriendlyTypeName(prop.PropertyType),
-                    Description = ExtractXmlDocumentation(prop, xmlDoc)
-                };
-
-                properties.Add(propInfo);
-            }
-
-            // Cache the results
-            _propertyCache[dataTypeName] = properties;
-            
-            Log.Debug("Discovered {Count} properties for {DataType}", properties.Count, dataTypeName);
-            return new List<MapPropertyInfo>(properties);
         }
 
         /// <summary>
-        /// Gets nested properties for complex types.
+        /// Gets the set of required property names for a specific data type.
         /// </summary>
+        /// <param name="dataTypeName">The data type name (e.g., "Bus", "LVCB").</param>
+        /// <returns>HashSet of required property names.</returns>
+        /// <remarks>
+        /// <para>
+        /// CROSS-MODULE EDIT: 2025-01-16 Required Property Validation
+        /// Modified for: Implement hybrid required property detection (universal + type-specific + settings override)
+        /// Related modules: None (self-contained in Map module)
+        /// Rollback instructions: Remove this method entirely
+        /// </para>
+        /// <para>
+        /// Required property determination (in order of precedence):
+        /// 1. Universal required properties (Id, Name) - always included
+        /// 2. Type-specific defaults from DefaultRequiredProperties dictionary
+        /// 3. Settings override (future enhancement) - replaces defaults if present
+        /// </para>
+        /// <para>
+        /// Example for Bus data type:
+        /// - Universal: Id, Name
+        /// - Type-specific: kV
+        /// - Final result: { "Id", "Name", "kV" }
+        /// </para>
+        /// </remarks>
+        private HashSet<string> GetRequiredPropertyNames(string dataTypeName)
+        {
+            var required = new HashSet<string>(UniversalRequiredProperties, StringComparer.OrdinalIgnoreCase);
+
+            // Add type-specific defaults
+            if (DefaultRequiredProperties.TryGetValue(dataTypeName, out var typeDefaults))
+            {
+                required.UnionWith(typeDefaults);
+                Log.Debug("Added {Count} type-specific required properties for {DataType}", 
+                    typeDefaults.Length, dataTypeName);
+            }
+
+            // Future Enhancement: Allow settings override
+            // This would let power users customize required properties per data type
+            // Example settings.json:
+            // {
+            //   "Map": {
+            //     "RequiredProperties": {
+            //       "Bus": ["Id", "Name", "kV", "Description"]
+            //     }
+            //   }
+            // }
+            //
+            // Implementation (when needed):
+            // var settingsOverride = _settingsService.GetModuleSettings("Map")
+            //     ?.GetValue<string[]>($"RequiredProperties.{dataTypeName}");
+            // if (settingsOverride != null)
+            // {
+            //     required.Clear();
+            //     required.UnionWith(UniversalRequiredProperties);  // Always keep universals
+            //     required.UnionWith(settingsOverride);
+            //     Log.Information("Applied settings override for required properties: {DataType}", dataTypeName);
+            // }
+
+            Log.Debug("Required properties for {DataType}: {Properties}", 
+                dataTypeName, string.Join(", ", required));
+
+            return required;
+        }
+
+        /// <summary>
+        /// Gets a friendly display name for a property type.
+        /// </summary>
+        private string GetFriendlyTypeName(Type type)
+        {
+            if (type == typeof(string)) return "String";
+            if (type == typeof(int)) return "Integer";
+            if (type == typeof(double)) return "Double";
+            if (type == typeof(bool)) return "Boolean";
+            if (type == typeof(DateTime)) return "DateTime";
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+                return GetFriendlyTypeName(Nullable.GetUnderlyingType(type)!) + "?";
+            
+            return type.Name;
+        }
+
+        /// <summary>
+        /// Gets a description for a property (placeholder for future attributes).
+        /// </summary>
+        private string? GetPropertyDescription(System.Reflection.PropertyInfo property)
+        {
+            // Future enhancement: Read from [Description] attribute if present
+            // For now, return null (no descriptions available)
+            return null;
+        }
+
+        /// <summary>
+        /// Gets nested properties for complex types (e.g., LVCB.TripUnit).
+        /// </summary>
+        /// <param name="parentType">The parent type name (e.g., "LVCB").</param>
+        /// <param name="nestedType">The nested type name (e.g., "TripUnit").</param>
+        /// <returns>List of PropertyInfo objects for the nested type.</returns>
+        /// <remarks>
+        /// Used for mapping to complex nested structures like LVCB trip unit settings.
+        /// Currently searches for the nested type directly.
+        /// </remarks>
         public List<MapPropertyInfo> GetNestedProperties(string parentType, string nestedType)
         {
-            // For now, just look up the nested type directly
-            // Future enhancement: validate parent-child relationship
+            // For now, just return properties of the nested type directly
+            // Future enhancement: Validate parent-child relationship
             return GetPropertiesForType(nestedType);
         }
 
         /// <summary>
-        /// Checks if a data type is valid and available for mapping.
+        /// Checks if a data type exists in the discovered types.
         /// </summary>
+        /// <param name="dataTypeName">The data type name to check.</param>
+        /// <returns>True if the type exists and can be mapped to; otherwise false.</returns>
         public bool IsValidDataType(string dataTypeName)
         {
-            return _typeCache.ContainsKey(dataTypeName);
+            var availableTypes = GetAvailableDataTypes();
+            return availableTypes.Contains(dataTypeName, StringComparer.OrdinalIgnoreCase);
         }
 
         /// <summary>
-        /// Discovers all public classes in EasyAF.Data.Models namespace that are actual data types in a DataSet.
+        /// Clears the property cache (useful after settings changes).
         /// </summary>
-        /// <remarks>
-        /// Only discovers the 6 core data types that exist as collections in a DataSet:
-        /// - Bus (electrical buses/switchgear)
-        /// - LVCB (low voltage circuit breakers)
-        /// - Fuse (fuse protection devices)
-        /// - Cable (cable/conductor data)
-        /// - ArcFlash (arc flash study results)
-        /// - ShortCircuit (short circuit study results)
-        /// 
-        /// Excludes helper classes, enums, and other non-data types.
-        /// </remarks>
-        private void DiscoverTypes()
+        public void ClearCache()
         {
-            try
-            {
-                // Only discover the 6 actual data types that exist in a DataSet
-                var allowedTypes = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-                {
-                    "Bus",
-                    "LVCB",
-                    "Fuse",
-                    "Cable",
-                    "ArcFlash",
-                    "ShortCircuit"
-                };
-
-                var assembly = Assembly.Load("EasyAF.Data");
-                var modelTypes = assembly.GetTypes()
-                    .Where(t => t.Namespace == "EasyAF.Data.Models" 
-                             && t.IsClass 
-                             && t.IsPublic
-                             && !t.IsAbstract
-                             && allowedTypes.Contains(t.Name))
-                    .ToList();
-
-                foreach (var type in modelTypes)
-                {
-                    _typeCache[type.Name] = type;
-                    Log.Debug("Discovered data type: {TypeName}", type.Name);
-                }
-
-                Log.Information("Property discovery complete: found {Count} data types (Bus, LVCB, Fuse, Cable, ArcFlash, ShortCircuit)", _typeCache.Count);
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Failed to discover data types from EasyAF.Data assembly");
-            }
-        }
-
-        /// <summary>
-        /// Gets the XML documentation file for an assembly.
-        /// </summary>
-        private XDocument? GetXmlDocumentation(Assembly assembly)
-        {
-            var assemblyName = assembly.GetName().Name;
-            if (assemblyName == null) return null;
-
-            // Check cache
-            if (_xmlDocCache.TryGetValue(assemblyName, out var cached))
-                return cached;
-
-            try
-            {
-                // Look for XML doc file next to the assembly
-                var assemblyLocation = assembly.Location;
-                var xmlPath = Path.ChangeExtension(assemblyLocation, ".xml");
-
-                if (File.Exists(xmlPath))
-                {
-                    var doc = XDocument.Load(xmlPath);
-                    _xmlDocCache[assemblyName] = doc;
-                    Log.Debug("Loaded XML documentation for {Assembly}", assemblyName);
-                    return doc;
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Warning(ex, "Failed to load XML documentation for {Assembly}", assemblyName);
-            }
-
-            _xmlDocCache[assemblyName] = null;
-            return null;
-        }
-
-        /// <summary>
-        /// Extracts XML documentation summary for a property.
-        /// </summary>
-        private string? ExtractXmlDocumentation(System.Reflection.PropertyInfo prop, XDocument? xmlDoc)
-        {
-            if (xmlDoc == null) return null;
-
-            try
-            {
-                // Build the XML member name (e.g., "P:EasyAF.Data.Models.Bus.Id")
-                var memberName = $"P:{prop.DeclaringType?.FullName}.{prop.Name}";
-
-                var memberElement = xmlDoc.Descendants("member")
-                    .FirstOrDefault(m => m.Attribute("name")?.Value == memberName);
-
-                if (memberElement == null) return null;
-
-                // Get the summary element
-                var summary = memberElement.Element("summary")?.Value;
-                
-                if (!string.IsNullOrWhiteSpace(summary))
-                {
-                    // Clean up whitespace and newlines
-                    return summary.Trim()
-                        .Replace("\r\n", " ")
-                        .Replace("\n", " ")
-                        .Replace("  ", " ");
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Debug(ex, "Failed to extract XML doc for {Property}", prop.Name);
-            }
-
-            return null;
-        }
-
-        /// <summary>
-        /// Converts a Type to a friendly display name.
-        /// </summary>
-        private string GetFriendlyTypeName(Type type)
-        {
-            // Handle nullable types
-            var underlyingType = Nullable.GetUnderlyingType(type);
-            if (underlyingType != null)
-                return $"{underlyingType.Name}?";
-
-            // Handle generic types
-            if (type.IsGenericType)
-            {
-                var genericTypeName = type.Name.Split('`')[0];
-                var genericArgs = string.Join(", ", type.GetGenericArguments().Select(GetFriendlyTypeName));
-                return $"{genericTypeName}<{genericArgs}>";
-            }
-
-            return type.Name;
+            _propertyCache.Clear();
+            Log.Debug("Property cache cleared");
         }
     }
 }

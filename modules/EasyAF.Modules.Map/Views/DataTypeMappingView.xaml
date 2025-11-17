@@ -266,9 +266,20 @@
                                     </Grid.ColumnDefinitions>
                                     
                                     <StackPanel Grid.Column="0">
-                                        <TextBlock Text="{Binding PropertyName}"
-                                                   FontWeight="SemiBold"
-                                                   Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding PropertyName}"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                            <!-- CROSS-MODULE EDIT: 2025-01-16 Required Property Validation -->
+                                            <!-- Modified for: Add red asterisk (*) indicator for required properties -->
+                                            <!-- Related modules: Map (PropertyInfo.IsRequired, PropertyDiscoveryService) -->
+                                            <!-- Rollback instructions: Remove this TextBlock with asterisk -->
+                                            <TextBlock Text=" *"
+                                                       FontWeight="Bold"
+                                                       Foreground="Red"
+                                                       Visibility="{Binding IsRequired, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                       ToolTip="This property is required for a valid mapping configuration"/>
+                                        </StackPanel>
                                         <TextBlock Text="{Binding MappedColumn}"
                                                    FontSize="10"
                                                    Foreground="{DynamicResource SuccessBrush}"

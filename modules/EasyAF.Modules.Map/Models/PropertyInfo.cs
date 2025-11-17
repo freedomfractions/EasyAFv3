@@ -1,49 +1,74 @@
+using Prism.Mvvm;
+
 namespace EasyAF.Modules.Map.Models
 {
     /// <summary>
-    /// Represents a property on a target data type that can be mapped to a source column.
+    /// Represents metadata about a property that can be mapped.
     /// </summary>
     /// <remarks>
-    /// This class is used to display available properties from EasyAF.Data.Models classes
-    /// (like Bus, LVCB, ArcFlash, etc.) in the mapping UI.
+    /// This is used in the UI to display property information and track mapping state.
+    /// Note: This is NOT the same as EasyAF.Data properties - this is UI metadata.
     /// </remarks>
-    public class PropertyInfo
+    public class PropertyInfo : BindableBase
     {
+        private bool _isMapped;
+        private string? _mappedColumn;
+
         /// <summary>
-        /// Gets or sets the name of the property (e.g., "Id", "Voltage", "Manufacturer").
+        /// Gets or sets the property name (e.g., "Name", "kV", "TripUnit.Rating").
         /// </summary>
         public string PropertyName { get; set; } = string.Empty;
 
         /// <summary>
-        /// Gets or sets the data type this property belongs to (e.g., "Bus", "LVCB").
+        /// Gets or sets the property's data type (e.g., "String", "Double", "Int32").
         /// </summary>
-        public string DataType { get; set; } = string.Empty;
+        public string PropertyType { get; set; } = string.Empty;
 
         /// <summary>
-        /// Gets or sets the C# type of the property (e.g., "String", "Int32", "Double").
+        /// Gets or sets an optional description of the property's purpose.
         /// </summary>
-        /// <remarks>
-        /// Most EasyAF properties are strings to preserve raw data from source files.
-        /// </remarks>
-        public string PropertyType { get; set; } = "string";
-
-        /// <summary>
-        /// Gets or sets an optional description extracted from XML documentation comments.
-        /// </summary>
-        /// <remarks>
-        /// This helps users understand what each property represents when mapping.
-        /// For example: "Unique identifier / name of the bus. (Column: Buses or Bus Name)"
-        /// </remarks>
         public string? Description { get; set; }
 
         /// <summary>
-        /// Gets or sets whether this property has been mapped to a source column.
+        /// Gets or sets whether this property is currently mapped to a column.
         /// </summary>
-        public bool IsMapped { get; set; }
+        public bool IsMapped
+        {
+            get => _isMapped;
+            set => SetProperty(ref _isMapped, value);
+        }
 
         /// <summary>
-        /// Gets or sets the source column this property is mapped to (if any).
+        /// Gets or sets the name of the column this property is mapped to.
+        /// Null if not mapped.
         /// </summary>
-        public string? MappedColumn { get; set; }
+        public string? MappedColumn
+        {
+            get => _mappedColumn;
+            set => SetProperty(ref _mappedColumn, value);
+        }
+
+        /// <summary>
+        /// Gets or sets whether this property is required for a valid mapping configuration.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// CROSS-MODULE EDIT: 2025-01-16 Required Property Validation
+        /// Modified for: Mark critical properties as required (e.g., Id, Name, kV)
+        /// Related modules: Map (PropertyDiscoveryService - defines required rules)
+        /// Rollback instructions: Remove this property and all required property logic
+        /// </para>
+        /// <para>
+        /// Required properties are determined by:
+        /// - Universal requirements (Id, Name for all types)
+        /// - Type-specific defaults (e.g., Bus.kV, ArcFlash.Scenario)
+        /// - Optional settings override (future: user-configurable)
+        /// </para>
+        /// <para>
+        /// UI Impact: Required properties display with a red asterisk (*) indicator.
+        /// Validation Impact: Saving a map with unmapped required properties shows a warning.
+        /// </para>
+        /// </remarks>
+        public bool IsRequired { get; set; }
     }
 }
