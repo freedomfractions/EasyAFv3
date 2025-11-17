@@ -114,6 +114,7 @@
             <GroupBox Header="{Binding DataType, StringFormat='Target Properties ({0})'}"
                       Foreground="{DynamicResource TextPrimaryBrush}"
                       BorderBrush="{DynamicResource ControlBorderBrush}"
+                      HorizontalAlignment="Stretch"
                       Grid.Column="0">
             <Grid Margin="4">
                 <Grid.RowDefinitions>
