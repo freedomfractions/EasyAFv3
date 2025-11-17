@@ -156,6 +156,8 @@ public partial class App : PrismApplication
         // Related modules: Shell (OpenBackstageViewModel, MainWindow)
         // Rollback instructions: Remove the registration line below
         containerRegistry.Register<EasyAF.Shell.ViewModels.Backstage.OpenBackstageViewModel>();
+        // Register FuzzyMatcher service
+        containerRegistry.RegisterSingleton<IFuzzyMatcher, FuzzyMatcher>(); // Fuzzy search framework
 
         Log.Information("Services registered with Unity container");
     }
