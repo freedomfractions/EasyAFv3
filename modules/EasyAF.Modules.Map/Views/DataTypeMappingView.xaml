@@ -25,16 +25,15 @@
             <RowDefinition Height="*"/>    <!-- Mapping Area -->
         </Grid.RowDefinitions>
         
-        <!-- Center the entire mapping interface with max width constraint -->
+        <!-- Left-justify with max width constraint -->
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>   <!-- Left spacer -->
-            <ColumnDefinition Width="Auto" MaxWidth="1400"/> <!-- Centered content -->
-            <ColumnDefinition Width="*"/>   <!-- Right spacer -->
+            <ColumnDefinition Width="*" MaxWidth="1400"/> <!-- Content expands up to 1400px -->
+            <ColumnDefinition Width="*"/>   <!-- Right spacer consumes remaining space -->
         </Grid.ColumnDefinitions>
         
-        <!-- Toolbar - Spans across centered content -->
+        <!-- Toolbar - Spans only the content column -->
         <ToolBar Grid.Row="0" 
-                 Grid.Column="1"
+                 Grid.Column="0"
                  Background="{DynamicResource SecondaryBackgroundBrush}"
                  BorderBrush="{DynamicResource ControlBorderBrush}">
             <Button Command="{Binding AutoMapCommand}" 
@@ -103,9 +102,9 @@
             <Separator Style="{StaticResource ToolBarSeparatorStyle}"/>
         </ToolBar>
         
-        <!-- Mapping Interface Grid - Centered with proportional columns -->
+        <!-- Mapping Interface Grid - Left-justified with proportional columns -->
         <Grid Grid.Row="1" 
-              Grid.Column="1"
+              Grid.Column="0"
               Margin="0,10,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="3*" MinWidth="360"/> <!-- Target Properties (LEFT) - 3 parts -->
