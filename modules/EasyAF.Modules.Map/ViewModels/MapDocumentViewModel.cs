@@ -108,6 +108,13 @@ namespace EasyAF.Modules.Map.ViewModels
                 {
                     SelectedTabContent = TabHeaders[value].ViewModel;
                     Log.Debug("Selected tab: {TabName}", TabHeaders[value].Header);
+                    
+                    // Auto-refresh Summary tab statistics when it gains focus
+                    if (TabHeaders[value].Header == "Summary" && TabHeaders[value].ViewModel is MapSummaryViewModel summaryVm)
+                    {
+                        summaryVm.RefreshStatusCommand.Execute(null);
+                        Log.Debug("Auto-refreshed Summary tab statistics on tab selection");
+                    }
                 }
             }
         }
