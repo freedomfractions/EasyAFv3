@@ -343,6 +343,8 @@ namespace EasyAF.Modules.Map.ViewModels
         /// <remarks>
         /// This version runs on a background thread to avoid blocking the UI.
         /// Used by the Summary tab auto-refresh to prevent lag.
+        /// NOTE: Does NOT refresh available tables since that requires file I/O.
+        /// Table refresh only happens when files are added/removed in Summary tab.
         /// </remarks>
         public async Task RefreshAllTabStatusesAsync()
         {
@@ -367,14 +369,9 @@ namespace EasyAF.Modules.Map.ViewModels
                         tab.Status = statusIcon;
                     });
 
-                    // Refresh available tables when files are added/removed (on UI thread)
-                    if (tab.ViewModel is DataTypeMappingViewModel dataTypeVm)
-                    {
-                        System.Windows.Application.Current?.Dispatcher.Invoke(() =>
-                        {
-                            dataTypeVm.RefreshAvailableTables();
-                        });
-                    }
+                    // REMOVED: RefreshAvailableTables() call
+                    // Refreshing tables requires file I/O (ExtractColumns) which is expensive
+                    // Tables should only refresh when files are actually added/removed
                 }
             });
         }
