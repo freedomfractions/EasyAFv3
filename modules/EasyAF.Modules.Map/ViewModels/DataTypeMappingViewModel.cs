@@ -226,6 +226,11 @@ namespace EasyAF.Modules.Map.ViewModels
                         Log.Debug("Saved table reference for {DataType}: {TableRef}", _dataType, value.DisplayName);
                     }
                     
+                    // Notify that table selection state changed
+                    RaisePropertyChanged(nameof(HasTableSelected));
+                    RaisePropertyChanged(nameof(NoTableMessage));
+                    UpdateCommandStates();
+                    
                     OnTableChanged(value);
                 }
             }
@@ -243,6 +248,19 @@ namespace EasyAF.Modules.Map.ViewModels
         /// Gets the count of available properties.
         /// </summary>
         public int AvailableCount => TargetProperties.Count;
+
+        /// <summary>
+        /// Gets whether a table is currently selected.
+        /// </summary>
+        /// <remarks>
+        /// Used to enable/disable mapping buttons and show helpful messages.
+        /// </remarks>
+        public bool HasTableSelected => SelectedTable != null && !string.IsNullOrEmpty(SelectedTable.TableName);
+
+        /// <summary>
+        /// Gets the message to display when no table is selected.
+        /// </summary>
+        public string NoTableMessage => "Please select a source table from the dropdown above to begin mapping.";
 
         #endregion
 
@@ -584,7 +602,14 @@ namespace EasyAF.Modules.Map.ViewModels
 
         private bool CanExecuteMapSelected()
         {
-            return SelectedSourceColumn != null && SelectedTargetProperty != null;
+            // CROSS-MODULE EDIT: 2025-01-16 Table Selection Validation
+            // Modified for: Require table selection before allowing mapping
+            // Related modules: Map (DataTypeMappingView)
+            // Rollback instructions: Remove HasTableSelected check
+            
+            return HasTableSelected && 
+                   SelectedSourceColumn != null && 
+                   SelectedTargetProperty != null;
         }
 
         private void ExecuteMapSelected()

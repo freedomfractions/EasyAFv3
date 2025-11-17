@@ -379,5 +379,71 @@
             </Grid>
         </GroupBox>
         
+        <!-- CROSS-MODULE EDIT: 2025-01-16 Table Selection Validation -->
+        <!-- Modified for: Show helpful message when no table selected -->
+        <!-- Related modules: Map (DataTypeMappingViewModel) -->
+        <!-- Rollback instructions: Remove this overlay Border -->
+        
+        <!-- No Table Selected Overlay -->
+        <Border Grid.Row="1"
+                Grid.Column="0"
+                Grid.ColumnSpan="3"
+                Background="{DynamicResource WindowBackgroundBrush}"
+                Opacity="0.95"
+                VerticalAlignment="Center"
+                HorizontalAlignment="Center"
+                CornerRadius="8"
+                Padding="32,24"
+                BorderBrush="{DynamicResource ControlBorderBrush}"
+                BorderThickness="2"
+                Margin="20">
+            <Border.Visibility>
+                <Binding Path="HasTableSelected">
+                    <Binding.Converter>
+                        <converters:InverseBoolToVisibilityConverter/>
+                    </Binding.Converter>
+                </Binding>
+            </Border.Visibility>
+            
+            <StackPanel MaxWidth="400">
+                <!-- Icon -->
+                <TextBlock Text="&#xE946;"
+                           FontFamily="Segoe MDL2 Assets"
+                           FontSize="48"
+                           HorizontalAlignment="Center"
+                           Foreground="{DynamicResource TextSecondaryBrush}"
+                           Margin="0,0,0,16"/>
+                
+                <!-- Title -->
+                <TextBlock Text="No Source Table Selected"
+                           FontSize="16"
+                           FontWeight="SemiBold"
+                           HorizontalAlignment="Center"
+                           Foreground="{DynamicResource TextPrimaryBrush}"
+                           Margin="0,0,0,8"/>
+                
+                <!-- Message -->
+                <TextBlock Text="{Binding NoTableMessage}"
+                           TextWrapping="Wrap"
+                           TextAlignment="Center"
+                           Foreground="{DynamicResource TextSecondaryBrush}"
+                           Margin="0,0,0,16"/>
+                
+                <!-- Instructions -->
+                <TextBlock TextWrapping="Wrap"
+                           TextAlignment="Center"
+                           Foreground="{DynamicResource TextSecondaryBrush}"
+                           FontSize="12">
+                    <Run Text="1. Use the"/>
+                    <Run Text="Source Table" FontWeight="Bold"/>
+                    <Run Text="dropdown in the toolbar above"/>
+                    <LineBreak/>
+                    <Run Text="2. Select a table from your loaded sample files"/>
+                    <LineBreak/>
+                    <Run Text="3. Begin mapping columns to properties"/>
+                </TextBlock>
+            </StackPanel>
+        </Border>
+        
     </Grid> <!-- End of Mapping Interface Grid -->
 </UserControl>
