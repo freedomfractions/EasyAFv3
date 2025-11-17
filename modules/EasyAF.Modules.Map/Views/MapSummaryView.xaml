@@ -39,15 +39,22 @@
             <StackPanel HorizontalAlignment="Center"
                         VerticalAlignment="Center"
                         MaxWidth="600">
-                <!-- Logo placeholder (optional - can add image here) -->
-                <TextBlock Text="???"
-                           FontSize="64"
+                <!-- CROSS-MODULE EDIT: 2025-01-16 Empty Map Handling -->
+                <!-- Modified for: Improve empty state with helpful guidance and action buttons -->
+                <!-- Related modules: Map (MapSummaryViewModel) -->
+                <!-- Rollback instructions: Restore original simple welcome screen -->
+                
+                <!-- Icon -->
+                <TextBlock Text="&#xE7C3;"
+                           FontFamily="Segoe MDL2 Assets"
+                           FontSize="72"
                            HorizontalAlignment="Center"
+                           Foreground="{DynamicResource AccentBrush}"
                            Margin="0,0,0,24"/>
                 
                 <!-- Title -->
-                <TextBlock Text="Map Editor"
-                           FontSize="32"
+                <TextBlock Text="Welcome to Map Editor"
+                           FontSize="28"
                            FontWeight="SemiBold"
                            HorizontalAlignment="Center"
                            Foreground="{DynamicResource TextPrimaryBrush}"
@@ -58,11 +65,92 @@
                            TextAlignment="Center"
                            FontSize="14"
                            Foreground="{DynamicResource TextSecondaryBrush}"
-                           LineHeight="20">
-                    <Run Text="This tab shows a summary of the map status and metadata."/>
+                           LineHeight="22"
+                           Margin="0,0,0,24">
+                    <Run Text="Create data import mappings by associating columns from your"/>
                     <LineBreak/>
-                    <Run Text="Click the other tabs to view data types or load sample files."/>
+                    <Run Text="sample files with properties in EasyAF data types."/>
                 </TextBlock>
+                
+                <!-- Getting Started Steps -->
+                <Border Background="{DynamicResource SecondaryBackgroundBrush}"
+                        BorderBrush="{DynamicResource ControlBorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="24"
+                        Margin="0,0,0,24">
+                    <StackPanel>
+                        <TextBlock Text="Getting Started"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                   Margin="0,0,0,16"/>
+                        
+                        <!-- Step 1 -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                            <Border Background="{DynamicResource AccentBrush}"
+                                    Width="24" Height="24"
+                                    CornerRadius="12"
+                                    Margin="0,0,12,0">
+                                <TextBlock Text="1"
+                                           Foreground="White"
+                                           FontWeight="Bold"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"/>
+                            </Border>
+                            <TextBlock Foreground="{DynamicResource TextPrimaryBrush}"
+                                       VerticalAlignment="Center">
+                                <Run Text="Click"/>
+                                <Run Text="'Load Sample'" FontWeight="Bold"/>
+                                <Run Text="in the ribbon to add a sample CSV or Excel file"/>
+                            </TextBlock>
+                        </StackPanel>
+                        
+                        <!-- Step 2 -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                            <Border Background="{DynamicResource AccentBrush}"
+                                    Width="24" Height="24"
+                                    CornerRadius="12"
+                                    Margin="0,0,12,0">
+                                <TextBlock Text="2"
+                                           Foreground="White"
+                                           FontWeight="Bold"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"/>
+                            </Border>
+                            <TextBlock Foreground="{DynamicResource TextPrimaryBrush}"
+                                       VerticalAlignment="Center">
+                                <Run Text="Select a data type tab (Bus, LVCB, etc.) to begin mapping"/>
+                            </TextBlock>
+                        </StackPanel>
+                        
+                        <!-- Step 3 -->
+                        <StackPanel Orientation="Horizontal">
+                            <Border Background="{DynamicResource AccentBrush}"
+                                    Width="24" Height="24"
+                                    CornerRadius="12"
+                                    Margin="0,0,12,0">
+                                <TextBlock Text="3"
+                                           Foreground="White"
+                                           FontWeight="Bold"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"/>
+                            </Border>
+                            <TextBlock Foreground="{DynamicResource TextPrimaryBrush}"
+                                       VerticalAlignment="Center">
+                                <Run Text="Associate columns with properties, then save your map"/>
+                            </TextBlock>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+                
+                <!-- Quick Action Button -->
+                <Button Content="Load Your First Sample File"
+                        Command="{Binding AddFileCommand}"
+                        Style="{StaticResource AccentButtonStyle}"
+                        Padding="20,12"
+                        FontSize="14"
+                        HorizontalAlignment="Center"/>
             </StackPanel>
         </Border>
         
