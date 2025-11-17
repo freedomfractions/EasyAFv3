@@ -257,6 +257,20 @@ namespace EasyAF.Modules.Map.ViewModels
 
             Log.Information("Tab initialization complete: {EnabledCount} tabs created", TabHeaders.Count);
 
+            // CROSS-MODULE EDIT: 2025-01-16 Table Reference Persistence
+            // Modified for: Restore saved table selections after tabs are created
+            // Related modules: Map (MapDocument, MapDocumentSerializer, DataTypeMappingViewModel)
+            // Rollback instructions: Remove this restoration block
+            
+            // Restore table selections for each data type from saved references
+            foreach (var tab in TabHeaders.Where(t => t.ViewModel is DataTypeMappingViewModel))
+            {
+                if (tab.ViewModel is DataTypeMappingViewModel dataTypeVm)
+                {
+                    dataTypeVm.RestoreTableSelection();
+                }
+            }
+
             // Select summary tab by default
             if (TabHeaders.Count > 0)
             {

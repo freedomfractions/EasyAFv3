@@ -213,6 +213,19 @@ namespace EasyAF.Modules.Map.ViewModels
             {
                 if (SetProperty(ref _selectedTable, value))
                 {
+                    // CROSS-MODULE EDIT: 2025-01-16 Table Reference Persistence
+                    // Modified for: Save table selection to document for round-trip UX
+                    // Related modules: Map (MapDocument, MapDocumentSerializer)
+                    // Rollback instructions: Remove this persistence block
+                    
+                    // Save the table reference to the document
+                    if (value != null && !string.IsNullOrEmpty(value.DisplayName))
+                    {
+                        _document.TableReferencesByDataType[_dataType] = value.DisplayName;
+                        _document.MarkDirty();
+                        Log.Debug("Saved table reference for {DataType}: {TableRef}", _dataType, value.DisplayName);
+                    }
+                    
                     OnTableChanged(value);
                 }
             }
@@ -327,6 +340,60 @@ namespace EasyAF.Modules.Map.ViewModels
 
             Log.Information("Refreshed properties for {DataType} based on updated settings ({Visible} visible, {Mapped} mapped)", 
                 _dataType, visibleProperties.Count, MappedCount);
+        }
+
+        /// <summary>
+        /// Restores the previously selected table from the document (called after loading a saved map).
+        /// </summary>
+        /// <remarks>
+        /// This method attempts to find and re-select the table that was used when the map was last saved,
+        /// providing better UX by showing the user which table each data type's mappings came from.
+        /// </remarks>
+        public void RestoreTableSelection()
+        {
+            // CROSS-MODULE EDIT: 2025-01-16 Table Reference Persistence
+            // Modified for: Restore table selection after loading saved map
+            // Related modules: Map (MapDocument, MapDocumentSerializer)
+            // Rollback instructions: Remove this method
+            
+            // Check if we have a saved table reference for this data type
+            if (!_document.TableReferencesByDataType.TryGetValue(_dataType, out var savedTableRef))
+            {
+                Log.Debug("No saved table reference for {DataType}", _dataType);
+                return;
+            }
+
+            if (string.IsNullOrEmpty(savedTableRef))
+            {
+                Log.Debug("Empty table reference for {DataType}", _dataType);
+                return;
+            }
+
+            // Try to find a matching table in the available tables
+            var matchingTable = AvailableTables.FirstOrDefault(t => t.DisplayName == savedTableRef);
+            
+            if (matchingTable != null)
+            {
+                // Find the corresponding ComboBoxItem
+                var matchingItem = ComboBoxItems.OfType<TableItem>()
+                    .FirstOrDefault(item => item.TableReference.DisplayName == savedTableRef);
+                
+                if (matchingItem != null)
+                {
+                    SelectedComboBoxItem = matchingItem;
+                    // SelectedTable will be set automatically via property binding
+                    Log.Information("Restored table selection for {DataType}: {TableRef}", _dataType, savedTableRef);
+                }
+                else
+                {
+                    Log.Warning("Could not find ComboBoxItem for saved table reference: {TableRef}", savedTableRef);
+                }
+            }
+            else
+            {
+                Log.Warning("Could not find table matching saved reference for {DataType}: {TableRef} (file may have been moved/renamed)", 
+                    _dataType, savedTableRef);
+            }
         }
 
         #endregion

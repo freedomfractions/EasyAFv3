@@ -91,6 +91,14 @@ namespace EasyAF.Modules.Map.Services
                         // Status is transient - don't persist it
                     }).ToArray(),
                     
+                    // CROSS-MODULE EDIT: 2025-01-16 Table Reference Persistence
+                    // Modified for: Save table selections per data type for better UX on reopen
+                    // Related modules: Map (MapDocument, MapDocumentSerializer, DataTypeMappingViewModel)
+                    // Rollback instructions: Remove TableReferences field below and from Load method
+                    TableReferences = document.TableReferencesByDataType.Count > 0 
+                        ? document.TableReferencesByDataType 
+                        : null, // Don't save empty dictionaries
+                    
                     // MappingConfig fields (used by ImportManager)
                     SoftwareVersion = document.SoftwareVersion,
                     MapVersion = "1.0",
@@ -186,6 +194,26 @@ namespace EasyAF.Modules.Map.Services
                     }
                 }
 
+                // CROSS-MODULE EDIT: 2025-01-16 Table Reference Persistence
+                // Modified for: Load table selections per data type for better UX on reopen
+                // Related modules: Map (MapDocument, MapDocumentSerializer, DataTypeMappingViewModel)
+                // Rollback instructions: Remove TableReferences extraction below
+                
+                // Extract table references (may not exist in older files)
+                var tableReferences = new Dictionary<string, string>();
+                if (json["TableReferences"] is JObject tableRefsObj)
+                {
+                    foreach (var prop in tableRefsObj.Properties())
+                    {
+                        var dataType = prop.Name;
+                        var tableRef = prop.Value.ToString();
+                        if (!string.IsNullOrWhiteSpace(dataType) && !string.IsNullOrWhiteSpace(tableRef))
+                        {
+                            tableReferences[dataType] = tableRef;
+                        }
+                    }
+                }
+
                 // Extract mappings using MappingConfig for compatibility
                 var mappingsByDataType = new Dictionary<string, List<MappingEntry>>();
                 
@@ -234,6 +262,12 @@ namespace EasyAF.Modules.Map.Services
                 foreach (var file in referencedFiles)
                 {
                     document.ReferencedFiles.Add(file);
+                }
+
+                // Add table references
+                foreach (var kvp in tableReferences)
+                {
+                    document.TableReferencesByDataType[kvp.Key] = kvp.Value;
                 }
 
                 // Add mappings

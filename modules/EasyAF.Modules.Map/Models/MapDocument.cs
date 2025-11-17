@@ -193,6 +193,21 @@ namespace EasyAF.Modules.Map.Models
         public Dictionary<string, List<MappingEntry>> MappingsByDataType { get; } = new();
 
         /// <summary>
+        /// Gets the table references by data type, tracking which source table was used for each data type's mappings.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Key = data type name (e.g., "Bus", "LVCB")
+        /// Value = table identifier string (e.g., "Table1 - Sheet1 (Sample_Export.csv)")
+        /// </para>
+        /// <para>
+        /// This allows the Map Editor to restore the user's table selection when reopening a saved map,
+        /// providing better context about where each mapping came from.
+        /// </para>
+        /// </remarks>
+        public Dictionary<string, string> TableReferencesByDataType { get; } = new();
+
+        /// <summary>
         /// Gets the list of sample files referenced by this mapping.
         /// </summary>
         /// <remarks>
