@@ -922,6 +922,28 @@ namespace EasyAF.Modules.Map.ViewModels
         {
             try
             {
+                // CROSS-MODULE EDIT: 2025-01-16 Reset Table Confirmation
+                // Modified for: Add confirmation prompt to prevent accidental resets
+                // Related modules: Core (IUserDialogService)
+                // Rollback instructions: Remove confirmation dialog block
+                
+                // Check if there are any mappings - if so, warn user
+                if (MappedCount > 0)
+                {
+                    var confirmed = _dialogService.Confirm(
+                        $"Reset table selection for {_dataType}?\n\n" +
+                        $"Your {MappedCount} mapping(s) will remain intact, but you'll need to re-select " +
+                        $"a table to see the source columns again.\n\n" +
+                        $"Are you sure you want to continue?",
+                        "Reset Table Selection?");
+                    
+                    if (!confirmed)
+                    {
+                        Log.Debug("User canceled table reset for {DataType}", _dataType);
+                        return; // User canceled
+                    }
+                }
+                
                 // Clear table selection
                 SelectedTable = null;
                 SelectedComboBoxItem = null;
