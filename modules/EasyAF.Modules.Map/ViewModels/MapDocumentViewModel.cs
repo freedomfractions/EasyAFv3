@@ -550,6 +550,19 @@ namespace EasyAF.Modules.Map.ViewModels
         }
 
         #endregion
+
+        /// <summary>
+        /// Gets the user dialog service for child ViewModels.
+        /// </summary>
+        /// <returns>The IUserDialogService instance.</returns>
+        /// <remarks>
+        /// This is a helper method to allow child ViewModels (like MapSummaryViewModel)
+        /// to access the dialog service without requiring it in their constructors.
+        /// </remarks>
+        public IUserDialogService GetDialogService()
+        {
+            return _dialogService;
+        }
     }
 
     /// <summary>

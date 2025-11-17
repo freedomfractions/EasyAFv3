@@ -328,9 +328,51 @@ namespace EasyAF.Modules.Map.ViewModels
 
             try
             {
+                // CROSS-MODULE EDIT: 2025-01-16 Orphaned Mapping Cleanup
+                // Modified for: Detect and clean up mappings when removing sample files
+                // Related modules: Map (OrphanedMappingDetector), Core (IUserDialogService)
+                // Rollback instructions: Remove orphaned mapping detection and return to simple file removal
+                
+                var orphanDetector = new OrphanedMappingDetector();
+                var orphanedMappings = orphanDetector.FindOrphanedMappings(_document, SelectedFile.FilePath);
+
+                // If there are orphaned mappings, ask user what to do
+                if (orphanedMappings.Any())
+                {
+                    var totalOrphaned = orphanedMappings.Sum(kvp => kvp.Value.Count);
+                    var summary = orphanDetector.GetOrphanedMappingsSummary(orphanedMappings);
+
+                    // We need IUserDialogService - get it from parent
+                    var dialogService = _parentViewModel.GetDialogService();
+                    
+                    var confirmed = dialogService.Confirm(
+                        $"Orphaned Mappings Detected\n\n" +
+                        $"{summary}" +
+                        $"Total: {totalOrphaned} mapping(s) will become orphaned.\n\n" +
+                        $"Remove these orphaned mappings?",
+                        "Remove Orphaned Mappings?");
+
+                    if (confirmed)
+                    {
+                        // Remove orphaned mappings
+                        var removedCount = orphanDetector.RemoveOrphanedMappings(_document, orphanedMappings);
+                        Log.Information("Removed {Count} orphaned mappings when removing file {FileName}",
+                            removedCount, SelectedFile.FileName);
+                    }
+                    else
+                    {
+                        Log.Information("User chose to keep {Count} orphaned mappings when removing file {FileName}",
+                            totalOrphaned, SelectedFile.FileName);
+                    }
+                }
+
+                // Remove the file from document
                 _document.ReferencedFiles.Remove(SelectedFile);
                 _document.MarkDirty();
                 UpdateReferencedFilesCollection();
+
+                // Refresh tabs to update table dropdowns and status
+                _parentViewModel.RefreshAllTabStatuses();
 
                 Log.Information("Removed referenced file: {FileName}", SelectedFile.FileName);
                 SelectedFile = null;
