@@ -82,6 +82,7 @@ namespace EasyAF.Modules.Map.ViewModels
             AutoMapCommand = new DelegateCommand(ExecuteAutoMap);
             ClearMappingsCommand = new DelegateCommand(ExecuteClearMappings);
             ManageFieldsCommand = new DelegateCommand(ExecuteManageFields);
+            ResetTableCommand = new DelegateCommand(ExecuteResetTable, CanExecuteResetTable);
 
             // Load initial data
             LoadTargetProperties();
@@ -235,6 +236,9 @@ namespace EasyAF.Modules.Map.ViewModels
                     RaisePropertyChanged(nameof(NoTableMessage));
                     UpdateCommandStates();
                     
+                    // Update Reset button state
+                    (ResetTableCommand as DelegateCommand)?.RaiseCanExecuteChanged();
+                    
                     OnTableChanged(value);
                 }
             }
@@ -294,6 +298,18 @@ namespace EasyAF.Modules.Map.ViewModels
         /// Command to open the property selector dialog.
         /// </summary>
         public ICommand ManageFieldsCommand { get; }
+
+        /// <summary>
+        /// Command to reset the table selection and return to the welcome overlay.
+        /// </summary>
+        /// <remarks>
+        /// This command clears the selected table, which triggers:
+        /// - Source columns list is cleared
+        /// - Welcome overlay becomes visible
+        /// - Glow effect appears on table dropdown
+        /// Useful when user wants to select a different table or start over.
+        /// </remarks>
+        public ICommand ResetTableCommand { get; }
 
         #endregion
 
@@ -850,6 +866,56 @@ namespace EasyAF.Modules.Map.ViewModels
             catch (Exception ex)
             {
                 Log.Error(ex, "Failed to open property selector for {DataType}", _dataType);
+            }
+        }
+
+        /// <summary>
+        /// Determines whether the reset table command can execute.
+        /// </summary>
+        /// <returns>True if a table is currently selected; otherwise false.</returns>
+        private bool CanExecuteResetTable()
+        {
+            return HasTableSelected;
+        }
+
+        /// <summary>
+        /// Executes the reset table command.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// This command performs the following actions:
+        /// 1. Clears the selected table (sets SelectedTable to null)
+        /// 2. Clears the selected ComboBox item
+        /// 3. Triggers the welcome overlay to reappear
+        /// 4. Triggers the glow effect on the table dropdown
+        /// 5. Clears the source columns list
+        /// </para>
+        /// <para>
+        /// Note: This does NOT clear any existing mappings. Mappings remain intact
+        /// and will be restored if the user selects a table again. To clear mappings,
+        /// use the "Clear All" button.
+        /// </para>
+        /// </remarks>
+        private void ExecuteResetTable()
+        {
+            try
+            {
+                // Clear table selection
+                SelectedTable = null;
+                SelectedComboBoxItem = null;
+                
+                // Clear source columns (will happen automatically via SelectedTable setter, but explicit is clearer)
+                SourceColumns.Clear();
+                
+                // Update command states
+                UpdateCommandStates();
+                (ResetTableCommand as DelegateCommand)?.RaiseCanExecuteChanged();
+                
+                Log.Information("Reset table selection for {DataType}", _dataType);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to reset table selection for {DataType}", _dataType);
             }
         }
 

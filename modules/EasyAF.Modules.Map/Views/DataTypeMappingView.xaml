@@ -59,56 +59,114 @@
                        VerticalAlignment="Center" 
                        Margin="4,0,4,0"
                        Foreground="{DynamicResource TextPrimaryBrush}"/>
-            <ComboBox ItemsSource="{Binding ComboBoxItems}"
-                      SelectedItem="{Binding SelectedComboBoxItem}"
-                      MinWidth="250"
-                      MaxDropDownHeight="400"
-                      Style="{StaticResource ThemedComboBoxStyle}"
-                      ToolTip="Select a table/sheet from your loaded files">
-                
-                <!-- Item Template with visual differentiation for headers vs items -->
-                <ComboBox.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding DisplayText}"
-                                   Foreground="{DynamicResource TextPrimaryBrush}">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
-                                    <!-- Default style for single-table items (no indent) -->
-                                    <Setter Property="Margin" Value="4"/>
-                                    <Setter Property="FontWeight" Value="Normal"/>
-                                    <Style.Triggers>
-                                        <!-- Header style (non-selectable) -->
-                                        <DataTrigger Binding="{Binding IsSelectable}" Value="False">
-                                            <Setter Property="Margin" Value="0,6,0,2"/>
-                                            <Setter Property="FontWeight" Value="SemiBold"/>
-                                            <Setter Property="FontSize" Value="11"/>
-                                            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
-                                            <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
-                                            <Setter Property="Padding" Value="6,4"/>
-                                        </DataTrigger>
-                                        <!-- Indent multi-table items -->
-                                        <DataTrigger Binding="{Binding ShouldIndent}" Value="True">
-                                            <Setter Property="Margin" Value="16,4,4,4"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
-                    </DataTemplate>
-                </ComboBox.ItemTemplate>
-                
-                <!-- Custom ItemContainerStyle to prevent selecting headers -->
-                <ComboBox.ItemContainerStyle>
-                    <Style TargetType="ComboBoxItem">
+            
+            <!-- CROSS-MODULE EDIT: 2025-01-16 Table Selection UX Enhancement -->
+            <!-- Modified for: Add glowing border effect to guide user to select table -->
+            <!-- Related modules: Map (DataTypeMappingViewModel) -->
+            <!-- Rollback instructions: Remove Border wrapper and restore ComboBox as direct child of ToolBar -->
+            
+            <!-- Wrapper Border for glow effect -->
+            <Border CornerRadius="4"
+                    Padding="2"
+                    Margin="2">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="BorderThickness" Value="0"/>
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsSelectable}" Value="False">
-                                <Setter Property="IsEnabled" Value="False"/>
-                                <Setter Property="Focusable" Value="False"/>
+                            <!-- Show pulsing glow when no table selected -->
+                            <DataTrigger Binding="{Binding HasTableSelected}" Value="False">
+                                <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                                <Setter Property="BorderThickness" Value="2"/>
+                                <DataTrigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                           From="1.0" To="0.3"
+                                                           Duration="0:0:1.5"
+                                                           AutoReverse="True"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </DataTrigger.EnterActions>
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
-                </ComboBox.ItemContainerStyle>
-            </ComboBox>
+                </Border.Style>
+                
+                <ComboBox ItemsSource="{Binding ComboBoxItems}"
+                          SelectedItem="{Binding SelectedComboBoxItem}"
+                          MinWidth="250"
+                          MaxDropDownHeight="400"
+                          Style="{StaticResource ThemedComboBoxStyle}"
+                          ToolTip="Select a table/sheet from your loaded files">
+                    
+                    <!-- Item Template with visual differentiation for headers vs items -->
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding DisplayText}"
+                                       Foreground="{DynamicResource TextPrimaryBrush}">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <!-- Default style for single-table items (no indent) -->
+                                        <Setter Property="Margin" Value="4"/>
+                                        <Setter Property="FontWeight" Value="Normal"/>
+                                        <Style.Triggers>
+                                            <!-- Header style (non-selectable) -->
+                                            <DataTrigger Binding="{Binding IsSelectable}" Value="False">
+                                                <Setter Property="Margin" Value="0,6,0,2"/>
+                                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                                <Setter Property="FontSize" Value="11"/>
+                                                <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                                                <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
+                                                <Setter Property="Padding" Value="6,4"/>
+                                            </DataTrigger>
+                                            <!-- Indent multi-table items -->
+                                            <DataTrigger Binding="{Binding ShouldIndent}" Value="True">
+                                                <Setter Property="Margin" Value="16,4,4,4"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                    
+                    <!-- Custom ItemContainerStyle to prevent selecting headers -->
+                    <ComboBox.ItemContainerStyle>
+                        <Style TargetType="ComboBoxItem">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsSelectable}" Value="False">
+                                    <Setter Property="IsEnabled" Value="False"/>
+                                    <Setter Property="Focusable" Value="False"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ComboBox.ItemContainerStyle>
+                </ComboBox>
+            </Border>
+            
+            <!-- CROSS-MODULE EDIT: 2025-01-16 Table Selection UX Enhancement -->
+            <!-- Modified for: Add Reset button to clear table selection -->
+            <!-- Related modules: Map (DataTypeMappingViewModel) -->
+            <!-- Rollback instructions: Remove this Button and associated command -->
+            
+            <!-- Reset Table Button -->
+            <Button Content="Reset Table"
+                    Command="{Binding ResetTableCommand}"
+                    ToolTip="Clear table selection and start over"
+                    Margin="4,0,0,0">
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource ToolBarButtonStyle}">
+                        <Style.Triggers>
+                            <!-- Only enabled when a table is selected -->
+                            <DataTrigger Binding="{Binding HasTableSelected}" Value="False">
+                                <Setter Property="IsEnabled" Value="False"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+            
             <Separator Style="{StaticResource ToolBarSeparatorStyle}"/>
         </ToolBar>
         
