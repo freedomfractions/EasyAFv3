@@ -106,12 +106,11 @@
         <!-- Mapping Interface Grid - Proportional columns that scale with window -->
         <Grid Grid.Row="1"
               Grid.Column="0"
-              Margin="0,10,0,0"
-              HorizontalAlignment="Stretch">
+              Margin="0,10,0,0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" MinWidth="20" MaxWidth="4000"/> <!-- Target Properties (LEFT) - wide range for testing -->
-                <ColumnDefinition Width="100" MinWidth="100"/> <!-- Map/Unmap Buttons -->
-                <ColumnDefinition Width="*" MinWidth="20" MaxWidth="4000"/> <!-- Source Columns (RIGHT) - wide range for testing -->
+                <ColumnDefinition Width="*" MinWidth="300" MaxWidth="700"/> <!-- Target Properties (LEFT) -->
+                <ColumnDefinition Width="Auto"/> <!-- Map/Unmap Buttons -->
+                <ColumnDefinition Width="*" MinWidth="300" MaxWidth="700"/> <!-- Source Columns (RIGHT) -->
             </Grid.ColumnDefinitions>
             
             <!-- Target Properties (LEFT Pane) -->
