@@ -80,39 +80,48 @@ namespace EasyAF.Modules.Map.Services
         /// Gets the list of available data types (classes in EasyAF.Data.Models).
         /// </summary>
         /// <remarks>
-        /// Returns only the 6 data types that are part of the DataSet structure:
-        /// Bus, LVCB, Fuse, Cable, ArcFlash, ShortCircuit.
-        /// Other classes in EasyAF.Data.Models (DataSet, DataSetDiff, etc.) are excluded.
+        /// Discovers data types by reflecting on the DataSet class and extracting
+        /// the generic type arguments from properties ending with "Entries".
+        /// This approach is dynamic and will automatically pick up new data types
+        /// added to the DataSet without requiring code changes.
         /// </remarks>
         public List<string> GetAvailableDataTypes()
         {
             try
             {
-                // CROSS-MODULE EDIT: 2025-01-16 Data Type Discovery Fix
-                // Modified for: Only return the 6 data types that are in DataSet (exclude support classes)
+                // CROSS-MODULE EDIT: 2025-01-16 Data Type Discovery via DataSet Reflection
+                // Modified for: Discover data types from DataSet properties (not all classes in namespace)
                 // Related modules: Data (DataSet model)
-                // Rollback instructions: Revert to reflection-based discovery of all classes
+                // Rollback instructions: Revert to hardcoded list or old reflection logic
                 
-                // Hardcoded list of data types that exist in DataSet
-                // This is more reliable than reflection since it filters out support classes
-                // (DataSet, DataSetDiff, EntryDiff, PropertyChange, DiffUtil, etc.)
-                var dataModelTypes = new List<string>
-                {
-                    "Bus",
-                    "LVCB",
-                    "Fuse",
-                    "Cable",
-                    "ArcFlash",
-                    "ShortCircuit"
-                };
+                // Use reflection on DataSet to find all "*Entries" properties
+                // and extract their generic type arguments (Bus, LVCB, Fuse, etc.)
+                var dataSetType = typeof(DataSet);
+                var dataModelTypes = dataSetType.GetProperties()
+                    .Where(p => p.Name.EndsWith("Entries") && p.PropertyType.IsGenericType)
+                    .Select(p =>
+                    {
+                        // Get the dictionary's value type (e.g., Dictionary<string, Bus> ? Bus)
+                        var genericArgs = p.PropertyType.GetGenericArguments();
+                        // For Dictionary<string, T>, T is at index 1
+                        // For Dictionary<(string, string), T>, T is still at index 1
+                        return genericArgs.Length >= 2 ? genericArgs[1].Name : null;
+                    })
+                    .Where(name => !string.IsNullOrEmpty(name))
+                    .OrderBy(name => name)
+                    .ToList();
 
-                Log.Debug("Returning {Count} known data types", dataModelTypes.Count);
+                Log.Debug("Discovered {Count} data types from DataSet properties", dataModelTypes.Count);
                 return dataModelTypes;
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Failed to get data types");
-                return new List<string>();
+                Log.Error(ex, "Failed to discover data types from DataSet");
+                
+                // Fallback to known list if reflection fails
+                var fallback = new List<string> { "Bus", "LVCB", "Fuse", "Cable", "ArcFlash", "ShortCircuit" };
+                Log.Warning("Using fallback data type list ({Count} types)", fallback.Count);
+                return fallback;
             }
         }
 
