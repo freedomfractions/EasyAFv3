@@ -237,18 +237,8 @@
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
                         
-                        <!-- Refresh Button -->
-                        <ToolBar Grid.Row="0"
-                                 Background="{DynamicResource SecondaryBackgroundBrush}"
-                                 BorderBrush="{DynamicResource ControlBorderBrush}">
-                            <Button Command="{Binding RefreshStatusCommand}"
-                                    Content="Refresh Status"
-                                    Style="{StaticResource ToolBarButtonStyle}"/>
-                        </ToolBar>
-                        
-                        <!-- Status DataGrid -->
-                        <DataGrid Grid.Row="1"
-                                  ItemsSource="{Binding DataTypeProperties}"
+                        <!-- Status DataGrid (Refresh is now automatic when tab is selected) -->
+                        <DataGrid ItemsSource="{Binding DataTypeProperties}"
                                   SelectedItem="{Binding SelectedDataType}"
                                   AutoGenerateColumns="False"
                                   IsReadOnly="True"

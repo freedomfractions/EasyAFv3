@@ -1,6 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using Prism.Mvvm;
 using Prism.Commands;
@@ -353,21 +354,43 @@ namespace EasyAF.Modules.Map.ViewModels
         /// </summary>
         private void ExecuteRefreshStatus()
         {
-            // Refresh all data type summaries
-            foreach (var summary in DataTypeProperties)
+            // Run async refresh without blocking UI
+            _ = RefreshStatusAsync();
+        }
+
+        /// <summary>
+        /// Asynchronously refreshes mapping status for all data types.
+        /// </summary>
+        /// <remarks>
+        /// This method is called automatically when the Summary tab is activated.
+        /// It runs on a background thread to avoid blocking the UI during tab transitions.
+        /// </remarks>
+        public async Task RefreshStatusAsync()
+        {
+            await Task.Run(() =>
             {
-                var mappedCount = _document.MappingsByDataType.TryGetValue(summary.TypeName, out var mappings)
-                    ? mappings.Count
-                    : 0;
+                Log.Debug("Starting async status refresh");
+                
+                // Process each data type summary
+                foreach (var summary in DataTypeProperties)
+                {
+                    var mappedCount = _document.MappingsByDataType.TryGetValue(summary.TypeName, out var mappings)
+                        ? mappings.Count
+                        : 0;
 
-                summary.FieldsMapped = mappedCount;
-                summary.StatusColor = GetStatusColor(mappedCount, summary.FieldsAvailable);
-            }
+                    // Update on UI thread
+                    System.Windows.Application.Current?.Dispatcher.Invoke(() =>
+                    {
+                        summary.FieldsMapped = mappedCount;
+                        summary.StatusColor = GetStatusColor(mappedCount, summary.FieldsAvailable);
+                    });
+                }
 
-            // Refresh parent tab statuses
+                Log.Debug("Async status refresh complete");
+            });
+
+            // Refresh parent tab statuses (already async-friendly)
             _parentViewModel.RefreshAllTabStatuses();
-
-            Log.Debug("Refreshed mapping status for all data types");
         }
 
         /// <summary>
