@@ -448,6 +448,15 @@ namespace EasyAF.Modules.Map.ViewModels
         {
             Log.Information("Settings reloaded, refreshing property visibility for all data types");
             
+            // CROSS-MODULE EDIT: 2025-01-16 Property Count Fix
+            // Modified for: Clear property cache when settings change so counts update correctly
+            // Related modules: Map (PropertyDiscoveryService)
+            // Rollback instructions: Remove ClearCache call
+            
+            // Clear cache so property counts reflect new visibility settings
+            // This ensures Summary tab and data type tabs show correct available property counts
+            _propertyDiscovery.ClearCache();
+            
             // CROSS-MODULE EDIT: 2025-01-16 Invalid Mapping Detection
             // Modified for: Detect and clean up mappings to hidden properties after settings change
             // Related modules: Map (InvalidMappingDetector)

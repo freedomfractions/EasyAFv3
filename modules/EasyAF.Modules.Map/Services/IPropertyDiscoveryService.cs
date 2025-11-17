@@ -74,5 +74,23 @@ namespace EasyAF.Modules.Map.Services
         /// <param name="dataTypeName">The data type name to check.</param>
         /// <returns>True if the type exists and can be mapped to; otherwise false.</returns>
         bool IsValidDataType(string dataTypeName);
+
+        /// <summary>
+        /// Clears the internal property cache.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// CROSS-MODULE EDIT: 2025-01-16 Property Count Fix
+        /// Modified for: Add cache invalidation when settings change
+        /// Related modules: Map (MapDocumentViewModel, PropertyDiscoveryService)
+        /// Rollback instructions: Remove this method from interface and implementation
+        /// </para>
+        /// <para>
+        /// Should be called when property visibility settings change to ensure
+        /// property counts and lists reflect the new settings.
+        /// Performance impact: ~6ms one-time cost to re-reflect all data types.
+        /// </para>
+        /// </remarks>
+        void ClearCache();
     }
 }
