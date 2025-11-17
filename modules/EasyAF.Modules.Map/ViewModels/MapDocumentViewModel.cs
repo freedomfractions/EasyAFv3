@@ -242,7 +242,7 @@ namespace EasyAF.Modules.Map.ViewModels
                     continue;
                 }
 
-                var dataTypeVm = new DataTypeMappingViewModel(_document, dataType, _propertyDiscovery, this);
+                var dataTypeVm = new DataTypeMappingViewModel(_document, dataType, _propertyDiscovery, this, _settingsService);
                 
                 TabHeaders.Add(new TabHeaderInfo
                 {

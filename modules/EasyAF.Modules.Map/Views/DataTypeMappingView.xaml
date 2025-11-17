@@ -50,6 +50,11 @@
                     Style="{StaticResource ToolBarButtonStyle}"
                     ToolTip="Remove all mappings for this data type"/>
             <Separator Style="{StaticResource ToolBarSeparatorStyle}"/>
+            <Button Command="{Binding ManageFieldsCommand}" 
+                    Content="Fields to Map..."
+                    Style="{StaticResource ToolBarButtonStyle}"
+                    ToolTip="Choose which properties to show/hide for mapping"/>
+            <Separator Style="{StaticResource ToolBarSeparatorStyle}"/>
             <TextBlock Text="Source Table:" 
                        VerticalAlignment="Center" 
                        Margin="4,0,4,0"

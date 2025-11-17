@@ -10,6 +10,7 @@ using Prism.Commands;
 using EasyAF.Import;
 using EasyAF.Modules.Map.Models;
 using EasyAF.Modules.Map.Services;
+using EasyAF.Core.Contracts;
 using Serilog;
 using MapPropertyInfo = EasyAF.Modules.Map.Models.PropertyInfo;
 
@@ -33,7 +34,8 @@ namespace EasyAF.Modules.Map.ViewModels
         private readonly IPropertyDiscoveryService _propertyDiscovery;
         private readonly MapDocumentViewModel _parentViewModel;
         private readonly ColumnExtractionService _columnExtraction;
-        
+        private readonly ISettingsService _settingsService;
+
         private string _sourceFilter = string.Empty;
         private string _targetFilter = string.Empty;
         private ColumnInfo? _selectedSourceColumn;
@@ -47,12 +49,14 @@ namespace EasyAF.Modules.Map.ViewModels
             MapDocument document,
             string dataType,
             IPropertyDiscoveryService propertyDiscovery,
-            MapDocumentViewModel parentViewModel)
+            MapDocumentViewModel parentViewModel,
+            ISettingsService settingsService)
         {
             _document = document ?? throw new ArgumentNullException(nameof(document));
             _dataType = dataType ?? throw new ArgumentNullException(nameof(dataType));
             _propertyDiscovery = propertyDiscovery ?? throw new ArgumentNullException(nameof(propertyDiscovery));
             _parentViewModel = parentViewModel ?? throw new ArgumentNullException(nameof(parentViewModel));
+            _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
             _columnExtraction = new ColumnExtractionService();
 
             // Initialize collections
@@ -73,6 +77,7 @@ namespace EasyAF.Modules.Map.ViewModels
             UnmapSelectedCommand = new DelegateCommand(ExecuteUnmapSelected, CanExecuteUnmapSelected);
             AutoMapCommand = new DelegateCommand(ExecuteAutoMap);
             ClearMappingsCommand = new DelegateCommand(ExecuteClearMappings);
+            ManageFieldsCommand = new DelegateCommand(ExecuteManageFields);
 
             // Load initial data
             LoadTargetProperties();
@@ -249,6 +254,11 @@ namespace EasyAF.Modules.Map.ViewModels
         /// Command to clear all mappings for this data type.
         /// </summary>
         public ICommand ClearMappingsCommand { get; }
+
+        /// <summary>
+        /// Command to open the property selector dialog.
+        /// </summary>
+        public ICommand ManageFieldsCommand { get; }
 
         #endregion
 
@@ -630,6 +640,65 @@ namespace EasyAF.Modules.Map.ViewModels
             catch (Exception ex)
             {
                 Log.Error(ex, "Failed to clear mappings");
+            }
+        }
+
+        /// <summary>
+        /// Executes the manage fields command to open the property selector dialog.
+        /// </summary>
+        private void ExecuteManageFields()
+        {
+            try
+            {
+                // Get all properties (including hidden ones) for this data type
+                var allProperties = _propertyDiscovery.GetPropertiesForType(_dataType);
+                
+                // Get current enabled properties from settings
+                var enabledProperties = _settingsService.GetEnabledProperties(_dataType);
+                
+                // Get default properties (use wildcard "*" as default)
+                var defaultProperties = new List<string> { "*" };
+
+                // Create and show dialog
+                var viewModel = new PropertySelectorViewModel(
+                    _dataType,
+                    allProperties,
+                    enabledProperties,
+                    defaultProperties);
+
+                var dialog = new Views.PropertySelectorDialog
+                {
+                    DataContext = viewModel,
+                    Owner = System.Windows.Application.Current.MainWindow
+                };
+
+                // Subscribe to DialogResult changes
+                viewModel.PropertyChanged += (s, e) =>
+                {
+                    if (e.PropertyName == nameof(PropertySelectorViewModel.DialogResult))
+                    {
+                        dialog.DialogResult = viewModel.DialogResult;
+                    }
+                };
+
+                var result = dialog.ShowDialog();
+
+                if (result == true)
+                {
+                    // Save the updated property visibility
+                    var newEnabledProperties = viewModel.GetEnabledProperties();
+                    _settingsService.SetEnabledProperties(_dataType, newEnabledProperties);
+
+                    // Refresh the target properties list
+                    RefreshTargetProperties();
+
+                    Log.Information("Updated field visibility for {DataType}: {EnabledCount} of {TotalCount} properties enabled",
+                        _dataType, viewModel.EnabledCount, viewModel.TotalCount);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to open property selector for {DataType}", _dataType);
             }
         }
 

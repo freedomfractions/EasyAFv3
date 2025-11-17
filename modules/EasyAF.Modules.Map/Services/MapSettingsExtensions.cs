@@ -52,6 +52,17 @@ namespace EasyAF.Modules.Map.Services
         }
 
         /// <summary>
+        /// Sets the list of enabled properties for a data type.
+        /// </summary>
+        public static void SetEnabledProperties(this ISettingsService settingsService, string dataTypeName, List<string> enabledProperties)
+        {
+            var settings = settingsService.GetMapVisibilitySettings();
+            var config = settings.GetOrCreateConfig(dataTypeName);
+            config.EnabledProperties = enabledProperties;
+            settingsService.SetMapVisibilitySettings(settings);
+        }
+
+        /// <summary>
         /// Checks if a specific property is enabled for a data type.
         /// </summary>
         public static bool IsPropertyEnabled(this ISettingsService settingsService, string dataTypeName, string propertyName)
