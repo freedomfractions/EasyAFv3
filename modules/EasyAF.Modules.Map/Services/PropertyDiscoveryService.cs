@@ -79,26 +79,39 @@ namespace EasyAF.Modules.Map.Services
         /// <summary>
         /// Gets the list of available data types (classes in EasyAF.Data.Models).
         /// </summary>
+        /// <remarks>
+        /// Returns only the 6 data types that are part of the DataSet structure:
+        /// Bus, LVCB, Fuse, Cable, ArcFlash, ShortCircuit.
+        /// Other classes in EasyAF.Data.Models (DataSet, DataSetDiff, etc.) are excluded.
+        /// </remarks>
         public List<string> GetAvailableDataTypes()
         {
             try
             {
-                var dataModelTypes = typeof(Bus).Assembly
-                    .GetTypes()
-                    .Where(t => t.Namespace == "EasyAF.Data.Models" && 
-                                t.IsClass && 
-                                !t.IsAbstract &&
-                                t != typeof(DataSet))
-                    .Select(t => t.Name)
-                    .OrderBy(name => name)
-                    .ToList();
+                // CROSS-MODULE EDIT: 2025-01-16 Data Type Discovery Fix
+                // Modified for: Only return the 6 data types that are in DataSet (exclude support classes)
+                // Related modules: Data (DataSet model)
+                // Rollback instructions: Revert to reflection-based discovery of all classes
+                
+                // Hardcoded list of data types that exist in DataSet
+                // This is more reliable than reflection since it filters out support classes
+                // (DataSet, DataSetDiff, EntryDiff, PropertyChange, DiffUtil, etc.)
+                var dataModelTypes = new List<string>
+                {
+                    "Bus",
+                    "LVCB",
+                    "Fuse",
+                    "Cable",
+                    "ArcFlash",
+                    "ShortCircuit"
+                };
 
-                Log.Debug("Discovered {Count} data types via reflection", dataModelTypes.Count);
+                Log.Debug("Returning {Count} known data types", dataModelTypes.Count);
                 return dataModelTypes;
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Failed to discover data types");
+                Log.Error(ex, "Failed to get data types");
                 return new List<string>();
             }
         }
