@@ -66,9 +66,19 @@ public class FileCommandsViewModel : BindableBase
 
         NewCommand = new DelegateCommand(ExecuteNew, CanExecuteNew).ObservesProperty(() => SelectedModule);
         OpenCommand = new DelegateCommand(ExecuteOpen);
-        SaveCommand = new DelegateCommand(ExecuteSave, CanExecuteSave).ObservesProperty(() => _documentManager.ActiveDocument);
-        SaveAsCommand = new DelegateCommand(ExecuteSaveAs, CanExecuteSave).ObservesProperty(() => _documentManager.ActiveDocument);
+        SaveCommand = new DelegateCommand(ExecuteSave, CanExecuteSave);
+        SaveAsCommand = new DelegateCommand(ExecuteSaveAs, CanExecuteSave);
         OpenRecentCommand = new DelegateCommand<string?>(ExecuteOpenRecent, path => !string.IsNullOrWhiteSpace(path));
+
+        // CROSS-MODULE EDIT: 2025-01-16 Save Command Reactive Fix
+        // Modified for: Subscribe to ActiveDocumentChanged to update Save command state
+        // Related modules: Core (IDocumentManager), Shell (FileCommandsViewModel)
+        // Rollback instructions: Remove subscription and restore ObservesProperty approach
+        _documentManager.ActiveDocumentChanged += (_, __) =>
+        {
+            SaveCommand.RaiseCanExecuteChanged();
+            SaveAsCommand.RaiseCanExecuteChanged();
+        };
 
         // CROSS-MODULE EDIT: 2025-11-14 Backstage Open UX
         // Modified for: Add context actions for recent files (remove entry, open containing folder, clear list)
