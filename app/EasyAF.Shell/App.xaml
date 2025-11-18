@@ -1,4 +1,4 @@
-﻿<prism:PrismApplication x:Class="EasyAF.Shell.App"
+<prism:PrismApplication x:Class="EasyAF.Shell.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:EasyAF.Shell"
@@ -17,6 +17,9 @@
 
                 <!-- Common Control Styles (ScrollBar, Thumb, future shared styles) -->
                 <ResourceDictionary Source="/EasyAF.Shell;component/Styles/CommonControls.xaml" />
+                
+                <!-- Module Data Templates -->
+                <ResourceDictionary Source="/EasyAF.Shell;component/Styles/ModuleDataTemplates.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

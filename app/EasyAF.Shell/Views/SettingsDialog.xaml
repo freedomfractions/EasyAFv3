@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EasyAF.Shell.Views"
+        xmlns:converters="clr-namespace:EasyAF.Shell.Converters"
         mc:Ignorable="d"
         Title="Settings" 
         Height="500" 
@@ -19,6 +20,7 @@
         <!-- Apply BaseButtonStyle locally -->
         <Style BasedOn="{StaticResource BaseButtonStyle}" TargetType="Button" />
         <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
+        <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
     </Window.Resources>
     <Grid Margin="0">
         <Grid.RowDefinitions>
@@ -159,22 +161,23 @@
                 </ScrollViewer>
             </TabItem>
 
-            <!-- Module Settings Tab (Placeholder for dynamic module tabs) -->
-            <TabItem Header="Modules" IsEnabled="False">
+            <!-- CROSS-MODULE EDIT: 2025-01-16 Map Module Settings Feature - Step 8 -->
+            <!-- Modified for: Add Map Editor settings tab -->
+            <!-- Related modules: Map (MapModuleSettingsView, MapModuleSettingsViewModel) -->
+            <!-- Rollback instructions: Remove this TabItem -->
+            
+            <!-- Map Editor Settings Tab -->
+            <TabItem Header="Map Editor"
+                     Visibility="{Binding MapSettingsViewModel, Converter={StaticResource NullToVisibilityConverter}}">
                 <TabItem.HeaderTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding}" 
-                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                   Foreground="{DynamicResource TextPrimaryBrush}"
                                    FontWeight="SemiBold"
                                    Padding="12,8"/>
                     </DataTemplate>
                 </TabItem.HeaderTemplate>
-                <StackPanel Margin="20" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <TextBlock Text="No modules loaded" 
-                               Foreground="{DynamicResource TextSecondaryBrush}"
-                               FontStyle="Italic"
-                               HorizontalAlignment="Center"/>
-                </StackPanel>
+                <ContentControl Content="{Binding MapSettingsViewModel}"/>
             </TabItem>
         </TabControl>
 

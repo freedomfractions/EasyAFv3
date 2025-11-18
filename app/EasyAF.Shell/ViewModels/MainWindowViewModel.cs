@@ -626,7 +626,24 @@ public class MainWindowViewModel : BindableBase
     /// </remarks>
     private void OpenSettings()
     {
-        var viewModel = new SettingsDialogViewModel(_themeService, _settingsService);
+        // CROSS-MODULE EDIT: 2025-01-16 Map Module Settings Feature - Step 8
+        // Modified for: Pass Map module settings ViewModel to SettingsDialog
+        // Related modules: Map (MapModuleSettingsViewModel)
+        // Rollback instructions: Remove mapSettingsVm resolution and parameter passing
+        
+        // Try to resolve Map module settings ViewModel (may be null if Map module not loaded)
+        object? mapSettingsVm = null;
+        try
+        {
+            mapSettingsVm = _container.Resolve<EasyAF.Modules.Map.ViewModels.MapModuleSettingsViewModel>();
+        }
+        catch
+        {
+            // Map module not loaded or registered - no problem, dialog will hide the Map tab
+            Log.Debug("Map module settings not available (module not loaded)");
+        }
+        
+        var viewModel = new SettingsDialogViewModel(_themeService, _settingsService, mapSettingsVm);
         var dialog = new Views.SettingsDialog
         {
             DataContext = viewModel,

@@ -1,0 +1,233 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:behaviors="clr-namespace:EasyAF.Shell.Behaviors">
+    
+    <!-- CROSS-MODULE EDIT: 2025-01-15 MVVM Optimization (4/4) -->
+    <!-- Modified for: Extract Quick Access Browser template from OpenBackstageView.xaml -->
+    <!-- Rollback instructions: Merge back into OpenBackstageView.xaml DataTrigger for QuickAccessFolder mode -->
+    
+    <!-- Quick Access Browser Template -->
+    <DataTemplate x:Key="QuickAccessBrowserTemplate">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>   <!-- Navigation strip -->
+                <RowDefinition Height="*"/>      <!-- Browser ListView -->
+            </Grid.RowDefinitions>
+            
+            <!-- Navigation Strip -->
+            <Border Grid.Row="0" 
+                    Background="{DynamicResource SecondaryBackgroundBrush}"
+                    BorderBrush="{DynamicResource ControlBorderBrush}"
+                    BorderThickness="0,0,0,1"
+                    Padding="8,6"
+                    Margin="0,0,0,8">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <!-- Up Button -->
+                    <Button Grid.Column="0" 
+                            Style="{StaticResource BaseButtonStyle}"
+                            Command="{Binding NavigateUpCommand}"
+                            ToolTip="Navigate up to parent folder"
+                            Padding="8,4"
+                            Margin="0,0,8,0">
+                        <TextBlock Text="&#xE74A;" 
+                                   FontFamily="Segoe MDL2 Assets"
+                                   FontSize="16"/>
+                    </Button>
+                    
+                    <!-- Current Path Display -->
+                    <TextBlock Grid.Column="1" 
+                               Text="{Binding CurrentBrowsePath}"
+                               VerticalAlignment="Center"
+                               FontSize="13"
+                               Foreground="{DynamicResource TextPrimaryBrush}"
+                               TextTrimming="CharacterEllipsis"
+                               ToolTip="{Binding CurrentBrowsePath}"/>
+                </Grid>
+            </Border>
+            
+            <!-- Browser ListView (Frozen Headers) -->
+            <ListView Grid.Row="1"
+                      Background="Transparent"
+                      BorderThickness="0"
+                      Style="{StaticResource FrozenHeaderListViewStyle}"
+                      ItemsSource="{Binding BrowserEntries}"
+                      behaviors:DragToQuickAccessBehavior.IsEnabled="True"
+                      behaviors:DragToQuickAccessBehavior.QuickAccessTarget="{Binding ElementName=QuickAccessItemsControl, Source={RelativeSource AncestorType=UserControl}}">
+                
+                <!-- Keyboard shortcuts -->
+                <ListView.InputBindings>
+                    <KeyBinding Key="Return"
+                                Command="{Binding OpenBrowserEntryCommand}"
+                                CommandParameter="{Binding SelectedItem, RelativeSource={RelativeSource AncestorType=ListView}}"/>
+                    <KeyBinding Key="Back"
+                                Command="{Binding NavigateUpCommand}"/>
+                </ListView.InputBindings>
+                
+                <!-- Context Menu -->
+                <ListView.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Open" 
+                                  Command="{Binding PlacementTarget.DataContext.OpenBrowserEntryCommand, 
+                                            RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                  CommandParameter="{Binding PlacementTarget.SelectedItem, 
+                                                     RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+                            <MenuItem.Icon>
+                                <TextBlock Text="&#xE8E5;" FontFamily="Segoe MDL2 Assets"/>
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Header="Copy Path" 
+                                  Command="{Binding PlacementTarget.DataContext.CopyBrowserPathCommand, 
+                                            RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                  CommandParameter="{Binding PlacementTarget.SelectedItem, 
+                                                     RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+                            <MenuItem.Icon>
+                                <TextBlock Text="&#xE8C8;" FontFamily="Segoe MDL2 Assets"/>
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <Separator/>
+                        <MenuItem Header="Add to Quick Access" 
+                                  Command="{Binding PlacementTarget.DataContext.AddToQuickAccessCommand, 
+                                            RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                  CommandParameter="{Binding PlacementTarget.SelectedItem.FullPath, 
+                                                     RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+                            <MenuItem.Icon>
+                                <TextBlock Text="&#xE710;" FontFamily="Segoe MDL2 Assets"/>
+                            </MenuItem.Icon>
+                        </MenuItem>
+                    </ContextMenu>
+                </ListView.ContextMenu>
+                
+                <!-- GridView Columns -->
+                <ListView.View>
+                    <GridView>
+                        <!-- Icon Column -->
+                        <GridViewColumn Width="40">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock FontFamily="Segoe MDL2 Assets"
+                                               FontSize="20"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="&#xE8A5;"/>
+                                                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsFolder}" Value="True">
+                                                        <Setter Property="Text" Value="&#xE8B7;"/>
+                                                        <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        
+                        <!-- Name Column -->
+                        <GridViewColumn Width="280" Header="Name">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Name}" 
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource TextPrimaryBrush}"
+                                               VerticalAlignment="Center"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        
+                        <!-- Type Column -->
+                        <GridViewColumn Width="80" Header="Type">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Foreground="{DynamicResource TextSecondaryBrush}"
+                                               VerticalAlignment="Center">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="{Binding Extension}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsFolder}" Value="True">
+                                                        <Setter Property="Text" Value="Folder"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        
+                        <!-- Size Column -->
+                        <GridViewColumn Width="80" Header="Size">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding FileSizeDisplay}" 
+                                               Foreground="{DynamicResource TextSecondaryBrush}"
+                                               VerticalAlignment="Center"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        
+                        <!-- Date Modified Column -->
+                        <GridViewColumn Width="120" Header="Date modified">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding LastModifiedDisplay}" 
+                                               Foreground="{DynamicResource TextSecondaryBrush}"
+                                               VerticalAlignment="Center"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                    </GridView>
+                </ListView.View>
+                
+                <!-- Item Container Style -->
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="BorderThickness" Value="0"/>
+                        <Setter Property="Padding" Value="0"/>
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                        <Setter Property="MinHeight" Value="32"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="ListViewItem">
+                                    <Border x:Name="ItemBorder"
+                                            Background="{TemplateBinding Background}"
+                                            BorderBrush="Transparent"
+                                            BorderThickness="0"
+                                            Padding="{TemplateBinding Padding}">
+                                        <Border.InputBindings>
+                                            <MouseBinding MouseAction="LeftDoubleClick"
+                                                          Command="{Binding DataContext.OpenBrowserEntryCommand, 
+                                                                    RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                          CommandParameter="{Binding}"/>
+                                        </Border.InputBindings>
+                                        <GridViewRowPresenter VerticalAlignment="Center"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource HighlightSelectionBrush}"/>
+                                        </Trigger>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource HighlightSelectionBrush}"/>
+                                            <Setter TargetName="ItemBorder" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                                            <Setter TargetName="ItemBorder" Property="BorderThickness" Value="2,0,0,0"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </ListView.ItemContainerStyle>
+            </ListView>
+        </Grid>
+    </DataTemplate>
+    
+</ResourceDictionary>

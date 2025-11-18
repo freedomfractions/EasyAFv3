@@ -49,6 +49,16 @@ public partial class App : PrismApplication
         // Hook module loaded event for service-side tab aggregation and help registration
         var ribbonService = Container.Resolve<IModuleRibbonService>();
         var loader = Container.Resolve<IModuleLoader>();
+        
+        // CROSS-MODULE EDIT: 2025-01-15 Map Module Integration
+        // Modified for: Pass Unity container to ModuleLoader so modules can register services
+        // Related modules: Core (ModuleLoader), Map (MapModule service registration)
+        // Rollback instructions: Remove SetContainer call
+        if (loader is Core.Services.ModuleLoader moduleLoader)
+        {
+            moduleLoader.SetContainer(Container.GetContainer());
+        }
+        
         loader.ModuleLoaded += (object? sender, EasyAF.Core.Contracts.IModule module) => 
         {
             ribbonService.AddModuleTabs(module, null);

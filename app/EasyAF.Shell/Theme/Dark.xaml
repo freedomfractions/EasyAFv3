@@ -50,6 +50,8 @@
     <!-- Highlight Colors (subtle grayscale highlight) -->
     <Color x:Key="HighlightSelectionColor">#FF222222</Color>
     <Color x:Key="ReadonlyBackgroundColor">#FF202020</Color>
+    <Color x:Key="HoverBackgroundColor">#FF222222</Color>
+    <Color x:Key="AccentBackgroundColor">#FF1C2941</Color>
 
     <!-- Log Level Colors (Dark Theme - maintain contrast on grayscale bg) -->
     <Color x:Key="LogVerboseColor">#FF9E9E9E</Color>
@@ -99,6 +101,8 @@
     
     <SolidColorBrush x:Key="HighlightSelectionBrush" Color="{StaticResource HighlightSelectionColor}"/>
     <SolidColorBrush x:Key="ReadonlyBackgroundBrush" Color="{StaticResource ReadonlyBackgroundColor}"/>
+    <SolidColorBrush x:Key="HoverBackgroundBrush" Color="{StaticResource HoverBackgroundColor}"/>
+    <SolidColorBrush x:Key="AccentBackgroundBrush" Color="{StaticResource AccentBackgroundColor}"/>
 
     <!-- Log Level Brushes -->
     <SolidColorBrush x:Key="LogVerboseBrush" Color="{StaticResource LogVerboseColor}"/>

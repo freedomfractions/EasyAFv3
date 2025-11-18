@@ -1,0 +1,1232 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<TitleBlock xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="EasyPower_Title_Block.xsd">
+  <!-- comment-->
+  <Settings>
+    <Scale>0</Scale>
+    <BorderWidth>1</BorderWidth>
+  </Settings>
+  <!-- border linework -->
+  <Rect> <!-- border rect -->
+    <left>0.5</left>
+    <top>0.5</top>
+    <right>35.5</right>
+    <bottom>23.5</bottom>
+    <LineWidth>2</LineWidth>
+    <Color>#FF000000</Color>
+  </Rect>
+  <Rect>
+    <!-- sheet no rect -->
+    <left>34.6875</left>
+    <top>22.6875</top>
+    <right>35.5</right>
+    <bottom>23.5</bottom>
+    <LineWidth>1</LineWidth>
+    <Color>#FF000000</Color>
+  </Rect>
+  <Text>
+    <!-- Sheet No Title text -->
+    <X>34.7969</X>
+    <Y>22.875</Y>
+    <Alignment>8</Alignment>
+    <Color>#FF000000</Color>
+    <Label>SHEET NO.</Label>
+    <FontName>Arial</FontName>
+    <FontSize>8</FontSize>
+  </Text>
+  <Text>
+    <!-- 'Drawing No.' text prompt -->
+    <X>35.0937</X>
+    <Y>22.925</Y>
+    <Alignment>6</Alignment>
+    <Color>#FF000000</Color>
+    <Label>%DrawingName%</Label>
+    <FontName>Arial Narrow</FontName>
+    <FontSize>26</FontSize>
+  </Text>
+  <Rect>
+    <!-- sheet of sheets rect -->
+    <left>32.4766</left>
+    <top>22.6875</top>
+    <right>35.5</right>
+    <bottom>23.5</bottom>
+    <LineWidth>1</LineWidth>
+    <Color>#FF000000</Color>
+  </Rect>
+  <Text>
+    <!-- 'SHEET' text -->
+    <X>32.5312</X>
+    <Y>22.875</Y>
+    <Alignment>8</Alignment>
+    <Color>#FF000000</Color>
+    <Label>SHEET</Label>
+    <FontName>Arial</FontName>
+    <FontSize>8</FontSize>
+  </Text>
+  <Text>
+    <!-- SHEET NO text prompt -->
+    <Prompt>Sheet No.</Prompt>
+    <Name>Sheet No.</Name>
+    <X>33.1</X>
+    <Y>22.875</Y>
+    <Alignment>14</Alignment>
+    <Color>#FF000000</Color>
+    <Label>1</Label>
+    <FontName>Arial</FontName>
+    <FontSize>8</FontSize>
+  </Text>
+  <Text>
+    <!-- 'OF' text -->
+    <X>33.4727</X>
+    <Y>22.875</Y>
+    <Alignment>14</Alignment>
+    <Color>#FF000000</Color>
+    <Label>OF</Label>
+    <FontName>Arial</FontName>
+    <FontSize>8</FontSize>
+  </Text>
+  <Text>
+    <!-- SHEET COUNT text prompt -->
+    <Prompt>Sheet Count</Prompt>
+    <Name>Sheet Count</Name>
+    <X>33.8906</X>
+    <Y>22.875</Y>
+    <Alignment>14</Alignment>
+    <Color>#FF000000</Color>
+    <Label>40</Label>
+    <FontName>Arial</FontName>
+    <FontSize>8</FontSize>
+  </Text>
+  <Text>
+    <!-- 'SHEETS' text -->
+    <X>34.1797</X>
+    <Y>22.875</Y>
+    <Alignment>8</Alignment>
+    <Color>#FF000000</Color>
+    <Label>SHEETS</Label>
+    <FontName>Arial</FontName>
+    <FontSize>8</FontSize>
+  </Text>
+  <Line>
+    <!-- att dwg no horz divider -->
+    <X1>32.4766</X1>
+    <Y1>22.9375</Y1>
+    <X2>34.6875</X2>
+    <Y2>22.9375</Y2>
+    <LineWidth>1</LineWidth>
+    <Color>0</Color>
+  </Line>
+  <Text>
+    <!-- 'AT&T DRAWING NO.' text -->
+    <X>32.5235</X>
+    <Y>23.0875</Y>
+    <Alignment>8</Alignment>
+    <Color>#FF000000</Color>
+    <Label>AT&amp;T DRAWING NO.:</Label>
+    <FontName>Arial</FontName>
+    <FontSize>8</FontSize>
+  </Text>
+  <Text>
+    <!-- ATT Drawing No text prompt -->
+    <Prompt>ATT Drawing No</Prompt>
+    <Name>ATT Drawing No</Name>
+    <X>33.582</X>
+    <Y>23.2187</Y>
+    <Alignment>0</Alignment>
+    <Color>#FF000000</Color>
+    <Label></Label>
+    <FontName>Arial</FontName>
+    <FontSize>10</FontSize>
+  </Text>
+  <Rect>
+    <!-- att proj no rect -->
+    <left>30.543</left>
+    <top>22.1875</top>
+    <right>32.4766</right>
+    <bottom>22.6875</bottom>
+    <LineWidth>1</LineWidth>
+    <Color>#FF000000</Color>
+  </Rect>
+  <Text>
+    <!-- 'AT&T Project No' text -->
+    <X>30.5703</X>
+    <Y>22.3375</Y>
+    <Alignment>8</Alignment>
+    <Color>#FF000000</Color>
+    <Label>AT&amp;T PROJECT NUMBER:</Label>
+    <FontName>Arial</FontName>
+    <FontSize>8</FontSize>
+  </Text>
+  <Text>
+    <!-- ATT Project No text prompt -->
+    <Prompt>ATT Project No</Prompt>
+    <Name>ATT Project No</Name>
+    <X>30.5942</X>
+    <Y>22.625</Y>
+    <Alignment>8</Alignment>
+    <Color>#FF000000</Color>
+    <Label>__ATT_PROJ_NO__</Label> <!-- PROJECT RELATED TAG -->
+    <FontName>Arial</FontName>
+    <FontSize>10</FontSize>
+  </Text>
+  <Rect>
+    <!-- att auth rect -->
+    <left>30.543</left>
+    <top>22.6875</top>
+    <right>32.4766</right>
+    <bottom>23.5</bottom>
+    <LineWidth>1</LineWidth>
+    <Color>#FF000000</Color>
+  </Rect>
+  <Text>
+    <!-- 'AT&T AUTHORIZATION' text -->
+    <X>30.5703</X>
+    <Y>22.8375</Y>
+    <Alignment>8</Alignment>
+    <Color>#FF000000</Color>
+    <Label>AT&amp;T AUTHORIZATION:</Label>
+    <FontName>Arial</FontName>
+    <FontSize>8</FontSize>
+  </Text>
+  <Line>
+    <!-- att auth underline -->
+    <X1>30.6016</X1>
+    <Y1>23.2812</Y1>
+    <X2>32.3516</X2>
+    <Y2>23.2812</Y2>
+    <LineWidth>1</LineWidth>
+    <Color>0</Color>
+  </Line>
+  <Text>
+    <!-- ATT PM text prompt -->
+    <Prompt>ATT Project Mgr</Prompt>
+    <Name>ATT Project Mgr</Name>
+    <X>30.5942</X>
+    <Y>23.2787</Y>
+    <Alignment>8</Alignment>
+    <Color>#FF000000</Color>
+    <Label>TIM BRUNS</Label>
+    <FontName>Arial</FontName>
+    <FontSize>10</FontSize>
+  </Text>
+  <Rect>
+    <!-- date, scale, drawn by, checked by rect -->
+    <left>32.4766</left>
+    <top>22.1875</top>
+    <right>35.5</right>
+    <bottom>22.6875</bottom>
+    <LineWidth>1</LineWidth>
+    <Color>#FF000000</Color>
+  </Rect>
+  <Line>
+    <!-- date/drawn by horz divider -->
+    <X1>32.4766</X1>
+    <Y1>22.4375</Y1>
+    <X2>35.5</X2>
+    <Y2>22.4375</Y2>
+    <LineWidth>1</LineWidth>
+    <Color>0</Color>
+  </Line>
+  <Line>
+    <!-- date/drawn by vert divider -->
+    <X1>33.9883</X1>
+    <Y1>22.1875</Y1>
+    <X2>33.9883</X2>
+    <Y2>22.6875</Y2>
+    <LineWidth>1</LineWidth>
+    <Color>0</Color>
+  </Line>
+  <Text>
+    <!-- 'DATE' text -->
+    <X>32.5039</X>
+    <Y>22.375</Y>
+    <Alignment>8</Alignment>
+    <Color>#FF000000</Color>
+    <Label>DATE:</Label>
+    <FontName>Arial</FontName>
+    <FontSize>8</FontSize>
+  </Text>
+  <Text>
+    <!-- Drawing date text prompt -->
+    <Prompt>Drawing Date</Prompt>
+    <Name>Drawing Date</Name>
+    <X>33.0039</X>
+    <Y>22.4</Y>
+    <Alignment>8</Alignment>
+    <Color>#FF000000</Color>
+    <Label>__STUDY_DATE__</Label>  <!-- PROJECT RELATED TAG -->
+    <FontName>Arial</FontName>
+    <FontSize>10</FontSize>
+  </Text>
+  <Text>
+    <!-- 'DRAWN BY' text -->
+    <X>32.5039</X>
+    <Y>22.625</Y>
+    <Alignment>8</Alignment>
+    <Color>#FF000000</Color>
+    <Label>DRAWN BY:</Label>
+    <FontName>Arial</FontName>
+    <FontSize>8</FontSize>
+  </Text>
+  <Text>
+    <!-- Drawn by text prompt -->
+    <Prompt>Drawn By</Prompt>
+    <Name>Drawn By</Name>
+    <X>33.2039</X>
+    <Y>22.65</Y>
+    <Alignment>8</Alignment>
+    <Color>#FF000000</Color>
+    <Label>BPB</Label>
+    <FontName>Arial</FontName>
+    <FontSize>10</FontSize>
+  </Text>
+  <Text>
+    <!-- 'SCALE' text -->
+    <X>34.0156</X>
+    <Y>22.375</Y>
+    <Alignment>8</Alignment>
+    <Color>#FF000000</Color>
+    <Label>SCALE:</Label>
+    <FontName>Arial</FontName>
+    <FontSize>8</FontSize>
+  </Text>
+  <Text>
+    <!-- Scale text prompt -->
+    <Prompt>Scale</Prompt>
+    <Name>Scale</Name>
+    <X>34.5156</X>
+    <Y>22.4</Y>
+    <Alignment>8</Alignment>
+    <Color>#FF000000</Color>
+    <Label>N.T.S.</Label>
+    <FontName>Arial</FontName>
+    <FontSize>10</FontSize>
+  </Text>
+  <Text>
+    <!-- 'CHECKED BY' text -->
+    <X>34.0156</X>
+    <Y>22.625</Y>
+    <Alignment>8</Alignment>
+    <Color>#FF000000</Color>
+    <Label>CHECKED BY:</Label>
+    <FontName>Arial</FontName>
+    <FontSize>8</FontSize>
+  </Text>
+  <Text>
+    <!-- Checked by text prompt -->
+    <Prompt>Checked By</Prompt>
+    <Name>Checked By</Name>
+    <X>34.8756</X>
+    <Y>22.65</Y>
+    <Alignment>8</Alignment>
+    <Color>#FF000000</Color>
+    <Label>MBB</Label>
+    <FontName>Arial</FontName>
+    <FontSize>10</FontSize>
+  </Text>
+  <Rect>
+    <!-- sheet title rect -->
+    <left>30.543</left>
+    <top>21.3477</top>
+    <right>35.5</right>
+    <bottom>22.1875</bottom>
+    <LineWidth>1</LineWidth>
+    <Color>#FF000000</Color>
+  </Rect>
+  <Text>
+    <!-- 'SHEET TITLE' text -->
+    <X>30.5703</X>
+    <Y>21.4977</Y>
+    <Alignment>8</Alignment>
+    <Color>#FF000000</Color>
+    <Label>SHEET TITLE:</Label>
+    <FontName>Arial</FontName>
+    <FontSize>8</FontSize>
+  </Text>
+  <Text>
+    <!-- Sheet Title Line 1 text prompt -->
+    <Prompt>Sheet Title 1</Prompt>
+    <Name>Sheet Title 1</Name>
+    <X>33.0215</X>
+    <Y>21.5</Y>
+    <Alignment>6</Alignment>
+    <Color>#FF000000</Color>
+    <Label>EASYPOWER</Label>
+    <FontName>Arial</FontName>
+    <FontSize>24</FontSize>
+  </Text>
+  <Text>
+    <!-- Sheet Title Line 2 text prompt -->
+    <Prompt>Sheet Title 2</Prompt>
+    <Name>Sheet Title 2</Name>
+    <X>33.0215</X>
+    <Y>21.8</Y>
+    <Alignment>6</Alignment>
+    <Color>#FF000000</Color>
+    <Label>ONE-LINE DIAGRAM</Label>
+    <FontName>Arial</FontName>
+    <FontSize>24</FontSize>
+  </Text>
+  <Rect>
+    <!-- project info/title rect -->
+    <left>30.543</left>
+    <top>19.2617</top>
+    <right>35.5</right>
+    <bottom>21.3477</bottom>
+    <LineWidth>1</LineWidth>
+    <Color>#FF000000</Color>
+  </Rect>
+  <Text>
+    <!-- 'PROJECT TITLE' text -->
+    <X>30.5703</X>
+    <Y>19.4117</Y>
+    <Alignment>8</Alignment>
+    <Color>#FF000000</Color>
+    <Label>PROJECT TITLE:</Label>
+    <FontName>Arial</FontName>
+    <FontSize>8</FontSize>
+  </Text>
+  <Text>
+    <!-- Project Title 1 text prompt -->
+    <Prompt>Project Title 1</Prompt>
+    <Name>Project Title 1</Name>
+    <X>33.0215</X>
+    <Y>19.4117</Y>
+    <Alignment>6</Alignment>
+    <Color>#FF000000</Color>
+    <Label>__CLIENT__</Label>  <!-- PROJECT RELATED TAG -->
+    <FontName>Arial</FontName>
+    <FontSize>22</FontSize>
+  </Text>
+  <Text>
+    <!-- Project Title 2 text prompt -->
+    <Prompt>Project Title 2</Prompt>
+    <Name>Project Title 2</Name>
+    <X>33.0215</X>
+    <Y>19.7117</Y>
+    <Alignment>6</Alignment>
+    <Color>#FF000000</Color>
+    <Label>ARC FLASH</Label>
+    <FontName>Arial</FontName>
+    <FontSize>22</FontSize>
+  </Text>
+  <Text>
+    <!-- Address Street text prompt -->
+    <Prompt>Address Street</Prompt>
+    <Name>Address Street</Name>
+    <X>33.0215</X>
+    <Y>20.3117</Y>
+    <Alignment>6</Alignment>
+    <Color>#FF000000</Color>
+    <Label>__ADDR_STREET__</Label>  <!-- PROJECT RELATED TAG -->
+    <FontName>Arial</FontName>
+    <FontSize>14</FontSize>
+  </Text>
+  <Text>
+    <!-- Address City text prompt -->
+    <Prompt>Address City</Prompt>
+    <Name>Address City</Name>
+    <X>33.0215</X>
+    <Y>20.5117</Y>
+    <Alignment>6</Alignment>
+    <Color>#FF000000</Color>
+    <Label>__ADDR_CITY__</Label>  <!-- PROJECT RELATED TAG -->  
+    <FontName>Arial</FontName>
+    <FontSize>14</FontSize>
+  </Text>
+  <Text>
+    <!-- Address State text prompt -->
+    <Prompt>Address State</Prompt>
+    <Name>Address State</Name>
+    <X>33.4215</X>
+    <Y>20.7117</Y>
+    <Alignment>0</Alignment>
+    <Color>#FF000000</Color>
+    <Label>__ADDR_STATE__</Label>  <!-- PROJECT RELATED TAG -->
+    <FontName>Arial</FontName>
+    <FontSize>14</FontSize>
+  </Text>
+  <Text>
+    <!-- Address Country text prompt -->
+    <Prompt>Address Country</Prompt>
+    <Name>Address Country</Name>
+    <X>32.6215</X>
+    <Y>20.7117</Y>
+    <Alignment>2</Alignment>
+    <Color>#FF000000</Color>
+    <Label>US</Label>
+    <FontName>Arial</FontName>
+    <FontSize>14</FontSize>
+  </Text>
+  <Text>
+    <!-- CLLI Code text prompt -->
+    <Prompt>CLLI Code</Prompt>
+    <Name>CLLI Code</Name>
+    <X>30.5703</X>
+    <Y>21.3477</Y>
+    <Alignment>8</Alignment>
+    <Color>#FF000000</Color>
+    <Label>__ATT_CLLI_CODE__</Label>  <!-- PROJECT RELATED TAG -->
+    <FontName>Arial</FontName>
+    <FontSize>14</FontSize>
+  </Text>
+  <Text>
+    <!-- GEOLOC Code text prompt -->
+    <Prompt>GEOLOC Code</Prompt>
+    <Name>GEOLOC Code</Name>
+    <X>35.4727</X>
+    <Y>21.3477</Y>
+    <Alignment>10</Alignment>
+    <Color>#FF000000</Color>
+    <Label>__ATT_GEOLOC__</Label>  <!-- PROJECT RELATED TAG -->
+    <FontName>Arial</FontName>
+    <FontSize>14</FontSize>
+  </Text>
+  <Text>
+    <!-- SAP Code text prompt -->
+    <Prompt>SAP Code</Prompt>
+    <Name>SAP Code</Name>
+    <X>33.0215</X>
+    <Y>21.3477</Y>
+    <Alignment>14</Alignment>
+    <Color>#FF000000</Color>
+    <Label>__ATT_SAP_CODE__</Label>  <!-- PROJECT RELATED TAG -->
+    <FontName>Arial</FontName>
+    <FontSize>14</FontSize>
+  </Text>
+  <Rect>
+    <!-- att cre rect -->
+    <left>30.543</left>
+    <top>18.2227</top>
+    <right>35.5</right>
+    <bottom>19.2618</bottom>
+    <LineWidth>1</LineWidth>
+    <Color>#FF000000</Color>
+  </Rect>
+  <Text>
+    <!-- 'DRAWINGS PREPARED FOR' text -->
+    <X>34.4</X>
+    <Y>18.45</Y>
+    <Alignment>14</Alignment>
+    <Color>#FF000000</Color>
+    <Label>DRAWINGS PREPARED FOR</Label>
+    <FontName>Arial</FontName>
+    <FontSize>10</FontSize>
+  </Text>
+  <Text>
+    <!-- 'CORPORATE' text -->
+    <X>34.4</X>
+    <Y>18.6</Y>
+    <Alignment>6</Alignment>
+    <Color>#FF000000</Color>
+    <Label>CORPORATE</Label>
+    <FontName>Arial</FontName>
+    <FontSize>22</FontSize>
+  </Text>
+  <Text>
+    <!-- 'REAL ESTATE' text -->
+    <X>34.4</X>
+    <Y>18.9</Y>
+    <Alignment>6</Alignment>
+    <Color>#FF000000</Color>
+    <Label>REAL ESTATE</Label>
+    <FontName>Arial</FontName>
+    <FontSize>22</FontSize>
+  </Text>
+  <Image>
+    <!-- ATT Logo image -->
+    <left>30.643</left>
+    <top>18.3227</top>
+    <right>32.7427</right>
+    <bottom>19.1835</bottom>
+    <Name>ATT Logo</Name>
+    <Prompt>ATT Logo</Prompt>
+    <File>Q:\EasyPower\Titleblocks\ATT Logo.jpg</File>
+  </Image>
+  <Rect>
+    <!-- att disclaim rect -->
+    <left>30.543</left>
+    <top>17.0117</top>
+    <right>35.5</right>
+    <bottom>18.2227</bottom>
+    <LineWidth>1</LineWidth>
+    <Color>#FF000000</Color>
+  </Rect>
+  <Line>
+    <!-- att proprietary underline -->
+    <X1>30.7734</X1>
+    <Y1>17.2969</Y1>
+    <X2>35.2969</X2>
+    <Y2>17.2969</Y2>
+    <LineWidth>1</LineWidth>
+    <Color>0</Color>
+  </Line>
+  <Text>
+    <!-- 'PROPRIETARY INFORMATION' text -->
+    <X>33.0215</X>
+    <Y>17.2969</Y>
+    <Alignment>14</Alignment>
+    <Color>#FF000000</Color>
+    <Label>PROPRIETARY AT&amp;T INFORMATION</Label>
+    <FontName>Arial</FontName>
+    <FontSize>12</FontSize>
+    <Bold>1</Bold>
+  </Text>
+  <Text>
+    <!-- 'PROPRIETARY' Line 1 text -->
+    <X>30.7734</X>
+    <Y>17.4969</Y>
+    <Alignment>8</Alignment>
+    <Color>#FF000000</Color>
+    <Label>NOT FOR GENERAL USE OR DISCLOSURE OUTSIDE OF AT&amp;T</Label>
+    <FontName>Arial Narrow</FontName>
+    <FontSize>11</FontSize>
+  </Text>
+  <Text>
+    <!-- 'PROPRIETARY' Line 2 text -->
+    <X>30.7734</X>
+    <Y>17.6469</Y>
+    <Alignment>8</Alignment>
+    <Color>#FF000000</Color>
+    <Label>THIS INFORMATION MAY ONLY BE USED BY AUTHORIZED</Label>
+    <FontName>Arial Narrow</FontName>
+    <FontSize>11</FontSize>
+  </Text>
+  <Text>
+    <!-- 'PROPRIETARY' Line 3 text -->
+    <X>30.7734</X>
+    <Y>17.7969</Y>
+    <Alignment>8</Alignment>
+    <Color>#FF000000</Color>
+    <Label>PERSONNEL OF THE LOCAL GOVERNMENT AGENCY IN CONNECTION</Label>
+    <FontName>Arial Narrow</FontName>
+    <FontSize>11</FontSize>
+  </Text>
+  <Text>
+    <!-- 'PROPRIETARY' Line 4 text -->
+    <X>30.7734</X>
+    <Y>17.9469</Y>
+    <Alignment>8</Alignment>
+    <Color>#FF000000</Color>
+    <Label>WITH APPLICATION FOR PERMITS AND AUTHORIZATIONS FOR</Label>
+    <FontName>Arial Narrow</FontName>
+    <FontSize>11</FontSize>
+  </Text>
+  <Text>
+    <!-- 'PROPRIETARY' Line 5 text -->
+    <X>30.7734</X>
+    <Y>18.0969</Y>
+    <Alignment>8</Alignment>
+    <Color>#FF000000</Color>
+    <Label>BUILDINGS, CONSTRUCTION, AND/OR ZONING CHANGES</Label>
+    <FontName>Arial Narrow</FontName>
+    <FontSize>11</FontSize>
+  </Text>
+  <Text>
+    <!-- 'LEE & BROWNE PROJECT No.' text prompt -->
+    <Prompt>L&amp;B PROJECT No.</Prompt>
+    <Name>L&amp;B PROJECT No.</Name>
+    <X>0.75</X>
+    <Y>21.9</Y>
+    <Alignment>8</Alignment>
+    <Color>#FF000000</Color>
+    <Label>__PROJECT_NUMBER__</Label>  <!-- PROJECT RELATED TAG -->
+    <FontName>Arial</FontName>
+    <FontSize>8</FontSize>
+    <Escapement>2700</Escapement>
+  </Text>
+  <Rect>
+    <!-- consultant stamp lower rect -->
+    <left>30.543</left>
+    <top>11.832</top>
+    <right>35.5</right>
+    <bottom>14.1016</bottom>
+    <LineWidth>1</LineWidth>
+    <Color>#FF000000</Color>
+  </Rect>
+  <Rect>
+    <!-- consultant stamp upper rect -->
+    <left>30.543</left>
+    <top>11.6016</top>
+    <right>35.5</right>
+    <bottom>11.832</bottom>
+    <LineWidth>1</LineWidth>
+    <Color>#FF000000</Color>
+  </Rect>
+  <Text>
+    <!-- 'CONSULTANT STAMP' text -->
+    <X>33.0215</X>
+    <Y>11.832</Y>
+    <Alignment>14</Alignment>
+    <Color>#FF000000</Color>
+    <Label>CONSULTANT STAMP</Label>
+    <FontName>Arial</FontName>
+    <FontSize>12</FontSize>
+  </Text>
+  <Text>
+    <!-- 'SDG PROJ #' text -->
+    <X>30.5734</X>
+    <Y>11.832</Y>
+    <Alignment>0</Alignment>
+    <Color>#FF000000</Color>
+    <Label>SDG PROJ #:</Label>
+    <FontName>Arial Narrow</FontName>
+    <FontSize>10</FontSize>
+  </Text>
+  <Text>
+    <!-- 'SDG Project No.' text prompt -->
+    <Prompt>SDG Project No.</Prompt>
+    <Name>SDG Project No.</Name>
+    <X>31.3234</X>
+    <Y>11.832</Y>
+    <Alignment>0</Alignment>
+    <Color>#FF000000</Color>
+    <Label>__SDG_PROJ_NO__</Label>  <!-- PROJECT RELATED TAG -->
+    <FontName>Arial Narrow</FontName>
+    <FontSize>10</FontSize>
+  </Text>
+  <Text>
+    <!-- 'NOT A CONSTRUCTION' text -->
+    <X>33.0215</X>
+    <Y>13.6</Y>
+    <Alignment>14</Alignment>
+    <Color>#FF000000</Color>
+    <Label>NOT A CONSTRUCTION</Label>
+    <FontName>Arial</FontName>
+    <FontSize>28</FontSize>
+  </Text>
+  <Text>
+    <!-- 'DOCUMENT' text -->
+    <X>33.0215</X>
+    <Y>14.05</Y>
+    <Alignment>14</Alignment>
+    <Color>#FF000000</Color>
+    <Label>DOCUMENT</Label>
+    <FontName>Arial</FontName>
+    <FontSize>28</FontSize>
+  </Text>
+  <Rect>
+    <!-- consultant logo rect -->
+    <left>30.543</left>
+    <top>9.5625</top>
+    <right>35.5</right>
+    <bottom>11.6016</bottom>
+    <LineWidth>1</LineWidth>
+    <Color>#FF000000</Color>
+  </Rect>
+  <Image>
+    <!-- LBCE Logo image -->
+    <left>30.643</left>
+    <top>9.6625</top>
+    <right>35.5</right>
+    <bottom>11.6016</bottom>
+    <Name>LB Logo</Name>
+    <Prompt>LB Logo</Prompt>
+    <File>Q:\EasyPower\Titleblocks\LB Logo.jpg</File>
+  </Image>
+  <Text>
+    <!-- C of A text prompt -->
+    <Prompt>CA Information</Prompt>
+    <Name>CA Information</Name>
+    <X>33.75</X>
+    <Y>11.225</Y>
+    <Alignment>14</Alignment>
+    <Color>#FF000000</Color>
+    <Label>OK CA #252         EXP: 06/2025</Label>  <!-- PROJECT RELATED TAG -->
+    <FontName>Arial</FontName>
+    <FontSize>10</FontSize>
+  </Text>
+  <Rect>
+    <!-- rev block outer rect -->
+    <left>30.543</left>
+    <top>14.5586</top>
+    <right>35.5</right>
+    <bottom>17.0117</bottom>
+    <LineWidth>1</LineWidth>
+    <Color>#FF000000</Color>
+  </Rect>
+  <Rect>
+    <!-- rev block title rect -->
+    <left>30.543</left>
+    <top>14.1016</top>
+    <right>35.5</right>
+    <bottom>14.5586</bottom>
+    <LineWidth>1</LineWidth>
+    <Color>#FF000000</Color>
+  </Rect>
+  <Line>
+    <!-- rev block vert divider -->
+    <X1>31.0079</X1>
+    <Y1>14.5586</Y1>
+    <X2>31.0079</X2>
+    <Y2>17.0117</Y2>
+    <LineWidth>1</LineWidth>
+    <Color>0</Color>
+  </Line>
+  <Line>
+    <!-- rev block vert divider -->
+    <X1>34.6641</X1>
+    <Y1>14.5586</Y1>
+    <X2>34.6641</X2>
+    <Y2>17.0117</Y2>
+    <LineWidth>1</LineWidth>
+    <Color>0</Color>
+  </Line>
+  <Line>
+    <!-- rev block vert divider -->
+    <X1>35.1523</X1>
+    <Y1>14.5586</Y1>
+    <X2>35.1523</X2>
+    <Y2>17.0117</Y2>
+    <LineWidth>1</LineWidth>
+    <Color>0</Color>
+  </Line>
+  <Text>
+    <!-- 'CONSULTANT STAMP' text -->
+    <X>33.0215</X>
+    <Y>14.4586</Y>
+    <Alignment>14</Alignment>
+    <Color>#FF000000</Color>
+    <Label>REVISIONS / AUTHORIZATIONS</Label>
+    <FontName>Arial Narrow</FontName>
+    <FontSize>14</FontSize>
+  </Text>
+  <Text>
+    <!-- 'NO.' text -->
+    <X>30.7754</X>
+    <Y>14.8</Y>
+    <Alignment>14</Alignment>
+    <Color>#FF000000</Color>
+    <Label>NO.</Label>
+    <FontName>Arial Narrow</FontName>
+    <FontSize>8</FontSize>
+  </Text>
+  <Text>
+    <!-- 'REVISIONS/AUTHORIZATIONS' text -->
+    <X>32.836</X>
+    <Y>14.8</Y>
+    <Alignment>14</Alignment>
+    <Color>#FF000000</Color>
+    <Label>REVISIONS / AUTHORIZATIONS</Label>
+    <FontName>Arial Narrow</FontName>
+    <FontSize>8</FontSize>
+  </Text>
+  <Text>
+    <!-- 'DATE' text -->
+    <X>34.9082</X>
+    <Y>14.8</Y>
+    <Alignment>14</Alignment>
+    <Color>#FF000000</Color>
+    <Label>DATE</Label>
+    <FontName>Arial Narrow</FontName>
+    <FontSize>8</FontSize>
+  </Text>
+  <Text>
+    <!-- 'BY' text -->
+    <X>35.3261</X>
+    <Y>14.8</Y>
+    <Alignment>14</Alignment>
+    <Color>#FF000000</Color>
+    <Label>BY</Label>
+    <FontName>Arial Narrow</FontName>
+    <FontSize>8</FontSize>
+  </Text>
+  <Line>
+    <!-- date/drawn by horz divider -->
+    <X1>30.543</X1>
+    <Y1>14.8652</Y1>
+    <X2>35.5</X2>
+    <Y2>14.8652</Y2>
+    <LineWidth>1</LineWidth>
+    <Color>0</Color>
+  </Line>
+  <Text>
+    <!-- 'REV 1 No.' text -->
+    <Prompt>REV 1 No.</Prompt>
+    <Name>REV 1 No.</Name>
+    <X>30.7754</X>
+    <Y>15.1066375</Y>
+    <Alignment>14</Alignment>
+    <Color>#FF000000</Color>
+    <Label></Label>
+    <FontName>Arial Narrow</FontName>
+    <FontSize>8</FontSize>
+  </Text>
+  <Text>
+    <!-- 'REV 1 Description' text -->
+    <Prompt>REV 1 Description</Prompt>
+    <Name>REV 1 Description</Name>
+    <X>31.1079</X>
+    <Y>15.1066375</Y>
+    <Alignment>8</Alignment>
+    <Color>#FF000000</Color>
+    <Label></Label>
+    <FontName>Arial Narrow</FontName>
+    <FontSize>8</FontSize>
+  </Text>
+  <Text>
+    <!-- 'REV 1 Date' text -->
+    <Prompt>REV 1 Date</Prompt>
+    <Name>REV 1 Date</Name>
+    <X>34.9082</X>
+    <Y>15.1066375</Y>
+    <Alignment>14</Alignment>
+    <Color>#FF000000</Color>
+    <Label></Label>
+    <FontName>Arial Narrow</FontName>
+    <FontSize>8</FontSize>
+  </Text>
+  <Text>
+    <!-- 'REV 1 By' text -->
+    <Prompt>REV 1 By</Prompt>
+    <Name>REV 1 By</Name>
+    <X>35.3261</X>
+    <Y>15.1066375</Y>
+    <Alignment>14</Alignment>
+    <Color>#FF000000</Color>
+    <Label></Label>
+    <FontName>Arial Narrow</FontName>
+    <FontSize>8</FontSize>
+  </Text>
+  <Line>
+    <!-- date/drawn by horz divider -->
+    <X1>30.543</X1>
+    <Y1>15.1719</Y1>
+    <X2>35.5</X2>
+    <Y2>15.1719</Y2>
+    <LineWidth>1</LineWidth>
+    <Color>0</Color>
+  </Line>
+  <Text>
+    <!-- 'REV 2 No.' text -->
+    <Prompt>REV 2 No.</Prompt>
+    <Name>REV 2 No.</Name>
+    <X>30.7754</X>
+    <Y>15.413275</Y>
+    <Alignment>14</Alignment>
+    <Color>#FF000000</Color>
+    <Label></Label>
+    <FontName>Arial Narrow</FontName>
+    <FontSize>8</FontSize>
+  </Text>
+  <Text>
+    <!-- 'REV 2 Description' text -->
+    <Prompt>REV 2 Description</Prompt>
+    <Name>REV 2 Description</Name>
+    <X>31.1079</X>
+    <Y>15.413275</Y>
+    <Alignment>8</Alignment>
+    <Color>#FF000000</Color>
+    <Label></Label>
+    <FontName>Arial Narrow</FontName>
+    <FontSize>8</FontSize>
+  </Text>
+  <Text>
+    <!-- 'REV 2 Date' text -->
+    <Prompt>REV 2 Date</Prompt>
+    <Name>REV 2 Date</Name>
+    <X>34.9082</X>
+    <Y>15.413275</Y>
+    <Alignment>14</Alignment>
+    <Color>#FF000000</Color>
+    <Label></Label>
+    <FontName>Arial Narrow</FontName>
+    <FontSize>8</FontSize>
+  </Text>
+  <Text>
+    <!-- 'REV 2 By' text -->
+    <Prompt>REV 2 By</Prompt>
+    <Name>REV 2 By</Name>
+    <X>35.3261</X>
+    <Y>15.413275</Y>
+    <Alignment>14</Alignment>
+    <Color>#FF000000</Color>
+    <Label></Label>
+    <FontName>Arial Narrow</FontName>
+    <FontSize>8</FontSize>
+  </Text>
+  <Line>
+    <!-- date/drawn by horz divider -->
+    <X1>30.543</X1>
+    <Y1>15.4785</Y1>
+    <X2>35.5</X2>
+    <Y2>15.4785</Y2>
+    <LineWidth>1</LineWidth>
+    <Color>0</Color>
+  </Line>
+  <Text>
+    <!-- 'REV 3 No.' text -->
+    <Prompt>REV 3 No.</Prompt>
+    <Name>REV 3 No.</Name>
+    <X>30.7754</X>
+    <Y>15.7199125</Y>
+    <Alignment>14</Alignment>
+    <Color>#FF000000</Color>
+    <Label></Label>
+    <FontName>Arial Narrow</FontName>
+    <FontSize>8</FontSize>
+  </Text>
+  <Text>
+    <!-- 'REV 3 Description' text -->
+    <Prompt>REV 3 Description</Prompt>
+    <Name>REV 3 Description</Name>
+    <X>31.1079</X>
+    <Y>15.7199125</Y>
+    <Alignment>8</Alignment>
+    <Color>#FF000000</Color>
+    <Label></Label>
+    <FontName>Arial Narrow</FontName>
+    <FontSize>8</FontSize>
+  </Text>
+  <Text>
+    <!-- 'REV 3 Date' text -->
+    <Prompt>REV 3 Date</Prompt>
+    <Name>REV 3 Date</Name>
+    <X>34.9082</X>
+    <Y>15.7199125</Y>
+    <Alignment>14</Alignment>
+    <Color>#FF000000</Color>
+    <Label></Label>
+    <FontName>Arial Narrow</FontName>
+    <FontSize>8</FontSize>
+  </Text>
+  <Text>
+    <!-- 'REV 3 By' text -->
+    <Prompt>REV 3 By</Prompt>
+    <Name>REV 3 By</Name>
+    <X>35.3261</X>
+    <Y>15.7199125</Y>
+    <Alignment>14</Alignment>
+    <Color>#FF000000</Color>
+    <Label></Label>
+    <FontName>Arial Narrow</FontName>
+    <FontSize>8</FontSize>
+  </Text>
+  <Line>
+    <!-- date/drawn by horz divider -->
+    <X1>30.543</X1>
+    <Y1>15.7852</Y1>
+    <X2>35.5</X2>
+    <Y2>15.7852</Y2>
+    <LineWidth>1</LineWidth>
+    <Color>0</Color>
+  </Line>
+  <Text>
+    <!-- 'REV 4 No.' text -->
+    <Prompt>REV 4 No.</Prompt>
+    <Name>REV 4 No.</Name>
+    <X>30.7754</X>
+    <Y>16.02655</Y>
+    <Alignment>14</Alignment>
+    <Color>#FF000000</Color>
+    <Label></Label>
+    <FontName>Arial Narrow</FontName>
+    <FontSize>8</FontSize>
+  </Text>
+  <Text>
+    <!-- 'REV 4 Description' text -->
+    <Prompt>REV 4 Description</Prompt>
+    <Name>REV 4 Description</Name>
+    <X>31.1079</X>
+    <Y>16.02655</Y>
+    <Alignment>8</Alignment>
+    <Color>#FF000000</Color>
+    <Label></Label>
+    <FontName>Arial Narrow</FontName>
+    <FontSize>8</FontSize>
+  </Text>
+  <Text>
+    <!-- 'REV 4 Date' text -->
+    <Prompt>REV 4 Date</Prompt>
+    <Name>REV 4 Date</Name>
+    <X>34.9082</X>
+    <Y>16.02655</Y>
+    <Alignment>14</Alignment>
+    <Color>#FF000000</Color>
+    <Label></Label>
+    <FontName>Arial Narrow</FontName>
+    <FontSize>8</FontSize>
+  </Text>
+  <Text>
+    <!-- 'REV 4 By' text -->
+    <Prompt>REV 4 By</Prompt>
+    <Name>REV 4 By</Name>
+    <X>35.3261</X>
+    <Y>16.02655</Y>
+    <Alignment>14</Alignment>
+    <Color>#FF000000</Color>
+    <Label></Label>
+    <FontName>Arial Narrow</FontName>
+    <FontSize>8</FontSize>
+  </Text>
+  <Line>
+    <!-- date/drawn by horz divider -->
+    <X1>30.543</X1>
+    <Y1>16.0918</Y1>
+    <X2>35.5</X2>
+    <Y2>16.0918</Y2>
+    <LineWidth>1</LineWidth>
+    <Color>0</Color>
+  </Line>
+  <Text>
+    <!-- 'REV 5 No.' text -->
+    <Prompt>REV 5 No.</Prompt>
+    <Name>REV 5 No.</Name>
+    <X>30.7754</X>
+    <Y>16.3331875</Y>
+    <Alignment>14</Alignment>
+    <Color>#FF000000</Color>
+    <Label></Label>
+    <FontName>Arial Narrow</FontName>
+    <FontSize>8</FontSize>
+  </Text>
+  <Text>
+    <!-- 'REV 5 Description' text -->
+    <Prompt>REV 5 Description</Prompt>
+    <Name>REV 5 Description</Name>
+    <X>31.1079</X>
+    <Y>16.3331875</Y>
+    <Alignment>8</Alignment>
+    <Color>#FF000000</Color>
+    <Label></Label>
+    <FontName>Arial Narrow</FontName>
+    <FontSize>8</FontSize>
+  </Text>
+  <Text>
+    <!-- 'REV 5 Date' text -->
+    <Prompt>REV 5 Date</Prompt>
+    <Name>REV 5 Date</Name>
+    <X>34.9082</X>
+    <Y>16.3331875</Y>
+    <Alignment>14</Alignment>
+    <Color>#FF000000</Color>
+    <Label></Label>
+    <FontName>Arial Narrow</FontName>
+    <FontSize>8</FontSize>
+  </Text>
+  <Text>
+    <!-- 'REV 5 By' text -->
+    <Prompt>REV 5 By</Prompt>
+    <Name>REV 5 By</Name>
+    <X>35.3261</X>
+    <Y>16.3331875</Y>
+    <Alignment>14</Alignment>
+    <Color>#FF000000</Color>
+    <Label></Label>
+    <FontName>Arial Narrow</FontName>
+    <FontSize>8</FontSize>
+  </Text>
+  <Line>
+    <!-- date/drawn by horz divider -->
+    <X1>30.543</X1>
+    <Y1>16.3984</Y1>
+    <X2>35.5</X2>
+    <Y2>16.3984</Y2>
+    <LineWidth>1</LineWidth>
+    <Color>0</Color>
+  </Line>
+  <Text>
+    <!-- 'REV 6 No.' text -->
+    <Prompt>REV 6 No.</Prompt>
+    <Name>REV 6 No.</Name>
+    <X>30.7754</X>
+    <Y>16.639825</Y>
+    <Alignment>14</Alignment>
+    <Color>#FF000000</Color>
+    <Label></Label>
+    <FontName>Arial Narrow</FontName>
+    <FontSize>8</FontSize>
+  </Text>
+  <Text>
+    <!-- 'REV 6 Description' text -->
+    <Prompt>REV 6 Description</Prompt>
+    <Name>REV 6 Description</Name>
+    <X>31.1079</X>
+    <Y>16.639825</Y>
+    <Alignment>8</Alignment>
+    <Color>#FF000000</Color>
+    <Label></Label>
+    <FontName>Arial Narrow</FontName>
+    <FontSize>8</FontSize>
+  </Text>
+  <Text>
+    <!-- 'REV 6 Date' text -->
+    <Prompt>REV 6 Date</Prompt>
+    <Name>REV 6 Date</Name>
+    <X>34.9082</X>
+    <Y>16.639825</Y>
+    <Alignment>14</Alignment>
+    <Color>#FF000000</Color>
+    <Label></Label>
+    <FontName>Arial Narrow</FontName>
+    <FontSize>8</FontSize>
+  </Text>
+  <Text>
+    <!-- 'REV 6 By' text -->
+    <Prompt>REV 6 By</Prompt>
+    <Name>REV 6 By</Name>
+    <X>35.3261</X>
+    <Y>16.639825</Y>
+    <Alignment>14</Alignment>
+    <Color>#FF000000</Color>
+    <Label></Label>
+    <FontName>Arial Narrow</FontName>
+    <FontSize>8</FontSize>
+  </Text>
+  <Line>
+    <!-- date/drawn by horz divider -->
+    <X1>30.543</X1>
+    <Y1>16.7051</Y1>
+    <X2>35.5</X2>
+    <Y2>16.7051</Y2>
+    <LineWidth>1</LineWidth>
+    <Color>0</Color>
+  </Line>
+  <Text>
+    <!-- 'REV 7 No.' text -->
+    <Prompt>REV 7 No.</Prompt>
+    <Name>REV 7 No.</Name>
+    <X>30.7754</X>
+    <Y>16.9464625</Y>
+    <Alignment>14</Alignment>
+    <Color>#FF000000</Color>
+    <Label></Label>
+    <FontName>Arial Narrow</FontName>
+    <FontSize>8</FontSize>
+  </Text>
+  <Text>
+    <!-- 'REV 7 Description' text -->
+    <Prompt>REV 7 Description</Prompt>
+    <Name>REV 7 Description</Name>
+    <X>31.1079</X>
+    <Y>16.9464625</Y>
+    <Alignment>8</Alignment>
+    <Color>#FF000000</Color>
+    <Label></Label>
+    <FontName>Arial Narrow</FontName>
+    <FontSize>8</FontSize>
+  </Text>
+  <Text>
+    <!-- 'REV 7 Date' text -->
+    <Prompt>REV 7 Date</Prompt>
+    <Name>REV 7 Date</Name>
+    <X>34.9082</X>
+    <Y>16.9464625</Y>
+    <Alignment>14</Alignment>
+    <Color>#FF000000</Color>
+    <Label></Label>
+    <FontName>Arial Narrow</FontName>
+    <FontSize>8</FontSize>
+  </Text>
+  <Text>
+    <!-- 'REV 7 By' text -->
+    <Prompt>REV 7 By</Prompt>
+    <Name>REV 7 By</Name>
+    <X>35.3261</X>
+    <Y>16.9464625</Y>
+    <Alignment>14</Alignment>
+    <Color>#FF000000</Color>
+    <Label></Label>
+    <FontName>Arial Narrow</FontName>
+    <FontSize>8</FontSize>
+  </Text>
+</TitleBlock>

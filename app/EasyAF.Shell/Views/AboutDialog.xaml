@@ -91,9 +91,9 @@
                                         <TextBlock Margin="0,2,0,2" Foreground="{DynamicResource TextSecondaryBrush}">
                                             <Run Text="&#x2022;"/>
                                             <Run Text=" "/>
-                                            <Run Text="{Binding ModuleName}"/>
+                                            <Run Text="{Binding ModuleName, Mode=OneWay}"/>
                                             <Run Text=" v"/>
-                                            <Run Text="{Binding ModuleVersion}"/>
+                                            <Run Text="{Binding ModuleVersion, Mode=OneWay}"/>
                                         </TextBlock>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>

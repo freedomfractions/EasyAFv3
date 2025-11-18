@@ -1,0 +1,158 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<xs:annotation>
+		<xs:documentation>
+			The rules in this schema are used to validate EasyPower One-line Title Block templates.
+		</xs:documentation>
+	</xs:annotation>
+  <!--Units-->
+  <xs:simpleType name="units">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="inches"/>
+      <xs:enumeration value="mm"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <!--Horizontal Alignment-->
+	<xs:simpleType name="h_alignment">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="left"/>
+			<xs:enumeration value="center"/>
+			<xs:enumeration value="right"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<!--Vertical Alignment-->
+	<xs:simpleType name="v_alignment">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="top"/>
+			<xs:enumeration value="center"/>
+			<xs:enumeration value="baseline"/>
+			<xs:enumeration value="bottom"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<!--Units-->
+	<xs:simpleType name="scale">
+		<xs:restriction base="xs:integer">
+			<xs:enumeration value="0"/>
+			<xs:enumeration value="1"/>
+			<xs:enumeration value="2"/>
+			<xs:enumeration value="3"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<!--Color-->
+	<xs:simpleType name="color">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="#((FF)|(ff))((\d)|(A)|(B)|(C)|(D)|(E)|(F)|(a)|(b)|(c)|(d)|(e)|(f)){6}" />
+		</xs:restriction>
+	</xs:simpleType>
+	<!--Font Sizes-->
+	<xs:simpleType name="font_size">
+		<xs:restriction base="xs:integer">
+			<xs:minInclusive value="3" />
+			<xs:maxInclusive value="100" />
+		</xs:restriction>
+	</xs:simpleType>
+	<!--Font Escapement-->
+	<xs:simpleType name="font_escapement">
+		<xs:restriction base="xs:integer">
+			<xs:minInclusive value="0" />
+			<xs:maxInclusive value="3600" />
+		</xs:restriction>
+	</xs:simpleType>
+	<!--Line Width-->
+	<xs:simpleType name="line_width">
+		<xs:restriction base="xs:integer">
+			<xs:minInclusive value="0" />
+			<xs:maxInclusive value="6" />
+		</xs:restriction>
+	</xs:simpleType>
+	<!--Line Styles-->
+	<xs:simpleType name="line_style">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="0" />
+			<xs:enumeration value="1" />
+			<xs:enumeration value="2" />
+			<xs:enumeration value="3" />
+			<xs:enumeration value="4" />
+		</xs:restriction>
+	</xs:simpleType>
+	<!--Root-->
+	<xs:element name="TitleBlock">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element maxOccurs="1" name="Settings" >
+					<xs:complexType>
+						<xs:all>
+							<xs:element minOccurs="0" maxOccurs="1" name="Scale" type="scale" />
+              <xs:element minOccurs="0" maxOccurs="1" name="Units" type="units" />
+              <xs:element minOccurs="0" maxOccurs="1" name="BorderWidth" type="xs:integer" />
+						</xs:all>
+					</xs:complexType>
+				</xs:element>
+				<xs:choice maxOccurs="unbounded">
+					<xs:element minOccurs="0" maxOccurs="unbounded" name="Text">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:choice maxOccurs="unbounded">
+									<xs:element minOccurs="0" maxOccurs="1" name="X" type="xs:decimal" />
+									<xs:element minOccurs="0" maxOccurs="1" name="Y" type="xs:decimal" />
+									<xs:element minOccurs="0" maxOccurs="1" name="VAlign" type="v_alignment" />
+									<xs:element minOccurs="0" maxOccurs="1" name="HAlign" type="h_alignment" />
+									<xs:element minOccurs="1" maxOccurs="1" name="Prompt" type="xs:string" />
+									<xs:element minOccurs="1" maxOccurs="1" name="Label" type="xs:string" />
+									<xs:element minOccurs="0" maxOccurs="1" name="Name" type="xs:string" />
+									<xs:element minOccurs="1" maxOccurs="1" name="FontName" type="xs:string" />
+									<xs:element minOccurs="1" maxOccurs="1" name="FontSize" type="font_size" />
+									<xs:element minOccurs="1" maxOccurs="1" name="Escapement" type="font_escapement" />
+									<xs:element minOccurs="1" maxOccurs="1" name="Bold" type="xs:boolean" />
+									<xs:element minOccurs="1" maxOccurs="1" name="Italic" type="xs:boolean" />
+									<xs:element minOccurs="1" maxOccurs="1" name="Color" type="color" />
+								</xs:choice>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element minOccurs="0" maxOccurs="unbounded" name="Rect">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:choice maxOccurs="unbounded">
+									<xs:element minOccurs="1" maxOccurs="1" name="left" type="xs:decimal" />
+									<xs:element minOccurs="1" maxOccurs="1" name="top" type="xs:decimal" />
+									<xs:element minOccurs="1" maxOccurs="1" name="right" type="xs:decimal" />
+									<xs:element minOccurs="1" maxOccurs="1" name="bottom" type="xs:decimal" />
+									<xs:element minOccurs="0" maxOccurs="1" name="LineWidth" type="line_width" />
+									<xs:element minOccurs="0" maxOccurs="1" name="Color" type="color" />
+								</xs:choice>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element minOccurs="0" maxOccurs="unbounded" name="Image">
+						<xs:complexType>
+							<xs:all>
+								<xs:element minOccurs="1" maxOccurs="1" name="left" type="xs:decimal" />
+								<xs:element minOccurs="1" maxOccurs="1" name="top" type="xs:decimal" />
+								<xs:element minOccurs="1" maxOccurs="1" name="right" type="xs:decimal" />
+								<xs:element minOccurs="1" maxOccurs="1" name="bottom" type="xs:decimal" />
+								<xs:element minOccurs="0" maxOccurs="1" name="Name" type="xs:string" />
+								<xs:element minOccurs="0" maxOccurs="1" name="Prompt" type="xs:string" />
+								<xs:element minOccurs="0" maxOccurs="1" name="File" type="xs:string" />
+								<xs:element minOccurs="0" maxOccurs="1" name="Color" type="color" />
+							</xs:all>
+						</xs:complexType>
+					</xs:element>
+					<xs:element minOccurs="0" maxOccurs="unbounded" name="Line">
+						<xs:complexType>
+							<xs:all>
+								<xs:element minOccurs="1" maxOccurs="1" name="X1" type="xs:decimal" />
+								<xs:element minOccurs="1" maxOccurs="1" name="Y1" type="xs:decimal" />
+								<xs:element minOccurs="1" maxOccurs="1" name="X2" type="xs:decimal" />
+								<xs:element minOccurs="1" maxOccurs="1" name="Y2" type="xs:decimal" />
+								<xs:element minOccurs="0" maxOccurs="1" name="LineWidth" type="xs:integer" />
+								<xs:element minOccurs="0" maxOccurs="1" name="LineStyle" type="line_style" />
+								<xs:element minOccurs="0" maxOccurs="1" name="Color" type="color" />
+							</xs:all>
+						</xs:complexType>
+					</xs:element>
+				</xs:choice>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>
