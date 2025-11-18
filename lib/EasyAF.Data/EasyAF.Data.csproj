@@ -14,4 +14,11 @@
     <PackageReference Include="DocumentFormat.OpenXml" Version="2.20.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Exclude Generated folder from compilation to avoid duplicates -->
+    <Compile Remove="Models\Generated\**" />
+    <EmbeddedResource Remove="Models\Generated\**" />
+    <None Remove="Models\Generated\**" />
+  </ItemGroup>
+
 </Project>

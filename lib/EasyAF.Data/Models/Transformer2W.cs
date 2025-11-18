@@ -3,7 +3,7 @@ using EasyAF.Data.Attributes;
 namespace EasyAF.Data.Models;
 
 /// <summary>
-/// Represents a Transformer with comprehensive properties from EasyPower exports.
+/// Represents a Transformer2W with comprehensive properties from EasyPower exports.
 /// All properties are strings to preserve source data fidelity without premature parsing.
 /// </summary>
 /// <remarks>
@@ -16,13 +16,13 @@ namespace EasyAF.Data.Models;
 /// </para>
 /// </remarks>
 [EasyPowerClass("2W Transformers")]
-public class Transformer
+public class Transformer2W
 {
     /// <summary>2W Transformers (Column: 2W Transformers)</summary>
-    [Category("General")]
+    [Category("Identity")]
     [Description("2W Transformers")]
     [Required]
-    public string? Transformers2W { get; set; }
+    public string? Transformer2Ws { get; set; }
 
     /// <summary>Status (Column: Status)</summary>
     [Category("Identity")]
@@ -30,7 +30,7 @@ public class Transformer
     public string? Status { get; set; }
 
     /// <summary>No of Phases (Column: No of Phases)</summary>
-    [Category("Electrical")]
+    [Category("General")]
     [Description("No of Phases")]
     public string? NoOfPhases { get; set; }
 
@@ -40,17 +40,17 @@ public class Transformer
     public string? CenterTap { get; set; }
 
     /// <summary>From Bus ID (Column: From Bus ID)</summary>
-    [Category("Identity")]
+    [Category("Electrical")]
     [Description("From Bus ID")]
     public string? FromBusID { get; set; }
 
     /// <summary>From Bus Type (Column: From Bus Type)</summary>
-    [Category("Physical")]
+    [Category("Electrical")]
     [Description("From Bus Type")]
     public string? FromBusType { get; set; }
 
     /// <summary>From Device ID (Column: From Device ID)</summary>
-    [Category("General")]
+    [Category("Identity")]
     [Description("From Device ID")]
     public string? FromDeviceID { get; set; }
 
@@ -70,17 +70,17 @@ public class Transformer
     public string? FromConn { get; set; }
 
     /// <summary>To Bus ID (Column: To Bus ID)</summary>
-    [Category("Identity")]
+    [Category("Electrical")]
     [Description("To Bus ID")]
     public string? ToBusID { get; set; }
 
     /// <summary>To Bus Type (Column: To Bus Type)</summary>
-    [Category("Physical")]
+    [Category("Electrical")]
     [Description("To Bus Type")]
     public string? ToBusType { get; set; }
 
     /// <summary>To Device ID (Column: To Device ID)</summary>
-    [Category("General")]
+    [Category("Identity")]
     [Description("To Device ID")]
     public string? ToDeviceID { get; set; }
 
@@ -137,12 +137,12 @@ public class Transformer
     /// <summary>From Nom kV (Column: From Nom kV)</summary>
     [Category("Electrical")]
     [Description("From Nom kV")]
-    public string? FromNomkV { get; set; }
+    public string? FromNomKV { get; set; }
 
     /// <summary>From Tap kV (Column: From Tap kV)</summary>
     [Category("Electrical")]
     [Description("From Tap kV")]
-    public string? FromTapkV { get; set; }
+    public string? FromTapKV { get; set; }
 
     /// <summary>From Gnd R (Column: From Gnd R)</summary>
     [Category("General")]
@@ -152,22 +152,22 @@ public class Transformer
     /// <summary>From Gnd jX (Column: From Gnd jX)</summary>
     [Category("General")]
     [Description("From Gnd jX")]
-    public string? FromGndjX { get; set; }
+    public string? FromGndJX { get; set; }
 
     /// <summary>From Gnd Amp Class (Column: From Gnd Amp Class)</summary>
-    [Category("Electrical")]
+    [Category("General")]
     [Description("From Gnd Amp Class")]
     public string? FromGndAmpClass { get; set; }
 
     /// <summary>To Nom kV (Column: To Nom kV)</summary>
     [Category("Electrical")]
     [Description("To Nom kV")]
-    public string? ToNomkV { get; set; }
+    public string? ToNomKV { get; set; }
 
     /// <summary>To Tap kV (Column: To Tap kV)</summary>
     [Category("Electrical")]
     [Description("To Tap kV")]
-    public string? ToTapkV { get; set; }
+    public string? ToTapKV { get; set; }
 
     /// <summary>To Gnd R (Column: To Gnd R)</summary>
     [Category("General")]
@@ -177,29 +177,26 @@ public class Transformer
     /// <summary>To Gnd jX (Column: To Gnd jX)</summary>
     [Category("General")]
     [Description("To Gnd jX")]
-    public string? ToGndjX { get; set; }
+    public string? ToGndJX { get; set; }
 
     /// <summary>To Gnd Amp Class (Column: To Gnd Amp Class)</summary>
-    [Category("Electrical")]
+    [Category("General")]
     [Description("To Gnd Amp Class")]
     public string? ToGndAmpClass { get; set; }
 
     /// <summary>MVA (Column: MVA)</summary>
-    [Category("General")]
+    [Category("Electrical")]
     [Description("MVA")]
-    [Required]
     public string? MVA { get; set; }
 
     /// <summary>MVA O/L (Column: MVA O/L)</summary>
-    [Category("General")]
+    [Category("Electrical")]
     [Description("MVA O/L")]
-    [Required]
     public string? MVAOL { get; set; }
 
     /// <summary>Z MVA Base (Column: Z MVA Base)</summary>
-    [Category("General")]
+    [Category("Electrical")]
     [Description("Z MVA Base")]
-    [Required]
     public string? ZMVABase { get; set; }
 
     /// <summary>Z (Column: Z)</summary>
@@ -215,16 +212,16 @@ public class Transformer
     /// <summary>X/R (Column: X/R)</summary>
     [Category("General")]
     [Description("X/R")]
-    public string? XR { get; set; }
+    public string? XRRatio { get; set; }
 
     /// <summary>X0/R0 (Column: X0/R0)</summary>
     [Category("General")]
     [Description("X0/R0")]
     public string? X0R0 { get; set; }
 
-    /// <summary>Loss (Column: Loss (kW))</summary>
-    [Category("Electrical")]
-    [Description("Loss")]
+    /// <summary>Loss (kW) (Column: Loss (kW))</summary>
+    [Category("General")]
+    [Description("Loss (kW)")]
     [Units("kW")]
     public string? Loss { get; set; }
 
@@ -234,7 +231,7 @@ public class Transformer
     public string? LTCTap { get; set; }
 
     /// <summary>LTC Step (Column: LTC Step)</summary>
-    [Category("Control")]
+    [Category("General")]
     [Description("LTC Step")]
     public string? LTCStep { get; set; }
 
@@ -254,59 +251,59 @@ public class Transformer
     public string? CtlType { get; set; }
 
     /// <summary>Ctl Value (Column: Ctl Value)</summary>
-    [Category("General")]
+    [Category("Control")]
     [Description("Ctl Value")]
     public string? CtlValue { get; set; }
 
     /// <summary>Zps R1 pu (Column: Zps R1 pu)</summary>
     [Category("General")]
     [Description("Zps R1 pu")]
-    public string? ZpsR1pu { get; set; }
+    public string? ZpsR1Pu { get; set; }
 
     /// <summary>Zps X1 pu (Column: Zps X1 pu)</summary>
     [Category("General")]
     [Description("Zps X1 pu")]
-    public string? ZpsX1pu { get; set; }
+    public string? ZpsX1Pu { get; set; }
 
     /// <summary>Zps R0 pu (Column: Zps R0 pu)</summary>
     [Category("General")]
     [Description("Zps R0 pu")]
-    public string? ZpsR0pu { get; set; }
+    public string? ZpsR0Pu { get; set; }
 
     /// <summary>Zps X0 pu (Column: Zps X0 pu)</summary>
     [Category("General")]
     [Description("Zps X0 pu")]
-    public string? ZpsX0pu { get; set; }
+    public string? ZpsX0Pu { get; set; }
 
     /// <summary>Rps0+3Rpsg (Column: Rps0+3Rpsg)</summary>
     [Category("General")]
     [Description("Rps0+3Rpsg")]
-    public string? Rps0+3Rpsg { get; set; }
+    public string? Rps0plus3rpsg { get; set; }
 
     /// <summary>Xps0+3Xpsg (Column: Xps0+3Xpsg)</summary>
     [Category("General")]
     [Description("Xps0+3Xpsg")]
-    public string? Xps0+3Xpsg { get; set; }
+    public string? Xps0plus3xpsg { get; set; }
 
     /// <summary>From Gnd R1 pu (Column: From Gnd R1 pu)</summary>
     [Category("General")]
     [Description("From Gnd R1 pu")]
-    public string? FromGndR1pu { get; set; }
+    public string? FromGndR1Pu { get; set; }
 
     /// <summary>From Gnd jX pu (Column: From Gnd jX pu)</summary>
     [Category("General")]
     [Description("From Gnd jX pu")]
-    public string? FromGndjXpu { get; set; }
+    public string? FromGndJXPu { get; set; }
 
     /// <summary>To Gnd R1 pu (Column: To Gnd R1 pu)</summary>
     [Category("General")]
     [Description("To Gnd R1 pu")]
-    public string? ToGndR1pu { get; set; }
+    public string? ToGndR1Pu { get; set; }
 
     /// <summary>To Gnd jX pu (Column: To Gnd jX pu)</summary>
     [Category("General")]
     [Description("To Gnd jX pu")]
-    public string? ToGndjXpu { get; set; }
+    public string? ToGndJXPu { get; set; }
 
     /// <summary>Sec Gnd (Column: Sec Gnd)</summary>
     [Category("General")]
@@ -316,37 +313,37 @@ public class Transformer
     /// <summary>IEC pT (Column: IEC pT)</summary>
     [Category("General")]
     [Description("IEC pT")]
-    public string? IECpT { get; set; }
+    public string? IECPt { get; set; }
 
     /// <summary>TCC Standard (Column: TCC Standard)</summary>
-    [Category("Protection")]
+    [Category("General")]
     [Description("TCC Standard")]
     public string? TCCStandard { get; set; }
 
     /// <summary>TCC FLA Based On (Column: TCC FLA Based On)</summary>
-    [Category("Protection")]
+    [Category("General")]
     [Description("TCC FLA Based On")]
     public string? TCCFLABasedOn { get; set; }
 
     /// <summary>Plot 100% Withstand (Column: Plot 100% Withstand)</summary>
     [Category("General")]
     [Description("Plot 100% Withstand")]
-    public string? Plot100%Withstand { get; set; }
+    public string? Plot100percentWithstand { get; set; }
 
     /// <summary>Plot Unbl Derating (Column: Plot Unbl Derating)</summary>
-    [Category("Physical")]
+    [Category("General")]
     [Description("Plot Unbl Derating")]
     public string? PlotUnblDerating { get; set; }
 
     /// <summary>Freq Fault Curve (Column: Freq Fault Curve)</summary>
-    [Category("Electrical")]
+    [Category("General")]
     [Description("Freq Fault Curve")]
     public string? FreqFaultCurve { get; set; }
 
     /// <summary>AutoCoord Setting (Column: AutoCoord Setting)</summary>
     [Category("Control")]
     [Description("AutoCoord Setting")]
-    public string? AutoCoordSetting { get; set; }
+    public string? AutocoordSetting { get; set; }
 
     /// <summary>Z System (Column: Z System)</summary>
     [Category("General")]
@@ -354,72 +351,72 @@ public class Transformer
     public string? ZSystem { get; set; }
 
     /// <summary>TCC Min Damage Time (Column: TCC Min Damage Time)</summary>
-    [Category("Protection")]
+    [Category("General")]
     [Description("TCC Min Damage Time")]
     public string? TCCMinDamageTime { get; set; }
 
     /// <summary>TCC Max Plot Time (Column: TCC Max Plot Time)</summary>
-    [Category("Protection")]
+    [Category("General")]
     [Description("TCC Max Plot Time")]
     public string? TCCMaxPlotTime { get; set; }
 
     /// <summary>TCC Inrush FLA Mult (Column: TCC Inrush FLA Mult)</summary>
-    [Category("Protection")]
+    [Category("General")]
     [Description("TCC Inrush FLA Mult")]
     public string? TCCInrushFLAMult { get; set; }
 
     /// <summary>TCC Inrush Cycles (Column: TCC Inrush Cycles)</summary>
-    [Category("Protection")]
+    [Category("General")]
     [Description("TCC Inrush Cycles")]
     public string? TCCInrushCycles { get; set; }
 
     /// <summary>Hrm RC Factor (Column: Hrm RC Factor)</summary>
     [Category("General")]
     [Description("Hrm RC Factor")]
-    public string? HrmRCFactor { get; set; }
+    public string? HrmRcFactor { get; set; }
 
     /// <summary>Hrm RC Value (Column: Hrm RC Value)</summary>
     [Category("General")]
     [Description("Hrm RC Value")]
-    public string? HrmRCValue { get; set; }
+    public string? HrmRcValue { get; set; }
 
     /// <summary>Hrm Pec-r % (Column: Hrm Pec-r %)</summary>
     [Category("General")]
     [Description("Hrm Pec-r %")]
-    public string? HrmPecr% { get; set; }
+    public string? HrmPecRPercent { get; set; }
 
     /// <summary>I Hrm Rating Setting (Column: I Hrm Rating Setting)</summary>
-    [Category("Physical")]
+    [Category("Control")]
     [Description("I Hrm Rating Setting")]
     public string? IHrmRatingSetting { get; set; }
 
     /// <summary>From I Hrm Rating (Column: From I Hrm Rating)</summary>
-    [Category("Physical")]
+    [Category("General")]
     [Description("From I Hrm Rating")]
     public string? FromIHrmRating { get; set; }
 
     /// <summary>To I Hrm Rating (Column: To I Hrm Rating)</summary>
-    [Category("Physical")]
+    [Category("General")]
     [Description("To I Hrm Rating")]
     public string? ToIHrmRating { get; set; }
 
-    /// <summary>Failure Rate (Column: Failure Rate (/year))</summary>
+    /// <summary>Failure Rate (/year) (Column: Failure Rate (/year))</summary>
     [Category("Reliability")]
-    [Description("Failure Rate")]
+    [Description("Failure Rate (/year)")]
     [Units("/year")]
     public string? FailureRatePerYear { get; set; }
 
-    /// <summary>Repair Time (Column: Repair Time (h))</summary>
+    /// <summary>Repair Time (h) (Column: Repair Time (h))</summary>
     [Category("Reliability")]
-    [Description("Repair Time")]
+    [Description("Repair Time (h)")]
     [Units("h")]
-    public string? RepairTimeH { get; set; }
+    public string? RepairTimeHours { get; set; }
 
-    /// <summary>Replace Time (Column: Replace Time (h))</summary>
-    [Category("Reliability")]
-    [Description("Replace Time")]
+    /// <summary>Replace Time (h) (Column: Replace Time (h))</summary>
+    [Category("General")]
+    [Description("Replace Time (h)")]
     [Units("h")]
-    public string? ReplaceTimeH { get; set; }
+    public string? ReplaceTimeHours { get; set; }
 
     /// <summary>Repair Cost (Column: Repair Cost)</summary>
     [Category("Reliability")]
@@ -427,7 +424,7 @@ public class Transformer
     public string? RepairCost { get; set; }
 
     /// <summary>Replace Cost (Column: Replace Cost)</summary>
-    [Category("Reliability")]
+    [Category("General")]
     [Description("Replace Cost")]
     public string? ReplaceCost { get; set; }
 
@@ -462,7 +459,7 @@ public class Transformer
     public string? LocationName { get; set; }
 
     /// <summary>Location Description (Column: Location Description)</summary>
-    [Category("Metadata")]
+    [Category("Location")]
     [Description("Location Description")]
     public string? LocationDescription { get; set; }
 
@@ -482,7 +479,7 @@ public class Transformer
     public string? Floor { get; set; }
 
     /// <summary>Data Status (Column: Data Status)</summary>
-    [Category("Metadata")]
+    [Category("Identity")]
     [Description("Data Status")]
     public string? DataStatus { get; set; }
 
@@ -491,26 +488,26 @@ public class Transformer
     [Description("Comment")]
     public string? Comment { get; set; }
 
-    /// <summary>Alias for Transformers2W (convenience property for dictionary indexing - not serialized).</summary>
+    /// <summary>Alias for Transformer2W (convenience property for dictionary indexing - not serialized).</summary>
     [System.Text.Json.Serialization.JsonIgnore]
     [Newtonsoft.Json.JsonIgnore]
     public string? Id
     {
-        get => Transformers2W;
-        set => Transformers2W = value;
+        get => Transformer2Ws;
+        set => Transformer2Ws = value;
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="Transformer"/> class.
+    /// Initializes a new instance of the <see cref="Transformer2W"/> class.
     /// </summary>
-    public Transformer() { }
+    public Transformer2W() { }
 
     /// <summary>
-    /// Returns a string representation of the Transformer.
+    /// Returns a string representation of the Transformer2W.
     /// </summary>
     public override string ToString()
     {
-        return $"Transformer: {Transformers2W}";
+        return $"Transformer2W: {Transformer2Ws}";
     }
 }
 

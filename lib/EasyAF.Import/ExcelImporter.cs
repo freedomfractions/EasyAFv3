@@ -23,7 +23,7 @@ namespace EasyAF.Import
             targetDataSet.SoftwareVersion = mappingConfig.SoftwareVersion;
             targetDataSet.ArcFlashEntries ??= new Dictionary<(string, string), ArcFlash>();
             targetDataSet.ShortCircuitEntries ??= new Dictionary<(string, string, string), ShortCircuit>();
-            targetDataSet.LVCBEntries ??= new Dictionary<string, LVCB>();
+            targetDataSet.LVBreakerEntries ??= new Dictionary<string, LVBreaker>();
             targetDataSet.FuseEntries ??= new Dictionary<string, Fuse>();
             targetDataSet.CableEntries ??= new Dictionary<string, Cable>();
             targetDataSet.BusEntries ??= new Dictionary<string, Bus>();
@@ -31,7 +31,7 @@ namespace EasyAF.Import
             var knownHeaders = new HashSet<string>(mappingConfig.ImportMap.Select(m => m.ColumnHeader.Trim()), StringComparer.OrdinalIgnoreCase);
             bool IsHeaderRow(IEnumerable<string> cells) { var arr = cells as string[] ?? cells.ToArray(); return arr.Count(f => knownHeaders.Contains((f ?? string.Empty).Trim())) >= 2; }
             var globalMissing = new HashSet<string>(StringComparer.OrdinalIgnoreCase); var duplicateCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
-            int startArc = targetDataSet.ArcFlashEntries.Count, startSc = targetDataSet.ShortCircuitEntries.Count, startLvcb = targetDataSet.LVCBEntries.Count, startFuse = targetDataSet.FuseEntries.Count, startCable = targetDataSet.CableEntries.Count, startBus = targetDataSet.BusEntries.Count;
+            int startArc = targetDataSet.ArcFlashEntries.Count, startSc = targetDataSet.ShortCircuitEntries.Count, startLvcb = targetDataSet.LVBreakerEntries.Count, startFuse = targetDataSet.FuseEntries.Count, startCable = targetDataSet.CableEntries.Count, startBus = targetDataSet.BusEntries.Count;
             try
             {
                 using var wb = new XLWorkbook(filePath); var worksheets = wb.Worksheets.AsEnumerable(); if (_worksheetNames?.Count > 0) worksheets = worksheets.Where(ws => _worksheetNames.Contains(ws.Name)); bool anyProcessed = false;
@@ -74,7 +74,7 @@ namespace EasyAF.Import
                         if (!inKnownSection) continue;
                         foreach (var targetType in activeTargetTypes.ToList())
                         {
-                            if (!groupsByType.TryGetValue(targetType, out var mapEntries)) continue; var idEntry = mapEntries.FirstOrDefault(e => e.PropertyName == "Id"); if (idEntry == null) continue; if (!currentHeaderIndex.TryGetValue(idEntry.ColumnHeader.Trim(), out int idCol)) continue; var idValue = row.Cell(idCol).GetString()?.Trim(); if (string.IsNullOrWhiteSpace(idValue)) continue; try { switch (targetType) { case "ArcFlash": var af = new ArcFlash(); PopulateObject(af, mapEntries, row, currentHeaderIndex, worksheetMissing, missingRequired, strict); if (!string.IsNullOrWhiteSpace(af.Id) && !string.IsNullOrWhiteSpace(af.Scenario)) { var key = (af.Id, af.Scenario); if (!targetDataSet.ArcFlashEntries.ContainsKey(key)) targetDataSet.ArcFlashEntries[key] = af; else LogDuplicate("ArcFlash"); } break; case "ShortCircuit": var sc = new ShortCircuit(); PopulateObject(sc, mapEntries, row, currentHeaderIndex, worksheetMissing, missingRequired, strict); var bus = sc.GetType().GetProperty("Bus")?.GetValue(sc) as string; var scen = sc.GetType().GetProperty("Scenario")?.GetValue(sc) as string; if (!string.IsNullOrWhiteSpace(sc.Id) && !string.IsNullOrWhiteSpace(bus) && !string.IsNullOrWhiteSpace(scen)) { var key = (sc.Id!, bus!, scen!); if (!targetDataSet.ShortCircuitEntries.ContainsKey(key)) targetDataSet.ShortCircuitEntries[key] = sc; else LogDuplicate("ShortCircuit"); } break; case "LVCB": var lvcb = new LVCB(); PopulateObject(lvcb, mapEntries, row, currentHeaderIndex, worksheetMissing, missingRequired, strict); if (!string.IsNullOrWhiteSpace(lvcb.Id)) { if (!targetDataSet.LVCBEntries.ContainsKey(lvcb.Id)) targetDataSet.LVCBEntries[lvcb.Id] = lvcb; else LogDuplicate("LVCB"); } break; case "Fuse": var fuse = new Fuse(); PopulateObject(fuse, mapEntries, row, currentHeaderIndex, worksheetMissing, missingRequired, strict); if (!string.IsNullOrWhiteSpace(fuse.Id)) { if (!targetDataSet.FuseEntries.ContainsKey(fuse.Id)) targetDataSet.FuseEntries[fuse.Id] = fuse; else LogDuplicate("Fuse"); } break; case "Cable": var cable = new Cable(); PopulateObject(cable, mapEntries, row, currentHeaderIndex, worksheetMissing, missingRequired, strict); if (!string.IsNullOrWhiteSpace(cable.Id)) { if (!targetDataSet.CableEntries.ContainsKey(cable.Id)) targetDataSet.CableEntries[cable.Id] = cable; else LogDuplicate("Cable"); } break; case "Bus": var busObj = new Bus(); PopulateObject(busObj, mapEntries, row, currentHeaderIndex, worksheetMissing, missingRequired, strict); if (!string.IsNullOrWhiteSpace(busObj.Id)) { if (!targetDataSet.BusEntries.ContainsKey(busObj.Id)) targetDataSet.BusEntries[busObj.Id] = busObj; else LogDuplicate("Bus"); } break; } } catch (Exception ex) { _logger.Error(nameof(Import), $"Exception processing {targetType} in worksheet '{ws.Name}' at row {row.RowNumber()}: {ex.Message}"); } }
+                            if (!groupsByType.TryGetValue(targetType, out var mapEntries)) continue; var idEntry = mapEntries.FirstOrDefault(e => e.PropertyName == "Id"); if (idEntry == null) continue; if (!currentHeaderIndex.TryGetValue(idEntry.ColumnHeader.Trim(), out int idCol)) continue; var idValue = row.Cell(idCol).GetString()?.Trim(); if (string.IsNullOrWhiteSpace(idValue)) continue; try { switch (targetType) { case "ArcFlash": var af = new ArcFlash(); PopulateObject(af, mapEntries, row, currentHeaderIndex, worksheetMissing, missingRequired, strict); if (!string.IsNullOrWhiteSpace(af.Id) && !string.IsNullOrWhiteSpace(af.Scenario)) { var key = (af.Id, af.Scenario); if (!targetDataSet.ArcFlashEntries.ContainsKey(key)) targetDataSet.ArcFlashEntries[key] = af; else LogDuplicate("ArcFlash"); } break; case "ShortCircuit": var sc = new ShortCircuit(); PopulateObject(sc, mapEntries, row, currentHeaderIndex, worksheetMissing, missingRequired, strict); var bus = sc.GetType().GetProperty("Bus")?.GetValue(sc) as string; var scen = sc.GetType().GetProperty("Scenario")?.GetValue(sc) as string; if (!string.IsNullOrWhiteSpace(sc.Id) && !string.IsNullOrWhiteSpace(bus) && !string.IsNullOrWhiteSpace(scen)) { var key = (sc.Id!, bus!, scen!); if (!targetDataSet.ShortCircuitEntries.ContainsKey(key)) targetDataSet.ShortCircuitEntries[key] = sc; else LogDuplicate("ShortCircuit"); } break; case "LVBreaker": var LVBreaker = new LVBreaker(); PopulateObject(LVBreaker, mapEntries, row, currentHeaderIndex, worksheetMissing, missingRequired, strict); if (!string.IsNullOrWhiteSpace(LVBreaker.Id)) { if (!targetDataSet.LVBreakerEntries.ContainsKey(LVBreaker.Id)) targetDataSet.LVBreakerEntries[LVBreaker.Id] = LVBreaker; else LogDuplicate("LVBreaker"); } break; case "Fuse": var fuse = new Fuse(); PopulateObject(fuse, mapEntries, row, currentHeaderIndex, worksheetMissing, missingRequired, strict); if (!string.IsNullOrWhiteSpace(fuse.Id)) { if (!targetDataSet.FuseEntries.ContainsKey(fuse.Id)) targetDataSet.FuseEntries[fuse.Id] = fuse; else LogDuplicate("Fuse"); } break; case "Cable": var cable = new Cable(); PopulateObject(cable, mapEntries, row, currentHeaderIndex, worksheetMissing, missingRequired, strict); if (!string.IsNullOrWhiteSpace(cable.Id)) { if (!targetDataSet.CableEntries.ContainsKey(cable.Id)) targetDataSet.CableEntries[cable.Id] = cable; else LogDuplicate("Cable"); } break; case "Bus": var busObj = new Bus(); PopulateObject(busObj, mapEntries, row, currentHeaderIndex, worksheetMissing, missingRequired, strict); if (!string.IsNullOrWhiteSpace(busObj.Id)) { if (!targetDataSet.BusEntries.ContainsKey(busObj.Id)) targetDataSet.BusEntries[busObj.Id] = busObj; else LogDuplicate("Bus"); } break; } } catch (Exception ex) { _logger.Error(nameof(Import), $"Exception processing {targetType} in worksheet '{ws.Name}' at row {row.RowNumber()}: {ex.Message}"); } }
                     }
                     if (worksheetMissing.Count > 0) { foreach (var m in worksheetMissing) globalMissing.Add(m); _logger.Error(nameof(Import), $"Missing headers in worksheet '{ws.Name}'", string.Join(", ", worksheetMissing)); }
                 }
@@ -84,16 +84,16 @@ namespace EasyAF.Import
 
             int importedArc = targetDataSet.ArcFlashEntries.Count - startArc;
             int importedSc = targetDataSet.ShortCircuitEntries.Count - startSc;
-            int importedLvcb = targetDataSet.LVCBEntries.Count - startLvcb;
+            int importedLvcb = targetDataSet.LVBreakerEntries.Count - startLvcb;
             int importedFuse = targetDataSet.FuseEntries.Count - startFuse;
             int importedCable = targetDataSet.CableEntries.Count - startCable;
             int importedBus = targetDataSet.BusEntries.Count - startBus;
-            var summary = $"Imported: ArcFlash={importedArc}, ShortCircuit={importedSc}, LVCB={importedLvcb}, Fuse={importedFuse}, Cable={importedCable}, Bus={importedBus}";
+            var summary = $"Imported: ArcFlash={importedArc}, ShortCircuit={importedSc}, LVBreaker={importedLvcb}, Fuse={importedFuse}, Cable={importedCable}, Bus={importedBus}";
             _logger.Info(nameof(Import), "Validation summary", summary);
             if (importedLvcb == 0)
             {
-                var idEntry = groupsByType.TryGetValue("LVCB", out var lmap) ? lmap.FirstOrDefault(e => e.PropertyName == "Id") : null;
-                _logger.Info(nameof(Import), $"Warning: No LVCB entries imported from workbook. Verify header '{idEntry?.ColumnHeader ?? "Id column"}' exists and contains data.");
+                var idEntry = groupsByType.TryGetValue("LVBreaker", out var lmap) ? lmap.FirstOrDefault(e => e.PropertyName == "Id") : null;
+                _logger.Info(nameof(Import), $"Warning: No LVBreaker entries imported from workbook. Verify header '{idEntry?.ColumnHeader ?? "Id column"}' exists and contains data.");
             }
             if (globalMissing.Count > 0) _logger.Error(nameof(Import), "Global missing headers", string.Join(", ", globalMissing.OrderBy(s => s)));
             if (duplicateCounts.Count > 0) _logger.Error(nameof(Import), "Duplicate key counts", string.Join(", ", duplicateCounts.Select(k => k.Key + ":" + k.Value)));
@@ -162,3 +162,4 @@ namespace EasyAF.Import
         }
     }
 }
+

@@ -3,7 +3,7 @@ using EasyAF.Data.Attributes;
 namespace EasyAF.Data.Models;
 
 /// <summary>
-/// Represents a LVCB with comprehensive properties from EasyPower exports.
+/// Represents a LVBreaker with comprehensive properties from EasyPower exports.
 /// All properties are strings to preserve source data fidelity without premature parsing.
 /// </summary>
 /// <remarks>
@@ -16,10 +16,10 @@ namespace EasyAF.Data.Models;
 /// </para>
 /// </remarks>
 [EasyPowerClass("LV Breakers")]
-public class LVCB
+public class LVBreaker
 {
     /// <summary>LV Breakers (Column: LV Breakers)</summary>
-    [Category("General")]
+    [Category("Identity")]
     [Description("LV Breakers")]
     [Required]
     public string? LVBreakers { get; set; }
@@ -35,14 +35,13 @@ public class LVCB
     public string? Status { get; set; }
 
     /// <summary>No of Phases (Column: No of Phases)</summary>
-    [Category("Electrical")]
+    [Category("General")]
     [Description("No of Phases")]
     public string? NoOfPhases { get; set; }
 
     /// <summary>On Bus (Column: On Bus)</summary>
-    [Category("Identity")]
+    [Category("Electrical")]
     [Description("On Bus")]
-    [Required]
     public string? OnBus { get; set; }
 
     /// <summary>Base kV (Column: Base kV)</summary>
@@ -66,7 +65,7 @@ public class LVCB
     public string? Options { get; set; }
 
     /// <summary>Breaker Mfr (Column: Breaker Mfr)</summary>
-    [Category("Physical")]
+    [Category("General")]
     [Description("Breaker Mfr")]
     public string? BreakerMfr { get; set; }
 
@@ -80,9 +79,9 @@ public class LVCB
     [Description("Breaker Style")]
     public string? BreakerStyle { get; set; }
 
-    /// <summary>Frame (Column: Frame (A))</summary>
-    [Category("Physical")]
-    [Description("Frame")]
+    /// <summary>Frame (A) (Column: Frame (A))</summary>
+    [Category("General")]
+    [Description("Frame (A)")]
     [Units("A")]
     public string? FrameA { get; set; }
 
@@ -92,7 +91,7 @@ public class LVCB
     public string? Trip { get; set; }
 
     /// <summary>Trip Mfr (Column: Trip Mfr)</summary>
-    [Category("Physical")]
+    [Category("Protection")]
     [Description("Trip Mfr")]
     public string? TripMfr { get; set; }
 
@@ -107,22 +106,22 @@ public class LVCB
     public string? TripStyle { get; set; }
 
     /// <summary>Sensor Frame (Column: Sensor Frame)</summary>
-    [Category("Physical")]
+    [Category("General")]
     [Description("Sensor Frame")]
     public string? SensorFrame { get; set; }
 
     /// <summary>Plug/Tap/Trip (Column: Plug/Tap/Trip)</summary>
-    [Category("Physical")]
+    [Category("Protection")]
     [Description("Plug/Tap/Trip")]
     public string? PlugTapTrip { get; set; }
 
     /// <summary>LTPU Setting (Column: LTPU Setting)</summary>
-    [Category("Protection")]
+    [Category("Control")]
     [Description("LTPU Setting")]
     public string? LTPUSetting { get; set; }
 
     /// <summary>LTPU Mult (Column: LTPU Mult)</summary>
-    [Category("Protection")]
+    [Category("General")]
     [Description("LTPU Mult")]
     public string? LTPUMult { get; set; }
 
@@ -133,14 +132,14 @@ public class LVCB
     public string? TripA { get; set; }
 
     /// <summary>LT Curve (Column: LT Curve)</summary>
-    [Category("Protection")]
+    [Category("General")]
     [Description("LT Curve")]
-    public string? LTCurve { get; set; }
+    public string? LtCurve { get; set; }
 
     /// <summary>LTD Band (Column: LTD Band)</summary>
     [Category("General")]
     [Description("LTD Band")]
-    public string? LTDBand { get; set; }
+    public string? LtdBand { get; set; }
 
     /// <summary>Trip Adjust (Column: Trip Adjust)</summary>
     [Category("Protection")]
@@ -165,11 +164,11 @@ public class LVCB
     /// <summary>STPU I2T (Column: STPU I2T)</summary>
     [Category("General")]
     [Description("STPU I2T")]
-    public string? STPUI2T { get; set; }
+    public string? STPUI2t { get; set; }
 
-    /// <summary>STPU (Column: STPU (A))</summary>
+    /// <summary>STPU (A) (Column: STPU (A))</summary>
     [Category("General")]
-    [Description("STPU")]
+    [Description("STPU (A)")]
     [Units("A")]
     public string? STPUA { get; set; }
 
@@ -179,19 +178,19 @@ public class LVCB
     public string? InstSetting { get; set; }
 
     /// <summary>Inst Override (Column: Inst Override)</summary>
-    [Category("Protection")]
+    [Category("General")]
     [Description("Inst Override")]
     public string? InstOverride { get; set; }
 
-    /// <summary>Inst (Column: Inst (A))</summary>
-    [Category("Protection")]
-    [Description("Inst")]
+    /// <summary>Inst (A) (Column: Inst (A))</summary>
+    [Category("General")]
+    [Description("Inst (A)")]
     [Units("A")]
     public string? InstA { get; set; }
 
-    /// <summary>Inst Ovr Pickup (Column: Inst Ovr Pickup (A))</summary>
-    [Category("Protection")]
-    [Description("Inst Ovr Pickup")]
+    /// <summary>Inst Ovr Pickup (A) (Column: Inst Ovr Pickup (A))</summary>
+    [Category("General")]
+    [Description("Inst Ovr Pickup (A)")]
     [Units("A")]
     public string? InstOvrPickupA { get; set; }
 
@@ -205,9 +204,9 @@ public class LVCB
     [Description("Maint Setting")]
     public string? MaintSetting { get; set; }
 
-    /// <summary>Maint (Column: Maint (A))</summary>
+    /// <summary>Maint (A) (Column: Maint (A))</summary>
     [Category("General")]
-    [Description("Maint")]
+    [Description("Maint (A)")]
     [Units("A")]
     public string? MaintA { get; set; }
 
@@ -217,54 +216,54 @@ public class LVCB
     public string? GndSensor { get; set; }
 
     /// <summary>Gnd Pickup (Column: Gnd Pickup)</summary>
-    [Category("Protection")]
+    [Category("General")]
     [Description("Gnd Pickup")]
     public string? GndPickup { get; set; }
 
     /// <summary>Gnd Delay (Column: Gnd Delay)</summary>
-    [Category("Protection")]
+    [Category("General")]
     [Description("Gnd Delay")]
     public string? GndDelay { get; set; }
 
     /// <summary>Gnd I2T (Column: Gnd I2T)</summary>
     [Category("General")]
     [Description("Gnd I2T")]
-    public string? GndI2T { get; set; }
+    public string? GndI2t { get; set; }
 
-    /// <summary>Gnd (Column: Gnd (A))</summary>
+    /// <summary>Gnd (A) (Column: Gnd (A))</summary>
     [Category("General")]
-    [Description("Gnd")]
+    [Description("Gnd (A)")]
     [Units("A")]
     public string? GndA { get; set; }
 
     /// <summary>Gnd Maint Pickup (Column: Gnd Maint Pickup)</summary>
-    [Category("Protection")]
+    [Category("General")]
     [Description("Gnd Maint Pickup")]
     public string? GndMaintPickup { get; set; }
 
-    /// <summary>Gnd Maint (Column: Gnd Maint (A))</summary>
+    /// <summary>Gnd Maint (A) (Column: Gnd Maint (A))</summary>
     [Category("General")]
-    [Description("Gnd Maint")]
+    [Description("Gnd Maint (A)")]
     [Units("A")]
     public string? GndMaintA { get; set; }
 
     /// <summary>ST ZSI (Column: ST ZSI)</summary>
-    [Category("Protection")]
+    [Category("General")]
     [Description("ST ZSI")]
-    public string? STZSI { get; set; }
+    public string? StZSI { get; set; }
 
     /// <summary>ST ZSI I2T (Column: ST ZSI I2T)</summary>
-    [Category("Protection")]
+    [Category("General")]
     [Description("ST ZSI I2T")]
-    public string? STZSII2T { get; set; }
+    public string? StZSII2t { get; set; }
 
     /// <summary>ST ZSI Delay (Column: ST ZSI Delay)</summary>
-    [Category("Protection")]
+    [Category("General")]
     [Description("ST ZSI Delay")]
-    public string? STZSIDelay { get; set; }
+    public string? StZSIDelay { get; set; }
 
     /// <summary>Inst ZSI (Column: Inst ZSI)</summary>
-    [Category("Protection")]
+    [Category("General")]
     [Description("Inst ZSI")]
     public string? InstZSI { get; set; }
 
@@ -276,10 +275,10 @@ public class LVCB
     /// <summary>Gnd ZSI I2T (Column: Gnd ZSI I2T)</summary>
     [Category("General")]
     [Description("Gnd ZSI I2T")]
-    public string? GndZSII2T { get; set; }
+    public string? GndZSII2t { get; set; }
 
     /// <summary>Gnd ZSI Delay (Column: Gnd ZSI Delay)</summary>
-    [Category("Protection")]
+    [Category("General")]
     [Description("Gnd ZSI Delay")]
     public string? GndZSIDelay { get; set; }
 
@@ -294,7 +293,7 @@ public class LVCB
     public string? TZSI { get; set; }
 
     /// <summary>Fuse Mfr (Column: Fuse Mfr)</summary>
-    [Category("Physical")]
+    [Category("Protection")]
     [Description("Fuse Mfr")]
     public string? FuseMfr { get; set; }
 
@@ -309,12 +308,12 @@ public class LVCB
     public string? FuseStyle { get; set; }
 
     /// <summary>Fuse Size (Column: Fuse Size)</summary>
-    [Category("Physical")]
+    [Category("Protection")]
     [Description("Fuse Size")]
     public string? FuseSize { get; set; }
 
     /// <summary>Mtr O/L Mfr (Column: Mtr O/L Mfr)</summary>
-    [Category("Physical")]
+    [Category("General")]
     [Description("Mtr O/L Mfr")]
     public string? MtrOLMfr { get; set; }
 
@@ -344,12 +343,12 @@ public class LVCB
     public string? Standard { get; set; }
 
     /// <summary>SC Rating Based On (Column: SC Rating Based On)</summary>
-    [Category("Electrical")]
+    [Category("General")]
     [Description("SC Rating Based On")]
     public string? SCRatingBasedOn { get; set; }
 
     /// <summary>SC Int kA (Column: SC Int kA)</summary>
-    [Category("Electrical")]
+    [Category("General")]
     [Description("SC Int kA")]
     public string? SCIntKA { get; set; }
 
@@ -359,82 +358,82 @@ public class LVCB
     public string? IECBreakingKA { get; set; }
 
     /// <summary>SC Test Std (Column: SC Test Std)</summary>
-    [Category("Electrical")]
+    [Category("General")]
     [Description("SC Test Std")]
     public string? SCTestStd { get; set; }
 
     /// <summary>TCC Clipping (Column: TCC Clipping)</summary>
-    [Category("Protection")]
+    [Category("General")]
     [Description("TCC Clipping")]
     public string? TCCClipping { get; set; }
 
     /// <summary>TCC Mom kA (Column: TCC Mom kA)</summary>
-    [Category("Protection")]
+    [Category("General")]
     [Description("TCC Mom kA")]
     public string? TCCMomKA { get; set; }
 
     /// <summary>TCC Int kA (Column: TCC Int kA)</summary>
-    [Category("Protection")]
+    [Category("General")]
     [Description("TCC Int kA")]
     public string? TCCIntKA { get; set; }
 
     /// <summary>TCC 30 Cyc kA (Column: TCC 30 Cyc kA)</summary>
-    [Category("Protection")]
+    [Category("General")]
     [Description("TCC 30 Cyc kA")]
     public string? TCC30CycKA { get; set; }
 
     /// <summary>TCC Gnd Mom kA (Column: TCC Gnd Mom kA)</summary>
-    [Category("Protection")]
+    [Category("General")]
     [Description("TCC Gnd Mom kA")]
     public string? TCCGndMomKA { get; set; }
 
     /// <summary>TCC Gnd Int kA (Column: TCC Gnd Int kA)</summary>
-    [Category("Protection")]
+    [Category("General")]
     [Description("TCC Gnd Int kA")]
     public string? TCCGndIntKA { get; set; }
 
     /// <summary>TCC Gnd 30 Cyc kA (Column: TCC Gnd 30 Cyc kA)</summary>
-    [Category("Protection")]
+    [Category("General")]
     [Description("TCC Gnd 30 Cyc kA")]
     public string? TCCGnd30CycKA { get; set; }
 
     /// <summary>IEC TCC Initial kA (Column: IEC TCC Initial kA)</summary>
-    [Category("Protection")]
+    [Category("General")]
     [Description("IEC TCC Initial kA")]
     public string? IECTCCInitialKA { get; set; }
 
     /// <summary>IEC TCC Breaking kA (Column: IEC TCC Breaking kA)</summary>
-    [Category("Protection")]
+    [Category("General")]
     [Description("IEC TCC Breaking kA")]
     public string? IECTCCBreakingKA { get; set; }
 
     /// <summary>IEC TCC Breaking Time (Column: IEC TCC Breaking Time)</summary>
-    [Category("Protection")]
+    [Category("General")]
     [Description("IEC TCC Breaking Time")]
     public string? IECTCCBreakingTime { get; set; }
 
     /// <summary>IEC TCC SS kA (Column: IEC TCC SS kA)</summary>
-    [Category("Protection")]
+    [Category("General")]
     [Description("IEC TCC SS kA")]
     public string? IECTCCSSKA { get; set; }
 
     /// <summary>IEC TCC Gnd Initial kA (Column: IEC TCC Gnd Initial kA)</summary>
-    [Category("Protection")]
+    [Category("General")]
     [Description("IEC TCC Gnd Initial kA")]
     public string? IECTCCGndInitialKA { get; set; }
 
     /// <summary>IEC TCC Gnd Breaking kA (Column: IEC TCC Gnd Breaking kA)</summary>
-    [Category("Protection")]
+    [Category("General")]
     [Description("IEC TCC Gnd Breaking kA")]
     public string? IECTCCGndBreakingKA { get; set; }
 
     /// <summary>IEC TCC Gnd Breaking Time (Column: IEC TCC Gnd Breaking Time)</summary>
-    [Category("Protection")]
+    [Category("General")]
     [Description("IEC TCC Gnd Breaking Time")]
     public string? IECTCCGndBreakingTime { get; set; }
 
     /// <summary>IEC TCC Gnd SS kA (Column: IEC TCC Gnd SS kA)</summary>
-    [Category("Protection")]
+    [Category("General")]
     [Description("IEC TCC Gnd SS kA")]
     public string? IECTCCGndSSKA { get; set; }
 
@@ -451,25 +450,25 @@ public class LVCB
     /// <summary>PCC Isc/ILoad (Column: PCC Isc/ILoad)</summary>
     [Category("Demand")]
     [Description("PCC Isc/ILoad")]
-    public string? PCCIscILoad { get; set; }
+    public string? PCCIscIload { get; set; }
 
-    /// <summary>Failure Rate (Column: Failure Rate (/year))</summary>
+    /// <summary>Failure Rate (/year) (Column: Failure Rate (/year))</summary>
     [Category("Reliability")]
-    [Description("Failure Rate")]
+    [Description("Failure Rate (/year)")]
     [Units("/year")]
     public string? FailureRatePerYear { get; set; }
 
-    /// <summary>Repair Time (Column: Repair Time (h))</summary>
+    /// <summary>Repair Time (h) (Column: Repair Time (h))</summary>
     [Category("Reliability")]
-    [Description("Repair Time")]
+    [Description("Repair Time (h)")]
     [Units("h")]
-    public string? RepairTimeH { get; set; }
+    public string? RepairTimeHours { get; set; }
 
-    /// <summary>Replace Time (Column: Replace Time (h))</summary>
-    [Category("Reliability")]
-    [Description("Replace Time")]
+    /// <summary>Replace Time (h) (Column: Replace Time (h))</summary>
+    [Category("General")]
+    [Description("Replace Time (h)")]
     [Units("h")]
-    public string? ReplaceTimeH { get; set; }
+    public string? ReplaceTimeHours { get; set; }
 
     /// <summary>Repair Cost (Column: Repair Cost)</summary>
     [Category("Reliability")]
@@ -477,7 +476,7 @@ public class LVCB
     public string? RepairCost { get; set; }
 
     /// <summary>Replace Cost (Column: Replace Cost)</summary>
-    [Category("Reliability")]
+    [Category("General")]
     [Description("Replace Cost")]
     public string? ReplaceCost { get; set; }
 
@@ -504,10 +503,10 @@ public class LVCB
     /// <summary>SC Failure Mode % (Column: SC Failure Mode %)</summary>
     [Category("Reliability")]
     [Description("SC Failure Mode %")]
-    public string? SCFailureMode% { get; set; }
+    public string? SCFailureModePercent { get; set; }
 
     /// <summary>Data Status (Column: Data Status)</summary>
-    [Category("Metadata")]
+    [Category("Identity")]
     [Description("Data Status")]
     public string? DataStatus { get; set; }
 
@@ -516,7 +515,7 @@ public class LVCB
     [Description("Comment")]
     public string? Comment { get; set; }
 
-    /// <summary>Alias for LVBreakers (convenience property for dictionary indexing - not serialized).</summary>
+    /// <summary>Alias for LVBreaker (convenience property for dictionary indexing - not serialized).</summary>
     [System.Text.Json.Serialization.JsonIgnore]
     [Newtonsoft.Json.JsonIgnore]
     public string? Id
@@ -526,20 +525,16 @@ public class LVCB
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="LVCB"/> class.
+    /// Initializes a new instance of the <see cref="LVBreaker"/> class.
     /// </summary>
-    public LVCB() { }
+    public LVBreaker() { }
 
     /// <summary>
-    /// Returns a string representation of the LVCB.
+    /// Returns a string representation of the LVBreaker.
     /// </summary>
     public override string ToString()
     {
-        return $"LVCB: {LVBreakers}";
+        return $"LVBreaker: {LVBreakers}";
     }
 }
-
-
-
-
 

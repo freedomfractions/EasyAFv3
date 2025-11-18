@@ -217,7 +217,8 @@ namespace EasyAF.Modules.Map.ViewModels
 
                 var summary = new DataTypePropertySummary
                 {
-                    TypeName = dataType,
+                    TypeName = dataType, // Raw class name (e.g., "Bus", "LVBreaker")
+                    TypeDisplayName = _propertyDiscovery.GetDataTypeDescription(dataType), // Friendly name (e.g., "Buses", "LV Breakers")
                     FieldsAvailable = properties.Count,
                     FieldsMapped = mappedCount,
                     StatusColor = GetStatusColor(mappedCount, properties.Count)
@@ -500,18 +501,31 @@ namespace EasyAF.Modules.Map.ViewModels
     public class DataTypePropertySummary : BindableBase
     {
         private string _typeName = string.Empty;
+        private string _typeDisplayName = string.Empty; // NEW: User-friendly display name
         private int _fieldsAvailable;
         private int _fieldsMapped;
         private string _statusColor = "Gray";
         private string? _sourceTable;
 
         /// <summary>
-        /// Gets or sets the data type name.
+        /// Gets or sets the data type name (raw class name, e.g., "Bus", "LVBreaker").
         /// </summary>
         public string TypeName
         {
             get => _typeName;
             set => SetProperty(ref _typeName, value);
+        }
+
+        /// <summary>
+        /// Gets or sets the user-friendly display name (e.g., "Buses", "LV Breakers").
+        /// </summary>
+        /// <remarks>
+        /// This is what should be displayed in the statistics grid. Falls back to TypeName if not set.
+        /// </remarks>
+        public string TypeDisplayName
+        {
+            get => string.IsNullOrEmpty(_typeDisplayName) ? _typeName : _typeDisplayName;
+            set => SetProperty(ref _typeDisplayName, value);
         }
 
         /// <summary>

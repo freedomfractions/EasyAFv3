@@ -19,7 +19,7 @@ namespace EasyAF.Data.Models;
 public class Capacitor
 {
     /// <summary>Capacitors (Column: Capacitors)</summary>
-    [Category("General")]
+    [Category("Identity")]
     [Description("Capacitors")]
     [Required]
     public string? Capacitors { get; set; }
@@ -30,17 +30,17 @@ public class Capacitor
     public string? Status { get; set; }
 
     /// <summary>No of Phases (Column: No of Phases)</summary>
-    [Category("Electrical")]
+    [Category("General")]
     [Description("No of Phases")]
     public string? NoOfPhases { get; set; }
 
     /// <summary>To Bus ID (Column: To Bus ID)</summary>
-    [Category("Identity")]
+    [Category("Electrical")]
     [Description("To Bus ID")]
     public string? ToBusID { get; set; }
 
     /// <summary>To Device ID (Column: To Device ID)</summary>
-    [Category("General")]
+    [Category("Identity")]
     [Description("To Device ID")]
     public string? ToDeviceID { get; set; }
 
@@ -60,15 +60,13 @@ public class Capacitor
     public string? NomKV { get; set; }
 
     /// <summary>MVAR (Column: MVAR)</summary>
-    [Category("General")]
+    [Category("Electrical")]
     [Description("MVAR")]
-    [Required]
     public string? MVAR { get; set; }
 
     /// <summary>MVAR pu (Column: MVAR pu)</summary>
-    [Category("General")]
+    [Category("Electrical")]
     [Description("MVAR pu")]
-    [Required]
     public string? MVARPu { get; set; }
 
     /// <summary>Inrush FLA Mult (Column: Inrush FLA Mult)</summary>
@@ -84,40 +82,40 @@ public class Capacitor
     /// <summary>Hrm RC Factor (Column: Hrm RC Factor)</summary>
     [Category("General")]
     [Description("Hrm RC Factor")]
-    public string? HrmRCFactor { get; set; }
+    public string? HrmRcFactor { get; set; }
 
     /// <summary>Hrm RC Value (Column: Hrm RC Value)</summary>
     [Category("General")]
     [Description("Hrm RC Value")]
-    public string? HrmRCValue { get; set; }
+    public string? HrmRcValue { get; set; }
 
     /// <summary>I Hrm Rating Setting (Column: I Hrm Rating Setting)</summary>
-    [Category("Physical")]
+    [Category("Control")]
     [Description("I Hrm Rating Setting")]
     public string? IHrmRatingSetting { get; set; }
 
     /// <summary>I Hrm Rating (Column: I Hrm Rating)</summary>
-    [Category("Physical")]
+    [Category("General")]
     [Description("I Hrm Rating")]
     public string? IHrmRating { get; set; }
 
-    /// <summary>Failure Rate (Column: Failure Rate (/year))</summary>
+    /// <summary>Failure Rate (/year) (Column: Failure Rate (/year))</summary>
     [Category("Reliability")]
-    [Description("Failure Rate")]
+    [Description("Failure Rate (/year)")]
     [Units("/year")]
     public string? FailureRatePerYear { get; set; }
 
-    /// <summary>Repair Time (Column: Repair Time (h))</summary>
+    /// <summary>Repair Time (h) (Column: Repair Time (h))</summary>
     [Category("Reliability")]
-    [Description("Repair Time")]
+    [Description("Repair Time (h)")]
     [Units("h")]
-    public string? RepairTimeH { get; set; }
+    public string? RepairTimeHours { get; set; }
 
-    /// <summary>Replace Time (Column: Replace Time (h))</summary>
-    [Category("Reliability")]
-    [Description("Replace Time")]
+    /// <summary>Replace Time (h) (Column: Replace Time (h))</summary>
+    [Category("General")]
+    [Description("Replace Time (h)")]
     [Units("h")]
-    public string? ReplaceTimeH { get; set; }
+    public string? ReplaceTimeHours { get; set; }
 
     /// <summary>Repair Cost (Column: Repair Cost)</summary>
     [Category("Reliability")]
@@ -125,7 +123,7 @@ public class Capacitor
     public string? RepairCost { get; set; }
 
     /// <summary>Replace Cost (Column: Replace Cost)</summary>
-    [Category("Reliability")]
+    [Category("General")]
     [Description("Replace Cost")]
     public string? ReplaceCost { get; set; }
 
@@ -160,7 +158,7 @@ public class Capacitor
     public string? LocationName { get; set; }
 
     /// <summary>Location Description (Column: Location Description)</summary>
-    [Category("Metadata")]
+    [Category("Location")]
     [Description("Location Description")]
     public string? LocationDescription { get; set; }
 
@@ -180,7 +178,7 @@ public class Capacitor
     public string? Floor { get; set; }
 
     /// <summary>Data Status (Column: Data Status)</summary>
-    [Category("Metadata")]
+    [Category("Identity")]
     [Description("Data Status")]
     public string? DataStatus { get; set; }
 
@@ -189,7 +187,7 @@ public class Capacitor
     [Description("Comment")]
     public string? Comment { get; set; }
 
-    /// <summary>Alias for Capacitors (convenience property for dictionary indexing - not serialized).</summary>
+    /// <summary>Alias for Capacitor (convenience property for dictionary indexing - not serialized).</summary>
     [System.Text.Json.Serialization.JsonIgnore]
     [Newtonsoft.Json.JsonIgnore]
     public string? Id

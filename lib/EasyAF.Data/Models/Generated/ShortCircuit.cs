@@ -30,18 +30,17 @@ public class ShortCircuit
     public string? EquipmentName { get; set; }
 
     /// <summary>Worst Case (Column: Worst Case)</summary>
-    [Category("Protection")]
+    [Category("General")]
     [Description("Worst Case")]
     public string? WorstCase { get; set; }
 
     /// <summary>Scenario (Column: Scenario)</summary>
     [Category("General")]
     [Description("Scenario")]
-    [Required]
     public string? Scenario { get; set; }
 
     /// <summary>Fault Type (Column: Fault Type)</summary>
-    [Category("Electrical")]
+    [Category("Physical")]
     [Description("Fault Type")]
     public string? FaultType { get; set; }
 
@@ -71,27 +70,27 @@ public class ShortCircuit
     public string? EquipmentStyle { get; set; }
 
     /// <summary>Test Standard (Column: Test Standard)</summary>
-    [Category("Physical")]
+    [Category("General")]
     [Description("Test Standard")]
     public string? TestStandard { get; set; }
 
-    /// <summary>1/2 Cycle Rating (Column: 1/2 Cycle Rating (kA))</summary>
-    [Category("Protection")]
-    [Description("1/2 Cycle Rating")]
+    /// <summary>1/2 Cycle Rating (kA) (Column: 1/2 Cycle Rating (kA))</summary>
+    [Category("General")]
+    [Description("1/2 Cycle Rating (kA)")]
     [Units("kA")]
-    public string? HalfCycleRatingKA { get; set; }
+    public string? OneTwoCycleRating { get; set; }
 
-    /// <summary>1/2 Cycle Duty (Column: 1/2 Cycle Duty (kA))</summary>
-    [Category("Electrical")]
-    [Description("1/2 Cycle Duty")]
+    /// <summary>1/2 Cycle Duty (kA) (Column: 1/2 Cycle Duty (kA))</summary>
+    [Category("General")]
+    [Description("1/2 Cycle Duty (kA)")]
     [Units("kA")]
-    public string? HalfCycleDutyKA { get; set; }
+    public string? OneTwoCycleDuty { get; set; }
 
     /// <summary>1/2 Cycle Duty (%) (Column: 1/2 Cycle Duty (%))</summary>
-    [Category("Electrical")]
+    [Category("General")]
     [Description("1/2 Cycle Duty (%)")]
     [Units("%")]
-    public string? HalfCycleDutyPercent { get; set; }
+    public string? OneTwoCycleDutyPercent { get; set; }
 
     /// <summary>Comments (Column: Comments)</summary>
     [Category("Metadata")]
@@ -120,3 +119,6 @@ public class ShortCircuit
         return $"ShortCircuit: {BusName}";
     }
 }
+
+
+

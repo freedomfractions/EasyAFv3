@@ -207,10 +207,10 @@ namespace EasyAF.Data.Models
         /// </summary>
         /// <remarks>
         /// <para>
-        /// Trip unit settings are flattened onto the LVCB model as TripUnit* properties.
+        /// Trip unit settings are flattened onto the LVBreaker model as TripUnit* properties.
         /// </para>
         /// </remarks>
-        public Dictionary<string, LVCB>? LVCBEntries { get; set; } = new Dictionary<string, LVCB>();
+        public Dictionary<string, LVBreaker>? LVBreakerEntries { get; set; } = new Dictionary<string, LVBreaker>();
 
         /// <summary>
         /// Gets or sets the dictionary of fuse entries, keyed by Id.
@@ -240,9 +240,9 @@ namespace EasyAF.Data.Models
         public Dictionary<string, Bus>? BusEntries { get; set; } = new Dictionary<string, Bus>();
 
         /// <summary>
-        /// Gets or sets the dictionary of transformer entries, keyed by Id.
+        /// Gets or sets the dictionary of 2-winding transformer entries, keyed by Id.
         /// </summary>
-        public Dictionary<string, Transformer>? TransformerEntries { get; set; } = new Dictionary<string, Transformer>();
+        public Dictionary<string, Transformer2W>? Transformer2WEntries { get; set; } = new Dictionary<string, Transformer2W>();
 
         /// <summary>
         /// Gets or sets the dictionary of motor entries, keyed by Id.
@@ -268,6 +268,118 @@ namespace EasyAF.Data.Models
         /// Gets or sets the dictionary of load entries, keyed by Id.
         /// </summary>
         public Dictionary<string, Load>? LoadEntries { get; set; } = new Dictionary<string, Load>();
+
+        // === Additional Equipment Types (Alphabetically) ===
+
+        /// <summary>
+        /// Gets or sets the dictionary of adjustable frequency drive entries, keyed by Id.
+        /// </summary>
+        public Dictionary<string, AFD>? AFDEntries { get; set; } = new Dictionary<string, AFD>();
+
+        /// <summary>
+        /// Gets or sets the dictionary of automatic transfer switch entries, keyed by Id.
+        /// </summary>
+        public Dictionary<string, ATS>? ATSEntries { get; set; } = new Dictionary<string, ATS>();
+
+        /// <summary>
+        /// Gets or sets the dictionary of battery entries, keyed by Id.
+        /// </summary>
+        public Dictionary<string, Battery>? BatteryEntries { get; set; } = new Dictionary<string, Battery>();
+
+        /// <summary>
+        /// Gets or sets the dictionary of busway entries, keyed by Id.
+        /// </summary>
+        public Dictionary<string, Busway>? BuswayEntries { get; set; } = new Dictionary<string, Busway>();
+
+        /// <summary>
+        /// Gets or sets the dictionary of current limiting reactor entries, keyed by Id.
+        /// </summary>
+        public Dictionary<string, CLReactor>? CLReactorEntries { get; set; } = new Dictionary<string, CLReactor>();
+
+        /// <summary>
+        /// Gets or sets the dictionary of current transformer entries, keyed by Id.
+        /// </summary>
+        public Dictionary<string, CT>? CTEntries { get; set; } = new Dictionary<string, CT>();
+
+        /// <summary>
+        /// Gets or sets the dictionary of filter entries, keyed by Id.
+        /// </summary>
+        public Dictionary<string, Filter>? FilterEntries { get; set; } = new Dictionary<string, Filter>();
+
+        /// <summary>
+        /// Gets or sets the dictionary of high voltage breaker entries, keyed by Id.
+        /// </summary>
+        public Dictionary<string, HVBreaker>? HVBreakerEntries { get; set; } = new Dictionary<string, HVBreaker>();
+
+        /// <summary>
+        /// Gets or sets the dictionary of inverter entries, keyed by Id.
+        /// </summary>
+        public Dictionary<string, Inverter>? InverterEntries { get; set; } = new Dictionary<string, Inverter>();
+
+        /// <summary>
+        /// Gets or sets the dictionary of motor control center entries, keyed by Id.
+        /// </summary>
+        public Dictionary<string, MCC>? MCCEntries { get; set; } = new Dictionary<string, MCC>();
+
+        /// <summary>
+        /// Gets or sets the dictionary of meter entries, keyed by Id.
+        /// </summary>
+        public Dictionary<string, Meter>? MeterEntries { get; set; } = new Dictionary<string, Meter>();
+
+        /// <summary>
+        /// Gets or sets the dictionary of panel entries, keyed by Id.
+        /// </summary>
+        public Dictionary<string, Panel>? PanelEntries { get; set; } = new Dictionary<string, Panel>();
+
+        /// <summary>
+        /// Gets or sets the dictionary of photovoltaic entries, keyed by Id.
+        /// </summary>
+        public Dictionary<string, Photovoltaic>? PhotovoltaicEntries { get; set; } = new Dictionary<string, Photovoltaic>();
+
+        /// <summary>
+        /// Gets or sets the dictionary of point of common coupling entries, keyed by Id.
+        /// </summary>
+        public Dictionary<string, POC>? POCEntries { get; set; } = new Dictionary<string, POC>();
+
+        /// <summary>
+        /// Gets or sets the dictionary of rectifier entries, keyed by Id.
+        /// </summary>
+        public Dictionary<string, Rectifier>? RectifierEntries { get; set; } = new Dictionary<string, Rectifier>();
+
+        /// <summary>
+        /// Gets or sets the dictionary of relay entries, keyed by Id.
+        /// </summary>
+        public Dictionary<string, Relay>? RelayEntries { get; set; } = new Dictionary<string, Relay>();
+
+        /// <summary>
+        /// Gets or sets the dictionary of shunt entries, keyed by Id.
+        /// </summary>
+        public Dictionary<string, Shunt>? ShuntEntries { get; set; } = new Dictionary<string, Shunt>();
+
+        /// <summary>
+        /// Gets or sets the dictionary of switch entries, keyed by Id.
+        /// </summary>
+        public Dictionary<string, Switch>? SwitchEntries { get; set; } = new Dictionary<string, Switch>();
+
+        /// <summary>
+        /// Gets or sets the dictionary of 3-winding transformer entries, keyed by Id.
+        /// </summary>
+        public Dictionary<string, Transformer3W>? Transformer3WEntries { get; set; } = new Dictionary<string, Transformer3W>();
+
+        /// <summary>
+        /// Gets or sets the dictionary of transmission line entries, keyed by Id.
+        /// </summary>
+        public Dictionary<string, TransmissionLine>? TransmissionLineEntries { get; set; } = new Dictionary<string, TransmissionLine>();
+
+        /// <summary>
+        /// Gets or sets the dictionary of UPS entries, keyed by Id.
+        /// </summary>
+        public Dictionary<string, UPS>? UPSEntries { get; set; } = new Dictionary<string, UPS>();
+
+        /// <summary>
+        /// Gets or sets the dictionary of zigzag transformer entries, keyed by Id.
+        /// </summary>
+        public Dictionary<string, ZigzagTransformer>? ZigzagTransformerEntries { get; set; } = new Dictionary<string, ZigzagTransformer>();
 
         /// <summary>
         /// Produces a detailed comparison between this DataSet (old) and another DataSet (new).
@@ -346,7 +458,7 @@ namespace EasyAF.Data.Models
             DiffShortCircuitEntries(diff, newer);
             
             // LVCB entries: keyed by ID
-            DiffLVCBEntries(diff, newer);
+            DiffLVBreakerEntries(diff, newer);
             
             // Fuse entries: keyed by ID
             DiffFuseEntries(diff, newer);
@@ -461,24 +573,24 @@ namespace EasyAF.Data.Models
             }
         }
 
-        private void DiffLVCBEntries(DataSetDiff diff, DataSet? newer)
+        private void DiffLVBreakerEntries(DataSetDiff diff, DataSet? newer)
         {
-            var oldLv = this.LVCBEntries ?? new Dictionary<string, LVCB>();
-            var newLv = newer?.LVCBEntries ?? new Dictionary<string, LVCB>();
+            var oldLv = this.LVBreakerEntries ?? new Dictionary<string, LVBreaker>();
+            var newLv = newer?.LVBreakerEntries ?? new Dictionary<string, LVBreaker>();
             var allLvKeys = new HashSet<string>(oldLv.Keys);
             foreach (var k in newLv.Keys) allLvKeys.Add(k);
 
             foreach (var key in allLvKeys)
             {
-                var entryKey = $"LVCB:{key}";
+                var entryKey = $"LVBreaker:{key}";
                 if (!oldLv.ContainsKey(key))
                 {
                     diff.EntryDiffs.Add(new EntryDiff
                     {
                         EntryKey = entryKey,
-                        EntryType = "LVCB",
+                        EntryType = "LVBreaker",
                         ChangeType = ChangeType.Added,
-                        PropertyChanges = DiffUtil.DiffObjects<LVCB>(null, newLv[key])
+                        PropertyChanges = DiffUtil.DiffObjects<LVBreaker>(null, newLv[key])
                     });
                 }
                 else if (!newLv.ContainsKey(key))
@@ -486,9 +598,9 @@ namespace EasyAF.Data.Models
                     diff.EntryDiffs.Add(new EntryDiff
                     {
                         EntryKey = entryKey,
-                        EntryType = "LVCB",
+                        EntryType = "LVBreaker",
                         ChangeType = ChangeType.Removed,
-                        PropertyChanges = DiffUtil.DiffObjects<LVCB>(oldLv[key], null)
+                        PropertyChanges = DiffUtil.DiffObjects<LVBreaker>(oldLv[key], null)
                     });
                 }
                 else
@@ -501,7 +613,7 @@ namespace EasyAF.Data.Models
                         diff.EntryDiffs.Add(new EntryDiff
                         {
                             EntryKey = entryKey,
-                            EntryType = "LVCB",
+                            EntryType = "LVBreaker",
                             ChangeType = ChangeType.Modified,
                             PropertyChanges = changes
                         });

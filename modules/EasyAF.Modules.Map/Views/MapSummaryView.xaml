@@ -335,7 +335,7 @@
                                   RowStyle="{StaticResource MapDataGridRowStyle}">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Data Type" 
-                                                    Binding="{Binding TypeName}" 
+                                                    Binding="{Binding TypeDisplayName}" 
                                                     Width="150"/>
                                 
                                 <!-- Status Indicator Column -->

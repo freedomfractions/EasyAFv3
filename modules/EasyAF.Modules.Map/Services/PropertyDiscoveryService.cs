@@ -22,6 +22,7 @@ namespace EasyAF.Modules.Map.Services
     {
         private readonly ISettingsService _settingsService;
         private readonly Dictionary<string, List<MapPropertyInfo>> _propertyCache;
+        private readonly Dictionary<string, string> _dataTypeDescriptions = new(); // NEW: Cache for descriptions
 
         // CROSS-MODULE EDIT: 2025-01-16 Required Property Validation
         // Modified for: Define universal and type-specific required properties
@@ -77,6 +78,54 @@ namespace EasyAF.Modules.Map.Services
         {
             _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
             _propertyCache = new Dictionary<string, List<MapPropertyInfo>>();
+            
+            // NEW: Pre-load data type descriptions from [EasyPowerClass] attributes
+            LoadDataTypeDescriptions();
+        }
+
+        /// <summary>
+        /// Gets the user-friendly description for a data type (e.g., "Electrical buses/switchgear" for "Bus").
+        /// </summary>
+        /// <param name="dataTypeName">The class name (e.g., "Bus", "LVBreaker").</param>
+        /// <returns>User-friendly description from [EasyPowerClass] attribute, or the class name if not found.</returns>
+        public string GetDataTypeDescription(string dataTypeName)
+        {
+            return _dataTypeDescriptions.TryGetValue(dataTypeName, out var description) 
+                ? description 
+                : dataTypeName;
+        }
+
+        /// <summary>
+        /// Loads [EasyPowerClass] attribute descriptions for all data types.
+        /// </summary>
+        /// <remarks>
+        /// This method scans EasyAF.Data.Models for classes with [EasyPowerClass("Description")] attributes
+        /// and caches their user-friendly descriptions for UI display.
+        /// </remarks>
+        private void LoadDataTypeDescriptions()
+        {
+            try
+            {
+                var assembly = typeof(Bus).Assembly;
+                var types = assembly.GetTypes()
+                    .Where(t => t.Namespace == "EasyAF.Data.Models" && t.IsClass && t.IsPublic);
+
+                foreach (var type in types)
+                {
+                    var attribute = type.GetCustomAttribute<EasyAF.Data.Attributes.EasyPowerClassAttribute>();
+                    if (attribute != null && !string.IsNullOrWhiteSpace(attribute.EasyPowerClassName))
+                    {
+                        _dataTypeDescriptions[type.Name] = attribute.EasyPowerClassName;
+                        Log.Debug("Loaded description for {Type}: {Description}", type.Name, attribute.EasyPowerClassName);
+                    }
+                }
+
+                Log.Information("Loaded {Count} data type descriptions", _dataTypeDescriptions.Count);
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Failed to load data type descriptions from attributes");
+            }
         }
 
         /// <summary>

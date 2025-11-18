@@ -41,7 +41,7 @@ namespace EasyAF.Import
             // Ensure dataset dictionaries are initialized
             targetDataSet.ArcFlashEntries ??= new Dictionary<(string, string), ArcFlash>();
             targetDataSet.ShortCircuitEntries ??= new Dictionary<(string, string, string), ShortCircuit>();
-            targetDataSet.LVCBEntries ??= new Dictionary<string, LVCB>();
+            targetDataSet.LVBreakerEntries ??= new Dictionary<string, LVBreaker>();
             targetDataSet.FuseEntries ??= new Dictionary<string, Fuse>();
             targetDataSet.CableEntries ??= new Dictionary<string, Cable>();
 
@@ -108,7 +108,7 @@ namespace EasyAF.Import
                     activeTargetTypes.Clear();
                     foreach (var kvp in groupsByType)
                     {
-                        // Skip nested / child pseudo-types (e.g., LVCB.TripUnit) for section activation
+                        // Skip nested / child pseudo-types (e.g., LVBreaker.TripUnit) for section activation
                         if (kvp.Key.Contains('.')) continue;
                         var idEntry = kvp.Value.FirstOrDefault(e => e.PropertyName == "Id");
                         if (idEntry == null) continue;
@@ -163,14 +163,14 @@ namespace EasyAF.Import
                                     if (!targetDataSet.ShortCircuitEntries.ContainsKey(key)) targetDataSet.ShortCircuitEntries[key] = sc; else _logger.Error(nameof(Import), $"Duplicate ShortCircuit key {key} at row {physicalRow} (skipped)");
                                 }
                                 break;
-                            case "LVCB":
-                                var lvcb = new LVCB();
-                                PopulateObjectByIndex(lvcb, mapEntries, csv, currentHeaderIndex, currentHeaderSet, missingHeaders, missingRequired, strict);
-                                // Trip unit properties are now flattened directly on LVCB (no nested object)
-                                // Mappings with TargetType="LVCB" and PropertyName="TripUnitXxx" will populate automatically
-                                if (!string.IsNullOrWhiteSpace(lvcb.Id))
+                            case "LVBreaker":
+                                var LVBreaker = new LVBreaker();
+                                PopulateObjectByIndex(LVBreaker, mapEntries, csv, currentHeaderIndex, currentHeaderSet, missingHeaders, missingRequired, strict);
+                                // Trip unit properties are now flattened directly on LVBreaker (no nested object)
+                                // Mappings with TargetType="LVBreaker" and PropertyName="TripUnitXxx" will populate automatically
+                                if (!string.IsNullOrWhiteSpace(LVBreaker.Id))
                                 {
-                                    if (!targetDataSet.LVCBEntries.ContainsKey(lvcb.Id)) targetDataSet.LVCBEntries[lvcb.Id] = lvcb; else _logger.Error(nameof(Import), $"Duplicate LVCB key {lvcb.Id} at row {physicalRow} (skipped)");
+                                    if (!targetDataSet.LVBreakerEntries.ContainsKey(LVBreaker.Id)) targetDataSet.LVBreakerEntries[LVBreaker.Id] = LVBreaker; else _logger.Error(nameof(Import), $"Duplicate LVBreaker key {LVBreaker.Id} at row {physicalRow} (skipped)");
                                 }
                                 break;
                             case "Fuse":
@@ -254,3 +254,4 @@ namespace EasyAF.Import
         }
     }
 }
+

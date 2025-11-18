@@ -209,26 +209,78 @@ namespace EasyAF.Engine
             var rows = new List<string[]>();
             var sourceObjects = new List<object>();
             IEnumerable<object> items = Enumerable.Empty<object>();
-            if (td.Id.StartsWith("LVCB.Breakers", StringComparison.OrdinalIgnoreCase))
-            {
+            
+            // === Original Equipment Types ===
+            if (td.Id.StartsWith("LVBreaker.Breakers", StringComparison.OrdinalIgnoreCase))
                 items = ctx.LVCBs().Cast<object>();
-            }
             else if (td.Id.StartsWith("Fuse", StringComparison.OrdinalIgnoreCase))
-            {
                 items = ctx.Fuses().Cast<object>();
-            }
             else if (td.Id.StartsWith("Cable", StringComparison.OrdinalIgnoreCase))
-            {
                 items = ctx.Cables().Cast<object>();
-            }
             else if (td.Id.StartsWith("ArcFlash", StringComparison.OrdinalIgnoreCase))
-            {
                 items = ctx.ArcFlashEntries().Cast<object>();
-            }
             else if (td.Id.StartsWith("ShortCircuit", StringComparison.OrdinalIgnoreCase))
-            {
                 items = ctx.ShortCircuitEntries().Cast<object>();
-            }
+            else if (td.Id.StartsWith("Bus", StringComparison.OrdinalIgnoreCase))
+                items = ctx.Buses().Cast<object>();
+            
+            // === Extended Equipment Types (Alphabetically) ===
+            else if (td.Id.StartsWith("AFD", StringComparison.OrdinalIgnoreCase))
+                items = ctx.AFDs().Cast<object>();
+            else if (td.Id.StartsWith("ATS", StringComparison.OrdinalIgnoreCase))
+                items = ctx.ATSs().Cast<object>();
+            else if (td.Id.StartsWith("Battery", StringComparison.OrdinalIgnoreCase) || td.Id.StartsWith("Batteries", StringComparison.OrdinalIgnoreCase))
+                items = ctx.Batteries().Cast<object>();
+            else if (td.Id.StartsWith("Busway", StringComparison.OrdinalIgnoreCase))
+                items = ctx.Busways().Cast<object>();
+            else if (td.Id.StartsWith("Capacitor", StringComparison.OrdinalIgnoreCase))
+                items = ctx.Capacitors().Cast<object>();
+            else if (td.Id.StartsWith("CLReactor", StringComparison.OrdinalIgnoreCase))
+                items = ctx.CLReactors().Cast<object>();
+            else if (td.Id.StartsWith("CT", StringComparison.OrdinalIgnoreCase))
+                items = ctx.CTs().Cast<object>();
+            else if (td.Id.StartsWith("Filter", StringComparison.OrdinalIgnoreCase))
+                items = ctx.Filters().Cast<object>();
+            else if (td.Id.StartsWith("Generator", StringComparison.OrdinalIgnoreCase))
+                items = ctx.Generators().Cast<object>();
+            else if (td.Id.StartsWith("HVBreaker", StringComparison.OrdinalIgnoreCase))
+                items = ctx.HVBreakers().Cast<object>();
+            else if (td.Id.StartsWith("Inverter", StringComparison.OrdinalIgnoreCase))
+                items = ctx.Inverters().Cast<object>();
+            else if (td.Id.StartsWith("Load", StringComparison.OrdinalIgnoreCase))
+                items = ctx.Loads().Cast<object>();
+            else if (td.Id.StartsWith("MCC", StringComparison.OrdinalIgnoreCase))
+                items = ctx.MCCs().Cast<object>();
+            else if (td.Id.StartsWith("Meter", StringComparison.OrdinalIgnoreCase))
+                items = ctx.Meters().Cast<object>();
+            else if (td.Id.StartsWith("Motor", StringComparison.OrdinalIgnoreCase))
+                items = ctx.Motors().Cast<object>();
+            else if (td.Id.StartsWith("Panel", StringComparison.OrdinalIgnoreCase))
+                items = ctx.Panels().Cast<object>();
+            else if (td.Id.StartsWith("Photovoltaic", StringComparison.OrdinalIgnoreCase))
+                items = ctx.Photovoltaics().Cast<object>();
+            else if (td.Id.StartsWith("POC", StringComparison.OrdinalIgnoreCase))
+                items = ctx.POCs().Cast<object>();
+            else if (td.Id.StartsWith("Rectifier", StringComparison.OrdinalIgnoreCase))
+                items = ctx.Rectifiers().Cast<object>();
+            else if (td.Id.StartsWith("Relay", StringComparison.OrdinalIgnoreCase))
+                items = ctx.Relays().Cast<object>();
+            else if (td.Id.StartsWith("Shunt", StringComparison.OrdinalIgnoreCase))
+                items = ctx.Shunts().Cast<object>();
+            else if (td.Id.StartsWith("Switch", StringComparison.OrdinalIgnoreCase))
+                items = ctx.Switches().Cast<object>();
+            else if (td.Id.StartsWith("Transformer2W", StringComparison.OrdinalIgnoreCase))
+                items = ctx.Transformers2W().Cast<object>();
+            else if (td.Id.StartsWith("Transformer3W", StringComparison.OrdinalIgnoreCase))
+                items = ctx.Transformers3W().Cast<object>();
+            else if (td.Id.StartsWith("TransmissionLine", StringComparison.OrdinalIgnoreCase))
+                items = ctx.TransmissionLines().Cast<object>();
+            else if (td.Id.StartsWith("UPS", StringComparison.OrdinalIgnoreCase))
+                items = ctx.UPSs().Cast<object>();
+            else if (td.Id.StartsWith("Utility", StringComparison.OrdinalIgnoreCase) || td.Id.StartsWith("Utilities", StringComparison.OrdinalIgnoreCase))
+                items = ctx.Utilities().Cast<object>();
+            else if (td.Id.StartsWith("ZigzagTransformer", StringComparison.OrdinalIgnoreCase))
+                items = ctx.ZigzagTransformers().Cast<object>();
 
             if (td.FilterSpecs != null && td.FilterSpecs.Count > 0)
             {
@@ -287,15 +339,85 @@ namespace EasyAF.Engine
         private List<string[]> BuildDiffRows(TableDefinition td, ProjectContext ctx)
         {
             if (ctx.OldData == null) return BuildNewRows(td, ctx);
-            if (td.Id.StartsWith("LVCB.Breakers", StringComparison.OrdinalIgnoreCase)) return BuildDiffFor(td, ctx, ctx.NewData.LVCBEntries, ctx.OldData.LVCBEntries);
-            if (td.Id.StartsWith("Fuse", StringComparison.OrdinalIgnoreCase)) return BuildDiffFor(td, ctx, ctx.NewData.FuseEntries, ctx.OldData.FuseEntries);
-            if (td.Id.StartsWith("Cable", StringComparison.OrdinalIgnoreCase)) return BuildDiffFor(td, ctx, ctx.NewData.CableEntries, ctx.OldData.CableEntries);
-            if (td.Id.StartsWith("ShortCircuit", StringComparison.OrdinalIgnoreCase)) return BuildDiffForComposite(td, ctx,
-                ctx.NewData.ShortCircuitEntries == null ? null : ctx.NewData.ShortCircuitEntries.ToDictionary(k => CompositeKey(k.Key), v => v.Value, StringComparer.OrdinalIgnoreCase),
-                ctx.OldData?.ShortCircuitEntries == null ? null : ctx.OldData.ShortCircuitEntries.ToDictionary(k => CompositeKey(k.Key), v => v.Value, StringComparer.OrdinalIgnoreCase));
-            if (td.Id.StartsWith("ArcFlash", StringComparison.OrdinalIgnoreCase)) return BuildDiffForComposite(td, ctx,
-                ctx.NewData.ArcFlashEntries == null ? null : ctx.NewData.ArcFlashEntries.ToDictionary(k => CompositeKey(k.Key), v => v.Value, StringComparer.OrdinalIgnoreCase),
-                ctx.OldData?.ArcFlashEntries == null ? null : ctx.OldData.ArcFlashEntries.ToDictionary(k => CompositeKey(k.Key), v => v.Value, StringComparer.OrdinalIgnoreCase));
+            
+            // === Original Types ===
+            if (td.Id.StartsWith("LVBreaker.Breakers", StringComparison.OrdinalIgnoreCase)) 
+                return BuildDiffFor(td, ctx, ctx.NewData.LVBreakerEntries, ctx.OldData.LVBreakerEntries);
+            if (td.Id.StartsWith("Fuse", StringComparison.OrdinalIgnoreCase)) 
+                return BuildDiffFor(td, ctx, ctx.NewData.FuseEntries, ctx.OldData.FuseEntries);
+            if (td.Id.StartsWith("Cable", StringComparison.OrdinalIgnoreCase)) 
+                return BuildDiffFor(td, ctx, ctx.NewData.CableEntries, ctx.OldData.CableEntries);
+            if (td.Id.StartsWith("Bus", StringComparison.OrdinalIgnoreCase))
+                return BuildDiffFor(td, ctx, ctx.NewData.BusEntries, ctx.OldData.BusEntries);
+            
+            // Composite key types
+            if (td.Id.StartsWith("ShortCircuit", StringComparison.OrdinalIgnoreCase)) 
+                return BuildDiffForComposite(td, ctx,
+                    ctx.NewData.ShortCircuitEntries == null ? null : ctx.NewData.ShortCircuitEntries.ToDictionary(k => CompositeKey(k.Key), v => v.Value, StringComparer.OrdinalIgnoreCase),
+                    ctx.OldData?.ShortCircuitEntries == null ? null : ctx.OldData.ShortCircuitEntries.ToDictionary(k => CompositeKey(k.Key), v => v.Value, StringComparer.OrdinalIgnoreCase));
+            if (td.Id.StartsWith("ArcFlash", StringComparison.OrdinalIgnoreCase)) 
+                return BuildDiffForComposite(td, ctx,
+                    ctx.NewData.ArcFlashEntries == null ? null : ctx.NewData.ArcFlashEntries.ToDictionary(k => CompositeKey(k.Key), v => v.Value, StringComparer.OrdinalIgnoreCase),
+                    ctx.OldData?.ArcFlashEntries == null ? null : ctx.OldData.ArcFlashEntries.ToDictionary(k => CompositeKey(k.Key), v => v.Value, StringComparer.OrdinalIgnoreCase));
+            
+            // === Extended Equipment Types (Alphabetically) ===
+            if (td.Id.StartsWith("AFD", StringComparison.OrdinalIgnoreCase))
+                return BuildDiffFor(td, ctx, ctx.NewData.AFDEntries, ctx.OldData.AFDEntries);
+            if (td.Id.StartsWith("ATS", StringComparison.OrdinalIgnoreCase))
+                return BuildDiffFor(td, ctx, ctx.NewData.ATSEntries, ctx.OldData.ATSEntries);
+            if (td.Id.StartsWith("Battery", StringComparison.OrdinalIgnoreCase) || td.Id.StartsWith("Batteries", StringComparison.OrdinalIgnoreCase))
+                return BuildDiffFor(td, ctx, ctx.NewData.BatteryEntries, ctx.OldData.BatteryEntries);
+            if (td.Id.StartsWith("Busway", StringComparison.OrdinalIgnoreCase))
+                return BuildDiffFor(td, ctx, ctx.NewData.BuswayEntries, ctx.OldData.BuswayEntries);
+            if (td.Id.StartsWith("Capacitor", StringComparison.OrdinalIgnoreCase))
+                return BuildDiffFor(td, ctx, ctx.NewData.CapacitorEntries, ctx.OldData.CapacitorEntries);
+            if (td.Id.StartsWith("CLReactor", StringComparison.OrdinalIgnoreCase))
+                return BuildDiffFor(td, ctx, ctx.NewData.CLReactorEntries, ctx.OldData.CLReactorEntries);
+            if (td.Id.StartsWith("CT", StringComparison.OrdinalIgnoreCase))
+                return BuildDiffFor(td, ctx, ctx.NewData.CTEntries, ctx.OldData.CTEntries);
+            if (td.Id.StartsWith("Filter", StringComparison.OrdinalIgnoreCase))
+                return BuildDiffFor(td, ctx, ctx.NewData.FilterEntries, ctx.OldData.FilterEntries);
+            if (td.Id.StartsWith("Generator", StringComparison.OrdinalIgnoreCase))
+                return BuildDiffFor(td, ctx, ctx.NewData.GeneratorEntries, ctx.OldData.GeneratorEntries);
+            if (td.Id.StartsWith("HVBreaker", StringComparison.OrdinalIgnoreCase))
+                return BuildDiffFor(td, ctx, ctx.NewData.HVBreakerEntries, ctx.OldData.HVBreakerEntries);
+            if (td.Id.StartsWith("Inverter", StringComparison.OrdinalIgnoreCase))
+                return BuildDiffFor(td, ctx, ctx.NewData.InverterEntries, ctx.OldData.InverterEntries);
+            if (td.Id.StartsWith("Load", StringComparison.OrdinalIgnoreCase))
+                return BuildDiffFor(td, ctx, ctx.NewData.LoadEntries, ctx.OldData.LoadEntries);
+            if (td.Id.StartsWith("MCC", StringComparison.OrdinalIgnoreCase))
+                return BuildDiffFor(td, ctx, ctx.NewData.MCCEntries, ctx.OldData.MCCEntries);
+            if (td.Id.StartsWith("Meter", StringComparison.OrdinalIgnoreCase))
+                return BuildDiffFor(td, ctx, ctx.NewData.MeterEntries, ctx.OldData.MeterEntries);
+            if (td.Id.StartsWith("Motor", StringComparison.OrdinalIgnoreCase))
+                return BuildDiffFor(td, ctx, ctx.NewData.MotorEntries, ctx.OldData.MotorEntries);
+            if (td.Id.StartsWith("Panel", StringComparison.OrdinalIgnoreCase))
+                return BuildDiffFor(td, ctx, ctx.NewData.PanelEntries, ctx.OldData.PanelEntries);
+            if (td.Id.StartsWith("Photovoltaic", StringComparison.OrdinalIgnoreCase))
+                return BuildDiffFor(td, ctx, ctx.NewData.PhotovoltaicEntries, ctx.OldData.PhotovoltaicEntries);
+            if (td.Id.StartsWith("POC", StringComparison.OrdinalIgnoreCase))
+                return BuildDiffFor(td, ctx, ctx.NewData.POCEntries, ctx.OldData.POCEntries);
+            if (td.Id.StartsWith("Rectifier", StringComparison.OrdinalIgnoreCase))
+                return BuildDiffFor(td, ctx, ctx.NewData.RectifierEntries, ctx.OldData.RectifierEntries);
+            if (td.Id.StartsWith("Relay", StringComparison.OrdinalIgnoreCase))
+                return BuildDiffFor(td, ctx, ctx.NewData.RelayEntries, ctx.OldData.RelayEntries);
+            if (td.Id.StartsWith("Shunt", StringComparison.OrdinalIgnoreCase))
+                return BuildDiffFor(td, ctx, ctx.NewData.ShuntEntries, ctx.OldData.ShuntEntries);
+            if (td.Id.StartsWith("Switch", StringComparison.OrdinalIgnoreCase))
+                return BuildDiffFor(td, ctx, ctx.NewData.SwitchEntries, ctx.OldData.SwitchEntries);
+            if (td.Id.StartsWith("Transformer2W", StringComparison.OrdinalIgnoreCase))
+                return BuildDiffFor(td, ctx, ctx.NewData.Transformer2WEntries, ctx.OldData.Transformer2WEntries);
+            if (td.Id.StartsWith("Transformer3W", StringComparison.OrdinalIgnoreCase))
+                return BuildDiffFor(td, ctx, ctx.NewData.Transformer3WEntries, ctx.OldData.Transformer3WEntries);
+            if (td.Id.StartsWith("TransmissionLine", StringComparison.OrdinalIgnoreCase))
+                return BuildDiffFor(td, ctx, ctx.NewData.TransmissionLineEntries, ctx.OldData.TransmissionLineEntries);
+            if (td.Id.StartsWith("UPS", StringComparison.OrdinalIgnoreCase))
+                return BuildDiffFor(td, ctx, ctx.NewData.UPSEntries, ctx.OldData.UPSEntries);
+            if (td.Id.StartsWith("Utility", StringComparison.OrdinalIgnoreCase) || td.Id.StartsWith("Utilities", StringComparison.OrdinalIgnoreCase))
+                return BuildDiffFor(td, ctx, ctx.NewData.UtilityEntries, ctx.OldData.UtilityEntries);
+            if (td.Id.StartsWith("ZigzagTransformer", StringComparison.OrdinalIgnoreCase))
+                return BuildDiffFor(td, ctx, ctx.NewData.ZigzagTransformerEntries, ctx.OldData.ZigzagTransformerEntries);
+            
             return new List<string[]>();
         }
 
@@ -995,3 +1117,4 @@ namespace EasyAF.Engine
         public const string DiffMarker = "\nWas\n";
     }
 }
+

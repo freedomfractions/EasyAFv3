@@ -3,358 +3,293 @@ using EasyAF.Data.Attributes;
 namespace EasyAF.Data.Models;
 
 /// <summary>
-/// Represents a fuse with comprehensive properties from EasyPower exports.
+/// Represents a Fuse with comprehensive properties from EasyPower exports.
 /// All properties are strings to preserve source data fidelity without premature parsing.
 /// </summary>
 /// <remarks>
 /// <para>
-/// Fuses are overcurrent protective devices that interrupt by melting a conductor element.
-/// This model includes nameplate data, ratings, TCC parameters, associated switching equipment, and reliability metrics.
+/// <strong>EasyPower Correlation:</strong> Maps to "Fuses" class in EasyPower CSV exports.
 /// </para>
 /// <para>
-/// <strong>EasyPower Correlation:</strong> Maps to "Fuses" class in EasyPower CSV exports.
+/// <strong>Auto-Generated:</strong> This file was automatically generated from CSV field definitions.
+/// Do not manually edit property names - regenerate from source CSV if changes are needed.
 /// </para>
 /// </remarks>
 [EasyPowerClass("Fuses")]
 public class Fuse
 {
-    // ========================================
-    // IDENTITY & BASIC ELECTRICAL
-    // ========================================
-    
-    /// <summary>Fuse identifier. (Column: Fuses)</summary>
+    /// <summary>Fuses (Column: Fuses)</summary>
     [Category("Identity")]
-    [Description("Fuse identifier")]
+    [Description("Fuses")]
     [Required]
     public string? Fuses { get; set; }
-    
-    /// <summary>Alias for Fuses (convenience property for dictionary indexing - not serialized).</summary>
-    [System.Text.Json.Serialization.JsonIgnore]
-    [Newtonsoft.Json.JsonIgnore]
-    public string? Id 
-    { 
-        get => Fuses; 
-        set => Fuses = value; 
-    }
-    
-    /// <summary>AC / DC designation. (Column: AC/DC)</summary>
-    [Category("Electrical")]
-    [Description("AC or DC power system designation")]
+
+    /// <summary>AC/DC (Column: AC/DC)</summary>
+    [Category("General")]
+    [Description("AC/DC")]
     public string? AcDc { get; set; }
-    
-    /// <summary>Status of the fuse. (Column: Status)</summary>
+
+    /// <summary>Status (Column: Status)</summary>
     [Category("Identity")]
-    [Description("Operational status")]
+    [Description("Status")]
     public string? Status { get; set; }
-    
-    /// <summary>Number of phases. (Column: No of Phases)</summary>
-    [Category("Electrical")]
-    [Description("Number of phases (1, 2, or 3)")]
-    [Required]
+
+    /// <summary>No of Phases (Column: No of Phases)</summary>
+    [Category("General")]
+    [Description("No of Phases")]
     public string? NoOfPhases { get; set; }
-    
-    /// <summary>Bus to which the fuse is connected. (Column: On Bus)</summary>
+
+    /// <summary>On Bus (Column: On Bus)</summary>
     [Category("Electrical")]
-    [Description("Source bus connection")]
-    [Required]
+    [Description("On Bus")]
     public string? OnBus { get; set; }
-    
-    /// <summary>Base kV of the system. (Column: Base kV)</summary>
+
+    /// <summary>Base kV (Column: Base kV)</summary>
     [Category("Electrical")]
-    [Units("kV")]
-    [Description("System nominal voltage")]
+    [Description("Base kV")]
     public string? BaseKV { get; set; }
-    
-    /// <summary>Connection type. (Column: Conn Type)</summary>
-    [Category("Electrical")]
-    [Description("Connection configuration")]
-    public string? ConnectionType { get; set; }
-    
-    /// <summary>Rating standard. (Column: Standard)</summary>
-    [Category("Protection")]
-    [Description("Rating standard (ANSI, IEC, etc.)")]
-    public string? Standard { get; set; }
-    
-    /// <summary>Normal operating state. (Column: Normal State)</summary>
-    [Category("Electrical")]
-    [Description("Normal operating position")]
-    public string? NormalState { get; set; }
-    
-    /// <summary>Optional features. (Column: Options)</summary>
+
+    /// <summary>Conn Type (Column: Conn Type)</summary>
     [Category("Physical")]
-    [Description("Special options or features")]
+    [Description("Conn Type")]
+    public string? ConnType { get; set; }
+
+    /// <summary>Standard (Column: Standard)</summary>
+    [Category("General")]
+    [Description("Standard")]
+    public string? Standard { get; set; }
+
+    /// <summary>Normal State (Column: Normal State)</summary>
+    [Category("General")]
+    [Description("Normal State")]
+    public string? NormalState { get; set; }
+
+    /// <summary>Options (Column: Options)</summary>
+    [Category("General")]
+    [Description("Options")]
     public string? Options { get; set; }
 
-    // ========================================
-    // FUSE NAMEPLATE
-    // ========================================
-    
-    /// <summary>Fuse manufacturer. (Column: Fuse Mfr)</summary>
+    /// <summary>Fuse Mfr (Column: Fuse Mfr)</summary>
+    [Category("Protection")]
+    [Description("Fuse Mfr")]
+    public string? FuseMfr { get; set; }
+
+    /// <summary>Fuse Type (Column: Fuse Type)</summary>
     [Category("Physical")]
-    [Description("Fuse manufacturer")]
-    public string? Manufacturer { get; set; }
-    
-    /// <summary>Fuse type. (Column: Fuse Type)</summary>
+    [Description("Fuse Type")]
+    public string? FuseType { get; set; }
+
+    /// <summary>Fuse Style (Column: Fuse Style)</summary>
     [Category("Physical")]
-    [Description("Fuse type designation")]
-    public string? Type { get; set; }
-    
-    /// <summary>Fuse style/class. (Column: Fuse Style)</summary>
-    [Category("Physical")]
-    [Description("Fuse style or class (e.g., K, J, L, RK5)")]
-    public string? Style { get; set; }
-    
-    /// <summary>Fuse model. (Column: Model)</summary>
-    [Category("Physical")]
-    [Description("Fuse model number")]
+    [Description("Fuse Style")]
+    public string? FuseStyle { get; set; }
+
+    /// <summary>Model (Column: Model)</summary>
+    [Category("General")]
+    [Description("Model")]
     public string? Model { get; set; }
-    
-    /// <summary>TCC voltage rating. (Column: TCC kV)</summary>
-    [Category("Protection")]
-    [Units("kV")]
-    [Description("Time-current curve voltage rating")]
-    public string? TccKV { get; set; }
-    
-    /// <summary>Fuse ampere rating. (Column: Size)</summary>
-    [Category("Protection")]
-    [Units("A")]
-    [Description("Fuse ampere rating")]
+
+    /// <summary>TCC kV (Column: TCC kV)</summary>
+    [Category("Electrical")]
+    [Description("TCC kV")]
+    public string? TCCKV { get; set; }
+
+    /// <summary>Size (Column: Size)</summary>
+    [Category("General")]
+    [Description("Size")]
     public string? Size { get; set; }
 
-    // ========================================
-    // SHORT CIRCUIT RATINGS
-    // ========================================
-    
-    /// <summary>Short-circuit interrupting rating. (Column: SC Int kA)</summary>
-    [Category("Protection")]
-    [Units("kA")]
-    [Description("Short-circuit interrupting capacity")]
-    public string? ScIntKA { get; set; }
-    
-    /// <summary>SC test X/R ratio. (Column: SC Test X/R)</summary>
-    [Category("Protection")]
-    [Description("Test X/R ratio for short-circuit rating")]
-    public string? ScTestXR { get; set; }
-    
-    /// <summary>Short-circuit test standard. (Column: SC Test Std)</summary>
-    [Category("Protection")]
-    [Description("Test standard for short-circuit rating")]
-    public string? ScTestStd { get; set; }
+    /// <summary>SC Int kA (Column: SC Int kA)</summary>
+    [Category("General")]
+    [Description("SC Int kA")]
+    public string? SCIntKA { get; set; }
 
-    // ========================================
-    // TCC (Time-Current Curve) - ANSI
-    // ========================================
-    
-    /// <summary>TCC clipping option. (Column: TCC Clipping)</summary>
-    [Category("Protection")]
-    [Description("Time-current curve clipping mode")]
-    public string? TccClipping { get; set; }
-    
-    /// <summary>TCC momentary current. (Column: TCC Mom kA)</summary>
-    [Category("Protection")]
-    [Units("kA")]
-    [Description("TCC momentary (first-cycle) current limit")]
-    public string? TccMomKA { get; set; }
-    
-    /// <summary>TCC interrupting current. (Column: TCC Int kA)</summary>
-    [Category("Protection")]
-    [Units("kA")]
-    [Description("TCC interrupting current limit")]
-    public string? TccIntKA { get; set; }
-    
-    /// <summary>TCC 30-cycle current. (Column: TCC 30 Cyc kA)</summary>
-    [Category("Protection")]
-    [Units("kA")]
-    [Description("TCC 30-cycle current limit")]
-    public string? Tcc30CycKA { get; set; }
+    /// <summary>SC Test X/R (Column: SC Test X/R)</summary>
+    [Category("General")]
+    [Description("SC Test X/R")]
+    public string? SCTestXR { get; set; }
 
-    // ========================================
-    // TCC - IEC
-    // ========================================
-    
-    /// <summary>IEC breaking capacity. (Column: IEC Breaking kA)</summary>
-    [Category("Protection")]
-    [Units("kA")]
-    [Description("IEC breaking capacity")]
-    public string? IecBreakingKA { get; set; }
-    
-    /// <summary>IEC TCC initial current. (Column: IEC TCC Initial kA)</summary>
-    [Category("Protection")]
-    [Units("kA")]
-    [Description("IEC TCC initial symmetrical current")]
-    public string? IecTccInitialKA { get; set; }
-    
-    /// <summary>IEC TCC breaking current. (Column: IEC TCC Breaking kA)</summary>
-    [Category("Protection")]
-    [Units("kA")]
-    [Description("IEC TCC breaking current")]
-    public string? IecTccBreakingKA { get; set; }
-    
-    /// <summary>IEC TCC breaking time. (Column: IEC TCC Breaking Time)</summary>
-    [Category("Protection")]
-    [Units("s")]
-    [Description("IEC TCC breaking time")]
-    public string? IecTccBreakingTime { get; set; }
-    
-    /// <summary>IEC TCC steady-state current. (Column: IEC TCC SS kA)</summary>
-    [Category("Protection")]
-    [Units("kA")]
-    [Description("IEC TCC steady-state current")]
-    public string? IecTccSsKA { get; set; }
+    /// <summary>SC Test Std (Column: SC Test Std)</summary>
+    [Category("General")]
+    [Description("SC Test Std")]
+    public string? SCTestStd { get; set; }
 
-    // ========================================
-    // SWITCH (if integral with fuse)
-    // ========================================
-    
-    /// <summary>Switch manufacturer. (Column: Switch Manufacturer)</summary>
+    /// <summary>TCC Clipping (Column: TCC Clipping)</summary>
+    [Category("General")]
+    [Description("TCC Clipping")]
+    public string? TCCClipping { get; set; }
+
+    /// <summary>TCC Mom kA (Column: TCC Mom kA)</summary>
+    [Category("General")]
+    [Description("TCC Mom kA")]
+    public string? TCCMomKA { get; set; }
+
+    /// <summary>TCC Int kA (Column: TCC Int kA)</summary>
+    [Category("General")]
+    [Description("TCC Int kA")]
+    public string? TCCIntKA { get; set; }
+
+    /// <summary>TCC 30 Cyc kA (Column: TCC 30 Cyc kA)</summary>
+    [Category("General")]
+    [Description("TCC 30 Cyc kA")]
+    public string? TCC30CycKA { get; set; }
+
+    /// <summary>IEC Breaking kA (Column: IEC Breaking kA)</summary>
+    [Category("General")]
+    [Description("IEC Breaking kA")]
+    public string? IECBreakingKA { get; set; }
+
+    /// <summary>IEC TCC Initial kA (Column: IEC TCC Initial kA)</summary>
+    [Category("General")]
+    [Description("IEC TCC Initial kA")]
+    public string? IECTCCInitialKA { get; set; }
+
+    /// <summary>IEC TCC Breaking kA (Column: IEC TCC Breaking kA)</summary>
+    [Category("General")]
+    [Description("IEC TCC Breaking kA")]
+    public string? IECTCCBreakingKA { get; set; }
+
+    /// <summary>IEC TCC Breaking Time (Column: IEC TCC Breaking Time)</summary>
+    [Category("General")]
+    [Description("IEC TCC Breaking Time")]
+    public string? IECTCCBreakingTime { get; set; }
+
+    /// <summary>IEC TCC SS kA (Column: IEC TCC SS kA)</summary>
+    [Category("General")]
+    [Description("IEC TCC SS kA")]
+    public string? IECTCCSSKA { get; set; }
+
+    /// <summary>Switch Manufacturer (Column: Switch Manufacturer)</summary>
     [Category("Physical")]
-    [Description("Integral switch manufacturer")]
+    [Description("Switch Manufacturer")]
     public string? SwitchManufacturer { get; set; }
-    
-    /// <summary>Switch type. (Column: Switch Type)</summary>
+
+    /// <summary>Switch Type (Column: Switch Type)</summary>
     [Category("Physical")]
-    [Description("Integral switch type")]
+    [Description("Switch Type")]
     public string? SwitchType { get; set; }
-    
-    /// <summary>Switch style. (Column: Switch Style)</summary>
+
+    /// <summary>Switch Style (Column: Switch Style)</summary>
     [Category("Physical")]
-    [Description("Integral switch style")]
+    [Description("Switch Style")]
     public string? SwitchStyle { get; set; }
-    
-    /// <summary>Switch continuous current rating. (Column: Switch Cont A)</summary>
-    [Category("Physical")]
-    [Units("A")]
-    [Description("Switch continuous current rating")]
+
+    /// <summary>Switch Cont A (Column: Switch Cont A)</summary>
+    [Category("General")]
+    [Description("Switch Cont A")]
     public string? SwitchContA { get; set; }
-    
-    /// <summary>Switch momentary rating. (Column: Switch Mom kA)</summary>
-    [Category("Protection")]
-    [Units("kA")]
-    [Description("Switch momentary withstand rating")]
+
+    /// <summary>Switch Mom kA (Column: Switch Mom kA)</summary>
+    [Category("General")]
+    [Description("Switch Mom kA")]
     public string? SwitchMomKA { get; set; }
 
-    // ========================================
-    // MOTOR OVERLOAD (if applicable)
-    // ========================================
-    
-    /// <summary>Motor overload manufacturer. (Column: Mtr O/L Mfr)</summary>
-    [Category("Protection")]
-    [Description("Motor overload relay manufacturer")]
-    public string? MtrOlMfr { get; set; }
-    
-    /// <summary>Motor overload type. (Column: Mtr O/L Type)</summary>
-    [Category("Protection")]
-    [Description("Motor overload relay type")]
-    public string? MtrOlType { get; set; }
-    
-    /// <summary>Motor overload style. (Column: Mtr O/L Style)</summary>
-    [Category("Protection")]
-    [Description("Motor overload relay style")]
-    public string? MtrOlStyle { get; set; }
-    
-    /// <summary>Motor full-load amperes. (Column: Motor FLA)</summary>
-    [Category("Protection")]
-    [Units("A")]
-    [Description("Protected motor full-load current")]
-    public string? MotorFla { get; set; }
-    
-    /// <summary>Motor service factor. (Column: Service Factor)</summary>
-    [Category("Protection")]
-    [Description("Motor service factor")]
+    /// <summary>Mtr O/L Mfr (Column: Mtr O/L Mfr)</summary>
+    [Category("General")]
+    [Description("Mtr O/L Mfr")]
+    public string? MtrOLMfr { get; set; }
+
+    /// <summary>Mtr O/L Type (Column: Mtr O/L Type)</summary>
+    [Category("Physical")]
+    [Description("Mtr O/L Type")]
+    public string? MtrOLType { get; set; }
+
+    /// <summary>Mtr O/L Style (Column: Mtr O/L Style)</summary>
+    [Category("Physical")]
+    [Description("Mtr O/L Style")]
+    public string? MtrOLStyle { get; set; }
+
+    /// <summary>Motor FLA (Column: Motor FLA)</summary>
+    [Category("General")]
+    [Description("Motor FLA")]
+    public string? MotorFLA { get; set; }
+
+    /// <summary>Service Factor (Column: Service Factor)</summary>
+    [Category("General")]
+    [Description("Service Factor")]
     public string? ServiceFactor { get; set; }
 
-    // ========================================
-    // OPERATING CONDITIONS
-    // ========================================
-    
-    /// <summary>PCC demand kVA. (Column: PCC kVA Demand)</summary>
+    /// <summary>PCC kVA Demand (Column: PCC kVA Demand)</summary>
     [Category("Electrical")]
-    [Units("kVA")]
-    [Description("Point of common coupling demand kVA")]
-    public string? PccKvaDemand { get; set; }
-    
-    /// <summary>PCC current ratio. (Column: PCC Isc/ILoad)</summary>
-    [Category("Electrical")]
-    [Description("Ratio of short-circuit to load current at PCC")]
-    public string? PccIscILoad { get; set; }
+    [Description("PCC kVA Demand")]
+    public string? PCCKVADemand { get; set; }
 
-    // ========================================
-    // RELIABILITY DATA
-    // ========================================
-    
-    /// <summary>Failure rate per year. (Column: Failure Rate (/year))</summary>
+    /// <summary>PCC Isc/ILoad (Column: PCC Isc/ILoad)</summary>
+    [Category("Demand")]
+    [Description("PCC Isc/ILoad")]
+    public string? PCCIscIload { get; set; }
+
+    /// <summary>Failure Rate (/year) (Column: Failure Rate (/year))</summary>
     [Category("Reliability")]
+    [Description("Failure Rate (/year)")]
     [Units("/year")]
-    [Description("Expected failure rate (failures per year)")]
     public string? FailureRatePerYear { get; set; }
-    
-    /// <summary>Repair time in hours. (Column: Repair Time (h))</summary>
+
+    /// <summary>Repair Time (h) (Column: Repair Time (h))</summary>
     [Category("Reliability")]
+    [Description("Repair Time (h)")]
     [Units("h")]
-    [Description("Mean time to repair")]
     public string? RepairTimeHours { get; set; }
-    
-    /// <summary>Replacement time in hours. (Column: Replace Time (h))</summary>
-    [Category("Reliability")]
+
+    /// <summary>Replace Time (h) (Column: Replace Time (h))</summary>
+    [Category("General")]
+    [Description("Replace Time (h)")]
     [Units("h")]
-    [Description("Mean time to replace")]
     public string? ReplaceTimeHours { get; set; }
-    
-    /// <summary>Repair cost. (Column: Repair Cost)</summary>
+
+    /// <summary>Repair Cost (Column: Repair Cost)</summary>
     [Category("Reliability")]
-    [Units("$")]
-    [Description("Estimated repair cost")]
+    [Description("Repair Cost")]
     public string? RepairCost { get; set; }
-    
-    /// <summary>Replacement cost. (Column: Replace Cost)</summary>
-    [Category("Reliability")]
-    [Units("$")]
-    [Description("Estimated replacement cost")]
+
+    /// <summary>Replace Cost (Column: Replace Cost)</summary>
+    [Category("General")]
+    [Description("Replace Cost")]
     public string? ReplaceCost { get; set; }
-    
-    /// <summary>Action upon failure. (Column: Action Upon Failure)</summary>
+
+    /// <summary>Action Upon Failure (Column: Action Upon Failure)</summary>
     [Category("Reliability")]
-    [Description("Planned action when fuse fails")]
+    [Description("Action Upon Failure")]
     public string? ActionUponFailure { get; set; }
-    
-    /// <summary>Reliability data source. (Column: Reliability Source)</summary>
+
+    /// <summary>Reliability Source (Column: Reliability Source)</summary>
     [Category("Reliability")]
-    [Description("Source of reliability data")]
+    [Description("Reliability Source")]
     public string? ReliabilitySource { get; set; }
-    
-    /// <summary>Reliability category. (Column: Reliability Category)</summary>
+
+    /// <summary>Reliability Category (Column: Reliability Category)</summary>
     [Category("Reliability")]
-    [Description("Reliability classification category")]
+    [Description("Reliability Category")]
     public string? ReliabilityCategory { get; set; }
-    
-    /// <summary>Reliability class. (Column: Reliability Class)</summary>
+
+    /// <summary>Reliability Class (Column: Reliability Class)</summary>
     [Category("Reliability")]
-    [Description("Reliability class designation")]
+    [Description("Reliability Class")]
     public string? ReliabilityClass { get; set; }
-    
-    /// <summary>Short-circuit failure mode percentage. (Column: SC Failure Mode %)</summary>
+
+    /// <summary>SC Failure Mode % (Column: SC Failure Mode %)</summary>
     [Category("Reliability")]
-    [Units("%")]
-    [Description("Percentage of failures due to short circuits")]
-    public string? ScFailureModePercent { get; set; }
+    [Description("SC Failure Mode %")]
+    public string? SCFailureModePercent { get; set; }
 
-    // ========================================
-    // METADATA
-    // ========================================
-    
-    /// <summary>Data status. (Column: Data Status)</summary>
-    [Category("Metadata")]
-    [Description("Data quality or completion status")]
+    /// <summary>Data Status (Column: Data Status)</summary>
+    [Category("Identity")]
+    [Description("Data Status")]
     public string? DataStatus { get; set; }
-    
-    /// <summary>Comments. (Column: Comment)</summary>
-    [Category("Metadata")]
-    [Description("General comments or notes")]
-    public string? Comments { get; set; }
 
-    // ========================================
-    // METHODS
-    // ========================================
+    /// <summary>Comment (Column: Comment)</summary>
+    [Category("Metadata")]
+    [Description("Comment")]
+    public string? Comment { get; set; }
+
+    /// <summary>Alias for Fuse (convenience property for dictionary indexing - not serialized).</summary>
+    [System.Text.Json.Serialization.JsonIgnore]
+    [Newtonsoft.Json.JsonIgnore]
+    public string? Id
+    {
+        get => Fuses;
+        set => Fuses = value;
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Fuse"/> class.
@@ -362,10 +297,11 @@ public class Fuse
     public Fuse() { }
 
     /// <summary>
-    /// Returns a string representation of the fuse.
+    /// Returns a string representation of the Fuse.
     /// </summary>
     public override string ToString()
     {
-        return $"Fuses: {Fuses}, OnBus: {OnBus}, Mfr: {Manufacturer}, Type: {Type}, Style: {Style}, Size: {Size}";
+        return $"Fuse: {Fuses}";
     }
 }
+

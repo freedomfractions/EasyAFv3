@@ -108,10 +108,10 @@ public class ArcFlash
     [Units("in")]
     public string? WorkingDistanceInches { get; set; }
 
-    /// <summary>Incident Energy (Column: Incident Energy (cal/cm2))</summary>
+    /// <summary>Incident Energy (Column: Incident Energy (calcm2))</summary>
     [Category("General")]
     [Description("Incident Energy")]
-    [Units("cal/cm²")]
+    [Units("calcm²")]
     public string? IncidentEnergyCalPerCm2 { get; set; }
 
     /// <summary>Comments (Column: Comments)</summary>
@@ -141,3 +141,4 @@ public class ArcFlash
         return $"ArcFlash: {ArcFaultBusName}";
     }
 }
+

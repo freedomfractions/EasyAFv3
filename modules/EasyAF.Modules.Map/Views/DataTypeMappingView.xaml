@@ -180,7 +180,7 @@
         <GroupBox Grid.Row="1" 
                   Grid.Column="0"
                   Margin="0,10,0,0"
-                  Header="{Binding DataType, StringFormat='Target Properties ({0})'}"
+                  Header="{Binding DataTypeDisplayName, StringFormat='Target Properties ({0})'}"
                   Foreground="{DynamicResource TextPrimaryBrush}"
                   BorderBrush="{DynamicResource ControlBorderBrush}">
             <Grid Margin="4">

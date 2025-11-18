@@ -355,38 +355,38 @@ namespace EasyAF.Data.Models
 
         /// <summary>
         /// Populate missing Manufacturer fields (breaker) using fallbacks:
-        /// 1. If LVCB.Manufacturer empty but TripUnitManufacturer present → copy.
-        /// 2. If TripUnitManufacturer empty but LVCB.Manufacturer present → copy.
-        /// 3. If still empty attempt heuristic from Style (leading tokens matched to known manufacturers).
+        /// 1. If LVBreaker.BreakerMfr empty but TripMfr present → copy.
+        /// 2. If TripMfr empty but LVBreaker.BreakerMfr present → copy.
+        /// 3. If still empty attempt heuristic from BreakerStyle (leading tokens matched to known manufacturers).
         /// </summary>
         private static void NormalizeManufacturers(Project proj)
         {
             var dsList = new[] { proj.NewData, proj.OldData };
             foreach (var ds in dsList)
             {
-                if (ds?.LVCBEntries == null) continue;
-                foreach (var kv in ds.LVCBEntries)
+                if (ds?.LVBreakerEntries == null) continue;
+                foreach (var kv in ds.LVBreakerEntries)
                 {
                     var b = kv.Value;
                     if (b == null) continue;
                     
-                    // Step 1 / 2 cross-copy between Manufacturer and TripUnitManufacturer
-                    if (string.IsNullOrWhiteSpace(b.Manufacturer) && !string.IsNullOrWhiteSpace(b.TripUnitManufacturer))
-                        b.Manufacturer = b.TripUnitManufacturer!.Trim();
-                    else if (string.IsNullOrWhiteSpace(b.TripUnitManufacturer) && !string.IsNullOrWhiteSpace(b.Manufacturer))
-                        b.TripUnitManufacturer = b.Manufacturer!.Trim();
+                    // Step 1 / 2 cross-copy between BreakerMfr and TripMfr
+                    if (string.IsNullOrWhiteSpace(b.BreakerMfr) && !string.IsNullOrWhiteSpace(b.TripMfr))
+                        b.BreakerMfr = b.TripMfr!.Trim();
+                    else if (string.IsNullOrWhiteSpace(b.TripMfr) && !string.IsNullOrWhiteSpace(b.BreakerMfr))
+                        b.TripMfr = b.BreakerMfr!.Trim();
                     
                     // Step 3 heuristics on breaker style
-                    if (string.IsNullOrWhiteSpace(b.Manufacturer))
+                    if (string.IsNullOrWhiteSpace(b.BreakerMfr))
                     {
-                        var inferred = InferManufacturerFromStyle(b.Style);
-                        if (!string.IsNullOrEmpty(inferred)) b.Manufacturer = inferred;
+                        var inferred = InferManufacturerFromStyle(b.BreakerStyle);
+                        if (!string.IsNullOrEmpty(inferred)) b.BreakerMfr = inferred;
                     }
                     
-                    if (string.IsNullOrWhiteSpace(b.TripUnitManufacturer))
+                    if (string.IsNullOrWhiteSpace(b.TripMfr))
                     {
-                        var inferredTu = InferManufacturerFromStyle(b.TripUnitStyle) ?? b.Manufacturer;
-                        if (!string.IsNullOrWhiteSpace(inferredTu)) b.TripUnitManufacturer = inferredTu;
+                        var inferredTu = InferManufacturerFromStyle(b.TripStyle) ?? b.BreakerMfr;
+                        if (!string.IsNullOrWhiteSpace(inferredTu)) b.TripMfr = inferredTu;
                     }
                 }
             }
@@ -554,10 +554,42 @@ namespace EasyAF.Data.Models
         public string? SoftwareVersion { get; set; }
         public List<ArcFlashEntry>? ArcFlashEntries { get; set; }
         public List<ShortCircuitEntry>? ShortCircuitEntries { get; set; }
-        public Dictionary<string,LVCB>? LVCBEntries { get; set; }
+        
+        // Original 6 equipment types
+        public Dictionary<string,LVBreaker>? LVBreakerEntries { get; set; }
         public Dictionary<string,Fuse>? FuseEntries { get; set; }
         public Dictionary<string,Cable>? CableEntries { get; set; }
         public Dictionary<string,Bus>? BusEntries { get; set; }
+        
+        // Extended equipment types (alphabetically)
+        public Dictionary<string,AFD>? AFDEntries { get; set; }
+        public Dictionary<string,ATS>? ATSEntries { get; set; }
+        public Dictionary<string,Battery>? BatteryEntries { get; set; }
+        public Dictionary<string,Busway>? BuswayEntries { get; set; }
+        public Dictionary<string,Capacitor>? CapacitorEntries { get; set; }
+        public Dictionary<string,CLReactor>? CLReactorEntries { get; set; }
+        public Dictionary<string,CT>? CTEntries { get; set; }
+        public Dictionary<string,Filter>? FilterEntries { get; set; }
+        public Dictionary<string,Generator>? GeneratorEntries { get; set; }
+        public Dictionary<string,HVBreaker>? HVBreakerEntries { get; set; }
+        public Dictionary<string,Inverter>? InverterEntries { get; set; }
+        public Dictionary<string,Load>? LoadEntries { get; set; }
+        public Dictionary<string,MCC>? MCCEntries { get; set; }
+        public Dictionary<string,Meter>? MeterEntries { get; set; }
+        public Dictionary<string,Motor>? MotorEntries { get; set; }
+        public Dictionary<string,Panel>? PanelEntries { get; set; }
+        public Dictionary<string,Photovoltaic>? PhotovoltaicEntries { get; set; }
+        public Dictionary<string,POC>? POCEntries { get; set; }
+        public Dictionary<string,Rectifier>? RectifierEntries { get; set; }
+        public Dictionary<string,Relay>? RelayEntries { get; set; }
+        public Dictionary<string,Shunt>? ShuntEntries { get; set; }
+        public Dictionary<string,Switch>? SwitchEntries { get; set; }
+        public Dictionary<string,Transformer2W>? Transformer2WEntries { get; set; }
+        public Dictionary<string,Transformer3W>? Transformer3WEntries { get; set; }
+        public Dictionary<string,TransmissionLine>? TransmissionLineEntries { get; set; }
+        public Dictionary<string,UPS>? UPSEntries { get; set; }
+        public Dictionary<string,Utility>? UtilityEntries { get; set; }
+        public Dictionary<string,ZigzagTransformer>? ZigzagTransformerEntries { get; set; }
 
         public static DataSetPersist? FromDataSet(DataSet? ds)
         {
@@ -567,26 +599,94 @@ namespace EasyAF.Data.Models
                 SoftwareVersion = ds.SoftwareVersion,
                 ArcFlashEntries = ds.ArcFlashEntries?.Select(kv => new ArcFlashEntry { Id = kv.Key.Id, Scenario = kv.Key.Scenario, Value = kv.Value }).ToList(),
                 ShortCircuitEntries = ds.ShortCircuitEntries?.Select(kv => new ShortCircuitEntry { Id = kv.Key.Id, Bus = kv.Key.Bus, Scenario = kv.Key.Scenario, Value = kv.Value }).ToList(),
-                LVCBEntries = ds.LVCBEntries,
+                
+                // Original 6
+                LVBreakerEntries = ds.LVBreakerEntries,
                 FuseEntries = ds.FuseEntries,
                 CableEntries = ds.CableEntries,
-                BusEntries = ds.BusEntries
+                BusEntries = ds.BusEntries,
+                
+                // Extended (alphabetically)
+                AFDEntries = ds.AFDEntries,
+                ATSEntries = ds.ATSEntries,
+                BatteryEntries = ds.BatteryEntries,
+                BuswayEntries = ds.BuswayEntries,
+                CapacitorEntries = ds.CapacitorEntries,
+                CLReactorEntries = ds.CLReactorEntries,
+                CTEntries = ds.CTEntries,
+                FilterEntries = ds.FilterEntries,
+                GeneratorEntries = ds.GeneratorEntries,
+                HVBreakerEntries = ds.HVBreakerEntries,
+                InverterEntries = ds.InverterEntries,
+                LoadEntries = ds.LoadEntries,
+                MCCEntries = ds.MCCEntries,
+                MeterEntries = ds.MeterEntries,
+                MotorEntries = ds.MotorEntries,
+                PanelEntries = ds.PanelEntries,
+                PhotovoltaicEntries = ds.PhotovoltaicEntries,
+                POCEntries = ds.POCEntries,
+                RectifierEntries = ds.RectifierEntries,
+                RelayEntries = ds.RelayEntries,
+                ShuntEntries = ds.ShuntEntries,
+                SwitchEntries = ds.SwitchEntries,
+                Transformer2WEntries = ds.Transformer2WEntries,
+                Transformer3WEntries = ds.Transformer3WEntries,
+                TransmissionLineEntries = ds.TransmissionLineEntries,
+                UPSEntries = ds.UPSEntries,
+                UtilityEntries = ds.UtilityEntries,
+                ZigzagTransformerEntries = ds.ZigzagTransformerEntries
             };
         }
+        
         public DataSet ToDataSet()
         {
             var ds = new DataSet { SoftwareVersion = SoftwareVersion };
+            
+            // Composite key entries
             if (ArcFlashEntries != null)
                 ds.ArcFlashEntries = ArcFlashEntries.ToDictionary(e => (e.Id, e.Scenario), e => e.Value!);
             if (ShortCircuitEntries != null)
                 ds.ShortCircuitEntries = ShortCircuitEntries.ToDictionary(e => (e.Id, e.Bus, e.Scenario), e => e.Value!);
-            ds.LVCBEntries = LVCBEntries ?? new Dictionary<string, LVCB>();
-            ds.FuseEntries = FuseEntries ?? new Dictionary<string, Fuse>();
-            ds.CableEntries = CableEntries ?? new Dictionary<string, Cable>();
+            
+            // All equipment dictionaries (alphabetically)
+            ds.AFDEntries = AFDEntries ?? new Dictionary<string, AFD>();
+            ds.ATSEntries = ATSEntries ?? new Dictionary<string, ATS>();
+            ds.BatteryEntries = BatteryEntries ?? new Dictionary<string, Battery>();
             ds.BusEntries = BusEntries ?? new Dictionary<string, Bus>();
+            ds.BuswayEntries = BuswayEntries ?? new Dictionary<string, Busway>();
+            ds.CableEntries = CableEntries ?? new Dictionary<string, Cable>();
+            ds.CapacitorEntries = CapacitorEntries ?? new Dictionary<string, Capacitor>();
+            ds.CLReactorEntries = CLReactorEntries ?? new Dictionary<string, CLReactor>();
+            ds.CTEntries = CTEntries ?? new Dictionary<string, CT>();
+            ds.FilterEntries = FilterEntries ?? new Dictionary<string, Filter>();
+            ds.FuseEntries = FuseEntries ?? new Dictionary<string, Fuse>();
+            ds.GeneratorEntries = GeneratorEntries ?? new Dictionary<string, Generator>();
+            ds.HVBreakerEntries = HVBreakerEntries ?? new Dictionary<string, HVBreaker>();
+            ds.InverterEntries = InverterEntries ?? new Dictionary<string, Inverter>();
+            ds.LoadEntries = LoadEntries ?? new Dictionary<string, Load>();
+            ds.LVBreakerEntries = LVBreakerEntries ?? new Dictionary<string, LVBreaker>();
+            ds.MCCEntries = MCCEntries ?? new Dictionary<string, MCC>();
+            ds.MeterEntries = MeterEntries ?? new Dictionary<string, Meter>();
+            ds.MotorEntries = MotorEntries ?? new Dictionary<string, Motor>();
+            ds.PanelEntries = PanelEntries ?? new Dictionary<string, Panel>();
+            ds.PhotovoltaicEntries = PhotovoltaicEntries ?? new Dictionary<string, Photovoltaic>();
+            ds.POCEntries = POCEntries ?? new Dictionary<string, POC>();
+            ds.RectifierEntries = RectifierEntries ?? new Dictionary<string, Rectifier>();
+            ds.RelayEntries = RelayEntries ?? new Dictionary<string, Relay>();
+            ds.ShuntEntries = ShuntEntries ?? new Dictionary<string, Shunt>();
+            ds.SwitchEntries = SwitchEntries ?? new Dictionary<string, Switch>();
+            ds.Transformer2WEntries = Transformer2WEntries ?? new Dictionary<string, Transformer2W>();
+            ds.Transformer3WEntries = Transformer3WEntries ?? new Dictionary<string, Transformer3W>();
+            ds.TransmissionLineEntries = TransmissionLineEntries ?? new Dictionary<string, TransmissionLine>();
+            ds.UPSEntries = UPSEntries ?? new Dictionary<string, UPS>();
+            ds.UtilityEntries = UtilityEntries ?? new Dictionary<string, Utility>();
+            ds.ZigzagTransformerEntries = ZigzagTransformerEntries ?? new Dictionary<string, ZigzagTransformer>();
+            
             return ds;
         }
     }
     internal class ArcFlashEntry { public string Id { get; set; } = string.Empty; public string Scenario { get; set; } = string.Empty; public ArcFlash? Value { get; set; } }
     internal class ShortCircuitEntry { public string Id { get; set; } = string.Empty; public string Bus { get; set; } = string.Empty; public string Scenario { get; set; } = string.Empty; public ShortCircuit? Value { get; set; } }
 }
+
+

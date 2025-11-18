@@ -3,593 +3,497 @@ using EasyAF.Data.Attributes;
 namespace EasyAF.Data.Models;
 
 /// <summary>
-/// Represents an electrical cable/conductor with comprehensive properties from EasyPower exports.
+/// Represents a Cable with comprehensive properties from EasyPower exports.
 /// All properties are strings to preserve source data fidelity without premature parsing.
 /// </summary>
 /// <remarks>
 /// <para>
-/// Cables connect electrical equipment and carry current between buses and devices.
-/// This model includes physical properties, electrical characteristics, installation details, and reliability data.
+/// <strong>EasyPower Correlation:</strong> Maps to "Cables" class in EasyPower CSV exports.
 /// </para>
 /// <para>
-/// <strong>EasyPower Correlation:</strong> Maps to "Cables" class in EasyPower CSV exports.
+/// <strong>Auto-Generated:</strong> This file was automatically generated from CSV field definitions.
+/// Do not manually edit property names - regenerate from source CSV if changes are needed.
 /// </para>
 /// </remarks>
 [EasyPowerClass("Cables")]
 public class Cable
 {
-    // ========================================
-    // IDENTITY & BASIC INFO
-    // ========================================
-    
-    /// <summary>Cable identifier. (Column: Cables)</summary>
+    /// <summary>Cables (Column: Cables)</summary>
     [Category("Identity")]
-    [Description("Cable identifier")]
+    [Description("Cables")]
     [Required]
     public string? Cables { get; set; }
-    
-    /// <summary>Alias for Cables (convenience property for dictionary indexing - not serialized).</summary>
-    [System.Text.Json.Serialization.JsonIgnore]
-    [Newtonsoft.Json.JsonIgnore]
-    public string? Id 
-    { 
-        get => Cables; 
-        set => Cables = value; 
-    }
-    
-    /// <summary>AC / DC designation. (Column: AC/DC)</summary>
-    [Category("Electrical")]
-    [Description("AC or DC power system designation")]
+
+    /// <summary>AC/DC (Column: AC/DC)</summary>
+    [Category("General")]
+    [Description("AC/DC")]
     public string? AcDc { get; set; }
-    
-    /// <summary>Status of the cable. (Column: Status)</summary>
+
+    /// <summary>Status (Column: Status)</summary>
     [Category("Identity")]
-    [Description("Operational status")]
+    [Description("Status")]
     public string? Status { get; set; }
-    
-    /// <summary>Number of phases. (Column: No of Phases)</summary>
-    [Category("Electrical")]
-    [Description("Number of phases (1, 2, or 3)")]
+
+    /// <summary>No of Phases (Column: No of Phases)</summary>
+    [Category("General")]
+    [Description("No of Phases")]
     public string? NoOfPhases { get; set; }
 
-    // ========================================
-    // FROM CONNECTION
-    // ========================================
-    
-    /// <summary>From bus ID. (Column: From Bus ID)</summary>
+    /// <summary>From Bus ID (Column: From Bus ID)</summary>
     [Category("Electrical")]
-    [Description("Source bus identifier")]
-    public string? FromBusId { get; set; }
-    
-    /// <summary>From bus type. (Column: From Bus Type)</summary>
+    [Description("From Bus ID")]
+    public string? FromBusID { get; set; }
+
+    /// <summary>From Bus Type (Column: From Bus Type)</summary>
     [Category("Electrical")]
-    [Description("Source bus type")]
+    [Description("From Bus Type")]
     public string? FromBusType { get; set; }
-    
-    /// <summary>From device ID. (Column: From Device ID)</summary>
-    [Category("Electrical")]
-    [Description("Source device identifier")]
-    public string? FromDeviceId { get; set; }
-    
-    /// <summary>From device type. (Column: From Device Type)</summary>
-    [Category("Electrical")]
-    [Description("Source device type")]
+
+    /// <summary>From Device ID (Column: From Device ID)</summary>
+    [Category("Identity")]
+    [Description("From Device ID")]
+    public string? FromDeviceID { get; set; }
+
+    /// <summary>From Device Type (Column: From Device Type)</summary>
+    [Category("Physical")]
+    [Description("From Device Type")]
     public string? FromDeviceType { get; set; }
-    
-    /// <summary>From base kV. (Column: From Base kV)</summary>
+
+    /// <summary>From Base kV (Column: From Base kV)</summary>
     [Category("Electrical")]
-    [Units("kV")]
-    [Description("Source voltage level")]
+    [Description("From Base kV")]
     public string? FromBaseKV { get; set; }
 
-    // ========================================
-    // TO CONNECTION
-    // ========================================
-    
-    /// <summary>To bus ID. (Column: To Bus ID)</summary>
+    /// <summary>To Bus ID (Column: To Bus ID)</summary>
     [Category("Electrical")]
-    [Description("Destination bus identifier")]
-    public string? ToBusId { get; set; }
-    
-    /// <summary>To bus type. (Column: To Bus Type)</summary>
+    [Description("To Bus ID")]
+    public string? ToBusID { get; set; }
+
+    /// <summary>To Bus Type (Column: To Bus Type)</summary>
     [Category("Electrical")]
-    [Description("Destination bus type")]
+    [Description("To Bus Type")]
     public string? ToBusType { get; set; }
-    
-    /// <summary>To device ID. (Column: To Device ID)</summary>
-    [Category("Electrical")]
-    [Description("Destination device identifier")]
-    public string? ToDeviceId { get; set; }
-    
-    /// <summary>To device type. (Column: To Device Type)</summary>
-    [Category("Electrical")]
-    [Description("Destination device type")]
+
+    /// <summary>To Device ID (Column: To Device ID)</summary>
+    [Category("Identity")]
+    [Description("To Device ID")]
+    public string? ToDeviceID { get; set; }
+
+    /// <summary>To Device Type (Column: To Device Type)</summary>
+    [Category("Physical")]
+    [Description("To Device Type")]
     public string? ToDeviceType { get; set; }
-    
-    /// <summary>To base kV. (Column: To Base kV)</summary>
+
+    /// <summary>To Base kV (Column: To Base kV)</summary>
     [Category("Electrical")]
-    [Units("kV")]
-    [Description("Destination voltage level")]
+    [Description("To Base kV")]
     public string? ToBaseKV { get; set; }
 
-    // ========================================
-    // CABLE CONFIGURATION
-    // ========================================
-    
-    /// <summary>Cable unit designation. (Column: Unit)</summary>
-    [Category("Physical")]
-    [Description("Cable unit or section designation")]
+    /// <summary>Unit (Column: Unit)</summary>
+    [Category("General")]
+    [Description("Unit")]
     public string? Unit { get; set; }
-    
-    /// <summary>Cable type. (Column: Type)</summary>
+
+    /// <summary>Type (Column: Type)</summary>
     [Category("Physical")]
-    [Description("Cable type or construction")]
+    [Description("Type")]
     public string? Type { get; set; }
-    
-    /// <summary>Number per phase. (Column: No/Ph)</summary>
-    [Category("Physical")]
-    [Description("Number of conductors per phase")]
-    public string? NumberPerPhase { get; set; }
-    
-    /// <summary>Phase number. (Column: Phase Num)</summary>
-    [Category("Physical")]
-    [Description("Phase number designation")]
+
+    /// <summary>No/Ph (Column: No/Ph)</summary>
+    [Category("General")]
+    [Description("No/Ph")]
+    public string? NoPerPhase { get; set; }
+
+    /// <summary>Phase Num (Column: Phase Num)</summary>
+    [Category("General")]
+    [Description("Phase Num")]
     public string? PhaseNum { get; set; }
-    
-    /// <summary>Conductor size. (Column: Size)</summary>
-    [Category("Physical")]
-    [Description("Conductor size (AWG, kcmil, mm²)")]
+
+    /// <summary>Size (Column: Size)</summary>
+    [Category("General")]
+    [Description("Size")]
     public string? Size { get; set; }
-    
-    /// <summary>Cable length. (Column: Length)</summary>
-    [Category("Physical")]
-    [Units("ft")]
-    [Description("Cable length")]
+
+    /// <summary>Length (Column: Length)</summary>
+    [Category("General")]
+    [Description("Length")]
     public string? Length { get; set; }
-    
-    /// <summary>Operating temperature. (Column: Op Temp (C))</summary>
-    [Category("Physical")]
-    [Units("°C")]
-    [Description("Operating temperature")]
+
+    /// <summary>Op Temp (C) (Column: Op Temp (C))</summary>
+    [Category("General")]
+    [Description("Op Temp (C)")]
+    [Units("Â°C")]
     public string? OpTempC { get; set; }
-    
-    /// <summary>Ambient temperature. (Column: Ambient Temp (C))</summary>
-    [Category("Physical")]
-    [Units("°C")]
-    [Description("Ambient temperature")]
+
+    /// <summary>Ambient Temp (C) (Column: Ambient Temp (C))</summary>
+    [Category("General")]
+    [Description("Ambient Temp (C)")]
+    [Units("Â°C")]
     public string? AmbientTempC { get; set; }
-    
-    /// <summary>Insulation type. (Column: Insulation)</summary>
-    [Category("Physical")]
-    [Description("Insulation material type")]
+
+    /// <summary>Insulation (Column: Insulation)</summary>
+    [Category("General")]
+    [Description("Insulation")]
     public string? Insulation { get; set; }
-    
-    /// <summary>Insulation level. (Column: Insulation Level)</summary>
-    [Category("Physical")]
-    [Description("Insulation voltage level or class")]
+
+    /// <summary>Insulation Level (Column: Insulation Level)</summary>
+    [Category("General")]
+    [Description("Insulation Level")]
     public string? InsulationLevel { get; set; }
-    
-    /// <summary>Ampacity rating. (Column: Rating (A))</summary>
-    [Category("Physical")]
+
+    /// <summary>Rating (A) (Column: Rating (A))</summary>
+    [Category("General")]
+    [Description("Rating (A)")]
     [Units("A")]
-    [Description("Ampacity rating at operating temperature")]
     public string? RatingA { get; set; }
-    
-    /// <summary>75°C ampacity rating. (Column: 75 deg C Rating (A))</summary>
-    [Category("Physical")]
+
+    /// <summary>75 deg C Rating (A) (Column: 75 deg C Rating (A))</summary>
+    [Category("General")]
+    [Description("75 deg C Rating (A)")]
     [Units("A")]
-    [Description("Ampacity rating at 75°C")]
-    public string? Rating75DegCA { get; set; }
-    
-    /// <summary>Conductor material. (Column: Material)</summary>
+    public string? SevenFiveDegCRatingA { get; set; }
+
+    /// <summary>Material (Column: Material)</summary>
     [Category("Physical")]
-    [Description("Conductor material (Copper, Aluminum)")]
+    [Description("Material")]
     public string? Material { get; set; }
 
-    // ========================================
-    // RACEWAY / INSTALLATION
-    // ========================================
-    
-    /// <summary>Raceway type. (Column: Raceway Type)</summary>
+    /// <summary>Raceway Type (Column: Raceway Type)</summary>
     [Category("Physical")]
-    [Description("Raceway or conduit type")]
+    [Description("Raceway Type")]
     public string? RacewayType { get; set; }
-    
-    /// <summary>Raceway material. (Column: Raceway Mtl)</summary>
-    [Category("Physical")]
-    [Description("Raceway material")]
-    public string? RacewayMaterial { get; set; }
-    
-    /// <summary>Conduit size. (Column: Conduit Size)</summary>
-    [Category("Physical")]
-    [Description("Conduit size designation")]
+
+    /// <summary>Raceway Mtl (Column: Raceway Mtl)</summary>
+    [Category("General")]
+    [Description("Raceway Mtl")]
+    public string? RacewayMtl { get; set; }
+
+    /// <summary>Conduit Size (Column: Conduit Size)</summary>
+    [Category("General")]
+    [Description("Conduit Size")]
     public string? ConduitSize { get; set; }
-    
-    /// <summary>Number of conduits. (Column: Conduit Num)</summary>
-    [Category("Physical")]
-    [Description("Number of conduits")]
+
+    /// <summary>Conduit Num (Column: Conduit Num)</summary>
+    [Category("General")]
+    [Description("Conduit Num")]
     public string? ConduitNum { get; set; }
 
-    // ========================================
-    // ELECTRICAL IMPEDANCE (ANSI)
-    // ========================================
-    
-    /// <summary>Positive sequence resistance. (Column: R1)</summary>
-    [Category("Electrical")]
-    [Units("?")]
-    [Description("Positive sequence resistance")]
+    /// <summary>R1 (Column: R1)</summary>
+    [Category("General")]
+    [Description("R1")]
     public string? R1 { get; set; }
-    
-    /// <summary>Positive sequence reactance. (Column: X1)</summary>
-    [Category("Electrical")]
-    [Units("?")]
-    [Description("Positive sequence reactance")]
+
+    /// <summary>X1 (Column: X1)</summary>
+    [Category("General")]
+    [Description("X1")]
     public string? X1 { get; set; }
-    
-    /// <summary>Zero sequence resistance. (Column: R0)</summary>
-    [Category("Electrical")]
-    [Units("?")]
-    [Description("Zero sequence resistance")]
+
+    /// <summary>R0 (Column: R0)</summary>
+    [Category("General")]
+    [Description("R0")]
     public string? R0 { get; set; }
-    
-    /// <summary>Zero sequence reactance. (Column: X0)</summary>
-    [Category("Electrical")]
-    [Units("?")]
-    [Description("Zero sequence reactance")]
+
+    /// <summary>X0 (Column: X0)</summary>
+    [Category("General")]
+    [Description("X0")]
     public string? X0 { get; set; }
-    
-    /// <summary>Positive sequence capacitive reactance. (Column: Xc)</summary>
-    [Category("Electrical")]
-    [Units("?")]
-    [Description("Positive sequence capacitive reactance")]
+
+    /// <summary>Xc (Column: Xc)</summary>
+    [Category("General")]
+    [Description("Xc")]
     public string? Xc { get; set; }
-    
-    /// <summary>Zero sequence capacitive reactance. (Column: Xc0)</summary>
-    [Category("Electrical")]
-    [Units("?")]
-    [Description("Zero sequence capacitive reactance")]
+
+    /// <summary>Xc0 (Column: Xc0)</summary>
+    [Category("General")]
+    [Description("Xc0")]
     public string? Xc0 { get; set; }
 
-    // ========================================
-    // GROUND CONDUCTOR
-    // ========================================
-    
-    /// <summary>Number of ground conductors. (Column: Gnd Num)</summary>
-    [Category("Physical")]
-    [Description("Number of ground conductors")]
-    public string? GroundNum { get; set; }
-    
-    /// <summary>Ground conductor size. (Column: Gnd Size)</summary>
-    [Category("Physical")]
-    [Description("Ground conductor size")]
-    public string? GroundSize { get; set; }
-    
-    /// <summary>Ground conductor material. (Column: Gnd Mtl)</summary>
-    [Category("Physical")]
-    [Description("Ground conductor material")]
-    public string? GroundMaterial { get; set; }
-    
-    /// <summary>Ground conductor type. (Column: Gnd Type)</summary>
-    [Category("Physical")]
-    [Description("Ground conductor type")]
-    public string? GroundType { get; set; }
-    
-    /// <summary>Ground conductor insulation. (Column: Gnd Insul)</summary>
-    [Category("Physical")]
-    [Description("Ground conductor insulation")]
-    public string? GroundInsulation { get; set; }
+    /// <summary>Gnd Num (Column: Gnd Num)</summary>
+    [Category("General")]
+    [Description("Gnd Num")]
+    public string? GndNum { get; set; }
 
-    // ========================================
-    // NEUTRAL CONDUCTOR
-    // ========================================
-    
-    /// <summary>Number of neutral conductors. (Column: Neutral Num)</summary>
+    /// <summary>Gnd Size (Column: Gnd Size)</summary>
+    [Category("General")]
+    [Description("Gnd Size")]
+    public string? GndSize { get; set; }
+
+    /// <summary>Gnd Mtl (Column: Gnd Mtl)</summary>
+    [Category("General")]
+    [Description("Gnd Mtl")]
+    public string? GndMtl { get; set; }
+
+    /// <summary>Gnd Type (Column: Gnd Type)</summary>
     [Category("Physical")]
-    [Description("Number of neutral conductors")]
+    [Description("Gnd Type")]
+    public string? GndType { get; set; }
+
+    /// <summary>Gnd Insul (Column: Gnd Insul)</summary>
+    [Category("General")]
+    [Description("Gnd Insul")]
+    public string? GndInsul { get; set; }
+
+    /// <summary>Neutral Num (Column: Neutral Num)</summary>
+    [Category("General")]
+    [Description("Neutral Num")]
     public string? NeutralNum { get; set; }
-    
-    /// <summary>Neutral insulation. (Column: Neutral Insul)</summary>
-    [Category("Physical")]
-    [Description("Neutral conductor insulation")]
-    public string? NeutralInsulation { get; set; }
-    
-    /// <summary>Neutral conductor size. (Column: Neutral Size)</summary>
-    [Category("Physical")]
-    [Description("Neutral conductor size")]
+
+    /// <summary>Neutral Insul (Column: Neutral Insul)</summary>
+    [Category("General")]
+    [Description("Neutral Insul")]
+    public string? NeutralInsul { get; set; }
+
+    /// <summary>Neutral Size (Column: Neutral Size)</summary>
+    [Category("General")]
+    [Description("Neutral Size")]
     public string? NeutralSize { get; set; }
-    
-    /// <summary>Neutral conductor material. (Column: Neutral Mtl)</summary>
-    [Category("Physical")]
-    [Description("Neutral conductor material")]
-    public string? NeutralMaterial { get; set; }
-    
-    /// <summary>Neutral insulation level. (Column: Neutral Insulation Level)</summary>
-    [Category("Physical")]
-    [Description("Neutral insulation voltage level")]
+
+    /// <summary>Neutral Mtl (Column: Neutral Mtl)</summary>
+    [Category("General")]
+    [Description("Neutral Mtl")]
+    public string? NeutralMtl { get; set; }
+
+    /// <summary>Neutral Insulation Level (Column: Neutral Insulation Level)</summary>
+    [Category("General")]
+    [Description("Neutral Insulation Level")]
     public string? NeutralInsulationLevel { get; set; }
-    
-    /// <summary>Neutral resistance. (Column: Neutral R)</summary>
-    [Category("Electrical")]
-    [Units("?")]
-    [Description("Neutral conductor resistance")]
+
+    /// <summary>Neutral R (Column: Neutral R)</summary>
+    [Category("General")]
+    [Description("Neutral R")]
     public string? NeutralR { get; set; }
-    
-    /// <summary>Neutral reactance. (Column: Neutral X)</summary>
-    [Category("Electrical")]
-    [Units("?")]
-    [Description("Neutral conductor reactance")]
+
+    /// <summary>Neutral X (Column: Neutral X)</summary>
+    [Category("General")]
+    [Description("Neutral X")]
     public string? NeutralX { get; set; }
-    
-    /// <summary>Neutral capacitive reactance. (Column: Neutral Xc)</summary>
-    [Category("Electrical")]
-    [Units("?")]
-    [Description("Neutral capacitive reactance")]
+
+    /// <summary>Neutral Xc (Column: Neutral Xc)</summary>
+    [Category("General")]
+    [Description("Neutral Xc")]
     public string? NeutralXc { get; set; }
-    
-    /// <summary>Neutral conductor rating. (Column: Neutral Rating)</summary>
-    [Category("Physical")]
-    [Units("A")]
-    [Description("Neutral conductor ampacity")]
+
+    /// <summary>Neutral Rating (Column: Neutral Rating)</summary>
+    [Category("General")]
+    [Description("Neutral Rating")]
     public string? NeutralRating { get; set; }
 
-    // ========================================
-    // CONDUCTOR CONSTRUCTION
-    // ========================================
-    
-    /// <summary>Conductor lay type. (Column: Conductor Lay)</summary>
-    [Category("Physical")]
-    [Description("Conductor lay or stranding type")]
+    /// <summary>Conductor Lay (Column: Conductor Lay)</summary>
+    [Category("General")]
+    [Description("Conductor Lay")]
     public string? ConductorLay { get; set; }
-    
-    /// <summary>Conductor form. (Column: Conductor Form)</summary>
-    [Category("Physical")]
-    [Description("Conductor form or shape")]
+
+    /// <summary>Conductor Form (Column: Conductor Form)</summary>
+    [Category("General")]
+    [Description("Conductor Form")]
     public string? ConductorForm { get; set; }
-    
-    /// <summary>Duct configuration. (Column: Duct Config)</summary>
-    [Category("Physical")]
-    [Description("Duct bank configuration")]
+
+    /// <summary>Duct Config (Column: Duct Config)</summary>
+    [Category("General")]
+    [Description("Duct Config")]
     public string? DuctConfig { get; set; }
-    
-    /// <summary>Cable spacing. (Column: Spacing)</summary>
-    [Category("Physical")]
-    [Description("Cable spacing arrangement")]
+
+    /// <summary>Spacing (Column: Spacing)</summary>
+    [Category("General")]
+    [Description("Spacing")]
     public string? Spacing { get; set; }
 
-    // ========================================
-    // PER-UNIT IMPEDANCE (ANSI)
-    // ========================================
-    
-    /// <summary>R1 per unit. (Column: R1 pu)</summary>
-    [Category("Electrical")]
-    [Units("pu")]
-    [Description("Positive sequence resistance (per unit)")]
+    /// <summary>R1 pu (Column: R1 pu)</summary>
+    [Category("General")]
+    [Description("R1 pu")]
     public string? R1Pu { get; set; }
-    
-    /// <summary>X1 per unit. (Column: X1 pu)</summary>
-    [Category("Electrical")]
-    [Units("pu")]
-    [Description("Positive sequence reactance (per unit)")]
+
+    /// <summary>X1 pu (Column: X1 pu)</summary>
+    [Category("General")]
+    [Description("X1 pu")]
     public string? X1Pu { get; set; }
-    
-    /// <summary>R0 per unit. (Column: R0 pu)</summary>
-    [Category("Electrical")]
-    [Units("pu")]
-    [Description("Zero sequence resistance (per unit)")]
+
+    /// <summary>R0 pu (Column: R0 pu)</summary>
+    [Category("General")]
+    [Description("R0 pu")]
     public string? R0Pu { get; set; }
-    
-    /// <summary>X0 per unit. (Column: X0 pu)</summary>
-    [Category("Electrical")]
-    [Units("pu")]
-    [Description("Zero sequence reactance (per unit)")]
+
+    /// <summary>X0 pu (Column: X0 pu)</summary>
+    [Category("General")]
+    [Description("X0 pu")]
     public string? X0Pu { get; set; }
-    
-    /// <summary>B1 per unit. (Column: B1 pu)</summary>
-    [Category("Electrical")]
-    [Units("pu")]
-    [Description("Positive sequence susceptance (per unit)")]
+
+    /// <summary>B1 pu (Column: B1 pu)</summary>
+    [Category("General")]
+    [Description("B1 pu")]
     public string? B1Pu { get; set; }
-    
-    /// <summary>B0 per unit. (Column: B0 pu)</summary>
-    [Category("Electrical")]
-    [Units("pu")]
-    [Description("Zero sequence susceptance (per unit)")]
+
+    /// <summary>B0 pu (Column: B0 pu)</summary>
+    [Category("General")]
+    [Description("B0 pu")]
     public string? B0Pu { get; set; }
-    
-    /// <summary>Neutral R per unit. (Column: Neutral R Pu)</summary>
-    [Category("Electrical")]
-    [Units("pu")]
-    [Description("Neutral resistance (per unit)")]
+
+    /// <summary>Neutral R Pu (Column: Neutral R Pu)</summary>
+    [Category("General")]
+    [Description("Neutral R Pu")]
     public string? NeutralRPu { get; set; }
-    
-    /// <summary>Neutral X per unit. (Column: Neutral X Pu)</summary>
-    [Category("Electrical")]
-    [Units("pu")]
-    [Description("Neutral reactance (per unit)")]
+
+    /// <summary>Neutral X Pu (Column: Neutral X Pu)</summary>
+    [Category("General")]
+    [Description("Neutral X Pu")]
     public string? NeutralXPu { get; set; }
-    
-    /// <summary>Neutral B per unit. (Column: Neutral B Pu)</summary>
-    [Category("Electrical")]
-    [Units("pu")]
-    [Description("Neutral susceptance (per unit)")]
+
+    /// <summary>Neutral B Pu (Column: Neutral B Pu)</summary>
+    [Category("General")]
+    [Description("Neutral B Pu")]
     public string? NeutralBPu { get; set; }
 
-    // ========================================
-    // IEC TEMPERATURE-CORRECTED IMPEDANCE
-    // ========================================
-    
-    /// <summary>IEC field temperature. (Column: IEC Field Temp (C))</summary>
-    [Category("Electrical")]
-    [Units("°C")]
-    [Description("IEC field operating temperature")]
-    public string? IecFieldTempC { get; set; }
-    
-    /// <summary>IEC short-circuit temperature. (Column: IEC SC Temp (C))</summary>
-    [Category("Electrical")]
-    [Units("°C")]
-    [Description("IEC short-circuit temperature")]
-    public string? IecScTempC { get; set; }
-    
-    /// <summary>IEC R1 at Cmax. (Column: IEC R1 Cmax pu)</summary>
-    [Category("Electrical")]
-    [Units("pu")]
-    [Description("IEC positive sequence resistance at max temp")]
-    public string? IecR1CmaxPu { get; set; }
-    
-    /// <summary>IEC R0 at Cmax. (Column: IEC R0 Cmax pu)</summary>
-    [Category("Electrical")]
-    [Units("pu")]
-    [Description("IEC zero sequence resistance at max temp")]
-    public string? IecR0CmaxPu { get; set; }
-    
-    /// <summary>IEC R1 at Cmin. (Column: IEC R1 Cmin pu)</summary>
-    [Category("Electrical")]
-    [Units("pu")]
-    [Description("IEC positive sequence resistance at min temp")]
-    public string? IecR1CminPu { get; set; }
-    
-    /// <summary>IEC R0 at Cmin. (Column: IEC R0 Cmin pu)</summary>
-    [Category("Electrical")]
-    [Units("pu")]
-    [Description("IEC zero sequence resistance at min temp")]
-    public string? IecR0CminPu { get; set; }
-    
-    /// <summary>IEC neutral R at Cmax. (Column: IEC Neutral R Cmax pu)</summary>
-    [Category("Electrical")]
-    [Units("pu")]
-    [Description("IEC neutral resistance at max temp")]
-    public string? IecNeutralRCmaxPu { get; set; }
-    
-    /// <summary>IEC neutral R at Cmin. (Column: IEC Neutral R Cmin pu)</summary>
-    [Category("Electrical")]
-    [Units("pu")]
-    [Description("IEC neutral resistance at min temp")]
-    public string? IecNeutralRCminPu { get; set; }
+    /// <summary>IEC Field Temp (C) (Column: IEC Field Temp (C))</summary>
+    [Category("General")]
+    [Description("IEC Field Temp (C)")]
+    [Units("Â°C")]
+    public string? IECFieldTempC { get; set; }
 
-    // ========================================
-    // HARMONICS & DERATING
-    // ========================================
-    
-    /// <summary>Rating at max temperature. (Column: Rating at Max Temp)</summary>
-    [Category("Physical")]
-    [Units("A")]
-    [Description("Ampacity at maximum temperature")]
+    /// <summary>IEC SC Temp (C) (Column: IEC SC Temp (C))</summary>
+    [Category("General")]
+    [Description("IEC SC Temp (C)")]
+    [Units("Â°C")]
+    public string? IECSCTempC { get; set; }
+
+    /// <summary>IEC R1 Cmax pu (Column: IEC R1 Cmax pu)</summary>
+    [Category("General")]
+    [Description("IEC R1 Cmax pu")]
+    public string? IECR1CmaxPu { get; set; }
+
+    /// <summary>IEC R0 Cmax pu (Column: IEC R0 Cmax pu)</summary>
+    [Category("General")]
+    [Description("IEC R0 Cmax pu")]
+    public string? IECR0CmaxPu { get; set; }
+
+    /// <summary>IEC R1 Cmin pu (Column: IEC R1 Cmin pu)</summary>
+    [Category("General")]
+    [Description("IEC R1 Cmin pu")]
+    public string? IECR1CminPu { get; set; }
+
+    /// <summary>IEC R0 Cmin pu (Column: IEC R0 Cmin pu)</summary>
+    [Category("General")]
+    [Description("IEC R0 Cmin pu")]
+    public string? IECR0CminPu { get; set; }
+
+    /// <summary>IEC Neutral R Cmax pu (Column: IEC Neutral R Cmax pu)</summary>
+    [Category("General")]
+    [Description("IEC Neutral R Cmax pu")]
+    public string? IECNeutralRCmaxPu { get; set; }
+
+    /// <summary>IEC Neutral R Cmin pu (Column: IEC Neutral R Cmin pu)</summary>
+    [Category("General")]
+    [Description("IEC Neutral R Cmin pu")]
+    public string? IECNeutralRCminPu { get; set; }
+
+    /// <summary>Rating at Max Temp (Column: Rating at Max Temp)</summary>
+    [Category("General")]
+    [Description("Rating at Max Temp")]
     public string? RatingAtMaxTemp { get; set; }
-    
-    /// <summary>Harmonic RC factor. (Column: Hrm RC Factor)</summary>
-    [Category("Electrical")]
-    [Description("Harmonic resistance correction factor")]
+
+    /// <summary>Hrm RC Factor (Column: Hrm RC Factor)</summary>
+    [Category("General")]
+    [Description("Hrm RC Factor")]
     public string? HrmRcFactor { get; set; }
-    
-    /// <summary>Harmonic RC value. (Column: Hrm RC Value)</summary>
-    [Category("Electrical")]
-    [Description("Harmonic resistance correction value")]
+
+    /// <summary>Hrm RC Value (Column: Hrm RC Value)</summary>
+    [Category("General")]
+    [Description("Hrm RC Value")]
     public string? HrmRcValue { get; set; }
-    
-    /// <summary>Harmonic current rating setting. (Column: I Hrm Rating Setting)</summary>
-    [Category("Electrical")]
-    [Description("Harmonic current rating setting method")]
+
+    /// <summary>I Hrm Rating Setting (Column: I Hrm Rating Setting)</summary>
+    [Category("Control")]
+    [Description("I Hrm Rating Setting")]
     public string? IHrmRatingSetting { get; set; }
-    
-    /// <summary>Harmonic current rating. (Column: I Hrm Rating)</summary>
-    [Category("Electrical")]
-    [Units("A")]
-    [Description("Derated ampacity for harmonic currents")]
+
+    /// <summary>I Hrm Rating (Column: I Hrm Rating)</summary>
+    [Category("General")]
+    [Description("I Hrm Rating")]
     public string? IHrmRating { get; set; }
 
-    // ========================================
-    // RELIABILITY - COMPONENT
-    // ========================================
-    
-    /// <summary>Component failure rate. (Column: Comp Failure Rate (/year))</summary>
+    /// <summary>Comp Failure Rate (/year) (Column: Comp Failure Rate (/year))</summary>
     [Category("Reliability")]
+    [Description("Comp Failure Rate (/year)")]
     [Units("/year")]
-    [Description("Cable component failure rate")]
     public string? CompFailureRatePerYear { get; set; }
-    
-    /// <summary>Component repair time. (Column: Comp Repair Time (h))</summary>
+
+    /// <summary>Comp Repair Time (h) (Column: Comp Repair Time (h))</summary>
     [Category("Reliability")]
+    [Description("Comp Repair Time (h)")]
     [Units("h")]
-    [Description("Component mean time to repair")]
     public string? CompRepairTimeHours { get; set; }
-    
-    /// <summary>Component replacement time. (Column: Comp Replace Time (h))</summary>
-    [Category("Reliability")]
+
+    /// <summary>Comp Replace Time (h) (Column: Comp Replace Time (h))</summary>
+    [Category("General")]
+    [Description("Comp Replace Time (h)")]
     [Units("h")]
-    [Description("Component mean time to replace")]
     public string? CompReplaceTimeHours { get; set; }
-    
-    /// <summary>Component repair cost. (Column: Comp Repair Cost)</summary>
+
+    /// <summary>Comp Repair Cost (Column: Comp Repair Cost)</summary>
     [Category("Reliability")]
-    [Units("$")]
-    [Description("Component repair cost")]
+    [Description("Comp Repair Cost")]
     public string? CompRepairCost { get; set; }
-    
-    /// <summary>Component replacement cost. (Column: Comp Replace Cost)</summary>
-    [Category("Reliability")]
-    [Units("$")]
-    [Description("Component replacement cost")]
+
+    /// <summary>Comp Replace Cost (Column: Comp Replace Cost)</summary>
+    [Category("General")]
+    [Description("Comp Replace Cost")]
     public string? CompReplaceCost { get; set; }
-    
-    /// <summary>Component action upon failure. (Column: Comp Action Upon Failure)</summary>
+
+    /// <summary>Comp Action Upon Failure (Column: Comp Action Upon Failure)</summary>
     [Category("Reliability")]
-    [Description("Action when cable component fails")]
+    [Description("Comp Action Upon Failure")]
     public string? CompActionUponFailure { get; set; }
 
-    // ========================================
-    // RELIABILITY - CONNECTION
-    // ========================================
-    
-    /// <summary>Connection failure rate. (Column: Conn Failure Rate (/year))</summary>
+    /// <summary>Conn Failure Rate (/year) (Column: Conn Failure Rate (/year))</summary>
     [Category("Reliability")]
+    [Description("Conn Failure Rate (/year)")]
     [Units("/year")]
-    [Description("Connection/termination failure rate")]
     public string? ConnFailureRatePerYear { get; set; }
-    
-    /// <summary>Connection repair time. (Column: Conn Repair Time (h))</summary>
+
+    /// <summary>Conn Repair Time (h) (Column: Conn Repair Time (h))</summary>
     [Category("Reliability")]
+    [Description("Conn Repair Time (h)")]
     [Units("h")]
-    [Description("Connection mean time to repair")]
     public string? ConnRepairTimeHours { get; set; }
-    
-    /// <summary>Connection replacement time. (Column: Conn Replace Time (h))</summary>
-    [Category("Reliability")]
+
+    /// <summary>Conn Replace Time (h) (Column: Conn Replace Time (h))</summary>
+    [Category("General")]
+    [Description("Conn Replace Time (h)")]
     [Units("h")]
-    [Description("Connection mean time to replace")]
     public string? ConnReplaceTimeHours { get; set; }
-    
-    /// <summary>Reliability data source. (Column: Reliability Source)</summary>
+
+    /// <summary>Reliability Source (Column: Reliability Source)</summary>
     [Category("Reliability")]
-    [Description("Source of reliability data")]
+    [Description("Reliability Source")]
     public string? ReliabilitySource { get; set; }
-    
-    /// <summary>Reliability category. (Column: Reliability Category)</summary>
+
+    /// <summary>Reliability Category (Column: Reliability Category)</summary>
     [Category("Reliability")]
-    [Description("Reliability classification category")]
+    [Description("Reliability Category")]
     public string? ReliabilityCategory { get; set; }
-    
-    /// <summary>Reliability class. (Column: Reliability Class)</summary>
+
+    /// <summary>Reliability Class (Column: Reliability Class)</summary>
     [Category("Reliability")]
-    [Description("Reliability class designation")]
+    [Description("Reliability Class")]
     public string? ReliabilityClass { get; set; }
 
-    // ========================================
-    // METADATA
-    // ========================================
-    
-    /// <summary>Data status. (Column: Data Status)</summary>
-    [Category("Metadata")]
-    [Description("Data quality or completion status")]
+    /// <summary>Data Status (Column: Data Status)</summary>
+    [Category("Identity")]
+    [Description("Data Status")]
     public string? DataStatus { get; set; }
-    
-    /// <summary>Comments. (Column: Comment)</summary>
-    [Category("Metadata")]
-    [Description("General comments or notes")]
-    public string? Comments { get; set; }
 
-    // ========================================
-    // METHODS
-    // ========================================
+    /// <summary>Comment (Column: Comment)</summary>
+    [Category("Metadata")]
+    [Description("Comment")]
+    public string? Comment { get; set; }
+
+    /// <summary>Alias for Cable (convenience property for dictionary indexing - not serialized).</summary>
+    [System.Text.Json.Serialization.JsonIgnore]
+    [Newtonsoft.Json.JsonIgnore]
+    public string? Id
+    {
+        get => Cables;
+        set => Cables = value;
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Cable"/> class.
@@ -597,10 +501,11 @@ public class Cable
     public Cable() { }
 
     /// <summary>
-    /// Returns a string representation of the cable.
+    /// Returns a string representation of the Cable.
     /// </summary>
     public override string ToString()
     {
-        return $"Cables: {Cables}, From: {FromBusId ?? FromDeviceId}, To: {ToBusId ?? ToDeviceId}, Size: {Size}, Length: {Length}";
+        return $"Cable: {Cables}";
     }
 }
+

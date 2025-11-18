@@ -3,170 +3,130 @@ using EasyAF.Data.Attributes;
 namespace EasyAF.Data.Models;
 
 /// <summary>
-/// Represents an arc flash study result entry with comprehensive calculation results from EasyPower exports.
+/// Represents an ArcFlash with comprehensive properties from EasyPower exports.
 /// All properties are strings to preserve source data fidelity without premature parsing.
 /// </summary>
 /// <remarks>
 /// <para>
-/// Arc flash study results document the incident energy, arc flash boundary, and PPE requirements
-/// for electrical equipment under fault conditions.
-/// </para>
-/// <para>
 /// <strong>EasyPower Correlation:</strong> Maps to "Arc Flash Scenario Report" class in EasyPower CSV exports.
 /// </para>
 /// <para>
-/// <strong>Composite Key:</strong> (Id, Scenario) uniquely identifies each arc flash study result.
+/// <strong>Auto-Generated:</strong> This file was automatically generated from CSV field definitions.
+/// Do not manually edit property names - regenerate from source CSV if changes are needed.
 /// </para>
 /// </remarks>
 [EasyPowerClass("Arc Flash Scenario Report")]
 public class ArcFlash
 {
-    // ========================================
-    // IDENTITY (Composite Key)
-    // ========================================
-    
-    /// <summary>Arc fault bus name. (Column: Arc Fault Bus Name)</summary>
-    [Category("Identity")]
-    [Description("Bus or location where arc flash was calculated")]
+    /// <summary>Arc Fault Bus Name (Column: Arc Fault Bus Name)</summary>
+    [Category("Electrical")]
+    [Description("Arc Fault Bus Name")]
     [Required]
     public string? ArcFaultBusName { get; set; }
-    
+
+    /// <summary>Worst Case (Column: Worst Case)</summary>
+    [Category("Protection")]
+    [Description("Worst Case")]
+    public string? WorstCase { get; set; }
+
+    /// <summary>Scenario (Column: Scenario)</summary>
+    [Category("General")]
+    [Description("Scenario")]
+    [Required]
+    public string? Scenario { get; set; }
+
+    /// <summary>Arc Fault Bus kV (Column: Arc Fault Bus kV)</summary>
+    [Category("Electrical")]
+    [Description("Arc Fault Bus kV")]
+    public string? ArcFaultBusKV { get; set; }
+
+    /// <summary>Upstream Trip Device Name (Column: Upstream Trip Device Name)</summary>
+    [Category("Protection")]
+    [Description("Upstream Trip Device Name")]
+    public string? UpstreamTripDeviceName { get; set; }
+
+    /// <summary>Upstream Trip Device Function (Column: Upstream Trip Device Function)</summary>
+    [Category("Protection")]
+    [Description("Upstream Trip Device Function")]
+    public string? UpstreamTripDeviceFunction { get; set; }
+
+    /// <summary>Equip Type (Column: Equip Type)</summary>
+    [Category("Physical")]
+    [Description("Equip Type")]
+    public string? EquipType { get; set; }
+
+    /// <summary>Electrode Configuration (Column: Electrode Configuration)</summary>
+    [Category("General")]
+    [Description("Electrode Configuration")]
+    public string? ElectrodeConfiguration { get; set; }
+
+    /// <summary>Electrode Gap (Column: Electrode Gap (mm))</summary>
+    [Category("General")]
+    [Description("Electrode Gap")]
+    [Units("mm")]
+    public string? ElectrodeGapMM { get; set; }
+
+    /// <summary>Bus Bolted Fault (Column: Bus Bolted Fault (kA))</summary>
+    [Category("Electrical")]
+    [Description("Bus Bolted Fault")]
+    [Units("kA")]
+    public string? BusBoltedFaultKA { get; set; }
+
+    /// <summary>Bus Arc Fault (Column: Bus Arc Fault (kA))</summary>
+    [Category("Electrical")]
+    [Description("Bus Arc Fault")]
+    [Units("kA")]
+    public string? BusArcFaultKA { get; set; }
+
+    /// <summary>Trip Time (Column: Trip Time (sec))</summary>
+    [Category("Protection")]
+    [Description("Trip Time")]
+    [Units("s")]
+    public string? TripTimeSec { get; set; }
+
+    /// <summary>Opening Time (Column: Opening Time (sec))</summary>
+    [Category("General")]
+    [Description("Opening Time")]
+    [Units("s")]
+    public string? OpeningTimeSec { get; set; }
+
+    /// <summary>Arc Time (Column: Arc Time (sec))</summary>
+    [Category("General")]
+    [Description("Arc Time")]
+    [Units("s")]
+    public string? ArcTimeSec { get; set; }
+
+    /// <summary>Est Arc Flash Boundary (Column: Est Arc Flash Boundary (inches))</summary>
+    [Category("Protection")]
+    [Description("Est Arc Flash Boundary")]
+    [Units("in")]
+    public string? EstArcFlashBoundaryInches { get; set; }
+
+    /// <summary>Working Distance (Column: Working Distance (inches))</summary>
+    [Category("General")]
+    [Description("Working Distance")]
+    [Units("in")]
+    public string? WorkingDistanceInches { get; set; }
+
+    /// <summary>Incident Energy (Column: Incident Energy (calcm2))</summary>
+    [Category("General")]
+    [Description("Incident Energy")]
+    [Units("calcmÂ²")]
+    public string? IncidentEnergyCalPerCm2 { get; set; }
+
+    /// <summary>Comments (Column: Comments)</summary>
+    [Category("Metadata")]
+    [Description("Comments")]
+    public string? Comments { get; set; }
+
     /// <summary>Alias for ArcFaultBusName (convenience property for dictionary indexing - not serialized).</summary>
     [System.Text.Json.Serialization.JsonIgnore]
     [Newtonsoft.Json.JsonIgnore]
-    public string? Id 
-    { 
-        get => ArcFaultBusName; 
-        set => ArcFaultBusName = value; 
+    public string? Id
+    {
+        get => ArcFaultBusName;
+        set => ArcFaultBusName = value;
     }
-    
-    /// <summary>Scenario name. (Column: Scenario)</summary>
-    [Category("Study Results")]
-    [Description("Study scenario name (e.g., Main-Min, Main-Max)")]
-    [Required]
-    public string? Scenario { get; set; }
-    
-    /// <summary>Worst case flag. (Column: Worst Case)</summary>
-    [Category("Study Results")]
-    [Description("Indicates if this is the worst-case scenario")]
-    public string? WorstCase { get; set; }
-
-    // ========================================
-    // BUS & SYSTEM INFO
-    // ========================================
-    
-    /// <summary>Arc fault bus voltage. (Column: Arc Fault Bus kV)</summary>
-    [Category("Study Results")]
-    [Units("kV")]
-    [Description("Bus voltage level")]
-    public string? ArcFaultBusKV { get; set; }
-
-    // ========================================
-    // UPSTREAM PROTECTIVE DEVICE
-    // ========================================
-    
-    /// <summary>Upstream trip device name. (Column: Upstream Trip Device Name)</summary>
-    [Category("Study Results")]
-    [Description("Upstream protective device identifier")]
-    public string? UpstreamTripDeviceName { get; set; }
-    
-    /// <summary>Upstream trip device function. (Column: Upstream Trip Device Function)</summary>
-    [Category("Study Results")]
-    [Description("Upstream device trip function or element")]
-    public string? UpstreamTripDeviceFunction { get; set; }
-
-    // ========================================
-    // ARC FLASH PARAMETERS
-    // ========================================
-    
-    /// <summary>Equipment type. (Column: Equip Type)</summary>
-    [Category("Study Results")]
-    [Description("Equipment type for arc flash calculation")]
-    public string? EquipType { get; set; }
-    
-    /// <summary>Electrode configuration. (Column: Electrode Configuration)</summary>
-    [Category("Study Results")]
-    [Description("Electrode configuration (VCB, VCBB, HCB, etc.)")]
-    public string? ElectrodeConfiguration { get; set; }
-    
-    /// <summary>Electrode gap in millimeters. (Column: Electrode Gap (mm))</summary>
-    [Category("Study Results")]
-    [Units("mm")]
-    [Description("Electrode gap for arc flash calculation")]
-    public string? ElectrodeGapMM { get; set; }
-
-    // ========================================
-    // FAULT CURRENTS
-    // ========================================
-    
-    /// <summary>Bus bolted fault current. (Column: Bus Bolted Fault (kA))</summary>
-    [Category("Study Results")]
-    [Units("kA")]
-    [Description("Bolted short-circuit current at bus")]
-    public string? BusBoltedFaultKA { get; set; }
-    
-    /// <summary>Bus arc fault current. (Column: Bus Arc Fault (kA))</summary>
-    [Category("Study Results")]
-    [Units("kA")]
-    [Description("Arcing fault current")]
-    public string? BusArcFaultKA { get; set; }
-
-    // ========================================
-    // TIMING
-    // ========================================
-    
-    /// <summary>Trip time in seconds. (Column: Trip Time (sec))</summary>
-    [Category("Study Results")]
-    [Units("s")]
-    [Description("Protective device trip time")]
-    public string? TripTimeSec { get; set; }
-    
-    /// <summary>Opening time in seconds. (Column: Opening Time (sec))</summary>
-    [Category("Study Results")]
-    [Units("s")]
-    [Description("Device opening time (mechanical delay)")]
-    public string? OpeningTimeSec { get; set; }
-    
-    /// <summary>Arc time in seconds. (Column: Arc Time (sec))</summary>
-    [Category("Study Results")]
-    [Units("s")]
-    [Description("Total arcing time (trip + opening)")]
-    public string? ArcTimeSec { get; set; }
-
-    // ========================================
-    // CALCULATED RESULTS
-    // ========================================
-    
-    /// <summary>Estimated arc flash boundary. (Column: Est Arc Flash Boundary (inches))</summary>
-    [Category("Study Results")]
-    [Units("in")]
-    [Description("Calculated arc flash boundary distance")]
-    public string? EstArcFlashBoundaryInches { get; set; }
-    
-    /// <summary>Working distance. (Column: Working Distance (inches))</summary>
-    [Category("Study Results")]
-    [Units("in")]
-    [Description("Assumed working distance for calculation")]
-    public string? WorkingDistanceInches { get; set; }
-    
-    /// <summary>Incident energy. (Column: Incident Energy (cal/cm2))</summary>
-    [Category("Study Results")]
-    [Units("cal/cm²")]
-    [Description("Calculated incident energy at working distance")]
-    public string? IncidentEnergyCalPerCm2 { get; set; }
-
-    // ========================================
-    // METADATA
-    // ========================================
-    
-    /// <summary>Comments. (Column: Comments)</summary>
-    [Category("Metadata")]
-    [Description("Study notes or comments")]
-    public string? Comments { get; set; }
-
-    // ========================================
-    // METHODS
-    // ========================================
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ArcFlash"/> class.
@@ -174,10 +134,11 @@ public class ArcFlash
     public ArcFlash() { }
 
     /// <summary>
-    /// Returns a string representation of the arc flash study result.
+    /// Returns a string representation of the ArcFlash.
     /// </summary>
     public override string ToString()
     {
-        return $"ArcFaultBusName: {ArcFaultBusName}, Scenario: {Scenario}, IE: {IncidentEnergyCalPerCm2} cal/cm², AFB: {EstArcFlashBoundaryInches} in";
+        return $"ArcFlash: {ArcFaultBusName}";
     }
 }
+

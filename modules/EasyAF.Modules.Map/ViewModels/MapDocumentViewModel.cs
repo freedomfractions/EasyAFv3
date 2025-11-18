@@ -223,6 +223,7 @@ namespace EasyAF.Modules.Map.ViewModels
             TabHeaders.Add(new TabHeaderInfo
             {
                 Header = "Summary",
+                DisplayName = "Summary", // Summary tab uses same name
                 Status = string.Empty,
                 ViewModel = summaryVm,
                 DataType = null
@@ -234,11 +235,6 @@ namespace EasyAF.Modules.Map.ViewModels
 
             foreach (var dataType in dataTypes)
             {
-                // CROSS-MODULE EDIT: 2025-01-16 Map Module Settings Feature - Step 5
-                // Modified for: Check IsDataTypeEnabled before creating tabs
-                // Related modules: Core (ISettingsService), Map (DataTypeVisibilitySettings, MapSettingsExtensions)
-                // Rollback instructions: Remove IsDataTypeEnabled check, revert to creating all tabs
-                
                 // Skip disabled data types
                 if (!_settingsService.IsDataTypeEnabled(dataType))
                 {
@@ -246,36 +242,23 @@ namespace EasyAF.Modules.Map.ViewModels
                     continue;
                 }
 
-                // CROSS-MODULE EDIT: 2025-01-16 Duplicate Mapping Prevention
-                // Modified for: Pass IUserDialogService to DataTypeMappingViewModel for confirmation dialogs
-                // Related modules: Core (IUserDialogService), Map (DataTypeMappingViewModel)
-                // Rollback instructions: Remove _dialogService parameter from constructor call
-                
-                // CROSS-MODULE EDIT: 2025-01-16 Auto-Map Intelligence
-                // Modified for: Pass IFuzzyMatcher to DataTypeMappingViewModel for intelligent auto-mapping
-                // Related modules: Core (IFuzzyMatcher), Map (DataTypeMappingViewModel)
-                // Rollback instructions: Remove _fuzzyMatcher parameter from constructor call
-                
                 var dataTypeVm = new DataTypeMappingViewModel(_document, dataType, _propertyDiscovery, this, _settingsService, _dialogService, _fuzzyMatcher);
                 
                 TabHeaders.Add(new TabHeaderInfo
                 {
-                    Header = dataType,
+                    Header = dataType, // Internal name (e.g., "Bus", "LVBreaker")
+                    DisplayName = _propertyDiscovery.GetDataTypeDescription(dataType), // Friendly name (e.g., "Buses", "LV Breakers")
                     Status = GetInitialStatus(dataType),
                     ViewModel = dataTypeVm,
                     DataType = dataType
                 });
                 
-                Log.Debug("Created tab for enabled data type: {DataType}", dataType);
+                Log.Debug("Created tab for enabled data type: {DataType} (display: {DisplayName})", 
+                    dataType, _propertyDiscovery.GetDataTypeDescription(dataType));
             }
 
             Log.Information("Tab initialization complete: {EnabledCount} tabs created", TabHeaders.Count);
 
-            // CROSS-MODULE EDIT: 2025-01-16 Table Reference Persistence
-            // Modified for: Restore saved table selections after tabs are created
-            // Related modules: Map (MapDocument, MapDocumentSerializer, DataTypeMappingViewModel)
-            // Rollback instructions: Remove this restoration block
-            
             // Restore table selections for each data type from saved references
             foreach (var tab in TabHeaders.Where(t => t.ViewModel is DataTypeMappingViewModel))
             {
@@ -662,15 +645,31 @@ namespace EasyAF.Modules.Map.ViewModels
     public class TabHeaderInfo : BindableBase
     {
         private string _header = string.Empty;
+        private string _displayName = string.Empty; // NEW: User-friendly display name
         private string _status = string.Empty;
 
         /// <summary>
-        /// Gets or sets the tab header text (e.g., "Summary", "Bus", "LVCB").
+        /// Gets or sets the tab header text (e.g., "Summary", "Bus", "LVBreaker") - raw class name.
         /// </summary>
+        /// <remarks>
+        /// This is the internal data type name used for lookups. For UI display, use <see cref="DisplayName"/>.
+        /// </remarks>
         public string Header
         {
             get => _header;
             set => SetProperty(ref _header, value);
+        }
+
+        /// <summary>
+        /// Gets or sets the user-friendly display name from [EasyPowerClass] attribute (e.g., "Buses", "LV Breakers").
+        /// </summary>
+        /// <remarks>
+        /// This is what should be displayed in the tab header. Falls back to <see cref="Header"/> if not set.
+        /// </remarks>
+        public string DisplayName
+        {
+            get => string.IsNullOrEmpty(_displayName) ? _header : _displayName;
+            set => SetProperty(ref _displayName, value);
         }
 
         /// <summary>

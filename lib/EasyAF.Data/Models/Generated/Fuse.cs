@@ -19,7 +19,7 @@ namespace EasyAF.Data.Models;
 public class Fuse
 {
     /// <summary>Fuses (Column: Fuses)</summary>
-    [Category("General")]
+    [Category("Identity")]
     [Description("Fuses")]
     [Required]
     public string? Fuses { get; set; }
@@ -35,14 +35,13 @@ public class Fuse
     public string? Status { get; set; }
 
     /// <summary>No of Phases (Column: No of Phases)</summary>
-    [Category("Electrical")]
+    [Category("General")]
     [Description("No of Phases")]
     public string? NoOfPhases { get; set; }
 
     /// <summary>On Bus (Column: On Bus)</summary>
-    [Category("Identity")]
+    [Category("Electrical")]
     [Description("On Bus")]
-    [Required]
     public string? OnBus { get; set; }
 
     /// <summary>Base kV (Column: Base kV)</summary>
@@ -71,7 +70,7 @@ public class Fuse
     public string? Options { get; set; }
 
     /// <summary>Fuse Mfr (Column: Fuse Mfr)</summary>
-    [Category("Physical")]
+    [Category("Protection")]
     [Description("Fuse Mfr")]
     public string? FuseMfr { get; set; }
 
@@ -86,7 +85,7 @@ public class Fuse
     public string? FuseStyle { get; set; }
 
     /// <summary>Model (Column: Model)</summary>
-    [Category("Physical")]
+    [Category("General")]
     [Description("Model")]
     public string? Model { get; set; }
 
@@ -96,42 +95,42 @@ public class Fuse
     public string? TCCKV { get; set; }
 
     /// <summary>Size (Column: Size)</summary>
-    [Category("Physical")]
+    [Category("General")]
     [Description("Size")]
     public string? Size { get; set; }
 
     /// <summary>SC Int kA (Column: SC Int kA)</summary>
-    [Category("Electrical")]
+    [Category("General")]
     [Description("SC Int kA")]
     public string? SCIntKA { get; set; }
 
     /// <summary>SC Test X/R (Column: SC Test X/R)</summary>
-    [Category("Electrical")]
+    [Category("General")]
     [Description("SC Test X/R")]
     public string? SCTestXR { get; set; }
 
     /// <summary>SC Test Std (Column: SC Test Std)</summary>
-    [Category("Electrical")]
+    [Category("General")]
     [Description("SC Test Std")]
     public string? SCTestStd { get; set; }
 
     /// <summary>TCC Clipping (Column: TCC Clipping)</summary>
-    [Category("Protection")]
+    [Category("General")]
     [Description("TCC Clipping")]
     public string? TCCClipping { get; set; }
 
     /// <summary>TCC Mom kA (Column: TCC Mom kA)</summary>
-    [Category("Protection")]
+    [Category("General")]
     [Description("TCC Mom kA")]
     public string? TCCMomKA { get; set; }
 
     /// <summary>TCC Int kA (Column: TCC Int kA)</summary>
-    [Category("Protection")]
+    [Category("General")]
     [Description("TCC Int kA")]
     public string? TCCIntKA { get; set; }
 
     /// <summary>TCC 30 Cyc kA (Column: TCC 30 Cyc kA)</summary>
-    [Category("Protection")]
+    [Category("General")]
     [Description("TCC 30 Cyc kA")]
     public string? TCC30CycKA { get; set; }
 
@@ -141,22 +140,22 @@ public class Fuse
     public string? IECBreakingKA { get; set; }
 
     /// <summary>IEC TCC Initial kA (Column: IEC TCC Initial kA)</summary>
-    [Category("Protection")]
+    [Category("General")]
     [Description("IEC TCC Initial kA")]
     public string? IECTCCInitialKA { get; set; }
 
     /// <summary>IEC TCC Breaking kA (Column: IEC TCC Breaking kA)</summary>
-    [Category("Protection")]
+    [Category("General")]
     [Description("IEC TCC Breaking kA")]
     public string? IECTCCBreakingKA { get; set; }
 
     /// <summary>IEC TCC Breaking Time (Column: IEC TCC Breaking Time)</summary>
-    [Category("Protection")]
+    [Category("General")]
     [Description("IEC TCC Breaking Time")]
     public string? IECTCCBreakingTime { get; set; }
 
     /// <summary>IEC TCC SS kA (Column: IEC TCC SS kA)</summary>
-    [Category("Protection")]
+    [Category("General")]
     [Description("IEC TCC SS kA")]
     public string? IECTCCSSKA { get; set; }
 
@@ -186,7 +185,7 @@ public class Fuse
     public string? SwitchMomKA { get; set; }
 
     /// <summary>Mtr O/L Mfr (Column: Mtr O/L Mfr)</summary>
-    [Category("Physical")]
+    [Category("General")]
     [Description("Mtr O/L Mfr")]
     public string? MtrOLMfr { get; set; }
 
@@ -218,25 +217,25 @@ public class Fuse
     /// <summary>PCC Isc/ILoad (Column: PCC Isc/ILoad)</summary>
     [Category("Demand")]
     [Description("PCC Isc/ILoad")]
-    public string? PCCIscILoad { get; set; }
+    public string? PCCIscIload { get; set; }
 
-    /// <summary>Failure Rate (Column: Failure Rate (/year))</summary>
+    /// <summary>Failure Rate (/year) (Column: Failure Rate (/year))</summary>
     [Category("Reliability")]
-    [Description("Failure Rate")]
+    [Description("Failure Rate (/year)")]
     [Units("/year")]
     public string? FailureRatePerYear { get; set; }
 
-    /// <summary>Repair Time (Column: Repair Time (h))</summary>
+    /// <summary>Repair Time (h) (Column: Repair Time (h))</summary>
     [Category("Reliability")]
-    [Description("Repair Time")]
+    [Description("Repair Time (h)")]
     [Units("h")]
-    public string? RepairTimeH { get; set; }
+    public string? RepairTimeHours { get; set; }
 
-    /// <summary>Replace Time (Column: Replace Time (h))</summary>
-    [Category("Reliability")]
-    [Description("Replace Time")]
+    /// <summary>Replace Time (h) (Column: Replace Time (h))</summary>
+    [Category("General")]
+    [Description("Replace Time (h)")]
     [Units("h")]
-    public string? ReplaceTimeH { get; set; }
+    public string? ReplaceTimeHours { get; set; }
 
     /// <summary>Repair Cost (Column: Repair Cost)</summary>
     [Category("Reliability")]
@@ -244,7 +243,7 @@ public class Fuse
     public string? RepairCost { get; set; }
 
     /// <summary>Replace Cost (Column: Replace Cost)</summary>
-    [Category("Reliability")]
+    [Category("General")]
     [Description("Replace Cost")]
     public string? ReplaceCost { get; set; }
 
@@ -271,10 +270,10 @@ public class Fuse
     /// <summary>SC Failure Mode % (Column: SC Failure Mode %)</summary>
     [Category("Reliability")]
     [Description("SC Failure Mode %")]
-    public string? SCFailureMode% { get; set; }
+    public string? SCFailureModePercent { get; set; }
 
     /// <summary>Data Status (Column: Data Status)</summary>
-    [Category("Metadata")]
+    [Category("Identity")]
     [Description("Data Status")]
     public string? DataStatus { get; set; }
 
@@ -283,7 +282,7 @@ public class Fuse
     [Description("Comment")]
     public string? Comment { get; set; }
 
-    /// <summary>Alias for Fuses (convenience property for dictionary indexing - not serialized).</summary>
+    /// <summary>Alias for Fuse (convenience property for dictionary indexing - not serialized).</summary>
     [System.Text.Json.Serialization.JsonIgnore]
     [Newtonsoft.Json.JsonIgnore]
     public string? Id
@@ -305,6 +304,4 @@ public class Fuse
         return $"Fuse: {Fuses}";
     }
 }
-
-
 

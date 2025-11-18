@@ -64,15 +64,15 @@ namespace EasyAF.Export
         public static IEnumerable<ShortCircuit> SelectWorstPerBus(IEnumerable<ShortCircuit> entries)
         {
             if (entries == null) yield break;
-            var groups = entries.Where(e => e != null && !string.IsNullOrWhiteSpace(e.Bus))
-                .GroupBy(e => e.Bus!.Trim(), StringComparer.OrdinalIgnoreCase);
+            var groups = entries.Where(e => e != null && !string.IsNullOrWhiteSpace(e.BusName))
+                .GroupBy(e => e.BusName!.Trim(), StringComparer.OrdinalIgnoreCase);
             foreach (var g in groups)
             {
-                // Try numeric HalfCycleDutyKA first
+                // Try numeric OneTwoCycleDuty first
                 ShortCircuit? numericMax = null; double maxDuty = double.MinValue;
                 foreach (var e in g)
                 {
-                    if (TryParseDutyKA(e.HalfCycleDutyKA, out var d))
+                    if (TryParseDutyKA(e.OneTwoCycleDuty, out var d))
                     {
                         if (d > maxDuty) { maxDuty = d; numericMax = e; }
                     }
@@ -115,15 +115,25 @@ namespace EasyAF.Export
         {
             var dict = new Dictionary<string,string?>(StringComparer.OrdinalIgnoreCase);
             string GetSc(string name) => ScProps.TryGetValue(name, out var p) ? (Format(p.GetValue(sc)) ?? string.Empty) : string.Empty;
+            
             // Provide raw values only; template supplies units.
-            var rawRating = SanitizeNumeric(GetSc("HalfCycleRatingKA"));
-            dict["ShortCircuit.Id"] = GetSc("Id");
+            var rawRating = SanitizeNumeric(GetSc("OneTwoCycleRating"));
+            dict["ShortCircuit.Id"] = GetSc("BusName"); // ID points to BusName
+            dict["ShortCircuit.BusName"] = GetSc("BusName");
+            dict["ShortCircuit.Bus"] = GetSc("BusName"); // Legacy compatibility
+            
+            // Current property names
             dict["ShortCircuit.RatingKA"] = RoundWhole(rawRating); // legacy tag for backward compatibility
+            dict["ShortCircuit.OneTwoCycleRating"] = RoundWhole(rawRating);
+            dict["ShortCircuit.DutyKA"] = SanitizeNumeric(GetSc("OneTwoCycleDuty")); // legacy tag
+            dict["ShortCircuit.OneTwoCycleDuty"] = SanitizeNumeric(GetSc("OneTwoCycleDuty"));
+            dict["ShortCircuit.DutyPercent"] = GetSc("OneTwoCycleDutyPercent"); // legacy tag
+            dict["ShortCircuit.OneTwoCycleDutyPercent"] = GetSc("OneTwoCycleDutyPercent");
+            
+            // Legacy mappings for old templates
             dict["ShortCircuit.HalfCycleRatingKA"] = RoundWhole(rawRating);
-            dict["ShortCircuit.DutyKA"] = SanitizeNumeric(GetSc("HalfCycleDutyKA")); // legacy tag
-            dict["ShortCircuit.HalfCycleDutyKA"] = SanitizeNumeric(GetSc("HalfCycleDutyKA"));
-            dict["ShortCircuit.DutyPercent"] = GetSc("HalfCycleDutyPercent"); // legacy tag
-            dict["ShortCircuit.HalfCycleDutyPercent"] = GetSc("HalfCycleDutyPercent");
+            dict["ShortCircuit.HalfCycleDutyKA"] = SanitizeNumeric(GetSc("OneTwoCycleDuty"));
+            dict["ShortCircuit.HalfCycleDutyPercent"] = GetSc("OneTwoCycleDutyPercent");
             
             // Add all other properties
             foreach (var prop in ScProps.Values)

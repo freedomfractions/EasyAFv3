@@ -19,7 +19,7 @@ namespace EasyAF.Data.Models;
 public class Motor
 {
     /// <summary>Motors (Column: Motors)</summary>
-    [Category("General")]
+    [Category("Identity")]
     [Description("Motors")]
     [Required]
     public string? Motors { get; set; }
@@ -35,17 +35,17 @@ public class Motor
     public string? Status { get; set; }
 
     /// <summary>No of Phases (Column: No of Phases)</summary>
-    [Category("Electrical")]
+    [Category("General")]
     [Description("No of Phases")]
     public string? NoOfPhases { get; set; }
 
     /// <summary>To Bus ID (Column: To Bus ID)</summary>
-    [Category("Identity")]
+    [Category("Electrical")]
     [Description("To Bus ID")]
     public string? ToBusID { get; set; }
 
     /// <summary>To Device ID (Column: To Device ID)</summary>
-    [Category("General")]
+    [Category("Identity")]
     [Description("To Device ID")]
     public string? ToDeviceID { get; set; }
 
@@ -65,14 +65,14 @@ public class Motor
     public string? Unit { get; set; }
 
     /// <summary>Model (Column: Model)</summary>
-    [Category("Physical")]
+    [Category("General")]
     [Description("Model")]
     public string? Model { get; set; }
 
     /// <summary>Motor kV (Column: Motor kV)</summary>
     [Category("Electrical")]
     [Description("Motor kV")]
-    public string? MotorkV { get; set; }
+    public string? MotorKV { get; set; }
 
     /// <summary>Conn (Column: Conn)</summary>
     [Category("General")]
@@ -80,10 +80,9 @@ public class Motor
     public string? Conn { get; set; }
 
     /// <summary>HP or kW (Column: HP or kW)</summary>
-    [Category("Electrical")]
+    [Category("General")]
     [Description("HP or kW")]
-    [Required]
-    public string? HPorkW { get; set; }
+    public string? HPOrKW { get; set; }
 
     /// <summary>AFD Setting (Column: AFD Setting)</summary>
     [Category("Control")]
@@ -128,11 +127,10 @@ public class Motor
     /// <summary>kVA/HP (Column: kVA/HP)</summary>
     [Category("Electrical")]
     [Description("kVA/HP")]
-    [Required]
     public string? KVAHP { get; set; }
 
     /// <summary>Impedance Settings (Column: Impedance Settings)</summary>
-    [Category("Electrical")]
+    [Category("Control")]
     [Description("Impedance Settings")]
     public string? ImpedanceSettings { get; set; }
 
@@ -144,13 +142,13 @@ public class Motor
     /// <summary>Connected % (Column: Connected %)</summary>
     [Category("General")]
     [Description("Connected %")]
-    public string? Connected% { get; set; }
+    public string? ConnectedPercent { get; set; }
 
-    /// <summary>X''dv or Xlr or R (Column: X''dv or Xlr or R (Ohms))</summary>
+    /// <summary>X''dv or Xlr or R (Ohms) (Column: X''dv or Xlr or R (Ohms))</summary>
     [Category("General")]
-    [Description("X''dv or Xlr or R")]
-    [Units("?")]
-    public string? XdvorXlrorR { get; set; }
+    [Description("X''dv or Xlr or R (Ohms)")]
+    [Units("Ω")]
+    public string? XdvOrXlrOrROhms { get; set; }
 
     /// <summary>X0 (Column: X0)</summary>
     [Category("General")]
@@ -160,7 +158,7 @@ public class Motor
     /// <summary>X/R (Column: X/R)</summary>
     [Category("General")]
     [Description("X/R")]
-    public string? XR { get; set; }
+    public string? XRRatio { get; set; }
 
     /// <summary>Quantity (Column: Quantity)</summary>
     [Category("General")]
@@ -170,23 +168,22 @@ public class Motor
     /// <summary>RG Ohm (Column: RG Ohm)</summary>
     [Category("General")]
     [Description("RG Ohm")]
-    public string? RGOhm { get; set; }
+    public string? RgOhm { get; set; }
 
     /// <summary>XG Ohm (Column: XG Ohm)</summary>
     [Category("General")]
     [Description("XG Ohm")]
-    public string? XGOhm { get; set; }
+    public string? XgOhm { get; set; }
 
     /// <summary>Load Model (Column: Load Model)</summary>
-    [Category("Physical")]
+    [Category("Demand")]
     [Description("Load Model")]
     public string? LoadModel { get; set; }
 
     /// <summary>Motor kVA (Column: Motor kVA)</summary>
     [Category("Electrical")]
     [Description("Motor kVA")]
-    [Required]
-    public string? MotorkVA { get; set; }
+    public string? MotorKVA { get; set; }
 
     /// <summary>Demand Factor (Column: Demand Factor)</summary>
     [Category("Demand")]
@@ -209,36 +206,34 @@ public class Motor
     public string? LoadSpeedExp { get; set; }
 
     /// <summary>SCADA kW (Column: SCADA kW)</summary>
-    [Category("Electrical")]
+    [Category("General")]
     [Description("SCADA kW")]
-    public string? SCADAkW { get; set; }
+    public string? ScadaKW { get; set; }
 
     /// <summary>SCADA jkVAR (Column: SCADA jkVAR)</summary>
     [Category("Electrical")]
     [Description("SCADA jkVAR")]
-    [Required]
-    public string? SCADAjkVAR { get; set; }
+    public string? ScadaJKVAR { get; set; }
 
     /// <summary>SCADA Type (Column: SCADA Type)</summary>
     [Category("Physical")]
     [Description("SCADA Type")]
-    public string? SCADAType { get; set; }
+    public string? ScadaType { get; set; }
 
     /// <summary>SCADA Scaling (Column: SCADA Scaling)</summary>
     [Category("General")]
     [Description("SCADA Scaling")]
-    public string? SCADAScaling { get; set; }
+    public string? ScadaScaling { get; set; }
 
     /// <summary>Starting kVA/HP (Column: Starting kVA/HP)</summary>
     [Category("Electrical")]
     [Description("Starting kVA/HP")]
-    [Required]
-    public string? StartingkVAHP { get; set; }
+    public string? StartingKVAHP { get; set; }
 
     /// <summary>Starting LR Mult (Column: Starting LR Mult)</summary>
     [Category("General")]
     [Description("Starting LR Mult")]
-    public string? StartingLRMult { get; set; }
+    public string? StartingLrMult { get; set; }
 
     /// <summary>Starting PF (Column: Starting PF)</summary>
     [Category("General")]
@@ -253,25 +248,25 @@ public class Motor
     /// <summary>Hrm RC Value (Column: Hrm RC Value)</summary>
     [Category("General")]
     [Description("Hrm RC Value")]
-    public string? HrmRCValue { get; set; }
+    public string? HrmRcValue { get; set; }
 
     /// <summary>Hrm RC Factor (Column: Hrm RC Factor)</summary>
     [Category("General")]
     [Description("Hrm RC Factor")]
-    public string? HrmRCFactor { get; set; }
+    public string? HrmRcFactor { get; set; }
 
     /// <summary>I Hrm Rating Setting (Column: I Hrm Rating Setting)</summary>
-    [Category("Physical")]
+    [Category("Control")]
     [Description("I Hrm Rating Setting")]
     public string? IHrmRatingSetting { get; set; }
 
     /// <summary>I Hrm Rating (Column: I Hrm Rating)</summary>
-    [Category("Physical")]
+    [Category("General")]
     [Description("I Hrm Rating")]
     public string? IHrmRating { get; set; }
 
     /// <summary>Lib Load Mfr (Column: Lib Load Mfr)</summary>
-    [Category("Physical")]
+    [Category("Demand")]
     [Description("Lib Load Mfr")]
     public string? LibLoadMfr { get; set; }
 
@@ -280,23 +275,23 @@ public class Motor
     [Description("Lib Load Type")]
     public string? LibLoadType { get; set; }
 
-    /// <summary>Failure Rate (Column: Failure Rate (/year))</summary>
+    /// <summary>Failure Rate (/year) (Column: Failure Rate (/year))</summary>
     [Category("Reliability")]
-    [Description("Failure Rate")]
+    [Description("Failure Rate (/year)")]
     [Units("/year")]
     public string? FailureRatePerYear { get; set; }
 
-    /// <summary>Repair Time (Column: Repair Time (h))</summary>
+    /// <summary>Repair Time (h) (Column: Repair Time (h))</summary>
     [Category("Reliability")]
-    [Description("Repair Time")]
+    [Description("Repair Time (h)")]
     [Units("h")]
-    public string? RepairTimeH { get; set; }
+    public string? RepairTimeHours { get; set; }
 
-    /// <summary>Replace Time (Column: Replace Time (h))</summary>
-    [Category("Reliability")]
-    [Description("Replace Time")]
+    /// <summary>Replace Time (h) (Column: Replace Time (h))</summary>
+    [Category("General")]
+    [Description("Replace Time (h)")]
     [Units("h")]
-    public string? ReplaceTimeH { get; set; }
+    public string? ReplaceTimeHours { get; set; }
 
     /// <summary>Repair Cost (Column: Repair Cost)</summary>
     [Category("Reliability")]
@@ -304,7 +299,7 @@ public class Motor
     public string? RepairCost { get; set; }
 
     /// <summary>Replace Cost (Column: Replace Cost)</summary>
-    [Category("Reliability")]
+    [Category("General")]
     [Description("Replace Cost")]
     public string? ReplaceCost { get; set; }
 
@@ -331,65 +326,65 @@ public class Motor
     /// <summary>R1 pu (Column: R1 pu)</summary>
     [Category("General")]
     [Description("R1 pu")]
-    public string? R1pu { get; set; }
+    public string? R1Pu { get; set; }
 
     /// <summary>X1 pu (Column: X1 pu)</summary>
     [Category("General")]
     [Description("X1 pu")]
-    public string? X1pu { get; set; }
+    public string? X1Pu { get; set; }
 
     /// <summary>R0 pu (Column: R0 pu)</summary>
     [Category("General")]
     [Description("R0 pu")]
-    public string? R0pu { get; set; }
+    public string? R0Pu { get; set; }
 
     /// <summary>X0 pu (Column: X0 pu)</summary>
     [Category("General")]
     [Description("X0 pu")]
-    public string? X0pu { get; set; }
+    public string? X0Pu { get; set; }
 
     /// <summary>R Gnd pu (Column: R Gnd pu)</summary>
     [Category("General")]
     [Description("R Gnd pu")]
-    public string? RGndpu { get; set; }
+    public string? RGndPu { get; set; }
 
     /// <summary>X Gnd pu (Column: X Gnd pu)</summary>
     [Category("General")]
     [Description("X Gnd pu")]
-    public string? XGndpu { get; set; }
+    public string? XGndPu { get; set; }
 
     /// <summary>Gnd Amp Class (Column: Gnd Amp Class)</summary>
-    [Category("Electrical")]
+    [Category("General")]
     [Description("Gnd Amp Class")]
     public string? GndAmpClass { get; set; }
 
-    /// <summary>"IEC RMf / X""d " (Column: "IEC RMf / X""d ")</summary>
+    /// <summary>IEC RMf / X\"d (Column: IEC RMf / X\"d)</summary>
     [Category("General")]
-    [Description(""IEC RMf / X""d "")]
-    public string? "IECRMfX""d" { get; set; }
+    [Description("IEC RMf / X\"d")]
+    public string? IECRmfXd { get; set; }
 
     /// <summary>Int MF (Column: Int MF)</summary>
     [Category("General")]
     [Description("Int MF")]
-    public string? IntMF { get; set; }
+    public string? IntMf { get; set; }
 
     /// <summary>Hrm R1 pu (Column: Hrm R1 pu)</summary>
     [Category("General")]
     [Description("Hrm R1 pu")]
-    public string? HrmR1pu { get; set; }
+    public string? HrmR1Pu { get; set; }
 
     /// <summary>Hrm X1 pu (Column: Hrm X1 pu)</summary>
     [Category("General")]
     [Description("Hrm X1 pu")]
-    public string? HrmX1pu { get; set; }
+    public string? HrmX1Pu { get; set; }
 
     /// <summary>TCC Starter (Column: TCC Starter)</summary>
-    [Category("Protection")]
+    [Category("General")]
     [Description("TCC Starter")]
     public string? TCCStarter { get; set; }
 
     /// <summary>Plot TCC (Column: Plot TCC)</summary>
-    [Category("Protection")]
+    [Category("General")]
     [Description("Plot TCC")]
     public string? PlotTCC { get; set; }
 
@@ -429,9 +424,8 @@ public class Motor
     public string? StallTimeTo { get; set; }
 
     /// <summary>Largest Motor HP (Column: Largest Motor HP)</summary>
-    [Category("Protection")]
+    [Category("General")]
     [Description("Largest Motor HP")]
-    [Required]
     public string? LargestMotorHP { get; set; }
 
     /// <summary>Facility (Column: Facility)</summary>
@@ -445,7 +439,7 @@ public class Motor
     public string? LocationName { get; set; }
 
     /// <summary>Location Description (Column: Location Description)</summary>
-    [Category("Metadata")]
+    [Category("Location")]
     [Description("Location Description")]
     public string? LocationDescription { get; set; }
 
@@ -465,7 +459,7 @@ public class Motor
     public string? Floor { get; set; }
 
     /// <summary>Data Status (Column: Data Status)</summary>
-    [Category("Metadata")]
+    [Category("Identity")]
     [Description("Data Status")]
     public string? DataStatus { get; set; }
 
@@ -474,7 +468,7 @@ public class Motor
     [Description("Comment")]
     public string? Comment { get; set; }
 
-    /// <summary>Alias for Motors (convenience property for dictionary indexing - not serialized).</summary>
+    /// <summary>Alias for Motor (convenience property for dictionary indexing - not serialized).</summary>
     [System.Text.Json.Serialization.JsonIgnore]
     [Newtonsoft.Json.JsonIgnore]
     public string? Id

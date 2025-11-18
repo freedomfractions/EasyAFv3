@@ -22,7 +22,7 @@ public class Bus
     [Category("Identity")]
     [Description("Buses")]
     [Required]
-    public string? Buses { get; set; }
+    public string? Buss { get; set; }
 
     /// <summary>AC/DC (Column: AC/DC)</summary>
     [Category("General")]
@@ -40,7 +40,7 @@ public class Bus
     public string? BaseKV { get; set; }
 
     /// <summary>No of Phases (Column: No of Phases)</summary>
-    [Category("Electrical")]
+    [Category("General")]
     [Description("No of Phases")]
     public string? NoOfPhases { get; set; }
 
@@ -50,12 +50,12 @@ public class Bus
     public string? Service { get; set; }
 
     /// <summary>Area (Column: Area)</summary>
-    [Category("Location")]
+    [Category("General")]
     [Description("Area")]
     public string? Area { get; set; }
 
     /// <summary>Zone (Column: Zone)</summary>
-    [Category("Location")]
+    [Category("General")]
     [Description("Zone")]
     public string? Zone { get; set; }
 
@@ -74,25 +74,25 @@ public class Bus
     [Description("Type")]
     public string? Type { get; set; }
 
-    /// <summary>Bus Rating (Column: Bus Rating (A))</summary>
-    [Category("Physical")]
-    [Description("Bus Rating")]
+    /// <summary>Bus Rating (A) (Column: Bus Rating (A))</summary>
+    [Category("Electrical")]
+    [Description("Bus Rating (A)")]
     [Units("A")]
     public string? BusRatingA { get; set; }
 
-    /// <summary>Bus Bracing (Column: Bus Bracing (kA))</summary>
-    [Category("Identity")]
-    [Description("Bus Bracing")]
+    /// <summary>Bus Bracing (kA) (Column: Bus Bracing (kA))</summary>
+    [Category("Electrical")]
+    [Description("Bus Bracing (kA)")]
     [Units("kA")]
-    public string? BusBracingKA { get; set; }
+    public string? BusBracing { get; set; }
 
     /// <summary>Test Standard (Column: Test Standard)</summary>
-    [Category("Protection")]
+    [Category("General")]
     [Description("Test Standard")]
     public string? TestStandard { get; set; }
 
     /// <summary>Material (Column: Material)</summary>
-    [Category("General")]
+    [Category("Physical")]
     [Description("Material")]
     public string? Material { get; set; }
 
@@ -141,17 +141,17 @@ public class Bus
     [Description("AF Solution")]
     public string? AFSolution { get; set; }
 
-    /// <summary>Forced To Energy (Column: Forced To Energy (cal/cm2))</summary>
+    /// <summary>Forced To Energy (cal/cm2) (Column: Forced To Energy (cal/cm2))</summary>
     [Category("General")]
-    [Description("Forced To Energy")]
-    [Units("cal/cm²")]
+    [Description("Forced To Energy (cal/cm2)")]
+    [Units("calcm²")]
     public string? ForcedToEnergyCalPerCm2 { get; set; }
 
-    /// <summary>Forced To Arc Boundary (Column: Forced To Arc Boundary (in))</summary>
+    /// <summary>Forced To Arc Boundary (in) (Column: Forced To Arc Boundary (in))</summary>
     [Category("General")]
-    [Description("Forced To Arc Boundary")]
+    [Description("Forced To Arc Boundary (in)")]
     [Units("in")]
-    public string? ForcedToArcBoundaryIn { get; set; }
+    public string? ForcedToArcBoundaryInches { get; set; }
 
     /// <summary>AF Option (Column: AF Option)</summary>
     [Category("General")]
@@ -168,20 +168,20 @@ public class Bus
     [Description("Working Distance Setting")]
     public string? WorkingDistanceSetting { get; set; }
 
-    /// <summary>Working Distance (Column: Working Distance (in))</summary>
+    /// <summary>Working Distance (in) (Column: Working Distance (in))</summary>
     [Category("General")]
-    [Description("Working Distance")]
+    [Description("Working Distance (in)")]
     [Units("in")]
-    public string? WorkingDistanceIn { get; set; }
+    public string? WorkingDistanceInches { get; set; }
 
     /// <summary>Electrode Gap Setting (Column: Electrode Gap Setting)</summary>
     [Category("Control")]
     [Description("Electrode Gap Setting")]
     public string? ElectrodeGapSetting { get; set; }
 
-    /// <summary>Electrode Gap (Column: Electrode Gap (mm))</summary>
+    /// <summary>Electrode Gap (mm) (Column: Electrode Gap (mm))</summary>
     [Category("General")]
-    [Description("Electrode Gap")]
+    [Description("Electrode Gap (mm)")]
     [Units("mm")]
     public string? ElectrodeGapMM { get; set; }
 
@@ -196,56 +196,56 @@ public class Bus
     public string? ElectrodeConfiguration { get; set; }
 
     /// <summary>Enclosure Size Setting (Column: Enclosure Size Setting)</summary>
-    [Category("Physical")]
+    [Category("Control")]
     [Description("Enclosure Size Setting")]
     public string? EnclosureSizeSetting { get; set; }
 
-    /// <summary>Enclosure Height (Column: Enclosure Height (in))</summary>
+    /// <summary>Enclosure Height (in) (Column: Enclosure Height (in))</summary>
     [Category("General")]
-    [Description("Enclosure Height")]
+    [Description("Enclosure Height (in)")]
     [Units("in")]
-    public string? EnclosureHeightIn { get; set; }
+    public string? EnclosureHeightInches { get; set; }
 
-    /// <summary>Enclosure Width (Column: Enclosure Width (in))</summary>
+    /// <summary>Enclosure Width (in) (Column: Enclosure Width (in))</summary>
     [Category("General")]
-    [Description("Enclosure Width")]
+    [Description("Enclosure Width (in)")]
     [Units("in")]
-    public string? EnclosureWidthIn { get; set; }
+    public string? EnclosureWidthInches { get; set; }
 
-    /// <summary>Enclosure Depth (Column: Enclosure Depth (in))</summary>
+    /// <summary>Enclosure Depth (in) (Column: Enclosure Depth (in))</summary>
     [Category("General")]
-    [Description("Enclosure Depth")]
+    [Description("Enclosure Depth (in)")]
     [Units("in")]
-    public string? EnclosureDepthIn { get; set; }
+    public string? EnclosureDepthInches { get; set; }
 
-    /// <summary>Stored AFB (Column: Stored AFB (in))</summary>
+    /// <summary>Stored AFB (in) (Column: Stored AFB (in))</summary>
     [Category("General")]
-    [Description("Stored AFB")]
+    [Description("Stored AFB (in)")]
     [Units("in")]
-    public string? StoredAFBIn { get; set; }
+    public string? StoredAfbInches { get; set; }
 
-    /// <summary>Stored AF IE (Column: Stored AF IE (cal/cm2))</summary>
+    /// <summary>Stored AF IE (cal/cm2) (Column: Stored AF IE (cal/cm2))</summary>
     [Category("General")]
-    [Description("Stored AF IE")]
-    [Units("cal/cm²")]
-    public string? StoredAFIECalPerCm2 { get; set; }
+    [Description("Stored AF IE (cal/cm2)")]
+    [Units("calcm²")]
+    public string? StoredAFIeCalPerCm2 { get; set; }
 
     /// <summary>Stored AF PPE (Column: Stored AF PPE)</summary>
     [Category("General")]
     [Description("Stored AF PPE")]
-    public string? StoredAFPPE { get; set; }
+    public string? StoredAFPpe { get; set; }
 
     /// <summary>SC Sym kA (ANSI) (Column: SC Sym kA (ANSI))</summary>
-    [Category("Electrical")]
+    [Category("General")]
     [Description("SC Sym kA (ANSI)")]
-    [Units("kA")]
-    public string? SCSymKAAnsi { get; set; }
+    [Units("ANSI")]
+    public string? SCSymKAANSI { get; set; }
 
     /// <summary>SC Sym kA (IEC) (Column: SC Sym kA (IEC))</summary>
-    [Category("Electrical")]
+    [Category("General")]
     [Description("SC Sym kA (IEC)")]
-    [Units("kA")]
-    public string? SCSymKAIec { get; set; }
+    [Units("IEC")]
+    public string? SCSymKAIEC { get; set; }
 
     /// <summary>Label Comment (Column: Label Comment)</summary>
     [Category("Metadata")]
@@ -255,25 +255,25 @@ public class Bus
     /// <summary># Labels To Print (Column: # Labels To Print)</summary>
     [Category("General")]
     [Description("# Labels To Print")]
-    public string? NumberLabelsToPrint { get; set; }
+    public string? NumLabelsToPrint { get; set; }
 
-    /// <summary>Failure Rate (Column: Failure Rate (/year))</summary>
+    /// <summary>Failure Rate (/year) (Column: Failure Rate (/year))</summary>
     [Category("Reliability")]
-    [Description("Failure Rate")]
+    [Description("Failure Rate (/year)")]
     [Units("/year")]
     public string? FailureRatePerYear { get; set; }
 
-    /// <summary>Repair Time (Column: Repair Time (h))</summary>
+    /// <summary>Repair Time (h) (Column: Repair Time (h))</summary>
     [Category("Reliability")]
-    [Description("Repair Time")]
+    [Description("Repair Time (h)")]
     [Units("h")]
-    public string? RepairTimeH { get; set; }
+    public string? RepairTimeHours { get; set; }
 
-    /// <summary>Replace Time (Column: Replace Time (h))</summary>
-    [Category("Reliability")]
-    [Description("Replace Time")]
+    /// <summary>Replace Time (h) (Column: Replace Time (h))</summary>
+    [Category("General")]
+    [Description("Replace Time (h)")]
     [Units("h")]
-    public string? ReplaceTimeH { get; set; }
+    public string? ReplaceTimeHours { get; set; }
 
     /// <summary>Repair Cost (Column: Repair Cost)</summary>
     [Category("Reliability")]
@@ -281,7 +281,7 @@ public class Bus
     public string? RepairCost { get; set; }
 
     /// <summary>Replace Cost (Column: Replace Cost)</summary>
-    [Category("Reliability")]
+    [Category("General")]
     [Description("Replace Cost")]
     public string? ReplaceCost { get; set; }
 
@@ -290,11 +290,11 @@ public class Bus
     [Description("Action Upon Failure")]
     public string? ActionUponFailure { get; set; }
 
-    /// <summary>Downtime Cost (Column: Downtime Cost (h))</summary>
-    [Category("Reliability")]
-    [Description("Downtime Cost")]
+    /// <summary>Downtime Cost (h) (Column: Downtime Cost (h))</summary>
+    [Category("General")]
+    [Description("Downtime Cost (h)")]
     [Units("h")]
-    public string? DowntimeCostH { get; set; }
+    public string? DowntimeCostHours { get; set; }
 
     /// <summary>Reliability Source (Column: Reliability Source)</summary>
     [Category("Reliability")]
@@ -322,7 +322,7 @@ public class Bus
     public string? LocationName { get; set; }
 
     /// <summary>Location Description (Column: Location Description)</summary>
-    [Category("Metadata")]
+    [Category("Location")]
     [Description("Location Description")]
     public string? LocationDescription { get; set; }
 
@@ -342,7 +342,7 @@ public class Bus
     public string? Floor { get; set; }
 
     /// <summary>Data Status (Column: Data Status)</summary>
-    [Category("Metadata")]
+    [Category("Identity")]
     [Description("Data Status")]
     public string? DataStatus { get; set; }
 
@@ -351,13 +351,13 @@ public class Bus
     [Description("Comment")]
     public string? Comment { get; set; }
 
-    /// <summary>Alias for Buses (convenience property for dictionary indexing - not serialized).</summary>
+    /// <summary>Alias for Bus (convenience property for dictionary indexing - not serialized).</summary>
     [System.Text.Json.Serialization.JsonIgnore]
     [Newtonsoft.Json.JsonIgnore]
     public string? Id
     {
-        get => Buses;
-        set => Buses = value;
+        get => Buss;
+        set => Buss = value;
     }
 
     /// <summary>
@@ -370,6 +370,7 @@ public class Bus
     /// </summary>
     public override string ToString()
     {
-        return $"Bus: {Buses}";
+        return $"Bus: {Buss}";
     }
 }
+

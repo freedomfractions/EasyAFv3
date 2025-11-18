@@ -25,6 +25,24 @@ namespace EasyAF.Modules.Map.Services
         List<string> GetAvailableDataTypes();
 
         /// <summary>
+        /// Gets the user-friendly description for a data type.
+        /// </summary>
+        /// <param name="dataTypeName">The class name (e.g., "Bus", "LVBreaker").</param>
+        /// <returns>User-friendly description from [EasyPowerClass] attribute, or the class name if not found.</returns>
+        /// <remarks>
+        /// <para>
+        /// Examples:
+        /// - "Bus" ? "Electrical buses/switchgear"
+        /// - "LVBreaker" ? "Low Voltage Breakers"
+        /// - "ArcFlash" ? "Arc Flash Scenario Report"
+        /// </para>
+        /// <para>
+        /// Used to display equipment type names in UI dropdowns and filters instead of raw class names.
+        /// </para>
+        /// </remarks>
+        string GetDataTypeDescription(string dataTypeName);
+
+        /// <summary>
         /// Gets enabled properties for a specific data type (filtered by settings).
         /// </summary>
         /// <param name="dataTypeName">The name of the data type (e.g., "Bus", "LVCB").</param>

@@ -107,6 +107,7 @@ namespace EasyAF.Modules.Map.ViewModels
                 var item = new DataTypeItem
                 {
                     DataTypeName = dataType,
+                    DataTypeDisplayName = _propertyDiscovery.GetDataTypeDescription(dataType), // NEW: Get friendly name
                     IsEnabled = config.Enabled,
                     EnabledPropertiesCount = enabledCount,
                     TotalPropertiesCount = allProperties.Count,
@@ -138,7 +139,7 @@ namespace EasyAF.Modules.Map.ViewModels
                 var allPropertiesWithInfo = _propertyDiscovery.GetAllPropertiesForType(item.DataTypeName);
 
                 var viewModel = new PropertySelectorViewModel(
-                    item.DataTypeName,
+                    item.DataTypeDisplayName, // NEW: Use display name for dialog title
                     allPropertiesWithInfo,  // Pass full PropertyInfo objects with descriptions
                     item.EnabledProperties,
                     defaultProperties);
@@ -247,18 +248,31 @@ namespace EasyAF.Modules.Map.ViewModels
     public class DataTypeItem : BindableBase
     {
         private string _dataTypeName = string.Empty;
+        private string _dataTypeDisplayName = string.Empty; // NEW: User-friendly name
         private bool _isEnabled;
         private int _enabledPropertiesCount;
         private int _totalPropertiesCount;
         private List<string> _enabledProperties = new();
 
         /// <summary>
-        /// Gets or sets the data type name (e.g., "Bus", "LVCB").
+        /// Gets or sets the data type name (e.g., "Bus", "LVBreaker") - used internally.
         /// </summary>
         public string DataTypeName
         {
             get => _dataTypeName;
             set => SetProperty(ref _dataTypeName, value);
+        }
+
+        /// <summary>
+        /// Gets or sets the user-friendly display name (e.g., "Electrical buses/switchgear", "Low Voltage Breakers").
+        /// </summary>
+        /// <remarks>
+        /// This is what appears in the UI grid. The raw class name is stored in <see cref="DataTypeName"/>.
+        /// </remarks>
+        public string DataTypeDisplayName
+        {
+            get => _dataTypeDisplayName;
+            set => SetProperty(ref _dataTypeDisplayName, value);
         }
 
         /// <summary>

@@ -91,15 +91,25 @@ namespace EasyAF.Modules.Map.ViewModels
             LoadTargetProperties();
             LoadAvailableTables();
 
-            Log.Debug("DataTypeMappingViewModel initialized for {DataType}", _dataType);
+            Log.Debug("DataTypeMappingViewModel initialized for {DataType} (display: {DisplayName})", 
+                _dataType, _propertyDiscovery.GetDataTypeDescription(_dataType));
         }
 
         #region Properties
 
         /// <summary>
-        /// Gets the data type this VM represents.
+        /// Gets the data type this VM represents (raw class name, e.g., "Bus", "LVBreaker").
         /// </summary>
         public string DataType => _dataType;
+
+        /// <summary>
+        /// Gets the user-friendly display name for this data type (e.g., "Buses", "LV Breakers").
+        /// </summary>
+        /// <remarks>
+        /// This is retrieved from the [EasyPowerClass] attribute on the model class.
+        /// Used for UI display in the GroupBox header.
+        /// </remarks>
+        public string DataTypeDisplayName => _propertyDiscovery.GetDataTypeDescription(_dataType);
 
         /// <summary>
         /// Gets the collection of source columns.

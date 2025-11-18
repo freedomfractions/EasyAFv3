@@ -3,7 +3,7 @@ using EasyAF.Data.Attributes;
 namespace EasyAF.Data.Models;
 
 /// <summary>
-/// Represents an Utility with comprehensive properties from EasyPower exports.
+/// Represents a Utility with comprehensive properties from EasyPower exports.
 /// All properties are strings to preserve source data fidelity without premature parsing.
 /// </summary>
 /// <remarks>
@@ -19,10 +19,10 @@ namespace EasyAF.Data.Models;
 public class Utility
 {
     /// <summary>Utilities (Column: Utilities)</summary>
-    [Category("General")]
+    [Category("Identity")]
     [Description("Utilities")]
     [Required]
-    public string? Utilities { get; set; }
+    public string? Utilitys { get; set; }
 
     /// <summary>AC/DC (Column: AC/DC)</summary>
     [Category("General")]
@@ -35,7 +35,7 @@ public class Utility
     public string? Status { get; set; }
 
     /// <summary>No of Phases (Column: No of Phases)</summary>
-    [Category("Electrical")]
+    [Category("General")]
     [Description("No of Phases")]
     public string? NoOfPhases { get; set; }
 
@@ -45,12 +45,12 @@ public class Utility
     public string? Service { get; set; }
 
     /// <summary>To Bus ID (Column: To Bus ID)</summary>
-    [Category("Identity")]
+    [Category("Electrical")]
     [Description("To Bus ID")]
     public string? ToBusID { get; set; }
 
     /// <summary>To Device ID (Column: To Device ID)</summary>
-    [Category("General")]
+    [Category("Identity")]
     [Description("To Device ID")]
     public string? ToDeviceID { get; set; }
 
@@ -67,32 +67,32 @@ public class Utility
     /// <summary>Util kV (Column: Util kV)</summary>
     [Category("Electrical")]
     [Description("Util kV")]
-    public string? UtilkV { get; set; }
+    public string? UtilKV { get; set; }
 
     /// <summary>Fault Unit (Column: Fault Unit)</summary>
-    [Category("Electrical")]
+    [Category("General")]
     [Description("Fault Unit")]
     public string? FaultUnit { get; set; }
 
     /// <summary>3Ph SC1 (Column: 3Ph SC1)</summary>
     [Category("General")]
     [Description("3Ph SC1")]
-    public string? 3PhSC1 { get; set; }
+    public string? ThreePhSC1 { get; set; }
 
     /// <summary>3Ph SC2 (Column: 3Ph SC2)</summary>
     [Category("General")]
     [Description("3Ph SC2")]
-    public string? 3PhSC2 { get; set; }
+    public string? ThreePhSC2 { get; set; }
 
     /// <summary>1PH SC1 (Column: 1PH SC1)</summary>
     [Category("General")]
     [Description("1PH SC1")]
-    public string? 1PHSC1 { get; set; }
+    public string? OnePhSC1 { get; set; }
 
     /// <summary>1PH SC2 (Column: 1PH SC2)</summary>
     [Category("General")]
     [Description("1PH SC2")]
-    public string? 1PHSC2 { get; set; }
+    public string? OnePhSC2 { get; set; }
 
     /// <summary>SLG SC1 (Column: SLG SC1)</summary>
     [Category("General")]
@@ -105,7 +105,7 @@ public class Utility
     public string? SLGSC2 { get; set; }
 
     /// <summary>Model (Column: Model)</summary>
-    [Category("Physical")]
+    [Category("General")]
     [Description("Model")]
     public string? Model { get; set; }
 
@@ -115,110 +115,107 @@ public class Utility
     public string? MW { get; set; }
 
     /// <summary>MVAR (Column: MVAR)</summary>
-    [Category("General")]
+    [Category("Electrical")]
     [Description("MVAR")]
-    [Required]
     public string? MVAR { get; set; }
 
     /// <summary>Ctl kV pu (Column: Ctl kV pu)</summary>
     [Category("Electrical")]
     [Description("Ctl kV pu")]
-    public string? CtlkVpu { get; set; }
+    public string? CtlKVPu { get; set; }
 
     /// <summary>MVAR Min (Column: MVAR Min)</summary>
-    [Category("General")]
+    [Category("Electrical")]
     [Description("MVAR Min")]
-    [Required]
     public string? MVARMin { get; set; }
 
     /// <summary>MVAR Max (Column: MVAR Max)</summary>
-    [Category("General")]
+    [Category("Electrical")]
     [Description("MVAR Max")]
-    [Required]
     public string? MVARMax { get; set; }
 
     /// <summary>kV pu Min (Column: kV pu Min)</summary>
     [Category("Electrical")]
     [Description("kV pu Min")]
-    public string? KVpuMin { get; set; }
+    public string? KVPuMin { get; set; }
 
     /// <summary>kV pu Max (Column: kV pu Max)</summary>
     [Category("Electrical")]
     [Description("kV pu Max")]
-    public string? KVpuMax { get; set; }
+    public string? KVPuMax { get; set; }
 
     /// <summary>Ctl Angle (Column: Ctl Angle)</summary>
-    [Category("General")]
+    [Category("Control")]
     [Description("Ctl Angle")]
     public string? CtlAngle { get; set; }
 
     /// <summary>Ctl Bus (Column: Ctl Bus)</summary>
-    [Category("Identity")]
+    [Category("Electrical")]
     [Description("Ctl Bus")]
     public string? CtlBus { get; set; }
 
     /// <summary>Ctl Base kV (Column: Ctl Base kV)</summary>
     [Category("Electrical")]
     [Description("Ctl Base kV")]
-    public string? CtlBasekV { get; set; }
+    public string? CtlBaseKV { get; set; }
 
     /// <summary>R1 pu (Column: R1 pu)</summary>
     [Category("General")]
     [Description("R1 pu")]
-    public string? R1pu { get; set; }
+    public string? R1Pu { get; set; }
 
     /// <summary>X1 pu (Column: X1 pu)</summary>
     [Category("General")]
     [Description("X1 pu")]
-    public string? X1pu { get; set; }
+    public string? X1Pu { get; set; }
 
     /// <summary>R0 pu (Column: R0 pu)</summary>
     [Category("General")]
     [Description("R0 pu")]
-    public string? R0pu { get; set; }
+    public string? R0Pu { get; set; }
 
     /// <summary>X0 pu (Column: X0 pu)</summary>
     [Category("General")]
     [Description("X0 pu")]
-    public string? X0pu { get; set; }
+    public string? X0Pu { get; set; }
 
     /// <summary>Hrm RC Factor (Column: Hrm RC Factor)</summary>
     [Category("General")]
     [Description("Hrm RC Factor")]
-    public string? HrmRCFactor { get; set; }
+    public string? HrmRcFactor { get; set; }
 
     /// <summary>Hrm RC Value (Column: Hrm RC Value)</summary>
     [Category("General")]
     [Description("Hrm RC Value")]
-    public string? HrmRCValue { get; set; }
+    public string? HrmRcValue { get; set; }
 
     /// <summary>I Hrm Rating Setting (Column: I Hrm Rating Setting)</summary>
-    [Category("Physical")]
+    [Category("Control")]
     [Description("I Hrm Rating Setting")]
     public string? IHrmRatingSetting { get; set; }
 
     /// <summary>I Hrm Rating (Column: I Hrm Rating)</summary>
-    [Category("Physical")]
+    [Category("General")]
     [Description("I Hrm Rating")]
     public string? IHrmRating { get; set; }
 
-    /// <summary>Failure Rate (Column: Failure Rate (/year))</summary>
+    /// <summary>Failure Rate (/year) (Column: Failure Rate (/year))</summary>
     [Category("Reliability")]
-    [Description("Failure Rate")]
+    [Description("Failure Rate (/year)")]
     [Units("/year")]
     public string? FailureRatePerYear { get; set; }
 
-    /// <summary>Repair Time (Column: Repair Time (h))</summary>
+    /// <summary>Repair Time (h) (Column: Repair Time (h))</summary>
     [Category("Reliability")]
-    [Description("Repair Time")]
+    [Description("Repair Time (h)")]
     [Units("h")]
-    public string? RepairTimeH { get; set; }
+    public string? RepairTimeHours { get; set; }
 
-    /// <summary>Replace Time (Column: Replace Time (h))</summary>
-    [Category("Reliability")]
-    [Description("Replace Time")]
+    /// <summary>Replace Time (h) (Column: Replace Time (h))</summary>
+    [Category("General")]
+    [Description("Replace Time (h)")]
     [Units("h")]
-    public string? ReplaceTime { get; set; }
+    public string? ReplaceTimeHours { get; set; }
 
     /// <summary>Repair Cost (Column: Repair Cost)</summary>
     [Category("Reliability")]
@@ -226,7 +223,7 @@ public class Utility
     public string? RepairCost { get; set; }
 
     /// <summary>Replace Cost (Column: Replace Cost)</summary>
-    [Category("Reliability")]
+    [Category("General")]
     [Description("Replace Cost")]
     public string? ReplaceCost { get; set; }
 
@@ -261,7 +258,7 @@ public class Utility
     public string? LocationName { get; set; }
 
     /// <summary>Location Description (Column: Location Description)</summary>
-    [Category("Metadata")]
+    [Category("Location")]
     [Description("Location Description")]
     public string? LocationDescription { get; set; }
 
@@ -281,7 +278,7 @@ public class Utility
     public string? Floor { get; set; }
 
     /// <summary>Data Status (Column: Data Status)</summary>
-    [Category("Metadata")]
+    [Category("Identity")]
     [Description("Data Status")]
     public string? DataStatus { get; set; }
 
@@ -290,13 +287,13 @@ public class Utility
     [Description("Comment")]
     public string? Comment { get; set; }
 
-    /// <summary>Alias for Utilities (convenience property for dictionary indexing - not serialized).</summary>
+    /// <summary>Alias for Utility (convenience property for dictionary indexing - not serialized).</summary>
     [System.Text.Json.Serialization.JsonIgnore]
     [Newtonsoft.Json.JsonIgnore]
     public string? Id
     {
-        get => Utilities;
-        set => Utilities = value;
+        get => Utilitys;
+        set => Utilitys = value;
     }
 
     /// <summary>
@@ -309,7 +306,7 @@ public class Utility
     /// </summary>
     public override string ToString()
     {
-        return $"Utility: {Utilities}";
+        return $"Utility: {Utilitys}";
     }
 }
 

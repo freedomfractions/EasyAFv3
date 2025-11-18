@@ -3,135 +3,133 @@ using EasyAF.Data.Attributes;
 namespace EasyAF.Data.Models;
 
 /// <summary>
-/// Represents a short-circuit (equipment duty) study result entry with comprehensive duty calculations from EasyPower exports.
+/// Represents a ShortCircuit with comprehensive properties from EasyPower exports.
 /// All properties are strings to preserve source data fidelity without premature parsing.
 /// </summary>
+/// <remarks>
+/// <para>
+/// <strong>EasyPower Correlation:</strong> Maps to "Equipment Duty Scenario Report" class in EasyPower CSV exports.
+/// </para>
+/// <para>
+/// <strong>Auto-Generated:</strong> This file was automatically generated from CSV field definitions.
+/// Do not manually edit property names - regenerate from source CSV if changes are needed.
+/// </para>
+/// </remarks>
 [EasyPowerClass("Equipment Duty Scenario Report")]
 public class ShortCircuit
 {
-    // ========================================
-    // IDENTITY (Composite Key)
-    // ========================================
-    
-    /// <summary>Bus name where equipment is located. (Column: Bus Name)</summary>
+    /// <summary>Bus Name (Column: Bus Name)</summary>
     [Category("Identity")]
-    [Description("Bus where equipment is located")]
+    [Description("Bus Name")]
     [Required]
     public string? BusName { get; set; }
-    
-    /// <summary>Equipment name/identifier. (Column: Equipment Name)</summary>
-    [Category("Identity")]
-    [Description("Equipment identifier being evaluated")]
-    [Required]
+
+    /// <summary>Equipment Name (Column: Equipment Name)</summary>
+    [Category("General")]
+    [Description("Equipment Name")]
     public string? EquipmentName { get; set; }
-    
-    /// <summary>Alias for EquipmentName (convenience property for dictionary indexing - not serialized).</summary>
-    [System.Text.Json.Serialization.JsonIgnore]
-    [Newtonsoft.Json.JsonIgnore]
-    public string? Id 
-    { 
-        get => EquipmentName; 
-        set => EquipmentName = value; 
-    }
-    
-    /// <summary>Alias for BusName (backward compatibility - not serialized).</summary>
-    [System.Text.Json.Serialization.JsonIgnore]
-    [Newtonsoft.Json.JsonIgnore]
-    public string? Bus 
-    { 
-        get => BusName; 
-        set => BusName = value; 
-    }
-    
-    /// <summary>Scenario name. (Column: Scenario)</summary>
-    [Category("Study Results")]
-    [Description("Study scenario name (e.g., Main-Min, Main-Max)")]
-    [Required]
-    public string? Scenario { get; set; }
-    
-    /// <summary>Worst case flag. (Column: Worst Case)</summary>
-    [Category("Study Results")]
-    [Description("Indicates if this is the worst-case scenario")]
+
+    /// <summary>Worst Case (Column: Worst Case)</summary>
+    [Category("General")]
+    [Description("Worst Case")]
     public string? WorstCase { get; set; }
-    
-    /// <summary>Fault type. (Column: Fault Type)</summary>
-    [Category("Study Results")]
-    [Description("Type of fault (3-phase, L-G, L-L, etc.)")]
+
+    /// <summary>Scenario (Column: Scenario)</summary>
+    [Category("General")]
+    [Description("Scenario")]
+    public string? Scenario { get; set; }
+
+    /// <summary>Fault Type (Column: Fault Type)</summary>
+    [Category("Physical")]
+    [Description("Fault Type")]
     public string? FaultType { get; set; }
-    
-    /// <summary>Voltage per unit. (Column: Vpu)</summary>
-    [Category("Study Results")]
-    [Units("pu")]
-    [Description("Per-unit voltage during fault")]
+
+    /// <summary>Vpu (Column: Vpu)</summary>
+    [Category("General")]
+    [Description("Vpu")]
     public string? Vpu { get; set; }
-    
-    /// <summary>Bus base voltage. (Column: Bus Base kV)</summary>
-    [Category("Study Results")]
-    [Units("kV")]
-    [Description("Bus nominal voltage")]
+
+    /// <summary>Bus Base kV (Column: Bus Base kV)</summary>
+    [Category("Electrical")]
+    [Description("Bus Base kV")]
     public string? BusBaseKV { get; set; }
-    
-    /// <summary>Bus number of phases. (Column: Bus No. of Phases)</summary>
-    [Category("Study Results")]
-    [Description("Number of phases at bus")]
+
+    /// <summary>Bus No. of Phases (Column: Bus No. of Phases)</summary>
+    [Category("Electrical")]
+    [Description("Bus No. of Phases")]
     public string? BusNoOfPhases { get; set; }
 
-    // ========================================
-    // EQUIPMENT DETAILS
-    // ========================================
-    
-    /// <summary>Equipment manufacturer. (Column: Equipment Manufacturer)</summary>
-    [Category("Study Results")]
-    [Description("Equipment manufacturer")]
+    /// <summary>Equipment Manufacturer (Column: Equipment Manufacturer)</summary>
+    [Category("Physical")]
+    [Description("Equipment Manufacturer")]
     public string? EquipmentManufacturer { get; set; }
-    
-    /// <summary>Equipment style. (Column: Equipment Style)</summary>
-    [Category("Study Results")]
-    [Description("Equipment model or style")]
+
+    /// <summary>Equipment Style (Column: Equipment Style)</summary>
+    [Category("Physical")]
+    [Description("Equipment Style")]
     public string? EquipmentStyle { get; set; }
-    
-    /// <summary>Test standard. (Column: Test Standard)</summary>
-    [Category("Study Results")]
-    [Description("Short-circuit test standard")]
+
+    /// <summary>Test Standard (Column: Test Standard)</summary>
+    [Category("General")]
+    [Description("Test Standard")]
     public string? TestStandard { get; set; }
-    
-    /// <summary>1/2 cycle rating in kA. (Column: 1/2 Cycle Rating (kA))</summary>
-    [Category("Study Results")]
+
+    /// <summary>1/2 Cycle Rating (kA) (Column: 1/2 Cycle Rating (kA))</summary>
+    [Category("General")]
+    [Description("1/2 Cycle Rating (kA)")]
     [Units("kA")]
-    [Description("Equipment half-cycle interrupting rating")]
-    public string? HalfCycleRatingKA { get; set; }
-    
-    /// <summary>1/2 cycle duty in kA. (Column: 1/2 Cycle Duty (kA))</summary>
-    [Category("Study Results")]
+    public string? OneTwoCycleRating { get; set; }
+
+    /// <summary>1/2 Cycle Duty (kA) (Column: 1/2 Cycle Duty (kA))</summary>
+    [Category("General")]
+    [Description("1/2 Cycle Duty (kA)")]
     [Units("kA")]
-    [Description("Calculated half-cycle fault current duty")]
-    public string? HalfCycleDutyKA { get; set; }
-    
-    /// <summary>1/2 cycle duty percentage. (Column: 1/2 Cycle Duty (%))</summary>
-    [Category("Study Results")]
+    public string? OneTwoCycleDuty { get; set; }
+
+    /// <summary>1/2 Cycle Duty (%) (Column: 1/2 Cycle Duty (%))</summary>
+    [Category("General")]
+    [Description("1/2 Cycle Duty (%)")]
     [Units("%")]
-    [Description("Duty as percentage of rating")]
-    public string? HalfCycleDutyPercent { get; set; }
-    
-    /// <summary>Comments. (Column: Comments)</summary>
+    public string? OneTwoCycleDutyPercent { get; set; }
+
+    /// <summary>Comments (Column: Comments)</summary>
     [Category("Metadata")]
-    [Description("Study notes or comments")]
+    [Description("Comments")]
     public string? Comments { get; set; }
 
+    /// <summary>Alias for BusName (convenience property for dictionary indexing - not serialized).</summary>
+    [System.Text.Json.Serialization.JsonIgnore]
+    [Newtonsoft.Json.JsonIgnore]
+    public string? Id
+    {
+        get => BusName;
+        set => BusName = value;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ShortCircuit"/> class.
+    /// </summary>
     public ShortCircuit() { }
 
     /// <summary>
-    /// Returns a string representation of the short-circuit study result.
+    /// Returns a string representation of the ShortCircuit.
     /// </summary>
     public override string ToString()
     {
-        return $"EquipmentName: {EquipmentName}, BusName: {BusName}, Scenario: {Scenario}, Duty: {HalfCycleDutyKA} kA ({HalfCycleDutyPercent}%)";
+        return $"ShortCircuit: {BusName}";
     }
-    
+
+    /// <summary>
+    /// Determines if this short circuit entry represents an over-dutied condition.
+    /// </summary>
+    /// <returns>True if the duty exceeds the rating; otherwise false.</returns>
     public bool IsOverDutied()
     {
-        if (double.TryParse(HalfCycleDutyKA, out double duty) && double.TryParse(HalfCycleRatingKA, out double rating))
+        if (double.TryParse(OneTwoCycleDuty, out double duty) && double.TryParse(OneTwoCycleRating, out double rating))
             return duty > rating;
         return false;
     }
 }
+
+
+

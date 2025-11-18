@@ -19,7 +19,7 @@ namespace EasyAF.Data.Models;
 public class Generator
 {
     /// <summary>Generators (Column: Generators)</summary>
-    [Category("General")]
+    [Category("Identity")]
     [Description("Generators")]
     [Required]
     public string? Generators { get; set; }
@@ -35,7 +35,7 @@ public class Generator
     public string? Status { get; set; }
 
     /// <summary>No of Phases (Column: No of Phases)</summary>
-    [Category("Electrical")]
+    [Category("General")]
     [Description("No of Phases")]
     public string? NoOfPhases { get; set; }
 
@@ -45,12 +45,12 @@ public class Generator
     public string? Service { get; set; }
 
     /// <summary>To Bus ID (Column: To Bus ID)</summary>
-    [Category("Identity")]
+    [Category("Electrical")]
     [Description("To Bus ID")]
     public string? ToBusID { get; set; }
 
     /// <summary>To Device ID (Column: To Device ID)</summary>
-    [Category("General")]
+    [Category("Identity")]
     [Description("To Device ID")]
     public string? ToDeviceID { get; set; }
 
@@ -64,17 +64,17 @@ public class Generator
     [Description("Base kV")]
     public string? BaseKV { get; set; }
 
-    /// <summary>Gen kV (Column: Gen kV (LL))</summary>
+    /// <summary>Gen kV (LL) (Column: Gen kV (LL))</summary>
     [Category("Electrical")]
-    [Description("Gen kV")]
+    [Description("Gen kV (LL)")]
     [Units("LL")]
-    public string? GenkV { get; set; }
+    public string? GenKVLL { get; set; }
 
-    /// <summary>Gen kV (Column: Gen kV (LN))</summary>
+    /// <summary>Gen kV (LN) (Column: Gen kV (LN))</summary>
     [Category("Electrical")]
-    [Description("Gen kV")]
+    [Description("Gen kV (LN)")]
     [Units("LN")]
-    public string? GenkV { get; set; }
+    public string? GenKVLN { get; set; }
 
     /// <summary>Conn (Column: Conn)</summary>
     [Category("General")]
@@ -82,14 +82,14 @@ public class Generator
     public string? Conn { get; set; }
 
     /// <summary>Rating (Column: Rating)</summary>
-    [Category("Physical")]
+    [Category("General")]
     [Description("Rating")]
     public string? Rating { get; set; }
 
     /// <summary>RatingUnit (Column: RatingUnit)</summary>
-    [Category("Physical")]
+    [Category("General")]
     [Description("RatingUnit")]
-    public string? RatingUnit { get; set; }
+    public string? Ratingunit { get; set; }
 
     /// <summary>Type (Column: Type)</summary>
     [Category("Physical")]
@@ -114,10 +114,10 @@ public class Generator
     /// <summary>X/R (Column: X/R)</summary>
     [Category("General")]
     [Description("X/R")]
-    public string? XR { get; set; }
+    public string? XRRatio { get; set; }
 
     /// <summary>Model (Column: Model)</summary>
-    [Category("Physical")]
+    [Category("General")]
     [Description("Model")]
     public string? Model { get; set; }
 
@@ -127,52 +127,49 @@ public class Generator
     public string? MW { get; set; }
 
     /// <summary>MVAR (Column: MVAR)</summary>
-    [Category("General")]
+    [Category("Electrical")]
     [Description("MVAR")]
-    [Required]
     public string? MVAR { get; set; }
 
     /// <summary>Ctl kV pu (Column: Ctl kV pu)</summary>
     [Category("Electrical")]
     [Description("Ctl kV pu")]
-    public string? CtlkVpu { get; set; }
+    public string? CtlKVPu { get; set; }
 
     /// <summary>MVAR Min (Column: MVAR Min)</summary>
-    [Category("General")]
+    [Category("Electrical")]
     [Description("MVAR Min")]
-    [Required]
     public string? MVARMin { get; set; }
 
     /// <summary>MVAR Max (Column: MVAR Max)</summary>
-    [Category("General")]
+    [Category("Electrical")]
     [Description("MVAR Max")]
-    [Required]
     public string? MVARMax { get; set; }
 
     /// <summary>kV pu Min (Column: kV pu Min)</summary>
     [Category("Electrical")]
     [Description("kV pu Min")]
-    public string? KVpuMin { get; set; }
+    public string? KVPuMin { get; set; }
 
     /// <summary>kV pu Max (Column: kV pu Max)</summary>
     [Category("Electrical")]
     [Description("kV pu Max")]
-    public string? KVpuMax { get; set; }
+    public string? KVPuMax { get; set; }
 
     /// <summary>Ctl Angle (Column: Ctl Angle)</summary>
-    [Category("General")]
+    [Category("Control")]
     [Description("Ctl Angle")]
     public string? CtlAngle { get; set; }
 
     /// <summary>Ctl Bus (Column: Ctl Bus)</summary>
-    [Category("Identity")]
+    [Category("Electrical")]
     [Description("Ctl Bus")]
     public string? CtlBus { get; set; }
 
     /// <summary>Ctl Base kV (Column: Ctl Base kV)</summary>
     [Category("Electrical")]
     [Description("Ctl Base kV")]
-    public string? CtlBasekV { get; set; }
+    public string? CtlBaseKV { get; set; }
 
     /// <summary>X''dv (Column: X''dv)</summary>
     [Category("General")]
@@ -182,7 +179,7 @@ public class Generator
     /// <summary>X'dv (Column: X'dv)</summary>
     [Category("General")]
     [Description("X'dv")]
-    public string? Xdv { get; set; }
+    public string? Xdv2 { get; set; }
 
     /// <summary>X0 (Column: X0)</summary>
     [Category("General")]
@@ -197,83 +194,83 @@ public class Generator
     /// <summary>RG Ohm (Column: RG Ohm)</summary>
     [Category("General")]
     [Description("RG Ohm")]
-    public string? RGOhm { get; set; }
+    public string? RgOhm { get; set; }
 
     /// <summary>XG Ohm (Column: XG Ohm)</summary>
     [Category("General")]
     [Description("XG Ohm")]
-    public string? XGOhm { get; set; }
+    public string? XgOhm { get; set; }
 
     /// <summary>Gnd Amp Class (Column: Gnd Amp Class)</summary>
-    [Category("Electrical")]
+    [Category("General")]
     [Description("Gnd Amp Class")]
     public string? GndAmpClass { get; set; }
 
     /// <summary>R1 pu (Column: R1 pu)</summary>
     [Category("General")]
     [Description("R1 pu")]
-    public string? R1pu { get; set; }
+    public string? R1Pu { get; set; }
 
     /// <summary>X1 pu (Column: X1 pu)</summary>
     [Category("General")]
     [Description("X1 pu")]
-    public string? X1pu { get; set; }
+    public string? X1Pu { get; set; }
 
     /// <summary>R0 pu (Column: R0 pu)</summary>
     [Category("General")]
     [Description("R0 pu")]
-    public string? R0pu { get; set; }
+    public string? R0Pu { get; set; }
 
     /// <summary>X0 pu (Column: X0 pu)</summary>
     [Category("General")]
     [Description("X0 pu")]
-    public string? X0pu { get; set; }
+    public string? X0Pu { get; set; }
 
     /// <summary>R Gnd pu (Column: R Gnd pu)</summary>
     [Category("General")]
     [Description("R Gnd pu")]
-    public string? RGndpu { get; set; }
+    public string? RGndPu { get; set; }
 
     /// <summary>X Gnd pu (Column: X Gnd pu)</summary>
     [Category("General")]
     [Description("X Gnd pu")]
-    public string? XGndpu { get; set; }
+    public string? XGndPu { get; set; }
 
     /// <summary>Hrm RC Factor (Column: Hrm RC Factor)</summary>
     [Category("General")]
     [Description("Hrm RC Factor")]
-    public string? HrmRCFactor { get; set; }
+    public string? HrmRcFactor { get; set; }
 
     /// <summary>Hrm RC Value (Column: Hrm RC Value)</summary>
     [Category("General")]
     [Description("Hrm RC Value")]
-    public string? HrmRCValue { get; set; }
+    public string? HrmRcValue { get; set; }
 
     /// <summary>I Hrm Rating Setting (Column: I Hrm Rating Setting)</summary>
-    [Category("Physical")]
+    [Category("Control")]
     [Description("I Hrm Rating Setting")]
     public string? IHrmRatingSetting { get; set; }
 
     /// <summary>I Hrm Rating (Column: I Hrm Rating)</summary>
-    [Category("Physical")]
+    [Category("General")]
     [Description("I Hrm Rating")]
     public string? IHrmRating { get; set; }
 
-    /// <summary>IEC RG (Column: IEC RG (Ohms))</summary>
+    /// <summary>IEC RG (Ohms) (Column: IEC RG (Ohms))</summary>
     [Category("General")]
-    [Description("IEC RG")]
-    [Units("?")]
-    public string? IECRG { get; set; }
+    [Description("IEC RG (Ohms)")]
+    [Units("Ω")]
+    public string? IECRgOhms { get; set; }
 
     /// <summary>IEC pG (Column: IEC pG)</summary>
     [Category("General")]
     [Description("IEC pG")]
-    public string? IECpG { get; set; }
+    public string? IECPg { get; set; }
 
     /// <summary>IEC RGf / X''d (Column: IEC RGf / X''d)</summary>
     [Category("General")]
     [Description("IEC RGf / X''d")]
-    public string? IECRGfXd { get; set; }
+    public string? IECRgfXd { get; set; }
 
     /// <summary>Xd (Column: Xd)</summary>
     [Category("General")]
@@ -288,7 +285,7 @@ public class Generator
     /// <summary>T'd (Column: T'd)</summary>
     [Category("General")]
     [Description("T'd")]
-    public string? Td { get; set; }
+    public string? Td2 { get; set; }
 
     /// <summary>Ta (Column: Ta)</summary>
     [Category("General")]
@@ -303,30 +300,30 @@ public class Generator
     /// <summary>Field Forcing pu (Column: Field Forcing pu)</summary>
     [Category("General")]
     [Description("Field Forcing pu")]
-    public string? FieldForcingpu { get; set; }
+    public string? FieldForcingPu { get; set; }
 
     /// <summary>Damage I^2t pu (Column: Damage I^2t pu)</summary>
     [Category("General")]
     [Description("Damage I^2t pu")]
-    public string? DamageI^2tpu { get; set; }
+    public string? DamageIsquaredtPu { get; set; }
 
-    /// <summary>Failure Rate (Column: Failure Rate (/year))</summary>
+    /// <summary>Failure Rate (/year) (Column: Failure Rate (/year))</summary>
     [Category("Reliability")]
-    [Description("Failure Rate")]
+    [Description("Failure Rate (/year)")]
     [Units("/year")]
     public string? FailureRatePerYear { get; set; }
 
-    /// <summary>Repair Time (Column: Repair Time (h))</summary>
+    /// <summary>Repair Time (h) (Column: Repair Time (h))</summary>
     [Category("Reliability")]
-    [Description("Repair Time")]
+    [Description("Repair Time (h)")]
     [Units("h")]
-    public string? RepairTimeH { get; set; }
+    public string? RepairTimeHours { get; set; }
 
-    /// <summary>Replace Time (Column: Replace Time (h))</summary>
-    [Category("Reliability")]
-    [Description("Replace Time")]
+    /// <summary>Replace Time (h) (Column: Replace Time (h))</summary>
+    [Category("General")]
+    [Description("Replace Time (h)")]
     [Units("h")]
-    public string? ReplaceTimeH { get; set; }
+    public string? ReplaceTimeHours { get; set; }
 
     /// <summary>Repair Cost (Column: Repair Cost)</summary>
     [Category("Reliability")]
@@ -334,7 +331,7 @@ public class Generator
     public string? RepairCost { get; set; }
 
     /// <summary>Replace Cost (Column: Replace Cost)</summary>
-    [Category("Reliability")]
+    [Category("General")]
     [Description("Replace Cost")]
     public string? ReplaceCost { get; set; }
 
@@ -369,7 +366,7 @@ public class Generator
     public string? LocationName { get; set; }
 
     /// <summary>Location Description (Column: Location Description)</summary>
-    [Category("Metadata")]
+    [Category("Location")]
     [Description("Location Description")]
     public string? LocationDescription { get; set; }
 
@@ -389,7 +386,7 @@ public class Generator
     public string? Floor { get; set; }
 
     /// <summary>Data Status (Column: Data Status)</summary>
-    [Category("Metadata")]
+    [Category("Identity")]
     [Description("Data Status")]
     public string? DataStatus { get; set; }
 
@@ -398,7 +395,7 @@ public class Generator
     [Description("Comment")]
     public string? Comment { get; set; }
 
-    /// <summary>Alias for Generators (convenience property for dictionary indexing - not serialized).</summary>
+    /// <summary>Alias for Generator (convenience property for dictionary indexing - not serialized).</summary>
     [System.Text.Json.Serialization.JsonIgnore]
     [Newtonsoft.Json.JsonIgnore]
     public string? Id

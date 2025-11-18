@@ -76,8 +76,8 @@
                             </TextBlock.Style>
                         </TextBlock>
                         
-                        <!-- Tab Header Text -->
-                        <TextBlock Text="{Binding Header}"
+                        <!-- Tab Header Text - NOW USING DISPLAY NAME -->
+                        <TextBlock Text="{Binding DisplayName}"
                                    FontSize="13"
                                    VerticalAlignment="Center"
                                    Foreground="{DynamicResource TextPrimaryBrush}"/>

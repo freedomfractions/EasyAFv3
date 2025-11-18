@@ -104,8 +104,8 @@
                     
                     <!-- Data Type Name -->
                     <DataGridTextColumn Header="Data Type" 
-                                        Binding="{Binding DataTypeName}" 
-                                        Width="150"
+                                        Binding="{Binding DataTypeDisplayName}" 
+                                        Width="200"
                                         IsReadOnly="True">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
