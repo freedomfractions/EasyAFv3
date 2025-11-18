@@ -22,7 +22,7 @@ public class Meter
     [Category("General")]
     [Description("Capacitors")]
     [Required]
-    public string? Capacitors { get; set; }
+    public string? Meters { get; set; }
 
     /// <summary>Status (Column: Status)</summary>
     [Category("Identity")]
@@ -57,7 +57,7 @@ public class Meter
     /// <summary>Nom kV (Column: Nom kV)</summary>
     [Category("Electrical")]
     [Description("Nom kV")]
-    public string? NomkV { get; set; }
+    public string? NomKV { get; set; }
 
     /// <summary>MVAR (Column: MVAR)</summary>
     [Category("General")]
@@ -69,7 +69,7 @@ public class Meter
     [Category("General")]
     [Description("MVAR pu")]
     [Required]
-    public string? MVARpu { get; set; }
+    public string? MVARPu { get; set; }
 
     /// <summary>Inrush FLA Mult (Column: Inrush FLA Mult)</summary>
     [Category("General")]
@@ -189,13 +189,13 @@ public class Meter
     [Description("Comment")]
     public string? Comment { get; set; }
 
-    /// <summary>Alias for Capacitors (convenience property for dictionary indexing - not serialized).</summary>
+    /// <summary>Alias for Meters (convenience property for dictionary indexing - not serialized).</summary>
     [System.Text.Json.Serialization.JsonIgnore]
     [Newtonsoft.Json.JsonIgnore]
     public string? Id
     {
-        get => Capacitors;
-        set => Capacitors = value;
+        get => Meters;
+        set => Meters = value;
     }
 
     /// <summary>
@@ -208,7 +208,8 @@ public class Meter
     /// </summary>
     public override string ToString()
     {
-        return $"Meter: {Capacitors}";
+        return $"Meter: {Meters}";
     }
 }
+
 

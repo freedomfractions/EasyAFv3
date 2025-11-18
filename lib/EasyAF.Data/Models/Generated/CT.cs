@@ -72,7 +72,7 @@ public class CT
     /// <summary>One-line Graphics (Column: One-line Graphics)</summary>
     [Category("General")]
     [Description("One-line Graphics")]
-    public string? OnelineGraphics { get; set; }
+    public string? OneLineGraphics { get; set; }
 
     /// <summary>Data Status (Column: Data Status)</summary>
     [Category("Metadata")]

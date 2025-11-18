@@ -57,78 +57,73 @@ public class Filter
     /// <summary>R (Column: R (Ohms))</summary>
     [Category("General")]
     [Description("R")]
-    [Units("?")]
-    public string? R { get; set; }
+    [Units("Ω")]
+    public string? ROhms { get; set; }
 
     /// <summary>L-R (Column: L-R (Ohms))</summary>
     [Category("General")]
     [Description("L-R")]
-    [Units("?")]
-    public string? LR { get; set; }
+    [Units("Ω")]
+    public string? LROhms { get; set; }
 
     /// <summary>L-X (Column: L-X (Ohms))</summary>
     [Category("General")]
     [Description("L-X")]
-    [Units("?")]
-    public string? LX { get; set; }
+    [Units("Ω")]
+    public string? LXOhms { get; set; }
 
-    /// <summary>C1 (Column: C1 (MVAR))</summary>
+    /// <summary>C1 (MVAR) (Column: C1 (MVAR))</summary>
     [Category("General")]
-    [Description("C1")]
+    [Description("C1 (MVAR)")]
     [Required]
-    [Units("MVA")]
-    public string? C1 { get; set; }
+    [Units("MVAR")]
+    public string? C1MVAR { get; set; }
 
-    /// <summary>C1 (Column: C1 (kV))</summary>
+    /// <summary>C1 (kV) (Column: C1 (kV))</summary>
     [Category("Electrical")]
-    [Description("C1")]
+    [Description("C1 (kV)")]
     [Units("kV")]
-    public string? C1 { get; set; }
+    public string? C1KV { get; set; }
 
-    /// <summary>C2 (Column: C2 (MVAR))</summary>
+    /// <summary>C2 (MVAR) (Column: C2 (MVAR))</summary>
     [Category("General")]
-    [Description("C2")]
+    [Description("C2 (MVAR)")]
     [Required]
-    [Units("MVA")]
-    public string? C2 { get; set; }
+    [Units("MVAR")]
+    public string? C2MVAR { get; set; }
 
-    /// <summary>C2 (Column: C2 (kV))</summary>
+    /// <summary>C2 (kV) (Column: C2 (kV))</summary>
     [Category("Electrical")]
-    [Description("C2")]
+    [Description("C2 (kV)")]
     [Units("kV")]
-    public string? C2 { get; set; }
+    public string? C2KV { get; set; }
 
-    /// <summary>G pu (Column: G pu (R))</summary>
+    /// <summary>G pu (R) (Column: G pu (R))</summary>
     [Category("General")]
-    [Description("G pu")]
-    [Units("R")]
-    public string? Gpu { get; set; }
+    [Description("G pu (R)")]
+    public string? GpuR { get; set; }
 
-    /// <summary>G pu (Column: G pu (L))</summary>
+    /// <summary>G pu (L) (Column: G pu (L))</summary>
     [Category("General")]
-    [Description("G pu")]
-    [Units("L")]
-    public string? Gpu { get; set; }
+    [Description("G pu (L)")]
+    public string? GpuL { get; set; }
 
-    /// <summary>B pu (Column: B pu (L))</summary>
+    /// <summary>B pu (L) (Column: B pu (L))</summary>
     [Category("General")]
-    [Description("B pu")]
-    [Units("L")]
-    public string? Bpu { get; set; }
+    [Description("B pu (L)")]
+    public string? BpuL { get; set; }
 
-    /// <summary>MVAR pu (Column: MVAR pu (C1))</summary>
+    /// <summary>MVAR pu (C1) (Column: MVAR pu (C1))</summary>
     [Category("General")]
-    [Description("MVAR pu")]
+    [Description("MVAR pu (C1)")]
     [Required]
-    [Units("°C")]
-    public string? MVARpu { get; set; }
+    public string? MVARpuC1 { get; set; }
 
-    /// <summary>MVAR pu (Column: MVAR pu (C2))</summary>
+    /// <summary>MVAR pu (C2) (Column: MVAR pu (C2))</summary>
     [Category("General")]
-    [Description("MVAR pu")]
+    [Description("MVAR pu (C2)")]
     [Required]
-    [Units("°C")]
-    public string? MVARpu { get; set; }
+    public string? MVARpuC2 { get; set; }
 
     /// <summary>Hrm RC Factor (Column: Hrm RC Factor)</summary>
     [Category("General")]

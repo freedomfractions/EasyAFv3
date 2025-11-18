@@ -53,13 +53,13 @@ public class ZigzagTransformer
     [Category("Electrical")]
     [Description("Rating")]
     [Units("kV")]
-    public string? Rating { get; set; }
+    public string? RatingKV { get; set; }
 
     /// <summary>Imped (Column: Imped (Ohm))</summary>
     [Category("General")]
     [Description("Imped")]
     [Units("?")]
-    public string? Imped { get; set; }
+    public string? ImpedOhm { get; set; }
 
     /// <summary>RG Ohm (Column: RG Ohm)</summary>
     [Category("General")]
@@ -74,7 +74,7 @@ public class ZigzagTransformer
     /// <summary>3RG Ohm (Column: 3RG Ohm)</summary>
     [Category("General")]
     [Description("3RG Ohm")]
-    public string? 3RGOhm { get; set; }
+    public string? ThreeRGOhm { get; set; }
 
     /// <summary>3RG Ohm + X0 (Column: 3RG Ohm + X0)</summary>
     [Category("General")]
@@ -221,4 +221,5 @@ public class ZigzagTransformer
         return $"ZigzagTransformer: {ZigzagTransformers}";
     }
 }
+
 

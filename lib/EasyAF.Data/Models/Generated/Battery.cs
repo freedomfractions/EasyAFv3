@@ -52,7 +52,7 @@ public class Battery
     /// <summary>Total Rated kV (Column: Total Rated kV)</summary>
     [Category("Electrical")]
     [Description("Total Rated kV")]
-    public string? TotalRatedkV { get; set; }
+    public string? TotalRatedKV { get; set; }
 
     /// <summary>Charging Mult (Column: Charging Mult)</summary>
     [Category("General")]
@@ -179,4 +179,5 @@ public class Battery
         return $"Battery: {Batteries}";
     }
 }
+
 

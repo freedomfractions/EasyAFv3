@@ -18,11 +18,11 @@ namespace EasyAF.Data.Models;
 [EasyPowerClass("Inverters")]
 public class Inverter
 {
-    /// <summary>Capacitors (Column: Capacitors)</summary>
-    [Category("General")]
-    [Description("Capacitors")]
+    /// <summary>Inverters (Column: Inverters)</summary>
+    [Category("Identity")]
+    [Description("Inverters")]
     [Required]
-    public string? Capacitors { get; set; }
+    public string? Inverters { get; set; }
 
     /// <summary>Status (Column: Status)</summary>
     [Category("Identity")]
@@ -57,7 +57,7 @@ public class Inverter
     /// <summary>Nom kV (Column: Nom kV)</summary>
     [Category("Electrical")]
     [Description("Nom kV")]
-    public string? NomkV { get; set; }
+    public string? NomKV { get; set; }
 
     /// <summary>MVAR (Column: MVAR)</summary>
     [Category("General")]
@@ -69,7 +69,7 @@ public class Inverter
     [Category("General")]
     [Description("MVAR pu")]
     [Required]
-    public string? MVARpu { get; set; }
+    public string? MVARPu { get; set; }
 
     /// <summary>Inrush FLA Mult (Column: Inrush FLA Mult)</summary>
     [Category("General")]
@@ -189,13 +189,13 @@ public class Inverter
     [Description("Comment")]
     public string? Comment { get; set; }
 
-    /// <summary>Alias for Capacitors (convenience property for dictionary indexing - not serialized).</summary>
+    /// <summary>Alias for Inverters (convenience property for dictionary indexing - not serialized).</summary>
     [System.Text.Json.Serialization.JsonIgnore]
     [Newtonsoft.Json.JsonIgnore]
     public string? Id
     {
-        get => Capacitors;
-        set => Capacitors = value;
+        get => Inverters;
+        set => Inverters = value;
     }
 
     /// <summary>
@@ -208,7 +208,8 @@ public class Inverter
     /// </summary>
     public override string ToString()
     {
-        return $"Inverter: {Capacitors}";
+        return $"Inverter: {Inverters}";
     }
 }
+
 

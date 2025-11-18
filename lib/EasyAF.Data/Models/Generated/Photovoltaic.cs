@@ -53,13 +53,13 @@ public class Photovoltaic
     [Category("Electrical")]
     [Description("Max Pwr Rating")]
     [Units("kW")]
-    public string? MaxPwrRating { get; set; }
+    public string? MaxPwrRatingKW { get; set; }
 
     /// <summary>Isc (Column: Isc (A))</summary>
     [Category("Electrical")]
     [Description("Isc")]
     [Units("A")]
-    public string? Isc { get; set; }
+    public string? IscA { get; set; }
 
     /// <summary>kVoc (Column: kVoc (kV))</summary>
     [Category("Electrical")]
@@ -183,4 +183,5 @@ public class Photovoltaic
         return $"Photovoltaic: {Photovoltaics}";
     }
 }
+
 

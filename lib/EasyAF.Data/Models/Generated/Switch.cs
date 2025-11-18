@@ -74,7 +74,7 @@ public class Switch
     [Category("Electrical")]
     [Description("Cont Current")]
     [Units("A")]
-    public string? ContCurrent { get; set; }
+    public string? ContCurrentA { get; set; }
 
     /// <summary>Standard (Column: Standard)</summary>
     [Category("General")]
@@ -89,12 +89,12 @@ public class Switch
     /// <summary>SC Mom kA (Column: SC Mom kA)</summary>
     [Category("Electrical")]
     [Description("SC Mom kA")]
-    public string? SCMomkA { get; set; }
+    public string? SCMomKA { get; set; }
 
     /// <summary>IEC Peak Withstand kA (Column: IEC Peak Withstand kA)</summary>
     [Category("General")]
     [Description("IEC Peak Withstand kA")]
-    public string? IECPeakWithstandkA { get; set; }
+    public string? IECPeakWithstandKA { get; set; }
 
     /// <summary>SC Test Std (Column: SC Test Std)</summary>
     [Category("Electrical")]
@@ -104,7 +104,7 @@ public class Switch
     /// <summary>PCC kVA Demand (Column: PCC kVA Demand)</summary>
     [Category("Electrical")]
     [Description("PCC kVA Demand")]
-    public string? PCCkVADemand { get; set; }
+    public string? PCCKVADemand { get; set; }
 
     /// <summary>PCC Isc/ILoad (Column: PCC Isc/ILoad)</summary>
     [Category("Demand")]
@@ -196,4 +196,5 @@ public class Switch
         return $"Switch: {Switches}";
     }
 }
+
 
