@@ -111,7 +111,7 @@ namespace EasyAF.Import
                         // Skip nested / child pseudo-types (e.g., LVCB.TripUnit) for section activation
                         if (kvp.Key.Contains('.')) continue;
                         var idEntry = kvp.Value.FirstOrDefault(e => e.PropertyName == "Id");
-                        if idEntry == null) continue;
+                        if (idEntry == null) continue;
                         if (currentHeaderSet.Contains(idEntry.ColumnHeader.Trim())) activeTargetTypes.Add(kvp.Key);
                     }
                     inKnownSection = activeTargetTypes.Count > 0;

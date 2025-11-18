@@ -16,19 +16,24 @@ namespace EasyAF.Export
         private static readonly Dictionary<string, PropertyInfo> LvcbProps = typeof(LVCB)
             .GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance)
             .ToDictionary(p => p.Name, p => p, StringComparer.OrdinalIgnoreCase);
-        private static readonly Dictionary<string, PropertyInfo> TripProps = typeof(TripUnit)
-            .GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance)
-            .ToDictionary(p => p.Name, p => p, StringComparer.OrdinalIgnoreCase);
+        
         private static readonly Dictionary<string, PropertyInfo> ProjectProps = typeof(Project)
             .GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance)
             .ToDictionary(p => p.Name, p => p, StringComparer.OrdinalIgnoreCase);
 
-        // Units (presentation only)
+        // Units (presentation only) - updated to use LVCB.TripUnitXxx property names
         private static readonly Dictionary<string, string> UnitSuffixes = new(StringComparer.OrdinalIgnoreCase)
         {
             ["LVCB.FrameSize"] = "A",
             ["LVCB.FrameRating"] = "A",
             ["LVCB.InterruptRating"] = "kA",
+            ["LVCB.TripUnitTripPlug"] = "A",
+            ["LVCB.TripUnitLtpuAmps"] = "A",
+            ["LVCB.TripUnitStpuAmps"] = "A",
+            ["LVCB.TripUnitInstAmps"] = "A",
+            ["LVCB.TripUnitMaintAmps"] = "A",
+            ["LVCB.TripUnitGfpuAmps"] = "A",
+            // Legacy TripUnit.* tags (for backward compatibility with old templates)
             ["TripUnit.TripPlug"] = "A",
             ["TripUnit.LtpuAmps"] = "A",
             ["TripUnit.StpuAmps"] = "A",
@@ -38,19 +43,19 @@ namespace EasyAF.Export
         };
 
         // Fields that are considered strictly indicative of adjustability (heuristic Option A)
-        // Excludes common computed/always-present amp fields: LtpuAmps, StpuAmps, MaintAmps, TripPlug, Gfpu (unitless)
+        // Now uses LVCB property names (flattened TripUnitXxx)
         private static readonly string[] StrictIndicatorPropertyNames = new[]
         {
-            nameof(TripUnit.LtpuMult), nameof(TripUnit.LtdBand), nameof(TripUnit.LtdCurve),
-            nameof(TripUnit.Stpu), nameof(TripUnit.StdBand), nameof(TripUnit.StdI2t), nameof(TripUnit.StpuI2t),
-            nameof(TripUnit.InstAmps), nameof(TripUnit.TripAdjust), nameof(TripUnit.Inst),
-            nameof(TripUnit.MaintSetting), nameof(TripUnit.GfpuAmps), nameof(TripUnit.Gfd), nameof(TripUnit.GfdI2t)
+            "TripUnitLtpuMult", "TripUnitLtdBand", "TripUnitLtdCurve",
+            "TripUnitStpu", "TripUnitStdBand", "TripUnitStdI2t", "TripUnitStpuI2t",
+            "TripUnitInstAmps", "TripUnitTripAdjust", "TripUnitInst",
+            "TripUnitMaintSetting", "TripUnitGfpuAmps", "TripUnitGfd", "TripUnitGfdI2t"
         };
         private static readonly HashSet<string> StrictIndicatorSet = new(StrictIndicatorPropertyNames, StringComparer.OrdinalIgnoreCase);
 
         private static readonly string[] AlwaysIgnoreIndicatorNames = new[]
         {
-            nameof(TripUnit.LtpuAmps), nameof(TripUnit.StpuAmps), nameof(TripUnit.MaintAmps), nameof(TripUnit.TripPlug), nameof(TripUnit.Gfpu)
+            "TripUnitLtpuAmps", "TripUnitStpuAmps", "TripUnitMaintAmps", "TripUnitTripPlug", "TripUnitGfpu"
         };
         private static readonly HashSet<string> IgnoreIndicatorSet = new(AlwaysIgnoreIndicatorNames, StringComparer.OrdinalIgnoreCase);
 
@@ -73,7 +78,7 @@ namespace EasyAF.Export
         /// <param name="breakers">Breakers to include.</param>
         /// <param name="templateName">Template file name (embedded resource lookup, case-insensitive).</param>
         /// <param name="outputPath">Destination .docx path.</param>
-        /// <param name="adjustableOnly">If true include only breakers whose TripUnit.Adjustable is true (auto inferred if not set).</param>
+        /// <param name="adjustableOnly">If true include only breakers with adjustable trip units (auto inferred from settings).</param>
         /// <param name="clearUnmatchedTags">If true clears (empties) any SDT whose tag cannot be resolved; otherwise leaves placeholder text.</param>
         public static BreakerLabelGenerationResult GenerateBreakerLabels(Project? project, IEnumerable<LVCB> breakers, string templateName, string outputPath, bool adjustableOnly = true, bool clearUnmatchedTags = true)
         {
@@ -86,8 +91,8 @@ namespace EasyAF.Export
                 filtered = new List<LVCB>();
                 foreach (var b in all)
                 {
-                    if (b?.TripUnit == null) continue;
-                    if (IsEffectivelyAdjustable(b.TripUnit, out var indicators))
+                    if (b == null) continue;
+                    if (IsEffectivelyAdjustable(b, out var indicators))
                     {
                         filtered.Add(b);
                         var key = b.Id ?? ($"IDX_{filtered.Count}");
@@ -131,37 +136,49 @@ namespace EasyAF.Export
         public static BreakerLabelGenerationResult GenerateBreakerLabels(IEnumerable<LVCB> breakers, string templateName, string outputPath, bool adjustableOnly = true)
             => GenerateBreakerLabels(null, breakers, templateName, outputPath, adjustableOnly, clearUnmatchedTags: true);
 
-        // Option A heuristic with trigger capture (Option C logging support)
-        public static bool IsEffectivelyAdjustable(TripUnit tu, out List<string> indicators)
+        /// <summary>
+        /// Determines if a breaker has an adjustable trip unit based on heuristics (Option A).
+        /// Checks TripUnitAdjustable flag and presence of meaningful trip unit settings.
+        /// </summary>
+        /// <param name="lvcb">The breaker to check.</param>
+        /// <param name="indicators">Output list of property names that indicate adjustability.</param>
+        /// <returns>True if the breaker is considered adjustable, otherwise false.</returns>
+        public static bool IsEffectivelyAdjustable(LVCB lvcb, out List<string> indicators)
         {
             indicators = new();
-            if (tu == null) return false;
+            if (lvcb == null) return false;
 
-            // Ensure flag is inferred when unset based on data tokens
-            tu.InferAdjustableIfUnset();
+            // Check explicit adjustable flag (if it's a boolean string like "True"/"False" or actual boolean)
+            bool flagged = false;
+            if (!string.IsNullOrWhiteSpace(lvcb.TripUnitAdjustable))
+            {
+                var adj = lvcb.TripUnitAdjustable.Trim().ToLowerInvariant();
+                flagged = adj is "true" or "t" or "yes" or "y" or "1" or "x" or "adj" or "adjustable";
+            }
 
             // Collect strict indicators regardless of current flag
             foreach (var name in StrictIndicatorPropertyNames)
             {
-                var prop = typeof(TripUnit).GetProperty(name, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+                var prop = typeof(LVCB).GetProperty(name, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
                 if (prop == null) continue;
-                var valObj = prop.GetValue(tu);
+                var valObj = prop.GetValue(lvcb);
                 if (valObj is string s && IsMeaningfulValue(s))
                 {
                     // special handling: Inst counted only if not literal "fixed"
-                    if (string.Equals(name, nameof(TripUnit.Inst), StringComparison.OrdinalIgnoreCase) && string.Equals(s.Trim(), "fixed", StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(name, "TripUnitInst", StringComparison.OrdinalIgnoreCase) && string.Equals(s.Trim(), "fixed", StringComparison.OrdinalIgnoreCase))
                         continue;
                     indicators.Add(name);
                 }
             }
 
             // Determine effective adjustability: explicit flag OR indicators present
-            bool flagged = tu.Adjustable;
             bool indicated = indicators.Count > 0;
             if (!(flagged || indicated)) return false;
 
             // If Inst is fixed AND only indicator is InstAmps -> treat as not adjustable
-            if (string.Equals(tu.Inst?.Trim(), "fixed", StringComparison.OrdinalIgnoreCase) && indicators.Count == 1 && indicators[0].Equals(nameof(TripUnit.InstAmps), StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(lvcb.TripUnitInst?.Trim(), "fixed", StringComparison.OrdinalIgnoreCase) && 
+                indicators.Count == 1 && 
+                indicators[0].Equals("TripUnitInstAmps", StringComparison.OrdinalIgnoreCase))
             {
                 indicators.Clear();
                 return false;
@@ -250,37 +267,33 @@ namespace EasyAF.Export
             var dict = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
             if (b != null)
             {
+                // Add all LVCB properties (including flattened TripUnitXxx properties)
                 foreach (var kvp in LvcbProps)
                 {
-                    if (kvp.Value.Name == nameof(LVCB.TripUnit)) continue;
                     var raw = kvp.Value.GetValue(b);
-                    var tag = $"LVCB.{kvp.Value.Name}";
+                    var propName = kvp.Value.Name;
+                    
+                    // Add as LVCB.PropertyName
+                    var lvcbTag = $"LVCB.{propName}";
                     var formatted = Format(raw);
-                    formatted = AppendUnitIfNeeded(tag, formatted);
-                    dict[tag] = formatted;
-                }
-                if (b.TripUnit != null)
-                {
-                    foreach (var kvp in TripProps)
+                    formatted = AppendUnitIfNeeded(lvcbTag, formatted);
+                    dict[lvcbTag] = formatted;
+                    
+                    // Also add TripUnitXxx properties as TripUnit.Xxx for backward compatibility with old templates
+                    if (propName.StartsWith("TripUnit", StringComparison.OrdinalIgnoreCase) && propName.Length > 8)
                     {
-                        var raw = kvp.Value.GetValue(b.TripUnit);
-                        var tag = $"TripUnit.{kvp.Value.Name}";
-                        var formatted = Format(raw);
-                        formatted = AppendUnitIfNeeded(tag, formatted);
-                        dict[tag] = formatted;
+                        var shortName = propName.Substring(8); // Remove "TripUnit" prefix
+                        var tripUnitTag = $"TripUnit.{shortName}";
+                        dict[tripUnitTag] = formatted;
                     }
-                    AddTripModuleDerivedTags(b, dict);
                 }
-                else
-                {
-                    dict["LVCB.MfrStyleLabel"] = (b.Manufacturer + " " + b.Style).Trim();
-                    dict["TripUnit.TripModuleInfo"] = string.Empty;
-                }
+                
+                AddTripModuleDerivedTags(b, dict);
 
                 // Effective manufacturer fallbacks (dataset often missing Manufacturer header per import warnings)
-                var effectiveBreakerMfr = !string.IsNullOrWhiteSpace(b.Manufacturer) ? b.Manufacturer!.Trim() : b.TripUnit?.Manufacturer?.Trim();
-                var effectiveTripMfr = b.TripUnit != null && !string.IsNullOrWhiteSpace(b.TripUnit.Manufacturer)
-                    ? b.TripUnit.Manufacturer!.Trim()
+                var effectiveBreakerMfr = !string.IsNullOrWhiteSpace(b.Manufacturer) ? b.Manufacturer!.Trim() : b.TripUnitManufacturer?.Trim();
+                var effectiveTripMfr = !string.IsNullOrWhiteSpace(b.TripUnitManufacturer)
+                    ? b.TripUnitManufacturer!.Trim()
                     : effectiveBreakerMfr; // fallback to breaker mfr
 
                 // Expose effective manufacturers explicitly
@@ -293,9 +306,11 @@ namespace EasyAF.Export
                 // Legacy template compatibility: also populate BreakerType if present
                 if (dict.ContainsKey("LVCB.BreakerType")) dict["LVCB.BreakerType"] = breakerTypeDisplay;
 
-                if (b.TripUnit != null)
+                // Trip unit type display
+                var hasTripUnitData = !string.IsNullOrWhiteSpace(b.TripUnitType) || !string.IsNullOrWhiteSpace(b.TripUnitStyle);
+                if (hasTripUnitData)
                 {
-                    var tripTypeDisplay = ComposeBreakerTypeDisplay(effectiveTripMfr, b.TripUnit.Style ?? b.TripUnit.Type);
+                    var tripTypeDisplay = ComposeBreakerTypeDisplay(effectiveTripMfr, b.TripUnitStyle ?? b.TripUnitType);
                     dict["TripUnit.TripTypeDisplay"] = tripTypeDisplay;
                     if (dict.ContainsKey("TripUnit.Type")) dict["TripUnit.Type"] = tripTypeDisplay; // override legacy Type tag
                     if (dict.ContainsKey("LVCB.Style")) dict["LVCB.Style"] = breakerTypeDisplay; // show Mfr + Style
@@ -333,30 +348,34 @@ namespace EasyAF.Export
         // Implements legacy VBA logic for trip module descriptor (tmpStr / tmpStr2)
         private static void AddTripModuleDerivedTags(LVCB breaker, Dictionary<string, string?> dict)
         {
-            var tu = breaker.TripUnit;
-            if (tu == null)
+            var hasTripUnitData = !string.IsNullOrWhiteSpace(breaker.TripUnitType) || !string.IsNullOrWhiteSpace(breaker.TripUnitStyle);
+            if (!hasTripUnitData)
             {
                 dict["LVCB.MfrStyleLabel"] = (breaker.Manufacturer + " " + breaker.Style).Trim();
                 dict["TripUnit.TripModuleInfo"] = string.Empty;
                 return;
             }
+            
             // Base label: Manufacturer + Style
             string baseLabel = string.Join(" ", new[]{breaker.Manufacturer, breaker.Style}.Where(s=>!string.IsNullOrWhiteSpace(s))).Trim();
-            string? tripType = tu.Type?.Trim();
-            string? tripStyle = tu.Style?.Trim();
+            string? tripType = breaker.TripUnitType?.Trim();
+            string? tripStyle = breaker.TripUnitStyle?.Trim();
             bool hasTripType = !string.IsNullOrWhiteSpace(tripType);
             bool hasTripStyle = !string.IsNullOrWhiteSpace(tripStyle);
             string tripTypeLower = (tripType ?? string.Empty).Trim().ToLowerInvariant();
             bool tripTypeIsStd = tripTypeLower == "(std)"; // replicates VBA LCase compare
+            
             // Determine if style already contains trip style (case-insensitive contains)
             bool styleContainsTripStyle = false;
             if (hasTripStyle && !string.IsNullOrWhiteSpace(breaker.Style))
             {
                 styleContainsTripStyle = breaker.Style!.IndexOf(tripStyle!, StringComparison.OrdinalIgnoreCase) >= 0;
             }
+            
             // Show trip module only if breaker considered adjustable by heuristic
-            bool isAdjustable = breaker.TripUnit != null && IsEffectivelyAdjustable(tu, out _);
+            bool isAdjustable = IsEffectivelyAdjustable(breaker, out _);
             string moduleInfo = string.Empty;
+            
             if (isAdjustable)
             {
                 // If tripType not (std) OR style does not already contain tripStyle add "/" + newline separator per legacy logic
