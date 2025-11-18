@@ -267,9 +267,32 @@
                                     
                                     <StackPanel Grid.Column="0">
                                         <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="{Binding PropertyName}"
-                                                       FontWeight="SemiBold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                            <!-- CROSS-MODULE EDIT: 2025-01-18 Display Friendly Property Descriptions -->
+                                            <!-- Modified for: Show Description from [Description] attribute instead of raw PropertyName -->
+                                            <!-- Related modules: Map (PropertyDiscoveryService extracts Description attribute) -->
+                                            <!-- Rollback instructions: Change binding back to PropertyName -->
+                                            <TextBlock FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource TextPrimaryBrush}">
+                                                <!-- Fallback to PropertyName if Description is null -->
+                                                <TextBlock.Text>
+                                                    <MultiBinding StringFormat="{}{0}">
+                                                        <Binding Path="Description" FallbackValue="{Binding PropertyName}"/>
+                                                    </MultiBinding>
+                                                </TextBlock.Text>
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Style.Triggers>
+                                                            <!-- If Description is null/empty, use PropertyName -->
+                                                            <DataTrigger Binding="{Binding Description}" Value="{x:Null}">
+                                                                <Setter Property="Text" Value="{Binding PropertyName}"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Description}" Value="">
+                                                                <Setter Property="Text" Value="{Binding PropertyName}"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
                                             <!-- CROSS-MODULE EDIT: 2025-01-16 Required Property Validation -->
                                             <!-- Modified for: Add red asterisk (*) indicator for required properties -->
                                             <!-- Related modules: Map (PropertyInfo.IsRequired, PropertyDiscoveryService) -->
@@ -284,11 +307,6 @@
                                                    FontSize="10"
                                                    Foreground="{DynamicResource SuccessBrush}"
                                                    Visibility="{Binding IsMapped, Converter={StaticResource BoolToVisibilityConverter}}"/>
-                                        <TextBlock Text="{Binding Description}"
-                                                   FontSize="10"
-                                                   TextWrapping="Wrap"
-                                                   Foreground="{DynamicResource TextSecondaryBrush}"
-                                                   Visibility="{Binding Description, Converter={StaticResource NullToVisibilityConverter}}"/>
                                     </StackPanel>
                                     
                                     <!-- Mapping Indicator -->
