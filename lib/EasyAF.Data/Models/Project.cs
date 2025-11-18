@@ -354,9 +354,9 @@ namespace EasyAF.Data.Models
         };
 
         /// <summary>
-        /// Populate missing Manufacturer fields (breaker & trip unit) using fallbacks:
-        /// 1. If LVCB.Manufacturer empty but TripUnit.Manufacturer present → copy.
-        /// 2. If TripUnit.Manufacturer empty but LVCB.Manufacturer present → copy.
+        /// Populate missing Manufacturer fields (breaker) using fallbacks:
+        /// 1. If LVCB.Manufacturer empty but TripUnitManufacturer present → copy.
+        /// 2. If TripUnitManufacturer empty but LVCB.Manufacturer present → copy.
         /// 3. If still empty attempt heuristic from Style (leading tokens matched to known manufacturers).
         /// </summary>
         private static void NormalizeManufacturers(Project proj)
@@ -368,27 +368,25 @@ namespace EasyAF.Data.Models
                 foreach (var kv in ds.LVCBEntries)
                 {
                     var b = kv.Value;
-                    // Replace problematic line with block form to avoid parser confusion
-                    if (b == null)
-                    {
-                        continue;
-                    }
-                    var tu = b.TripUnit;
-                    // Step 1 / 2 cross-copy
-                    if (string.IsNullOrWhiteSpace(b.Manufacturer) && !string.IsNullOrWhiteSpace(tu?.Manufacturer))
-                        b.Manufacturer = tu!.Manufacturer!.Trim();
-                    else if (tu != null && string.IsNullOrWhiteSpace(tu.Manufacturer) && !string.IsNullOrWhiteSpace(b.Manufacturer))
-                        tu.Manufacturer = b.Manufacturer!.Trim();
+                    if (b == null) continue;
+                    
+                    // Step 1 / 2 cross-copy between Manufacturer and TripUnitManufacturer
+                    if (string.IsNullOrWhiteSpace(b.Manufacturer) && !string.IsNullOrWhiteSpace(b.TripUnitManufacturer))
+                        b.Manufacturer = b.TripUnitManufacturer!.Trim();
+                    else if (string.IsNullOrWhiteSpace(b.TripUnitManufacturer) && !string.IsNullOrWhiteSpace(b.Manufacturer))
+                        b.TripUnitManufacturer = b.Manufacturer!.Trim();
+                    
                     // Step 3 heuristics on breaker style
                     if (string.IsNullOrWhiteSpace(b.Manufacturer))
                     {
                         var inferred = InferManufacturerFromStyle(b.Style);
                         if (!string.IsNullOrEmpty(inferred)) b.Manufacturer = inferred;
                     }
-                    if (tu != null && string.IsNullOrWhiteSpace(tu.Manufacturer))
+                    
+                    if (string.IsNullOrWhiteSpace(b.TripUnitManufacturer))
                     {
-                        var inferredTu = InferManufacturerFromStyle(tu.Style) ?? b.Manufacturer;
-                        if (!string.IsNullOrWhiteSpace(inferredTu)) tu.Manufacturer = inferredTu;
+                        var inferredTu = InferManufacturerFromStyle(b.TripUnitStyle) ?? b.Manufacturer;
+                        if (!string.IsNullOrWhiteSpace(inferredTu)) b.TripUnitManufacturer = inferredTu;
                     }
                 }
             }
