@@ -52,7 +52,7 @@ namespace EasyAF.Modules.Map
     /// // Document type (.ezmap) is now available in New/Open dialogs
     /// </code>
     /// </example>
-    public class MapModule : IDocumentModule
+    public class MapModule : IDocumentModule, IHelpProvider
     {
         private IUnityContainer? _container;
         
@@ -92,6 +92,53 @@ namespace EasyAF.Modules.Map
         /// Currently returns null; icon can be added as embedded resource in future.
         /// </remarks>
         public ImageSource? ModuleIcon => null; // TODO: Add module icon
+
+        /// <summary>
+        /// Gets the help pages provided by this module.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Provides comprehensive user documentation for the Map Editor including:
+        /// - Introduction and quick start
+        /// - Creating and managing mappings
+        /// - Property management features
+        /// - Troubleshooting common issues
+        /// </para>
+        /// <para>
+        /// All pages are embedded Markdown resources in the Help/ folder.
+        /// </para>
+        /// </remarks>
+        public IEnumerable<HelpPageDescriptor> GetHelpPages() => new[]
+        {
+            new HelpPageDescriptor(
+                Id: "map.intro",
+                Title: "Map Editor Introduction",
+                Category: "Getting Started",
+                ResourcePath: "Help/Introduction.md",
+                Keywords: new[] { "overview", "quick start", "basics", "map editor", "mapping" }
+            ),
+            new HelpPageDescriptor(
+                Id: "map.mapping",
+                Title: "Creating Mappings",
+                Category: "Mapping",
+                ResourcePath: "Help/CreatingMappings.md",
+                Keywords: new[] { "create", "map", "associate", "link", "columns", "properties", "auto-map", "drag-drop" }
+            ),
+            new HelpPageDescriptor(
+                Id: "map.properties",
+                Title: "Property Management",
+                Category: "Mapping",
+                ResourcePath: "Help/PropertyManagement.md",
+                Keywords: new[] { "manage fields", "show", "hide", "properties", "fields", "visibility", "selector" }
+            ),
+            new HelpPageDescriptor(
+                Id: "map.troubleshooting",
+                Title: "Troubleshooting",
+                Category: "Help",
+                ResourcePath: "Help/Troubleshooting.md",
+                Keywords: new[] { "problems", "errors", "issues", "bugs", "not working", "fix", "solve", "help" }
+            )
+        };
 
         /// <summary>
         /// Initializes the Map module with the dependency injection container.

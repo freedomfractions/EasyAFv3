@@ -22,4 +22,8 @@
     <ProjectReference Include="..\..\lib\EasyAF.Data\EasyAF.Data.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="Help\*.md" />
+  </ItemGroup>
+
 </Project>
