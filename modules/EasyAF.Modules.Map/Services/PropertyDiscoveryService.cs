@@ -7,6 +7,7 @@ using EasyAF.Data.Models;
 using EasyAF.Core.Contracts;
 using Serilog;
 using MapPropertyInfo = EasyAF.Modules.Map.Models.PropertyInfo;
+using EasyAF.Data.Attributes;
 
 namespace EasyAF.Modules.Map.Services
 {
