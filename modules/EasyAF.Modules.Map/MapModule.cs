@@ -64,7 +64,7 @@ namespace EasyAF.Modules.Map
         /// <summary>
         /// Gets the version of this module.
         /// </summary>
-        public string ModuleVersion => "3.0.0";
+        public string ModuleVersion => "0.1.0";
 
         /// <summary>
         /// Gets the file extensions supported by this module.
@@ -268,7 +268,7 @@ namespace EasyAF.Modules.Map
             var document = new MapDocument
             {
                 MapName = "Untitled Map",
-                SoftwareVersion = "3.0.0",
+                SoftwareVersion = "0.1.0",
                 IsDirty = true, // New documents are dirty until saved
                 OwnerModule = this
             };

@@ -1,6 +1,6 @@
 # Map Editor User Guide
 
-**Version:** 3.0.0  
+**Version:** 0.1.0  
 **Last Updated:** January 17, 2025
 
 ---
@@ -267,7 +267,7 @@ Map files are JSON-based with the following structure:
   "MapName": "My Custom Mapping",
   "Description": "Maps customer data to EasyAF format",
   "DateModified": "2025-01-17T10:30:00Z",
-  "SoftwareVersion": "3.0.0",
+  "SoftwareVersion": "0.1.0",
   "MapVersion": "1.0",
   "ReferencedFiles": [
     { "FilePath": "C:\\Data\\BusData.csv" },
