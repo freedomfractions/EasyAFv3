@@ -268,21 +268,17 @@
                                     <StackPanel Grid.Column="0">
                                         <StackPanel Orientation="Horizontal">
                                             <!-- CROSS-MODULE EDIT: 2025-01-18 Display Friendly Property Descriptions -->
-                                            <!-- Modified for: Show Description from [Description] attribute instead of raw PropertyName -->
+                                            <!-- Modified for: Show Description from [Description] attribute, fallback to PropertyName if null -->
                                             <!-- Related modules: Map (PropertyDiscoveryService extracts Description attribute) -->
                                             <!-- Rollback instructions: Change binding back to PropertyName -->
                                             <TextBlock FontWeight="SemiBold"
                                                        Foreground="{DynamicResource TextPrimaryBrush}">
-                                                <!-- Fallback to PropertyName if Description is null -->
-                                                <TextBlock.Text>
-                                                    <MultiBinding StringFormat="{}{0}">
-                                                        <Binding Path="Description" FallbackValue="{Binding PropertyName}"/>
-                                                    </MultiBinding>
-                                                </TextBlock.Text>
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
+                                                        <!-- Default: show Description -->
+                                                        <Setter Property="Text" Value="{Binding Description}"/>
                                                         <Style.Triggers>
-                                                            <!-- If Description is null/empty, use PropertyName -->
+                                                            <!-- If Description is null or empty, fallback to PropertyName -->
                                                             <DataTrigger Binding="{Binding Description}" Value="{x:Null}">
                                                                 <Setter Property="Text" Value="{Binding PropertyName}"/>
                                                             </DataTrigger>
@@ -307,6 +303,9 @@
                                                    FontSize="10"
                                                    Foreground="{DynamicResource SuccessBrush}"
                                                    Visibility="{Binding IsMapped, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                        <!-- CROSS-MODULE EDIT: 2025-01-18 Removed redundant Description display -->
+                                        <!-- Description is now shown as the main text above, so we don't show it again -->
+                                        <!-- Previous code showed both PropertyName and Description, creating redundancy -->
                                     </StackPanel>
                                     
                                     <!-- Mapping Indicator -->
