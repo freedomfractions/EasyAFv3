@@ -111,7 +111,7 @@ namespace EasyAF.Import
                         // Skip nested / child pseudo-types (e.g., LVCB.TripUnit) for section activation
                         if (kvp.Key.Contains('.')) continue;
                         var idEntry = kvp.Value.FirstOrDefault(e => e.PropertyName == "Id");
-                        if (idEntry == null) continue;
+                        if idEntry == null) continue;
                         if (currentHeaderSet.Contains(idEntry.ColumnHeader.Trim())) activeTargetTypes.Add(kvp.Key);
                     }
                     inKnownSection = activeTargetTypes.Count > 0;
@@ -166,16 +166,8 @@ namespace EasyAF.Import
                             case "LVCB":
                                 var lvcb = new LVCB();
                                 PopulateObjectByIndex(lvcb, mapEntries, csv, currentHeaderIndex, currentHeaderSet, missingHeaders, missingRequired, strict);
-                                if (groupsByType.TryGetValue("LVCB.TripUnit", out var tuMap))
-                                {
-                                    bool anyTUData = tuMap.Any(e => currentHeaderIndex.TryGetValue(e.ColumnHeader.Trim(), out int col) && !string.IsNullOrWhiteSpace(SafeGet(csv, col)));
-                                    if (anyTUData)
-                                    {
-                                        var tu = new TripUnit();
-                                        PopulateObjectByIndex(tu, tuMap, csv, currentHeaderIndex, currentHeaderSet, missingHeaders, missingRequired, strict);
-                                        lvcb.TripUnit = tu;
-                                    }
-                                }
+                                // Trip unit properties are now flattened directly on LVCB (no nested object)
+                                // Mappings with TargetType="LVCB" and PropertyName="TripUnitXxx" will populate automatically
                                 if (!string.IsNullOrWhiteSpace(lvcb.Id))
                                 {
                                     if (!targetDataSet.LVCBEntries.ContainsKey(lvcb.Id)) targetDataSet.LVCBEntries[lvcb.Id] = lvcb; else _logger.Error(nameof(Import), $"Duplicate LVCB key {lvcb.Id} at row {physicalRow} (skipped)");

@@ -28,7 +28,7 @@ namespace EasyAF.Engine
         {
             if (lvcb == null) return string.Empty;
             var a = string.Join(' ', new[] { lvcb.Manufacturer, lvcb.Style }.Where(s => !string.IsNullOrWhiteSpace(s)));
-            var b = lvcb.TripUnit == null ? string.Empty : string.Join(' ', new[] { lvcb.TripUnit.Type, lvcb.TripUnit.Style }.Where(s => !string.IsNullOrWhiteSpace(s)));
+            var b = string.Join(' ', new[] { lvcb.TripUnitType, lvcb.TripUnitStyle }.Where(s => !string.IsNullOrWhiteSpace(s)));
             return string.IsNullOrWhiteSpace(b) ? a : a + "\n" + b;
         }
     }
