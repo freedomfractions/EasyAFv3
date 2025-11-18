@@ -1,0 +1,30 @@
+feat(map): Add settings UI polish - counters and confirmations
+
+Add "X of Y" counter for enabled data types in Map Editor settings.
+Add confirmation dialog for risky "Reset to Defaults" operation.
+Verify friendly display names working correctly throughout UI.
+
+Changes:
+- Settings counter shows "15 of 34 data types enabled" dynamically
+- Reset confirmation shows impact summary and requires user approval
+- All UI elements properly use [EasyPowerClass] friendly names
+
+UI Improvements:
+1. Data Type Counter (MapModuleSettingsView):
+   - Added EnabledCount and TotalCount properties to ViewModel
+   - Right-aligned counter TextBlock shows current selection
+   - Updates in real-time as user toggles checkboxes
+
+2. Reset Confirmation Dialog (MapModuleSettingsViewModel):
+   - Injected IUserDialogService for confirmation prompts
+   - Dialog shows total impact and custom configurations affected
+   - Prevents accidental loss of user configurations
+
+3. Friendly Names Verification:
+   - Confirmed all UI uses GetDataTypeDescription() properly
+   - Settings grid, dialog titles use friendly equipment names
+   - Property lists correctly show actual C# property identifiers
+
+Related modules: Map (ViewModels, Views, Services)
+Breaking changes: None
+Rollback: Remove counter TextBlock and confirmation dialog logic
