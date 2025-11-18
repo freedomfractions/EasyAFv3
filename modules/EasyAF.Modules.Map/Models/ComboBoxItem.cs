@@ -16,6 +16,11 @@ namespace EasyAF.Modules.Map.Models
         /// Gets the display text for this item.
         /// </summary>
         public abstract string DisplayText { get; }
+        
+        /// <summary>
+        /// Gets whether this item should be indented (for multi-table file children).
+        /// </summary>
+        public abstract bool ShouldIndent { get; }
     }
 
     /// <summary>
@@ -28,6 +33,11 @@ namespace EasyAF.Modules.Map.Models
         public override bool IsSelectable => false;
 
         public override string DisplayText => FileName;
+        
+        /// <summary>
+        /// Headers are never indented (they're top-level file names).
+        /// </summary>
+        public override bool ShouldIndent => false;
     }
 
     /// <summary>
@@ -54,6 +64,6 @@ namespace EasyAF.Modules.Map.Models
         /// <summary>
         /// Gets whether this table should be indented (from a multi-table file).
         /// </summary>
-        public bool ShouldIndent => TableReference.IsMultiTableFile;
+        public override bool ShouldIndent => TableReference.IsMultiTableFile;
     }
 }
