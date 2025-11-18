@@ -388,18 +388,14 @@ namespace EasyAF.Modules.Map.ViewModels
         /// </summary>
         /// <remarks>
         /// CROSS-MODULE EDIT: 2025-01-17 Table Selection Restoration Fix
-        /// Modified for: Fix table selection not being restored after loading saved maps
-        /// Related modules: Map (MapDocument, MapDocumentSerializer)
-        /// Rollback instructions: Revert to previous version with exact DisplayName matching
+        /// Modified for: Fix table selection persistence by using exact DisplayName matching
+        /// Related modules: Map (MapDocument, MapDocumentSerializer, TableReference)
+        /// Rollback instructions: Revert to version without enhanced logging
         /// 
-        /// BUG FIX: The table selection was being saved correctly but not restored because:
-        /// 1. The method was called at the right time (after AvailableTables was populated)
-        /// 2. But the matching logic was looking for an exact DisplayName match
-        /// 3. The DisplayName format depends on whether it's a multi-table file
-        /// 4. This caused the match to fail in some cases
+        /// The saved reference is the DisplayName from TableReference, which uses format:
+        /// "FileName ? TableName" (e.g., "sample.csv ? BusData")
         /// 
-        /// NEW APPROACH: Match on FilePath + TableName instead of DisplayName for robustness.
-        /// This ensures table selections persist correctly even if file structure changes.
+        /// This must match EXACTLY what TableReference.DisplayName returns.
         /// </remarks>
         public void RestoreTableSelection()
         {
@@ -416,55 +412,28 @@ namespace EasyAF.Modules.Map.ViewModels
                 return;
             }
 
-            // The saved reference is the DisplayName, which has format:
-            // - Single-table file: "TableName (filename.ext)"
-            // - Multi-table file:  "  ? TableName"  (indented)
+            Log.Information("Attempting to restore table selection for {DataType}: '{SavedRef}'", _dataType, savedTableRef);
+            Log.Debug("Available items in ComboBox: {Count}", ComboBoxItems.Count);
             
-            // Try exact DisplayName match first (most common case)
+            // Log all available DisplayNames for debugging
+            foreach (var item in ComboBoxItems.OfType<TableItem>())
+            {
+                Log.Debug("  Available: '{DisplayName}'", item.TableReference.DisplayName);
+            }
+            
+            // Try exact DisplayName match
             var matchingItem = ComboBoxItems.OfType<TableItem>()
                 .FirstOrDefault(item => item.TableReference.DisplayName == savedTableRef);
             
             if (matchingItem != null)
             {
                 SelectedComboBoxItem = matchingItem;
-                Log.Information("Restored table selection for {DataType}: {TableRef} (exact match)", _dataType, savedTableRef);
+                Log.Information("? Restored table selection for {DataType}: '{TableRef}' (exact match)", _dataType, savedTableRef);
                 return;
             }
 
-            // If exact match failed, try fuzzy matching on table name
-            // This handles cases where file structure changed (single-table <-> multi-table)
-            string extractedTableName;
-            
-            if (savedTableRef.StartsWith("  "))
-            {
-                // Indented format: "  ? TableName"
-                extractedTableName = savedTableRef.TrimStart().TrimStart('?').Trim();
-            }
-            else if (savedTableRef.Contains('('))
-            {
-                // Non-indented format: "TableName (filename.ext)"
-                extractedTableName = savedTableRef.Substring(0, savedTableRef.IndexOf('(')).Trim();
-            }
-            else
-            {
-                // Unknown format - use as-is
-                extractedTableName = savedTableRef.Trim();
-            }
-
-            // Try to find a table with matching table name
-            matchingItem = ComboBoxItems.OfType<TableItem>()
-                .FirstOrDefault(item => item.TableReference.TableName.Equals(extractedTableName, StringComparison.OrdinalIgnoreCase));
-            
-            if (matchingItem != null)
-            {
-                SelectedComboBoxItem = matchingItem;
-                Log.Information("Restored table selection for {DataType}: {TableRef} (fuzzy match on table name '{TableName}')", 
-                    _dataType, savedTableRef, extractedTableName);
-                return;
-            }
-
-            Log.Warning("Could not restore table selection for {DataType}: '{TableRef}' (no matching table found in {Count} available tables)",
-                _dataType, savedTableRef, ComboBoxItems.OfType<TableItem>().Count());
+            Log.Warning("? Could not restore table selection for {DataType}: '{TableRef}' (no exact match found)", _dataType, savedTableRef);
+            Log.Warning("This usually means the DisplayName format changed or the file was removed.");
         }
 
         #endregion
