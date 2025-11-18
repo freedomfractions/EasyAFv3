@@ -38,7 +38,7 @@ public class ArcFlash
     /// <summary>Arc Fault Bus kV (Column: Arc Fault Bus kV)</summary>
     [Category("Electrical")]
     [Description("Arc Fault Bus kV")]
-    public string? ArcFaultBuskV { get; set; }
+    public string? ArcFaultBusKV { get; set; }
 
     /// <summary>Upstream Trip Device Name (Column: Upstream Trip Device Name)</summary>
     [Category("Protection")]
@@ -64,55 +64,55 @@ public class ArcFlash
     [Category("General")]
     [Description("Electrode Gap")]
     [Units("mm")]
-    public string? ElectrodeGap { get; set; }
+    public string? ElectrodeGapMM { get; set; }
 
     /// <summary>Bus Bolted Fault (Column: Bus Bolted Fault (kA))</summary>
     [Category("Electrical")]
     [Description("Bus Bolted Fault")]
     [Units("kA")]
-    public string? BusBoltedFault { get; set; }
+    public string? BusBoltedFaultKA { get; set; }
 
     /// <summary>Bus Arc Fault (Column: Bus Arc Fault (kA))</summary>
     [Category("Electrical")]
     [Description("Bus Arc Fault")]
     [Units("kA")]
-    public string? BusArcFault { get; set; }
+    public string? BusArcFaultKA { get; set; }
 
     /// <summary>Trip Time (Column: Trip Time (sec))</summary>
     [Category("Protection")]
     [Description("Trip Time")]
     [Units("s")]
-    public string? TripTime { get; set; }
+    public string? TripTimeSec { get; set; }
 
     /// <summary>Opening Time (Column: Opening Time (sec))</summary>
     [Category("General")]
     [Description("Opening Time")]
     [Units("s")]
-    public string? OpeningTime { get; set; }
+    public string? OpeningTimeSec { get; set; }
 
     /// <summary>Arc Time (Column: Arc Time (sec))</summary>
     [Category("General")]
     [Description("Arc Time")]
     [Units("s")]
-    public string? ArcTime { get; set; }
+    public string? ArcTimeSec { get; set; }
 
     /// <summary>Est Arc Flash Boundary (Column: Est Arc Flash Boundary (inches))</summary>
     [Category("Protection")]
     [Description("Est Arc Flash Boundary")]
     [Units("in")]
-    public string? EstArcFlashBoundary { get; set; }
+    public string? EstArcFlashBoundaryInches { get; set; }
 
     /// <summary>Working Distance (Column: Working Distance (inches))</summary>
     [Category("General")]
     [Description("Working Distance")]
     [Units("in")]
-    public string? WorkingDistance { get; set; }
+    public string? WorkingDistanceInches { get; set; }
 
     /// <summary>Incident Energy (Column: Incident Energy (cal/cm2))</summary>
     [Category("General")]
     [Description("Incident Energy")]
     [Units("cal/cm²")]
-    public string? IncidentEnergy { get; set; }
+    public string? IncidentEnergyCalPerCm2 { get; set; }
 
     /// <summary>Comments (Column: Comments)</summary>
     [Category("Metadata")]

@@ -27,7 +27,7 @@ public class Cable
     /// <summary>AC/DC (Column: AC/DC)</summary>
     [Category("General")]
     [Description("AC/DC")]
-    public string? ACDC { get; set; }
+    public string? AcDc { get; set; }
 
     /// <summary>Status (Column: Status)</summary>
     [Category("Identity")]
@@ -37,7 +37,7 @@ public class Cable
     /// <summary>No of Phases (Column: No of Phases)</summary>
     [Category("Electrical")]
     [Description("No of Phases")]
-    public string? NoofPhases { get; set; }
+    public string? NoOfPhases { get; set; }
 
     /// <summary>From Bus ID (Column: From Bus ID)</summary>
     [Category("Identity")]
@@ -62,7 +62,7 @@ public class Cable
     /// <summary>From Base kV (Column: From Base kV)</summary>
     [Category("Electrical")]
     [Description("From Base kV")]
-    public string? FromBasekV { get; set; }
+    public string? FromBaseKV { get; set; }
 
     /// <summary>To Bus ID (Column: To Bus ID)</summary>
     [Category("Identity")]
@@ -87,7 +87,7 @@ public class Cable
     /// <summary>To Base kV (Column: To Base kV)</summary>
     [Category("Electrical")]
     [Description("To Base kV")]
-    public string? ToBasekV { get; set; }
+    public string? ToBaseKV { get; set; }
 
     /// <summary>Unit (Column: Unit)</summary>
     [Category("General")]
@@ -102,7 +102,7 @@ public class Cable
     /// <summary>No/Ph (Column: No/Ph)</summary>
     [Category("General")]
     [Description("No/Ph")]
-    public string? NoPh { get; set; }
+    public string? NoPerPh { get; set; }
 
     /// <summary>Phase Num (Column: Phase Num)</summary>
     [Category("Electrical")]
@@ -123,13 +123,13 @@ public class Cable
     [Category("General")]
     [Description("Op Temp")]
     [Units("°C")]
-    public string? OpTemp { get; set; }
+    public string? OpTempC { get; set; }
 
     /// <summary>Ambient Temp (Column: Ambient Temp (C))</summary>
     [Category("General")]
     [Description("Ambient Temp")]
     [Units("°C")]
-    public string? AmbientTemp { get; set; }
+    public string? AmbientTempC { get; set; }
 
     /// <summary>Insulation (Column: Insulation)</summary>
     [Category("General")]
@@ -145,13 +145,13 @@ public class Cable
     [Category("Physical")]
     [Description("Rating")]
     [Units("A")]
-    public string? Rating { get; set; }
+    public string? RatingA { get; set; }
 
     /// <summary>75 deg C Rating (Column: 75 deg C Rating (A))</summary>
     [Category("Physical")]
     [Description("75 deg C Rating")]
     [Units("A")]
-    public string? 75degCRating { get; set; }
+    public string? Rating75DegCA { get; set; }
 
     /// <summary>Material (Column: Material)</summary>
     [Category("General")]
@@ -301,32 +301,32 @@ public class Cable
     /// <summary>R1 pu (Column: R1 pu)</summary>
     [Category("General")]
     [Description("R1 pu")]
-    public string? R1pu { get; set; }
+    public string? R1Pu { get; set; }
 
     /// <summary>X1 pu (Column: X1 pu)</summary>
     [Category("General")]
     [Description("X1 pu")]
-    public string? X1pu { get; set; }
+    public string? X1Pu { get; set; }
 
     /// <summary>R0 pu (Column: R0 pu)</summary>
     [Category("General")]
     [Description("R0 pu")]
-    public string? R0pu { get; set; }
+    public string? R0Pu { get; set; }
 
     /// <summary>X0 pu (Column: X0 pu)</summary>
     [Category("General")]
     [Description("X0 pu")]
-    public string? X0pu { get; set; }
+    public string? X0Pu { get; set; }
 
     /// <summary>B1 pu (Column: B1 pu)</summary>
     [Category("General")]
     [Description("B1 pu")]
-    public string? B1pu { get; set; }
+    public string? B1Pu { get; set; }
 
     /// <summary>B0 pu (Column: B0 pu)</summary>
     [Category("General")]
     [Description("B0 pu")]
-    public string? B0pu { get; set; }
+    public string? B0Pu { get; set; }
 
     /// <summary>Neutral R Pu (Column: Neutral R Pu)</summary>
     [Category("General")]
@@ -347,48 +347,48 @@ public class Cable
     [Category("General")]
     [Description("IEC Field Temp")]
     [Units("°C")]
-    public string? IECFieldTemp { get; set; }
+    public string? IECFieldTempC { get; set; }
 
     /// <summary>IEC SC Temp (Column: IEC SC Temp (C))</summary>
     [Category("Electrical")]
     [Description("IEC SC Temp")]
     [Units("°C")]
-    public string? IECSCTemp { get; set; }
+    public string? IECSCTempC { get; set; }
 
     /// <summary>IEC R1 Cmax pu (Column: IEC R1 Cmax pu)</summary>
     [Category("General")]
     [Description("IEC R1 Cmax pu")]
-    public string? IECR1Cmaxpu { get; set; }
+    public string? IECR1CmaxPu { get; set; }
 
     /// <summary>IEC R0 Cmax pu (Column: IEC R0 Cmax pu)</summary>
     [Category("General")]
     [Description("IEC R0 Cmax pu")]
-    public string? IECR0Cmaxpu { get; set; }
+    public string? IECR0CmaxPu { get; set; }
 
     /// <summary>IEC R1 Cmin pu (Column: IEC R1 Cmin pu)</summary>
     [Category("General")]
     [Description("IEC R1 Cmin pu")]
-    public string? IECR1Cminpu { get; set; }
+    public string? IECR1CminPu { get; set; }
 
     /// <summary>IEC R0 Cmin pu (Column: IEC R0 Cmin pu)</summary>
     [Category("General")]
     [Description("IEC R0 Cmin pu")]
-    public string? IECR0Cminpu { get; set; }
+    public string? IECR0CminPu { get; set; }
 
     /// <summary>IEC Neutral R Cmax pu (Column: IEC Neutral R Cmax pu)</summary>
     [Category("General")]
     [Description("IEC Neutral R Cmax pu")]
-    public string? IECNeutralRCmaxpu { get; set; }
+    public string? IECNeutralRCmaxPu { get; set; }
 
     /// <summary>IEC Neutral R Cmin pu (Column: IEC Neutral R Cmin pu)</summary>
     [Category("General")]
     [Description("IEC Neutral R Cmin pu")]
-    public string? IECNeutralRCminpu { get; set; }
+    public string? IECNeutralRCminPu { get; set; }
 
     /// <summary>Rating at Max Temp (Column: Rating at Max Temp)</summary>
     [Category("Physical")]
     [Description("Rating at Max Temp")]
-    public string? RatingatMaxTemp { get; set; }
+    public string? RatingAtMaxTemp { get; set; }
 
     /// <summary>Hrm RC Factor (Column: Hrm RC Factor)</summary>
     [Category("General")]
@@ -414,19 +414,19 @@ public class Cable
     [Category("Reliability")]
     [Description("Comp Failure Rate")]
     [Units("/year")]
-    public string? CompFailureRate { get; set; }
+    public string? CompFailureRatePerYear { get; set; }
 
     /// <summary>Comp Repair Time (Column: Comp Repair Time (h))</summary>
     [Category("Reliability")]
     [Description("Comp Repair Time")]
     [Units("h")]
-    public string? CompRepairTime { get; set; }
+    public string? CompRepairTimeH { get; set; }
 
     /// <summary>Comp Replace Time (Column: Comp Replace Time (h))</summary>
     [Category("Reliability")]
     [Description("Comp Replace Time")]
     [Units("h")]
-    public string? CompReplaceTime { get; set; }
+    public string? CompReplaceTimeH { get; set; }
 
     /// <summary>Comp Repair Cost (Column: Comp Repair Cost)</summary>
     [Category("Reliability")]
@@ -447,19 +447,19 @@ public class Cable
     [Category("Reliability")]
     [Description("Conn Failure Rate")]
     [Units("/year")]
-    public string? ConnFailureRate { get; set; }
+    public string? ConnFailureRatePerYear { get; set; }
 
     /// <summary>Conn Repair Time (Column: Conn Repair Time (h))</summary>
     [Category("Reliability")]
     [Description("Conn Repair Time")]
     [Units("h")]
-    public string? ConnRepairTime { get; set; }
+    public string? ConnRepairTimeH { get; set; }
 
     /// <summary>Conn Replace Time (Column: Conn Replace Time (h))</summary>
     [Category("Reliability")]
     [Description("Conn Replace Time")]
     [Units("h")]
-    public string? ConnReplaceTime { get; set; }
+    public string? ConnReplaceTimeH { get; set; }
 
     /// <summary>Reliability Source (Column: Reliability Source)</summary>
     [Category("Reliability")]

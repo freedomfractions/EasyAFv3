@@ -27,7 +27,7 @@ public class Fuse
     /// <summary>AC/DC (Column: AC/DC)</summary>
     [Category("General")]
     [Description("AC/DC")]
-    public string? ACDC { get; set; }
+    public string? AcDc { get; set; }
 
     /// <summary>Status (Column: Status)</summary>
     [Category("Identity")]
@@ -37,7 +37,7 @@ public class Fuse
     /// <summary>No of Phases (Column: No of Phases)</summary>
     [Category("Electrical")]
     [Description("No of Phases")]
-    public string? NoofPhases { get; set; }
+    public string? NoOfPhases { get; set; }
 
     /// <summary>On Bus (Column: On Bus)</summary>
     [Category("Identity")]
@@ -48,7 +48,7 @@ public class Fuse
     /// <summary>Base kV (Column: Base kV)</summary>
     [Category("Electrical")]
     [Description("Base kV")]
-    public string? BasekV { get; set; }
+    public string? BaseKV { get; set; }
 
     /// <summary>Conn Type (Column: Conn Type)</summary>
     [Category("Physical")]
@@ -93,7 +93,7 @@ public class Fuse
     /// <summary>TCC kV (Column: TCC kV)</summary>
     [Category("Electrical")]
     [Description("TCC kV")]
-    public string? TCCkV { get; set; }
+    public string? TCCKV { get; set; }
 
     /// <summary>Size (Column: Size)</summary>
     [Category("Physical")]
@@ -103,7 +103,7 @@ public class Fuse
     /// <summary>SC Int kA (Column: SC Int kA)</summary>
     [Category("Electrical")]
     [Description("SC Int kA")]
-    public string? SCIntkA { get; set; }
+    public string? SCIntKA { get; set; }
 
     /// <summary>SC Test X/R (Column: SC Test X/R)</summary>
     [Category("Electrical")]
@@ -123,32 +123,32 @@ public class Fuse
     /// <summary>TCC Mom kA (Column: TCC Mom kA)</summary>
     [Category("Protection")]
     [Description("TCC Mom kA")]
-    public string? TCCMomkA { get; set; }
+    public string? TCCMomKA { get; set; }
 
     /// <summary>TCC Int kA (Column: TCC Int kA)</summary>
     [Category("Protection")]
     [Description("TCC Int kA")]
-    public string? TCCIntkA { get; set; }
+    public string? TCCIntKA { get; set; }
 
     /// <summary>TCC 30 Cyc kA (Column: TCC 30 Cyc kA)</summary>
     [Category("Protection")]
     [Description("TCC 30 Cyc kA")]
-    public string? TCC30CyckA { get; set; }
+    public string? TCC30CycKA { get; set; }
 
     /// <summary>IEC Breaking kA (Column: IEC Breaking kA)</summary>
     [Category("General")]
     [Description("IEC Breaking kA")]
-    public string? IECBreakingkA { get; set; }
+    public string? IECBreakingKA { get; set; }
 
     /// <summary>IEC TCC Initial kA (Column: IEC TCC Initial kA)</summary>
     [Category("Protection")]
     [Description("IEC TCC Initial kA")]
-    public string? IECTCCInitialkA { get; set; }
+    public string? IECTCCInitialKA { get; set; }
 
     /// <summary>IEC TCC Breaking kA (Column: IEC TCC Breaking kA)</summary>
     [Category("Protection")]
     [Description("IEC TCC Breaking kA")]
-    public string? IECTCCBreakingkA { get; set; }
+    public string? IECTCCBreakingKA { get; set; }
 
     /// <summary>IEC TCC Breaking Time (Column: IEC TCC Breaking Time)</summary>
     [Category("Protection")]
@@ -158,7 +158,7 @@ public class Fuse
     /// <summary>IEC TCC SS kA (Column: IEC TCC SS kA)</summary>
     [Category("Protection")]
     [Description("IEC TCC SS kA")]
-    public string? IECTCCSSkA { get; set; }
+    public string? IECTCCSSKA { get; set; }
 
     /// <summary>Switch Manufacturer (Column: Switch Manufacturer)</summary>
     [Category("Physical")]
@@ -183,7 +183,7 @@ public class Fuse
     /// <summary>Switch Mom kA (Column: Switch Mom kA)</summary>
     [Category("General")]
     [Description("Switch Mom kA")]
-    public string? SwitchMomkA { get; set; }
+    public string? SwitchMomKA { get; set; }
 
     /// <summary>Mtr O/L Mfr (Column: Mtr O/L Mfr)</summary>
     [Category("Physical")]
@@ -213,7 +213,7 @@ public class Fuse
     /// <summary>PCC kVA Demand (Column: PCC kVA Demand)</summary>
     [Category("Electrical")]
     [Description("PCC kVA Demand")]
-    public string? PCCkVADemand { get; set; }
+    public string? PCCKVADemand { get; set; }
 
     /// <summary>PCC Isc/ILoad (Column: PCC Isc/ILoad)</summary>
     [Category("Demand")]
@@ -224,19 +224,19 @@ public class Fuse
     [Category("Reliability")]
     [Description("Failure Rate")]
     [Units("/year")]
-    public string? FailureRate { get; set; }
+    public string? FailureRatePerYear { get; set; }
 
     /// <summary>Repair Time (Column: Repair Time (h))</summary>
     [Category("Reliability")]
     [Description("Repair Time")]
     [Units("h")]
-    public string? RepairTime { get; set; }
+    public string? RepairTimeH { get; set; }
 
     /// <summary>Replace Time (Column: Replace Time (h))</summary>
     [Category("Reliability")]
     [Description("Replace Time")]
     [Units("h")]
-    public string? ReplaceTime { get; set; }
+    public string? ReplaceTimeH { get; set; }
 
     /// <summary>Repair Cost (Column: Repair Cost)</summary>
     [Category("Reliability")]
@@ -305,3 +305,6 @@ public class Fuse
         return $"Fuse: {Fuses}";
     }
 }
+
+
+

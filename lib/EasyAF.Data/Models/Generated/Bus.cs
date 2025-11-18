@@ -27,7 +27,7 @@ public class Bus
     /// <summary>AC/DC (Column: AC/DC)</summary>
     [Category("General")]
     [Description("AC/DC")]
-    public string? ACDC { get; set; }
+    public string? AcDc { get; set; }
 
     /// <summary>Status (Column: Status)</summary>
     [Category("Identity")]
@@ -37,12 +37,12 @@ public class Bus
     /// <summary>Base kV (Column: Base kV)</summary>
     [Category("Electrical")]
     [Description("Base kV")]
-    public string? BasekV { get; set; }
+    public string? BaseKV { get; set; }
 
     /// <summary>No of Phases (Column: No of Phases)</summary>
     [Category("Electrical")]
     [Description("No of Phases")]
-    public string? NoofPhases { get; set; }
+    public string? NoOfPhases { get; set; }
 
     /// <summary>Service (Column: Service)</summary>
     [Category("General")]
@@ -78,13 +78,13 @@ public class Bus
     [Category("Physical")]
     [Description("Bus Rating")]
     [Units("A")]
-    public string? BusRating { get; set; }
+    public string? BusRatingA { get; set; }
 
     /// <summary>Bus Bracing (Column: Bus Bracing (kA))</summary>
     [Category("Identity")]
     [Description("Bus Bracing")]
     [Units("kA")]
-    public string? BusBracing { get; set; }
+    public string? BusBracingKA { get; set; }
 
     /// <summary>Test Standard (Column: Test Standard)</summary>
     [Category("Protection")]
@@ -104,7 +104,7 @@ public class Bus
     /// <summary>Dn Conn kVA (Column: Dn Conn kVA)</summary>
     [Category("Electrical")]
     [Description("Dn Conn kVA")]
-    public string? DnConnkVA { get; set; }
+    public string? DnConnKVA { get; set; }
 
     /// <summary>Dn Conn FLA (Column: Dn Conn FLA)</summary>
     [Category("General")]
@@ -114,7 +114,7 @@ public class Bus
     /// <summary>Dn Demand kVA (Column: Dn Demand kVA)</summary>
     [Category("Electrical")]
     [Description("Dn Demand kVA")]
-    public string? DnDemandkVA { get; set; }
+    public string? DnDemandKVA { get; set; }
 
     /// <summary>Dn Demand FLA (Column: Dn Demand FLA)</summary>
     [Category("Demand")]
@@ -124,7 +124,7 @@ public class Bus
     /// <summary>Dn Code kVA (Column: Dn Code kVA)</summary>
     [Category("Electrical")]
     [Description("Dn Code kVA")]
-    public string? DnCodekVA { get; set; }
+    public string? DnCodeKVA { get; set; }
 
     /// <summary>Dn Code FLA (Column: Dn Code FLA)</summary>
     [Category("General")]
@@ -145,13 +145,13 @@ public class Bus
     [Category("General")]
     [Description("Forced To Energy")]
     [Units("cal/cm²")]
-    public string? ForcedToEnergy { get; set; }
+    public string? ForcedToEnergyCalPerCm2 { get; set; }
 
     /// <summary>Forced To Arc Boundary (Column: Forced To Arc Boundary (in))</summary>
     [Category("General")]
     [Description("Forced To Arc Boundary")]
     [Units("in")]
-    public string? ForcedToArcBoundary { get; set; }
+    public string? ForcedToArcBoundaryIn { get; set; }
 
     /// <summary>AF Option (Column: AF Option)</summary>
     [Category("General")]
@@ -172,7 +172,7 @@ public class Bus
     [Category("General")]
     [Description("Working Distance")]
     [Units("in")]
-    public string? WorkingDistance { get; set; }
+    public string? WorkingDistanceIn { get; set; }
 
     /// <summary>Electrode Gap Setting (Column: Electrode Gap Setting)</summary>
     [Category("Control")]
@@ -183,7 +183,7 @@ public class Bus
     [Category("General")]
     [Description("Electrode Gap")]
     [Units("mm")]
-    public string? ElectrodeGap { get; set; }
+    public string? ElectrodeGapMM { get; set; }
 
     /// <summary>Electrode Configuration Setting (Column: Electrode Configuration Setting)</summary>
     [Category("Control")]
@@ -204,48 +204,48 @@ public class Bus
     [Category("General")]
     [Description("Enclosure Height")]
     [Units("in")]
-    public string? EnclosureHeight { get; set; }
+    public string? EnclosureHeightIn { get; set; }
 
     /// <summary>Enclosure Width (Column: Enclosure Width (in))</summary>
     [Category("General")]
     [Description("Enclosure Width")]
     [Units("in")]
-    public string? EnclosureWidth { get; set; }
+    public string? EnclosureWidthIn { get; set; }
 
     /// <summary>Enclosure Depth (Column: Enclosure Depth (in))</summary>
     [Category("General")]
     [Description("Enclosure Depth")]
     [Units("in")]
-    public string? EnclosureDepth { get; set; }
+    public string? EnclosureDepthIn { get; set; }
 
     /// <summary>Stored AFB (Column: Stored AFB (in))</summary>
     [Category("General")]
     [Description("Stored AFB")]
     [Units("in")]
-    public string? StoredAFB { get; set; }
+    public string? StoredAFBIn { get; set; }
 
     /// <summary>Stored AF IE (Column: Stored AF IE (cal/cm2))</summary>
     [Category("General")]
     [Description("Stored AF IE")]
     [Units("cal/cm²")]
-    public string? StoredAFIE { get; set; }
+    public string? StoredAFIECalPerCm2 { get; set; }
 
     /// <summary>Stored AF PPE (Column: Stored AF PPE)</summary>
     [Category("General")]
     [Description("Stored AF PPE")]
     public string? StoredAFPPE { get; set; }
 
-    /// <summary>SC Sym kA (Column: SC Sym kA (ANSI))</summary>
+    /// <summary>SC Sym kA (ANSI) (Column: SC Sym kA (ANSI))</summary>
     [Category("Electrical")]
-    [Description("SC Sym kA")]
-    [Units("ANSI")]
-    public string? SCSymkA { get; set; }
+    [Description("SC Sym kA (ANSI)")]
+    [Units("kA")]
+    public string? SCSymKAAnsi { get; set; }
 
-    /// <summary>SC Sym kA (Column: SC Sym kA (IEC))</summary>
+    /// <summary>SC Sym kA (IEC) (Column: SC Sym kA (IEC))</summary>
     [Category("Electrical")]
-    [Description("SC Sym kA")]
-    [Units("°C")]
-    public string? SCSymkA { get; set; }
+    [Description("SC Sym kA (IEC)")]
+    [Units("kA")]
+    public string? SCSymKAIec { get; set; }
 
     /// <summary>Label Comment (Column: Label Comment)</summary>
     [Category("Metadata")]
@@ -261,19 +261,19 @@ public class Bus
     [Category("Reliability")]
     [Description("Failure Rate")]
     [Units("/year")]
-    public string? FailureRate { get; set; }
+    public string? FailureRatePerYear { get; set; }
 
     /// <summary>Repair Time (Column: Repair Time (h))</summary>
     [Category("Reliability")]
     [Description("Repair Time")]
     [Units("h")]
-    public string? RepairTime { get; set; }
+    public string? RepairTimeH { get; set; }
 
     /// <summary>Replace Time (Column: Replace Time (h))</summary>
     [Category("Reliability")]
     [Description("Replace Time")]
     [Units("h")]
-    public string? ReplaceTime { get; set; }
+    public string? ReplaceTimeH { get; set; }
 
     /// <summary>Repair Cost (Column: Repair Cost)</summary>
     [Category("Reliability")]
@@ -294,7 +294,7 @@ public class Bus
     [Category("Reliability")]
     [Description("Downtime Cost")]
     [Units("h")]
-    public string? DowntimeCost { get; set; }
+    public string? DowntimeCostH { get; set; }
 
     /// <summary>Reliability Source (Column: Reliability Source)</summary>
     [Category("Reliability")]

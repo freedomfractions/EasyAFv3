@@ -27,7 +27,7 @@ public class LVCB
     /// <summary>AC/DC (Column: AC/DC)</summary>
     [Category("General")]
     [Description("AC/DC")]
-    public string? ACDC { get; set; }
+    public string? AcDc { get; set; }
 
     /// <summary>Status (Column: Status)</summary>
     [Category("Identity")]
@@ -37,7 +37,7 @@ public class LVCB
     /// <summary>No of Phases (Column: No of Phases)</summary>
     [Category("Electrical")]
     [Description("No of Phases")]
-    public string? NoofPhases { get; set; }
+    public string? NoOfPhases { get; set; }
 
     /// <summary>On Bus (Column: On Bus)</summary>
     [Category("Identity")]
@@ -48,7 +48,7 @@ public class LVCB
     /// <summary>Base kV (Column: Base kV)</summary>
     [Category("Electrical")]
     [Description("Base kV")]
-    public string? BasekV { get; set; }
+    public string? BaseKV { get; set; }
 
     /// <summary>Conn Type (Column: Conn Type)</summary>
     [Category("Physical")]
@@ -84,7 +84,7 @@ public class LVCB
     [Category("Physical")]
     [Description("Frame")]
     [Units("A")]
-    public string? Frame { get; set; }
+    public string? FrameA { get; set; }
 
     /// <summary>Trip (Column: Trip)</summary>
     [Category("Protection")]
@@ -112,25 +112,25 @@ public class LVCB
     public string? SensorFrame { get; set; }
 
     /// <summary>Plug/Tap/Trip (Column: Plug/Tap/Trip)</summary>
-    [Category("Control")]
+    [Category("Physical")]
     [Description("Plug/Tap/Trip")]
     public string? PlugTapTrip { get; set; }
 
     /// <summary>LTPU Setting (Column: LTPU Setting)</summary>
-    [Category("Control")]
+    [Category("Protection")]
     [Description("LTPU Setting")]
     public string? LTPUSetting { get; set; }
 
     /// <summary>LTPU Mult (Column: LTPU Mult)</summary>
-    [Category("General")]
+    [Category("Protection")]
     [Description("LTPU Mult")]
     public string? LTPUMult { get; set; }
 
-    /// <summary>Trip (Column: Trip (A))</summary>
+    /// <summary>Trip (A) (Column: Trip (A))</summary>
     [Category("Protection")]
-    [Description("Trip")]
+    [Description("Trip (A)")]
     [Units("A")]
-    public string? Trip { get; set; }
+    public string? TripA { get; set; }
 
     /// <summary>LT Curve (Column: LT Curve)</summary>
     [Category("Protection")]
@@ -171,7 +171,7 @@ public class LVCB
     [Category("General")]
     [Description("STPU")]
     [Units("A")]
-    public string? STPU { get; set; }
+    public string? STPUA { get; set; }
 
     /// <summary>Inst Setting (Column: Inst Setting)</summary>
     [Category("Control")]
@@ -187,13 +187,13 @@ public class LVCB
     [Category("Protection")]
     [Description("Inst")]
     [Units("A")]
-    public string? Inst { get; set; }
+    public string? InstA { get; set; }
 
     /// <summary>Inst Ovr Pickup (Column: Inst Ovr Pickup (A))</summary>
     [Category("Protection")]
     [Description("Inst Ovr Pickup")]
     [Units("A")]
-    public string? InstOvrPickup { get; set; }
+    public string? InstOvrPickupA { get; set; }
 
     /// <summary>Maint Mode (Column: Maint Mode)</summary>
     [Category("General")]
@@ -209,7 +209,7 @@ public class LVCB
     [Category("General")]
     [Description("Maint")]
     [Units("A")]
-    public string? Maint { get; set; }
+    public string? MaintA { get; set; }
 
     /// <summary>Gnd Sensor (Column: Gnd Sensor)</summary>
     [Category("General")]
@@ -235,7 +235,7 @@ public class LVCB
     [Category("General")]
     [Description("Gnd")]
     [Units("A")]
-    public string? Gnd { get; set; }
+    public string? GndA { get; set; }
 
     /// <summary>Gnd Maint Pickup (Column: Gnd Maint Pickup)</summary>
     [Category("Protection")]
@@ -246,7 +246,7 @@ public class LVCB
     [Category("General")]
     [Description("Gnd Maint")]
     [Units("A")]
-    public string? GndMaint { get; set; }
+    public string? GndMaintA { get; set; }
 
     /// <summary>ST ZSI (Column: ST ZSI)</summary>
     [Category("Protection")]
@@ -351,12 +351,12 @@ public class LVCB
     /// <summary>SC Int kA (Column: SC Int kA)</summary>
     [Category("Electrical")]
     [Description("SC Int kA")]
-    public string? SCIntkA { get; set; }
+    public string? SCIntKA { get; set; }
 
     /// <summary>IEC Breaking kA (Column: IEC Breaking kA)</summary>
     [Category("General")]
     [Description("IEC Breaking kA")]
-    public string? IECBreakingkA { get; set; }
+    public string? IECBreakingKA { get; set; }
 
     /// <summary>SC Test Std (Column: SC Test Std)</summary>
     [Category("Electrical")]
@@ -371,42 +371,42 @@ public class LVCB
     /// <summary>TCC Mom kA (Column: TCC Mom kA)</summary>
     [Category("Protection")]
     [Description("TCC Mom kA")]
-    public string? TCCMomkA { get; set; }
+    public string? TCCMomKA { get; set; }
 
     /// <summary>TCC Int kA (Column: TCC Int kA)</summary>
     [Category("Protection")]
     [Description("TCC Int kA")]
-    public string? TCCIntkA { get; set; }
+    public string? TCCIntKA { get; set; }
 
     /// <summary>TCC 30 Cyc kA (Column: TCC 30 Cyc kA)</summary>
     [Category("Protection")]
     [Description("TCC 30 Cyc kA")]
-    public string? TCC30CyckA { get; set; }
+    public string? TCC30CycKA { get; set; }
 
     /// <summary>TCC Gnd Mom kA (Column: TCC Gnd Mom kA)</summary>
     [Category("Protection")]
     [Description("TCC Gnd Mom kA")]
-    public string? TCCGndMomkA { get; set; }
+    public string? TCCGndMomKA { get; set; }
 
     /// <summary>TCC Gnd Int kA (Column: TCC Gnd Int kA)</summary>
     [Category("Protection")]
     [Description("TCC Gnd Int kA")]
-    public string? TCCGndIntkA { get; set; }
+    public string? TCCGndIntKA { get; set; }
 
     /// <summary>TCC Gnd 30 Cyc kA (Column: TCC Gnd 30 Cyc kA)</summary>
     [Category("Protection")]
     [Description("TCC Gnd 30 Cyc kA")]
-    public string? TCCGnd30CyckA { get; set; }
+    public string? TCCGnd30CycKA { get; set; }
 
     /// <summary>IEC TCC Initial kA (Column: IEC TCC Initial kA)</summary>
     [Category("Protection")]
     [Description("IEC TCC Initial kA")]
-    public string? IECTCCInitialkA { get; set; }
+    public string? IECTCCInitialKA { get; set; }
 
     /// <summary>IEC TCC Breaking kA (Column: IEC TCC Breaking kA)</summary>
     [Category("Protection")]
     [Description("IEC TCC Breaking kA")]
-    public string? IECTCCBreakingkA { get; set; }
+    public string? IECTCCBreakingKA { get; set; }
 
     /// <summary>IEC TCC Breaking Time (Column: IEC TCC Breaking Time)</summary>
     [Category("Protection")]
@@ -416,17 +416,17 @@ public class LVCB
     /// <summary>IEC TCC SS kA (Column: IEC TCC SS kA)</summary>
     [Category("Protection")]
     [Description("IEC TCC SS kA")]
-    public string? IECTCCSSkA { get; set; }
+    public string? IECTCCSSKA { get; set; }
 
     /// <summary>IEC TCC Gnd Initial kA (Column: IEC TCC Gnd Initial kA)</summary>
     [Category("Protection")]
     [Description("IEC TCC Gnd Initial kA")]
-    public string? IECTCCGndInitialkA { get; set; }
+    public string? IECTCCGndInitialKA { get; set; }
 
     /// <summary>IEC TCC Gnd Breaking kA (Column: IEC TCC Gnd Breaking kA)</summary>
     [Category("Protection")]
     [Description("IEC TCC Gnd Breaking kA")]
-    public string? IECTCCGndBreakingkA { get; set; }
+    public string? IECTCCGndBreakingKA { get; set; }
 
     /// <summary>IEC TCC Gnd Breaking Time (Column: IEC TCC Gnd Breaking Time)</summary>
     [Category("Protection")]
@@ -436,7 +436,7 @@ public class LVCB
     /// <summary>IEC TCC Gnd SS kA (Column: IEC TCC Gnd SS kA)</summary>
     [Category("Protection")]
     [Description("IEC TCC Gnd SS kA")]
-    public string? IECTCCGndSSkA { get; set; }
+    public string? IECTCCGndSSKA { get; set; }
 
     /// <summary>Normal State (Column: Normal State)</summary>
     [Category("General")]
@@ -446,7 +446,7 @@ public class LVCB
     /// <summary>PCC kVA Demand (Column: PCC kVA Demand)</summary>
     [Category("Electrical")]
     [Description("PCC kVA Demand")]
-    public string? PCCkVADemand { get; set; }
+    public string? PCCKVADemand { get; set; }
 
     /// <summary>PCC Isc/ILoad (Column: PCC Isc/ILoad)</summary>
     [Category("Demand")]
@@ -457,19 +457,19 @@ public class LVCB
     [Category("Reliability")]
     [Description("Failure Rate")]
     [Units("/year")]
-    public string? FailureRate { get; set; }
+    public string? FailureRatePerYear { get; set; }
 
     /// <summary>Repair Time (Column: Repair Time (h))</summary>
     [Category("Reliability")]
     [Description("Repair Time")]
     [Units("h")]
-    public string? RepairTime { get; set; }
+    public string? RepairTimeH { get; set; }
 
     /// <summary>Replace Time (Column: Replace Time (h))</summary>
     [Category("Reliability")]
     [Description("Replace Time")]
     [Units("h")]
-    public string? ReplaceTime { get; set; }
+    public string? ReplaceTimeH { get; set; }
 
     /// <summary>Repair Cost (Column: Repair Cost)</summary>
     [Category("Reliability")]
@@ -538,3 +538,8 @@ public class LVCB
         return $"LVCB: {LVBreakers}";
     }
 }
+
+
+
+
+

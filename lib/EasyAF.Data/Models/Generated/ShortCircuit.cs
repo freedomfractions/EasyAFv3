@@ -53,12 +53,12 @@ public class ShortCircuit
     /// <summary>Bus Base kV (Column: Bus Base kV)</summary>
     [Category("Electrical")]
     [Description("Bus Base kV")]
-    public string? BusBasekV { get; set; }
+    public string? BusBaseKV { get; set; }
 
     /// <summary>Bus No. of Phases (Column: Bus No. of Phases)</summary>
     [Category("Electrical")]
     [Description("Bus No. of Phases")]
-    public string? BusNoofPhases { get; set; }
+    public string? BusNoOfPhases { get; set; }
 
     /// <summary>Equipment Manufacturer (Column: Equipment Manufacturer)</summary>
     [Category("Physical")]
@@ -71,27 +71,27 @@ public class ShortCircuit
     public string? EquipmentStyle { get; set; }
 
     /// <summary>Test Standard (Column: Test Standard)</summary>
-    [Category("Protection")]
+    [Category("Physical")]
     [Description("Test Standard")]
     public string? TestStandard { get; set; }
 
     /// <summary>1/2 Cycle Rating (Column: 1/2 Cycle Rating (kA))</summary>
-    [Category("Physical")]
+    [Category("Protection")]
     [Description("1/2 Cycle Rating")]
     [Units("kA")]
-    public string? 12CycleRating { get; set; }
+    public string? HalfCycleRatingKA { get; set; }
 
     /// <summary>1/2 Cycle Duty (Column: 1/2 Cycle Duty (kA))</summary>
-    [Category("General")]
+    [Category("Electrical")]
     [Description("1/2 Cycle Duty")]
     [Units("kA")]
-    public string? 12CycleDuty { get; set; }
+    public string? HalfCycleDutyKA { get; set; }
 
-    /// <summary>1/2 Cycle Duty (Column: 1/2 Cycle Duty (%))</summary>
-    [Category("General")]
-    [Description("1/2 Cycle Duty")]
+    /// <summary>1/2 Cycle Duty (%) (Column: 1/2 Cycle Duty (%))</summary>
+    [Category("Electrical")]
+    [Description("1/2 Cycle Duty (%)")]
     [Units("%")]
-    public string? 12CycleDuty { get; set; }
+    public string? HalfCycleDutyPercent { get; set; }
 
     /// <summary>Comments (Column: Comments)</summary>
     [Category("Metadata")]
