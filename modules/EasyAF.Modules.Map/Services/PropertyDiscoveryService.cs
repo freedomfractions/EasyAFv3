@@ -33,10 +33,11 @@ namespace EasyAF.Modules.Map.Services
         /// </summary>
         /// <remarks>
         /// These are foundational properties that every EasyAF data type must have mapped:
-        /// - Id: Primary key for uniquely identifying equipment
-        /// - Name: Human-readable identifier for equipment
+        /// - Primary identifier column (e.g., LVBreakers, Fuses, Buses, etc.) - varies by type
+        /// - Name: Human-readable identifier for equipment (where applicable)
+        /// NOTE: The actual ID property varies by data type and matches the CSV column name.
         /// </remarks>
-        private static readonly string[] UniversalRequiredProperties = { "Id", "Name" };
+        private static readonly string[] UniversalRequiredProperties = { "Name" };
 
         /// <summary>
         /// Type-specific required properties beyond the universal ones.
@@ -44,19 +45,19 @@ namespace EasyAF.Modules.Map.Services
         /// <remarks>
         /// <para>
         /// These properties are critical for specific data types:
-        /// - Bus.kV: Voltage rating required for electrical calculations
-        /// - LVCB.Type: Breaker type affects protection logic
-        /// - ArcFlash.Scenario: Required for multi-scenario differentiation
-        /// - ArcFlash.AFBoundary: Arc flash boundary is safety-critical
-        /// - ShortCircuit.Bus: Location reference required for composite key
-        /// - ShortCircuit.Scenario: Required for multi-scenario differentiation
+        /// - Bus: Buses (ID), kV (voltage rating for calculations)
+        /// - LVCB: LVBreakers (ID), BreakerType (affects protection logic)
+        /// - Fuse: Fuses (ID)
+        /// - Cable: Cables (ID)
+        /// - ArcFlash: ArcFaultBusName (ID), Scenario (multi-scenario differentiation)
+        /// - ShortCircuit: EquipmentName (ID), BusName (location), Scenario (multi-scenario)
         /// </para>
         /// <para>
         /// Future Enhancement: Allow settings.json to override these defaults:
         /// {
         ///   "Map": {
         ///     "RequiredProperties": {
-        ///       "Bus": ["Id", "Name", "kV", "CustomField"]
+        ///       "Bus": ["Buses", "Name", "kV", "CustomField"]
         ///     }
         ///   }
         /// }
@@ -64,10 +65,12 @@ namespace EasyAF.Modules.Map.Services
         /// </remarks>
         private static readonly Dictionary<string, string[]> DefaultRequiredProperties = new()
         {
-            { "Bus", new[] { "kV" } },
-            { "LVCB", new[] { "Type" } },
-            { "ArcFlash", new[] { "Scenario", "AFBoundary" } },
-            { "ShortCircuit", new[] { "Bus", "Scenario" } }
+            { "Bus", new[] { "Buses", "kV" } },
+            { "LVCB", new[] { "LVBreakers", "BreakerType" } },
+            { "Fuse", new[] { "Fuses" } },
+            { "Cable", new[] { "Cables" } },
+            { "ArcFlash", new[] { "ArcFaultBusName", "Scenario" } },
+            { "ShortCircuit", new[] { "EquipmentName", "BusName", "Scenario" } }
         };
 
         public PropertyDiscoveryService(ISettingsService settingsService)
@@ -95,7 +98,7 @@ namespace EasyAF.Modules.Map.Services
                 // Rollback instructions: Revert to hardcoded list or old reflection logic
                 
                 // Use reflection on DataSet to find all "*Entries" properties
-                // and extract their generic type arguments (Bus, LVCB, Fuse, etc.)
+                // and extract their generic type arguments (Bus, LVCB, Fuse, Cable, ArcFlash, ShortCircuit)
                 var dataSetType = typeof(DataSet);
                 var dataModelTypes = dataSetType.GetProperties()
                     .Where(p => p.Name.EndsWith("Entries") && p.PropertyType.IsGenericType)
@@ -212,6 +215,9 @@ namespace EasyAF.Modules.Map.Services
 
                 var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
                     .Where(p => p.CanRead && p.CanWrite)
+                    // FILTER OUT: Properties with JsonIgnore attributes (aliases like Id)
+                    .Where(p => !p.GetCustomAttributes(typeof(System.Text.Json.Serialization.JsonIgnoreAttribute), false).Any()
+                             && !p.GetCustomAttributes(typeof(Newtonsoft.Json.JsonIgnoreAttribute), false).Any())
                     .Select(p => new MapPropertyInfo
                     {
                         PropertyName = p.Name,

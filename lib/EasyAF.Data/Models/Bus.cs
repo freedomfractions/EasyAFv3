@@ -22,11 +22,20 @@ public class Bus
     // IDENTITY & BASIC ELECTRICAL
     // ========================================
     
-    /// <summary>Unique identifier / name of the bus. (Column: Buses)</summary>
+    /// <summary>Bus identifier. (Column: Buses)</summary>
     [Category("Identity")]
-    [Description("Unique identifier for the bus")]
+    [Description("Bus identifier")]
     [Required]
-    public string? Id { get; set; }
+    public string? Buses { get; set; }
+    
+    /// <summary>Alias for Buses (convenience property for dictionary indexing - not serialized).</summary>
+    [System.Text.Json.Serialization.JsonIgnore]
+    [Newtonsoft.Json.JsonIgnore]
+    public string? Id 
+    { 
+        get => Buses; 
+        set => Buses = value; 
+    }
     
     /// <summary>AC / DC designation. (Column: AC/DC)</summary>
     [Category("Electrical")]
@@ -412,11 +421,10 @@ public class Bus
     public Bus() { }
 
     /// <summary>
-    /// Returns a string representation of the bus including its key identifying properties.
+    /// Returns a summary string representation of the bus.
     /// </summary>
-    /// <returns>A string describing the bus with ID, voltage, phases, area, zone, and status.</returns>
     public override string ToString()
     {
-        return $"Id: {Id}, kV: {Voltage}, Phases: {Phases}, Area: {Area}, Zone: {Zone}, Status: {Status}";
+        return $"Buses: {Buses}, Voltage: {Voltage}, Phases: {Phases}";
     }
 }

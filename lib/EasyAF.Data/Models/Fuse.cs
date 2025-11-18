@@ -22,11 +22,20 @@ public class Fuse
     // IDENTITY & BASIC ELECTRICAL
     // ========================================
     
-    /// <summary>Unique identifier for the fuse. (Column: Fuses)</summary>
+    /// <summary>Fuse identifier. (Column: Fuses)</summary>
     [Category("Identity")]
-    [Description("Unique identifier for the fuse")]
+    [Description("Fuse identifier")]
     [Required]
-    public string? Id { get; set; }
+    public string? Fuses { get; set; }
+    
+    /// <summary>Alias for Fuses (convenience property for dictionary indexing - not serialized).</summary>
+    [System.Text.Json.Serialization.JsonIgnore]
+    [Newtonsoft.Json.JsonIgnore]
+    public string? Id 
+    { 
+        get => Fuses; 
+        set => Fuses = value; 
+    }
     
     /// <summary>AC / DC designation. (Column: AC/DC)</summary>
     [Category("Electrical")]
@@ -357,6 +366,6 @@ public class Fuse
     /// </summary>
     public override string ToString()
     {
-        return $"Id: {Id}, Bus: {Bus}, Mfr: {Manufacturer}, Type: {Type}, Style: {Style}, Size: {Size}";
+        return $"Fuses: {Fuses}, Bus: {Bus}, Mfr: {Manufacturer}, Type: {Type}, Style: {Style}, Size: {Size}";
     }
 }

@@ -22,11 +22,20 @@ public class Cable
     // IDENTITY & BASIC INFO
     // ========================================
     
-    /// <summary>Unique identifier for the cable. (Column: Cables)</summary>
+    /// <summary>Cable identifier. (Column: Cables)</summary>
     [Category("Identity")]
-    [Description("Unique identifier for the cable")]
+    [Description("Cable identifier")]
     [Required]
-    public string? Id { get; set; }
+    public string? Cables { get; set; }
+    
+    /// <summary>Alias for Cables (convenience property for dictionary indexing - not serialized).</summary>
+    [System.Text.Json.Serialization.JsonIgnore]
+    [Newtonsoft.Json.JsonIgnore]
+    public string? Id 
+    { 
+        get => Cables; 
+        set => Cables = value; 
+    }
     
     /// <summary>AC / DC designation. (Column: AC/DC)</summary>
     [Category("Electrical")]
@@ -592,6 +601,6 @@ public class Cable
     /// </summary>
     public override string ToString()
     {
-        return $"Id: {Id}, From: {FromBusId ?? FromDeviceId}, To: {ToBusId ?? ToDeviceId}, Size: {Size}, Length: {Length}";
+        return $"Cables: {Cables}, From: {FromBusId ?? FromDeviceId}, To: {ToBusId ?? ToDeviceId}, Size: {Size}, Length: {Length}";
     }
 }

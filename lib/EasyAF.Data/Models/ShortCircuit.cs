@@ -9,17 +9,39 @@ namespace EasyAF.Data.Models;
 [EasyPowerClass("Equipment Duty Scenario Report")]
 public class ShortCircuit
 {
-    /// <summary>Equipment name. (Column: Equipment Name)</summary>
-    [Category("Identity")]
-    [Description("Equipment identifier being evaluated")]
-    [Required]
-    public string? Id { get; set; }
+    // ========================================
+    // IDENTITY (Composite Key)
+    // ========================================
     
-    /// <summary>Bus name. (Column: Bus Name)</summary>
+    /// <summary>Bus name where equipment is located. (Column: Bus Name)</summary>
     [Category("Identity")]
     [Description("Bus where equipment is located")]
     [Required]
-    public string? Bus { get; set; }
+    public string? BusName { get; set; }
+    
+    /// <summary>Equipment name/identifier. (Column: Equipment Name)</summary>
+    [Category("Identity")]
+    [Description("Equipment identifier being evaluated")]
+    [Required]
+    public string? EquipmentName { get; set; }
+    
+    /// <summary>Alias for EquipmentName (convenience property for dictionary indexing - not serialized).</summary>
+    [System.Text.Json.Serialization.JsonIgnore]
+    [Newtonsoft.Json.JsonIgnore]
+    public string? Id 
+    { 
+        get => EquipmentName; 
+        set => EquipmentName = value; 
+    }
+    
+    /// <summary>Alias for BusName (backward compatibility - not serialized).</summary>
+    [System.Text.Json.Serialization.JsonIgnore]
+    [Newtonsoft.Json.JsonIgnore]
+    public string? Bus 
+    { 
+        get => BusName; 
+        set => BusName = value; 
+    }
     
     /// <summary>Scenario name. (Column: Scenario)</summary>
     [Category("Study Results")]
@@ -94,9 +116,12 @@ public class ShortCircuit
 
     public ShortCircuit() { }
 
+    /// <summary>
+    /// Returns a string representation of the short-circuit study result.
+    /// </summary>
     public override string ToString()
     {
-        return $"Id: {Id}, Bus: {Bus}, Scenario: {Scenario}, Duty: {HalfCycleDutyKA} kA ({HalfCycleDutyPercent}%)";
+        return $"EquipmentName: {EquipmentName}, BusName: {BusName}, Scenario: {Scenario}, Duty: {HalfCycleDutyKA} kA ({HalfCycleDutyPercent}%)";
     }
     
     public bool IsOverDutied()

@@ -29,7 +29,16 @@ public class ArcFlash
     [Category("Identity")]
     [Description("Bus or location where arc flash was calculated")]
     [Required]
-    public string? Id { get; set; }
+    public string? ArcFaultBusName { get; set; }
+    
+    /// <summary>Alias for ArcFaultBusName (convenience property for dictionary indexing - not serialized).</summary>
+    [System.Text.Json.Serialization.JsonIgnore]
+    [Newtonsoft.Json.JsonIgnore]
+    public string? Id 
+    { 
+        get => ArcFaultBusName; 
+        set => ArcFaultBusName = value; 
+    }
     
     /// <summary>Scenario name. (Column: Scenario)</summary>
     [Category("Study Results")]
@@ -169,6 +178,6 @@ public class ArcFlash
     /// </summary>
     public override string ToString()
     {
-        return $"Id: {Id}, Scenario: {Scenario}, IE: {IncidentEnergyCalPerCm2} cal/cm², AFB: {ArcFlashBoundaryIn} in";
+        return $"ArcFaultBusName: {ArcFaultBusName}, Scenario: {Scenario}, IE: {IncidentEnergyCalPerCm2} cal/cm², AFB: {ArcFlashBoundaryIn} in";
     }
 }

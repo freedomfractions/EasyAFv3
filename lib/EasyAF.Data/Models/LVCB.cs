@@ -27,11 +27,20 @@ public class LVCB
     // IDENTITY & BASIC ELECTRICAL
     // ========================================
     
-    /// <summary>Unique identifier for the breaker. (Column: LV Breakers)</summary>
+    /// <summary>Low voltage circuit breaker identifier. (Column: LV Breakers)</summary>
     [Category("Identity")]
-    [Description("Unique identifier for the circuit breaker")]
+    [Description("Low voltage circuit breaker identifier")]
     [Required]
-    public string? Id { get; set; }
+    public string? LVBreakers { get; set; }
+    
+    /// <summary>Alias for LVBreakers (convenience property for dictionary indexing - not serialized).</summary>
+    [System.Text.Json.Serialization.JsonIgnore]
+    [Newtonsoft.Json.JsonIgnore]
+    public string? Id 
+    { 
+        get => LVBreakers; 
+        set => LVBreakers = value; 
+    }
     
     /// <summary>AC / DC designation. (Column: AC/DC)</summary>
     [Category("Electrical")]
@@ -637,7 +646,7 @@ public class LVCB
     /// </summary>
     public override string ToString()
     {
-        return $"Id: {Id}, Bus: {Bus}, Mfr: {Manufacturer}, Type: {BreakerType}, Style: {Style}, Frame: {FrameSize}, AIC: {AIC}";
+        return $"LVBreakers: {LVBreakers}, Bus: {Bus}, Mfr: {Manufacturer}, Type: {BreakerType}, Style: {Style}, Frame: {FrameSize}, AIC: {AIC}";
     }
 
     /// <summary>
