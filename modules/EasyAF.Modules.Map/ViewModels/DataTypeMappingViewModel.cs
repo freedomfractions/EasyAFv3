@@ -221,7 +221,7 @@ namespace EasyAF.Modules.Map.ViewModels
             {
                 if (SetProperty(ref _selectedTable, value))
                 {
-                    // CROSS-MODULE EDIT: 2025-01-16 Table Reference Persistence
+                    // CROSS-MODULE EDIT: 2025-01-17 Table Reference Persistence
                     // Modified for: Save table selection to document for round-trip UX
                     // Related modules: Map (MapDocument, MapDocumentSerializer)
                     // Rollback instructions: Remove this persistence block
@@ -387,10 +387,10 @@ namespace EasyAF.Modules.Map.ViewModels
         /// Restores the previously selected table from the document (called after loading a saved map).
         /// </summary>
         /// <remarks>
-        /// CROSS-MODULE EDIT: 2025-01-17 Table Selection Restoration Fix
-        /// Modified for: Fix table selection persistence by using exact DisplayName matching
+        /// CROSS-MODULE EDIT: 2025-01-17 Table Selection Restoration
+        /// Modified for: Restore table selection persistence after document load
         /// Related modules: Map (MapDocument, MapDocumentSerializer, TableReference)
-        /// Rollback instructions: Revert to version without enhanced logging
+        /// Rollback instructions: Remove this method
         /// 
         /// The saved reference is the DisplayName from TableReference, which uses format:
         /// "FileName | TableName" (e.g., "sample.csv | BusData")
@@ -413,14 +413,7 @@ namespace EasyAF.Modules.Map.ViewModels
                 return;
             }
 
-            Log.Information("Attempting to restore table selection for {DataType}: '{SavedRef}'", _dataType, savedTableRef);
-            Log.Debug("Available items in ComboBox: {Count}", ComboBoxItems.Count);
-            
-            // Log all available DisplayNames for debugging
-            foreach (var item in ComboBoxItems.OfType<TableItem>())
-            {
-                Log.Debug("  Available: '{DisplayName}'", item.TableReference.DisplayName);
-            }
+            Log.Debug("Attempting to restore table selection for {DataType}: '{SavedRef}'", _dataType, savedTableRef);
             
             // Try exact DisplayName match
             var matchingItem = ComboBoxItems.OfType<TableItem>()
@@ -429,12 +422,11 @@ namespace EasyAF.Modules.Map.ViewModels
             if (matchingItem != null)
             {
                 SelectedComboBoxItem = matchingItem;
-                Log.Information("? Restored table selection for {DataType}: '{TableRef}' (exact match)", _dataType, savedTableRef);
+                Log.Debug("Restored table selection for {DataType}: '{TableRef}'", _dataType, savedTableRef);
                 return;
             }
 
-            Log.Warning("? Could not restore table selection for {DataType}: '{TableRef}' (no exact match found)", _dataType, savedTableRef);
-            Log.Warning("This usually means the DisplayName format changed or the file was removed.");
+            Log.Warning("Could not restore table selection for {DataType}: '{TableRef}' - table may have been removed or file renamed", _dataType, savedTableRef);
         }
 
         #endregion
@@ -473,6 +465,9 @@ namespace EasyAF.Modules.Map.ViewModels
         /// </summary>
         private void LoadAvailableTables()
         {
+            // Remember current selection (by stable DisplayName)
+            var previouslySelectedDisplayName = SelectedTable?.DisplayName;
+
             AvailableTables.Clear();
             ComboBoxItems.Clear();
 
@@ -519,6 +514,7 @@ namespace EasyAF.Modules.Map.ViewModels
                     FileName = "?? No sample files loaded - Add files in Summary tab" 
                 });
                 
+                // Explicitly clear selection and columns when nothing is available
                 SelectedTable = null;
                 SelectedComboBoxItem = null;
                 SourceColumns.Clear();
@@ -556,15 +552,47 @@ namespace EasyAF.Modules.Map.ViewModels
                 }
             }
 
-            // DO NOT auto-select any table - require explicit user selection
-            // This prevents accidental mappings to the wrong table
-            SelectedTable = null;
-            SelectedComboBoxItem = null;
-            
-            // Clear source columns since no table is selected
-            SourceColumns.Clear();
+            // Selection preservation / restoration logic
+            // 1) If there was a selection before refresh, try to re-select it
+            // 2) Else, try to restore from document's saved TableReferences
+            // 3) Else, leave selection null (user must pick)
 
-            Log.Information("Loaded {Count} available tables from {FileCount} files ({ItemCount} ComboBox items) - No table pre-selected", 
+            TableItem? itemToSelect = null;
+
+            if (!string.IsNullOrEmpty(previouslySelectedDisplayName))
+            {
+                itemToSelect = ComboBoxItems.OfType<TableItem>()
+                    .FirstOrDefault(i => string.Equals(i.TableReference.DisplayName, previouslySelectedDisplayName, StringComparison.Ordinal));
+
+                if (itemToSelect != null)
+                {
+                    Log.Debug("Preserved previous table selection: {DisplayName}", previouslySelectedDisplayName);
+                }
+            }
+
+            if (itemToSelect == null && _document.TableReferencesByDataType.TryGetValue(_dataType, out var savedRef) && !string.IsNullOrEmpty(savedRef))
+            {
+                itemToSelect = ComboBoxItems.OfType<TableItem>()
+                    .FirstOrDefault(i => string.Equals(i.TableReference.DisplayName, savedRef, StringComparison.Ordinal));
+
+                if (itemToSelect != null)
+                {
+                    Log.Debug("Restored saved table selection for {DataType}: {DisplayName}", _dataType, savedRef);
+                }
+            }
+
+            if (itemToSelect != null)
+            {
+                // This will route through SelectedComboBoxItem setter and set SelectedTable
+                SelectedComboBoxItem = itemToSelect;
+            }
+            else
+            {
+                // Do not force-clear selection here; leave as-is to avoid wiping a restored selection elsewhere
+                Log.Debug("No table auto-selected for {DataType} (previous/saved selection not found)", _dataType);
+            }
+
+            Log.Information("Loaded {Count} available tables from {FileCount} files ({ItemCount} ComboBox items)", 
                 AvailableTables.Count, tablesByFile.Count, ComboBoxItems.Count);
         }
 
@@ -647,7 +675,7 @@ namespace EasyAF.Modules.Map.ViewModels
 
         private bool CanExecuteMapSelected()
         {
-            // CROSS-MODULE EDIT: 2025-01-16 Table Selection Validation
+            // CROSS-MODULE EDIT: 2025-01-17 Table Selection Validation
             // Modified for: Require table selection before allowing mapping
             // Related modules: Map (DataTypeMappingView)
             // Rollback instructions: Remove HasTableSelected check
@@ -661,7 +689,7 @@ namespace EasyAF.Modules.Map.ViewModels
         {
             if (SelectedSourceColumn == null || SelectedTargetProperty == null) return;
 
-            // CROSS-MODULE EDIT: 2025-01-16 Duplicate Mapping Prevention (Bidirectional)
+            // CROSS-MODULE EDIT: 2025-01-17 Duplicate Mapping Prevention (Bidirectional)
             // Modified for: Detect and warn for BOTH directions of duplicate mappings (property?column AND column?property)
             // Related modules: Core (IUserDialogService)
             // Rollback instructions: Remove bidirectional duplicate detection logic below
@@ -806,7 +834,7 @@ namespace EasyAF.Modules.Map.ViewModels
         /// </summary>
         /// <remarks>
         /// <para>
-        /// CROSS-MODULE EDIT: 2025-01-16 Auto-Map Intelligence (Safeguard #9)
+        /// CROSS-MODULE EDIT: 2025-01-17 Auto-Map Intelligence (Safeguard #9)
         /// Modified for: Implement intelligent column-to-property matching using fuzzy search
         /// Related modules: Core (IFuzzyMatcher service with Levenshtein + Jaro-Winkler)
         /// Rollback instructions: Revert to stub implementation (just log message)
