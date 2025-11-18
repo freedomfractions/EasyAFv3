@@ -58,9 +58,30 @@ namespace EasyAF.Modules.Map.Models
         public bool IsCsvFile => FileExtension == ".csv";
 
         /// <summary>
-        /// Gets a composite display name combining file and table (e.g., "data.xlsx ? Sheet1").
+        /// Gets a composite display name combining file and table.
         /// </summary>
-        public string DisplayName => $"{FileName} ? {TableName}";
+        /// <remarks>
+        /// Format varies based on whether the file contains multiple tables:
+        /// - Single-table file: "TableName (filename.ext)"
+        /// - Multi-table file:  "  ? TableName" (indented with arrow)
+        /// This format must match what MapDocumentSerializer saves for table persistence.
+        /// </remarks>
+        public string DisplayName
+        {
+            get
+            {
+                if (IsMultiTableFile)
+                {
+                    // Multi-table file: indent with arrow
+                    return $"  ? {TableName}";
+                }
+                else
+                {
+                    // Single-table file: show table name with filename in parentheses
+                    return $"{TableName} ({FileName})";
+                }
+            }
+        }
 
         /// <summary>
         /// Returns a string representation of this table reference.
