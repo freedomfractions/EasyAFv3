@@ -1,3 +1,5 @@
+using EasyAF.Data.Attributes;
+
 namespace EasyAF.Data.Models;
 
 /// <summary>
@@ -9,18 +11,32 @@ public class Bus
 {
     // Identity & basics
     /// <summary>Unique identifier / name of the bus. (Column: Buses or Bus Name)</summary>
+    [Category("Identity")]
+    [Description("Unique identifier for the bus")]
+    [Required]
     public string? Id { get; set; }
     
     /// <summary>AC / DC designation. (Column: AC/DC)</summary>
+    [Category("Electrical")]
+    [Description("AC or DC power system designation")]
     public string? AcDc { get; set; }
     
     /// <summary>Status of the bus/equipment. (Column: Status)</summary>
+    [Category("Identity")]
+    [Description("Operational status of the bus")]
     public string? Status { get; set; }
     
     /// <summary>Base kV of the bus. (Column: Base kV)</summary>
+    [Category("Electrical")]
+    [Units("kV")]
+    [Description("Nominal voltage rating")]
+    [Required]
     public string? Voltage { get; set; }
     
     /// <summary>Number of phases. (Column: No of Phases)</summary>
+    [Category("Electrical")]
+    [Description("Number of phases (1, 2, or 3)")]
+    [Required]
     public string? Phases { get; set; }
 
     // Grouping / metadata
