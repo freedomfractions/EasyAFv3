@@ -98,7 +98,7 @@ public class UPS
     /// <summary>Ctl kV pu (Column: Ctl kV pu)</summary>
     [Category("Electrical")]
     [Description("Ctl kV pu")]
-    public string? CtlkVpu { get; set; }
+    public string? CtlKVPu { get; set; }
 
     /// <summary>Ctl Angle (Column: Ctl Angle)</summary>
     [Category("General")]
@@ -265,4 +265,5 @@ public class UPS
         return $"UPS: {UPSs}";
     }
 }
+
 

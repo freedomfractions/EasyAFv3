@@ -83,7 +83,7 @@ public class AFD
     [Category("Electrical")]
     [Description("HP/kVA")]
     [Required]
-    public string? HPkVA { get; set; }
+    public string? HPKVA { get; set; }
 
     /// <summary>X/R (Column: X/R)</summary>
     [Category("General")]
@@ -280,4 +280,5 @@ public class AFD
         return $"AFD: {AFDs}";
     }
 }
+
 

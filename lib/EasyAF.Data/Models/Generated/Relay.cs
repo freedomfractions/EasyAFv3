@@ -82,7 +82,7 @@ public class Relay
     /// <summary>TCC 30 Cyc kA (Column: TCC 30 Cyc kA)</summary>
     [Category("Protection")]
     [Description("TCC 30 Cyc kA")]
-    public string? TCC30CyckA { get; set; }
+    public string? TCC30CycKA { get; set; }
 
     /// <summary>IEC TCC Initial kA (Column: IEC TCC Initial kA)</summary>
     [Category("Protection")]
@@ -306,4 +306,5 @@ public class Relay
         return $"Relay: {Relays}";
     }
 }
+
 

@@ -83,13 +83,13 @@ public class ATS
     [Category("General")]
     [Description("Forced To Energy")]
     [Units("cal/cm²")]
-    public string? ForcedToEnergy { get; set; }
+    public string? ForcedToEnergyCalPerCm2 { get; set; }
 
     /// <summary>Forced To Arc Boundary (Column: Forced To Arc Boundary (in))</summary>
     [Category("General")]
     [Description("Forced To Arc Boundary")]
     [Units("in")]
-    public string? ForcedToArcBoundary { get; set; }
+    public string? ForcedToArcBoundaryIn { get; set; }
 
     /// <summary>AF Option (Column: AF Option)</summary>
     [Category("General")]
@@ -110,7 +110,7 @@ public class ATS
     [Category("General")]
     [Description("Working Distance")]
     [Units("in")]
-    public string? WorkingDistance { get; set; }
+    public string? WorkingDistanceIn { get; set; }
 
     /// <summary>Electrode Gap Setting (Column: Electrode Gap Setting)</summary>
     [Category("Control")]
@@ -121,7 +121,7 @@ public class ATS
     [Category("General")]
     [Description("Electrode Gap")]
     [Units("mm")]
-    public string? ElectrodeGap { get; set; }
+    public string? ElectrodeGapMM { get; set; }
 
     /// <summary>Electrode Configuration Setting (Column: Electrode Configuration Setting)</summary>
     [Category("Control")]
@@ -142,19 +142,19 @@ public class ATS
     [Category("General")]
     [Description("Enclosure Height")]
     [Units("in")]
-    public string? EnclosureHeight { get; set; }
+    public string? EnclosureHeightIn { get; set; }
 
     /// <summary>Enclosure Width (Column: Enclosure Width (in))</summary>
     [Category("General")]
     [Description("Enclosure Width")]
     [Units("in")]
-    public string? EnclosureWidth { get; set; }
+    public string? EnclosureWidthIn { get; set; }
 
     /// <summary>Enclosure Depth (Column: Enclosure Depth (in))</summary>
     [Category("General")]
     [Description("Enclosure Depth")]
     [Units("in")]
-    public string? EnclosureDepth { get; set; }
+    public string? EnclosureDepthIn { get; set; }
 
     /// <summary>Label Comment (Column: Label Comment)</summary>
     [Category("Metadata")]
@@ -170,30 +170,30 @@ public class ATS
     [Category("General")]
     [Description("Stored AFB")]
     [Units("in")]
-    public string? StoredAFB { get; set; }
+    public string? StoredAFBIn { get; set; }
 
     /// <summary>Stored AF IE (Column: Stored AF IE (cal/cm2))</summary>
     [Category("General")]
     [Description("Stored AF IE")]
     [Units("cal/cm²")]
-    public string? StoredAFIE { get; set; }
+    public string? StoredAFIECalPerCm2 { get; set; }
 
     /// <summary>Stored AF PPE (Column: Stored AF PPE)</summary>
     [Category("General")]
     [Description("Stored AF PPE")]
     public string? StoredAFPPE { get; set; }
 
-    /// <summary>SC Sym kA (Column: SC Sym kA (ANSI))</summary>
+    /// <summary>SC Sym kA (ANSI) (Column: SC Sym kA (ANSI))</summary>
     [Category("Electrical")]
-    [Description("SC Sym kA")]
-    [Units("ANSI")]
-    public string? SCSymkA { get; set; }
+    [Description("SC Sym kA (ANSI)")]
+    [Units("kA")]
+    public string? SCSymKAAnsi { get; set; }
 
-    /// <summary>SC Sym kA (Column: SC Sym kA (IEC))</summary>
+    /// <summary>SC Sym kA (IEC) (Column: SC Sym kA (IEC))</summary>
     [Category("Electrical")]
-    [Description("SC Sym kA")]
-    [Units("°C")]
-    public string? SCSymkA { get; set; }
+    [Description("SC Sym kA (IEC)")]
+    [Units("kA")]
+    public string? SCSymKAIec { get; set; }
 
     /// <summary>Source Connection (Column: Source Connection)</summary>
     [Category("General")]
@@ -315,4 +315,5 @@ public class ATS
         return $"ATS: {ATSs}";
     }
 }
+
 

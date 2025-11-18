@@ -83,7 +83,7 @@ public class CLReactor
     [Category("Electrical")]
     [Description("Imped kVA")]
     [Required]
-    public string? ImpedkVA { get; set; }
+    public string? ImpedKVA { get; set; }
 
     /// <summary>Material (Column: Material)</summary>
     [Category("General")]
@@ -245,4 +245,5 @@ public class CLReactor
         return $"CLReactor: {CLReactors}";
     }
 }
+
 

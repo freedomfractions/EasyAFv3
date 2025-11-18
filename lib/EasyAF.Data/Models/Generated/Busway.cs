@@ -137,22 +137,22 @@ public class Busway
     /// <summary>R1 pu (Column: R1 pu)</summary>
     [Category("General")]
     [Description("R1 pu")]
-    public string? R1pu { get; set; }
+    public string? R1Pu { get; set; }
 
     /// <summary>X1 pu (Column: X1 pu)</summary>
     [Category("General")]
     [Description("X1 pu")]
-    public string? X1pu { get; set; }
+    public string? X1Pu { get; set; }
 
     /// <summary>R0 pu (Column: R0 pu)</summary>
     [Category("General")]
     [Description("R0 pu")]
-    public string? R0pu { get; set; }
+    public string? R0Pu { get; set; }
 
     /// <summary>X0 pu (Column: X0 pu)</summary>
     [Category("General")]
     [Description("X0 pu")]
-    public string? X0pu { get; set; }
+    public string? X0Pu { get; set; }
 
     /// <summary>IEC SC Temp (Column: IEC SC Temp (C))</summary>
     [Category("Electrical")]
@@ -163,22 +163,22 @@ public class Busway
     /// <summary>IEC R1 Cmax pu (Column: IEC R1 Cmax pu)</summary>
     [Category("General")]
     [Description("IEC R1 Cmax pu")]
-    public string? IECR1Cmaxpu { get; set; }
+    public string? IECR1CmaxPu { get; set; }
 
     /// <summary>IEC R0 Cmax pu (Column: IEC R0 Cmax pu)</summary>
     [Category("General")]
     [Description("IEC R0 Cmax pu")]
-    public string? IECR0Cmaxpu { get; set; }
+    public string? IECR0CmaxPu { get; set; }
 
     /// <summary>IEC R1 Cmin pu (Column: IEC R1 Cmin pu)</summary>
     [Category("General")]
     [Description("IEC R1 Cmin pu")]
-    public string? IECR1Cminpu { get; set; }
+    public string? IECR1CminPu { get; set; }
 
     /// <summary>IEC R0 Cmin pu (Column: IEC R0 Cmin pu)</summary>
     [Category("General")]
     [Description("IEC R0 Cmin pu")]
-    public string? IECR0Cminpu { get; set; }
+    public string? IECR0CminPu { get; set; }
 
     /// <summary>Rating at Max Temp (Column: Rating at Max Temp)</summary>
     [Category("Physical")]
@@ -303,4 +303,5 @@ public class Busway
         return $"Busway: {Busways}";
     }
 }
+
 

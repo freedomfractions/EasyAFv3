@@ -67,7 +67,7 @@ public class Rectifier
     /// <summary>DC Rated kV (Column: DC Rated kV)</summary>
     [Category("Electrical")]
     [Description("DC Rated kV")]
-    public string? DCRatedkV { get; set; }
+    public string? DCRatedKV { get; set; }
 
     /// <summary>DC Rated FLA (Column: DC Rated FLA)</summary>
     [Category("General")]
@@ -112,7 +112,7 @@ public class Rectifier
     /// <summary>Ctl kV pu (Column: Ctl kV pu)</summary>
     [Category("Electrical")]
     [Description("Ctl kV pu")]
-    public string? CtlkVpu { get; set; }
+    public string? CtlKVPu { get; set; }
 
     /// <summary>Current Set Point (Column: Current Set Point)</summary>
     [Category("Electrical")]
@@ -143,7 +143,7 @@ public class Rectifier
     [Category("Electrical")]
     [Description("Comm kVA")]
     [Required]
-    public string? CommkVA { get; set; }
+    public string? CommKVA { get; set; }
 
     /// <summary>Hrm Load Type (Column: Hrm Load Type)</summary>
     [Category("Physical")]
@@ -290,4 +290,5 @@ public class Rectifier
         return $"Rectifier: {Rectifiers}";
     }
 }
+
 

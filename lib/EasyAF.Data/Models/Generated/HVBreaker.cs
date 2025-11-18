@@ -89,17 +89,17 @@ public class HVBreaker
     /// <summary>C&L/Crest kA (Column: C&L/Crest kA)</summary>
     [Category("Protection")]
     [Description("C&L/Crest kA")]
-    public string? C&LCrestkA { get; set; }
+    public string? CLCrestKA { get; set; }
 
     /// <summary>Max kV (Column: Max kV)</summary>
     [Category("Electrical")]
     [Description("Max kV")]
-    public string? MaxkV { get; set; }
+    public string? MaxKV { get; set; }
 
     /// <summary>Rated kA @ Max kV (Column: Rated kA @ Max kV)</summary>
     [Category("Electrical")]
     [Description("Rated kA @ Max kV")]
-    public string? RatedkA@MaxkV { get; set; }
+    public string? RatedKAAtMaxKV { get; set; }
 
     /// <summary>K-factor (Column: K-factor)</summary>
     [Category("General")]
@@ -109,7 +109,7 @@ public class HVBreaker
     /// <summary>Int kA (Column: Int kA)</summary>
     [Category("General")]
     [Description("Int kA")]
-    public string? IntkA { get; set; }
+    public string? IntKA { get; set; }
 
     /// <summary>kA Min (Column: kA Min)</summary>
     [Category("General")]
@@ -124,12 +124,12 @@ public class HVBreaker
     /// <summary>IEC Rated kV (Column: IEC Rated kV)</summary>
     [Category("Electrical")]
     [Description("IEC Rated kV")]
-    public string? IECRatedkV { get; set; }
+    public string? IECRatedKV { get; set; }
 
     /// <summary>IEC Making kA (Column: IEC Making kA)</summary>
     [Category("General")]
     [Description("IEC Making kA")]
-    public string? IECMakingkA { get; set; }
+    public string? IECMakingKA { get; set; }
 
     /// <summary>IEC Opening Time (Column: IEC Opening Time (s))</summary>
     [Category("General")]
@@ -243,4 +243,5 @@ public class HVBreaker
         return $"HVBreaker: {HVBreakers}";
     }
 }
+
 
