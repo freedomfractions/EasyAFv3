@@ -32,7 +32,7 @@ public class TransmissionLine
     /// <summary>No of Phases (Column: No of Phases)</summary>
     [Category("Electrical")]
     [Description("No of Phases")]
-    public string? NoofPhases { get; set; }
+    public string? NoOfPhases { get; set; }
 
     /// <summary>From Bus ID (Column: From Bus ID)</summary>
     [Category("Identity")]
@@ -57,7 +57,7 @@ public class TransmissionLine
     /// <summary>From Base kV (Column: From Base kV)</summary>
     [Category("Electrical")]
     [Description("From Base kV")]
-    public string? FromBasekV { get; set; }
+    public string? FromBaseKV { get; set; }
 
     /// <summary>To Bus ID (Column: To Bus ID)</summary>
     [Category("Identity")]
@@ -82,7 +82,7 @@ public class TransmissionLine
     /// <summary>To Base kV (Column: To Base kV)</summary>
     [Category("Electrical")]
     [Description("To Base kV")]
-    public string? ToBasekV { get; set; }
+    public string? ToBaseKV { get; set; }
 
     /// <summary>Unit (Column: Unit)</summary>
     [Category("General")]
@@ -256,19 +256,19 @@ public class TransmissionLine
     [Category("Reliability")]
     [Description("Comp Failure Rate")]
     [Units("/year")]
-    public string? CompFailureRate { get; set; }
+    public string? CompFailureRatePerYear { get; set; }
 
     /// <summary>Comp Repair Time (Column: Comp Repair Time (h))</summary>
     [Category("Reliability")]
     [Description("Comp Repair Time")]
     [Units("h")]
-    public string? CompRepairTime { get; set; }
+    public string? CompRepairTimeH { get; set; }
 
     /// <summary>Comp Replace Time (Column: Comp Replace Time (h))</summary>
     [Category("Reliability")]
     [Description("Comp Replace Time")]
     [Units("h")]
-    public string? CompReplaceTime { get; set; }
+    public string? CompReplaceTimeH { get; set; }
 
     /// <summary>Comp Repair Cost (Column: Comp Repair Cost)</summary>
     [Category("Reliability")]
@@ -289,19 +289,19 @@ public class TransmissionLine
     [Category("Reliability")]
     [Description("Conn Failure Rate")]
     [Units("/year")]
-    public string? ConnFailureRate { get; set; }
+    public string? ConnFailureRatePerYear { get; set; }
 
     /// <summary>Conn Repair Time (Column: Conn Repair Time (h))</summary>
     [Category("Reliability")]
     [Description("Conn Repair Time")]
     [Units("h")]
-    public string? ConnRepairTime { get; set; }
+    public string? ConnRepairTimeH { get; set; }
 
     /// <summary>Conn Replace Time (Column: Conn Replace Time (h))</summary>
     [Category("Reliability")]
     [Description("Conn Replace Time")]
     [Units("h")]
-    public string? ConnReplaceTime { get; set; }
+    public string? ConnReplaceTimeH { get; set; }
 
     /// <summary>Reliability Source (Column: Reliability Source)</summary>
     [Category("Reliability")]
@@ -350,3 +350,4 @@ public class TransmissionLine
         return $"TransmissionLine: {TransmissionLines}";
     }
 }
+

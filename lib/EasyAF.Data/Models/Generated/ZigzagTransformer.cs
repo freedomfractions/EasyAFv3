@@ -47,7 +47,7 @@ public class ZigzagTransformer
     /// <summary>From Base kV (Column: From Base kV)</summary>
     [Category("Electrical")]
     [Description("From Base kV")]
-    public string? FromBasekV { get; set; }
+    public string? FromBaseKV { get; set; }
 
     /// <summary>Rating (Column: Rating (kV))</summary>
     [Category("Electrical")]
@@ -115,19 +115,19 @@ public class ZigzagTransformer
     [Category("Reliability")]
     [Description("Failure Rate")]
     [Units("/year")]
-    public string? FailureRate { get; set; }
+    public string? FailureRatePerYear { get; set; }
 
     /// <summary>Repair Time (Column: Repair Time (h))</summary>
     [Category("Reliability")]
     [Description("Repair Time")]
     [Units("h")]
-    public string? RepairTime { get; set; }
+    public string? RepairTimeH { get; set; }
 
     /// <summary>Replace Time (Column: Replace Time (h))</summary>
     [Category("Reliability")]
     [Description("Replace Time")]
     [Units("h")]
-    public string? ReplaceTime { get; set; }
+    public string? ReplaceTimeH { get; set; }
 
     /// <summary>Repair Cost (Column: Repair Cost)</summary>
     [Category("Reliability")]
@@ -221,3 +221,4 @@ public class ZigzagTransformer
         return $"ZigzagTransformer: {ZigzagTransformers}";
     }
 }
+

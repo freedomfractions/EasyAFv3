@@ -47,7 +47,7 @@ public class Photovoltaic
     /// <summary>Base kV (Column: Base kV)</summary>
     [Category("Electrical")]
     [Description("Base kV")]
-    public string? BasekV { get; set; }
+    public string? BaseKV { get; set; }
 
     /// <summary>Max Pwr Rating (Column: Max Pwr Rating (kW))</summary>
     [Category("Electrical")]
@@ -77,19 +77,19 @@ public class Photovoltaic
     [Category("Reliability")]
     [Description("Failure Rate")]
     [Units("/year")]
-    public string? FailureRate { get; set; }
+    public string? FailureRatePerYear { get; set; }
 
     /// <summary>Repair Time (Column: Repair Time (h))</summary>
     [Category("Reliability")]
     [Description("Repair Time")]
     [Units("h")]
-    public string? RepairTime { get; set; }
+    public string? RepairTimeH { get; set; }
 
     /// <summary>Replace Time (Column: Replace Time (h))</summary>
     [Category("Reliability")]
     [Description("Replace Time")]
     [Units("h")]
-    public string? ReplaceTime { get; set; }
+    public string? ReplaceTimeH { get; set; }
 
     /// <summary>Repair Cost (Column: Repair Cost)</summary>
     [Category("Reliability")]
@@ -183,3 +183,4 @@ public class Photovoltaic
         return $"Photovoltaic: {Photovoltaics}";
     }
 }
+

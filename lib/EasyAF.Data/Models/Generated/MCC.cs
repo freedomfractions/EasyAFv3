@@ -32,7 +32,7 @@ public class MCC
     /// <summary>Base kV (Column: Base kV)</summary>
     [Category("Electrical")]
     [Description("Base kV")]
-    public string? BasekV { get; set; }
+    public string? BaseKV { get; set; }
 
     /// <summary>Area (Column: Area)</summary>
     [Category("Location")]
@@ -123,79 +123,79 @@ public class MCC
     [Description("Incoming Device Type")]
     public string? IncomingDeviceType { get; set; }
 
-    /// <summary>kVA Type (Column: kVA Type)</summary>
+    /// <summary>KVA Type (Column: KVA Type)</summary>
     [Category("Electrical")]
-    [Description("kVA Type")]
+    [Description("KVA Type")]
     [Required]
     public string? KVAType { get; set; }
 
-    /// <summary>Motor Hp/kW (Column: Motor Hp/kW)</summary>
+    /// <summary>Motor Hp/KW (Column: Motor Hp/KW)</summary>
     [Category("Electrical")]
-    [Description("Motor Hp/kW")]
+    [Description("Motor Hp/KW")]
     [Required]
-    public string? MotorHpkW { get; set; }
+    public string? MotorHpKW { get; set; }
 
-    /// <summary>VFD Hp/kW (Column: VFD Hp/kW)</summary>
+    /// <summary>VFD Hp/KW (Column: VFD Hp/KW)</summary>
     [Category("Electrical")]
-    [Description("VFD Hp/kW")]
+    [Description("VFD Hp/KW")]
     [Required]
-    public string? VFDHpkW { get; set; }
+    public string? VFDHpKW { get; set; }
 
-    /// <summary>Conn kVA (Column: Conn kVA)</summary>
+    /// <summary>Conn KVA (Column: Conn KVA)</summary>
     [Category("Electrical")]
-    [Description("Conn kVA")]
+    [Description("Conn KVA")]
     [Required]
-    public string? ConnkVA { get; set; }
+    public string? ConnKVA { get; set; }
 
     /// <summary>Conn FLA (Column: Conn FLA)</summary>
     [Category("General")]
     [Description("Conn FLA")]
     public string? ConnFLA { get; set; }
 
-    /// <summary>Demand kVA (Column: Demand kVA)</summary>
+    /// <summary>Demand KVA (Column: Demand KVA)</summary>
     [Category("Electrical")]
-    [Description("Demand kVA")]
-    public string? DemandkVA { get; set; }
+    [Description("Demand KVA")]
+    public string? DemandKVA { get; set; }
 
     /// <summary>Demand FLA (Column: Demand FLA)</summary>
     [Category("Demand")]
     [Description("Demand FLA")]
     public string? DemandFLA { get; set; }
 
-    /// <summary>Dn Conn kVA (Column: Dn Conn kVA)</summary>
+    /// <summary>Dn Conn KVA (Column: Dn Conn KVA)</summary>
     [Category("Electrical")]
-    [Description("Dn Conn kVA")]
-    public string? DnConnkVA { get; set; }
+    [Description("Dn Conn KVA")]
+    public string? DnConnKVA { get; set; }
 
     /// <summary>Dn Conn FLA (Column: Dn Conn FLA)</summary>
     [Category("General")]
     [Description("Dn Conn FLA")]
     public string? DnConnFLA { get; set; }
 
-    /// <summary>Dn Demand kVA (Column: Dn Demand kVA)</summary>
+    /// <summary>Dn Demand KVA (Column: Dn Demand KVA)</summary>
     [Category("Electrical")]
-    [Description("Dn Demand kVA")]
-    public string? DnDemandkVA { get; set; }
+    [Description("Dn Demand KVA")]
+    public string? DnDemandKVA { get; set; }
 
     /// <summary>Dn Demand FLA (Column: Dn Demand FLA)</summary>
     [Category("Demand")]
     [Description("Dn Demand FLA")]
     public string? DnDemandFLA { get; set; }
 
-    /// <summary>Dn Code kVA (Column: Dn Code kVA)</summary>
+    /// <summary>Dn Code KVA (Column: Dn Code KVA)</summary>
     [Category("Electrical")]
-    [Description("Dn Code kVA")]
-    public string? DnCodekVA { get; set; }
+    [Description("Dn Code KVA")]
+    public string? DnCodeKVA { get; set; }
 
     /// <summary>Dn Code FLA (Column: Dn Code FLA)</summary>
     [Category("General")]
     [Description("Dn Code FLA")]
     public string? DnCodeFLA { get; set; }
 
-    /// <summary>Dn Design kVA (Column: Dn Design kVA)</summary>
+    /// <summary>Dn Design KVA (Column: Dn Design KVA)</summary>
     [Category("Electrical")]
-    [Description("Dn Design kVA")]
-    public string? DnDesignkVA { get; set; }
+    [Description("Dn Design KVA")]
+    public string? DnDesignKVA { get; set; }
 
     /// <summary>Dn Design FLA (Column: Dn Design FLA)</summary>
     [Category("General")]
@@ -217,16 +217,16 @@ public class MCC
     [Description("Load Scaling")]
     public string? LoadScaling { get; set; }
 
-    /// <summary>SCADA kW (Column: SCADA kW)</summary>
+    /// <summary>SCADA KW (Column: SCADA KW)</summary>
     [Category("Electrical")]
-    [Description("SCADA kW")]
-    public string? SCADAkW { get; set; }
+    [Description("SCADA KW")]
+    public string? SCADAKW { get; set; }
 
-    /// <summary>SCADA jkVAR (Column: SCADA jkVAR)</summary>
+    /// <summary>SCADA jKVAR (Column: SCADA jKVAR)</summary>
     [Category("Electrical")]
-    [Description("SCADA jkVAR")]
+    [Description("SCADA jKVAR")]
     [Required]
-    public string? SCADAjkVAR { get; set; }
+    public string? SCADAjKVAR { get; set; }
 
     /// <summary>SCADA Load Type (Column: SCADA Load Type)</summary>
     [Category("Physical")]
@@ -474,19 +474,19 @@ public class MCC
     [Category("Reliability")]
     [Description("Failure Rate")]
     [Units("/year")]
-    public string? FailureRate { get; set; }
+    public string? FailureRatePerYear { get; set; }
 
     /// <summary>Repair Time (Column: Repair Time (h))</summary>
     [Category("Reliability")]
     [Description("Repair Time")]
     [Units("h")]
-    public string? RepairTime { get; set; }
+    public string? RepairTimeH { get; set; }
 
     /// <summary>Replace Time (Column: Replace Time (h))</summary>
     [Category("Reliability")]
     [Description("Replace Time")]
     [Units("h")]
-    public string? ReplaceTime { get; set; }
+    public string? ReplaceTimeH { get; set; }
 
     /// <summary>Repair Cost (Column: Repair Cost)</summary>
     [Category("Reliability")]
@@ -507,7 +507,7 @@ public class MCC
     [Category("Reliability")]
     [Description("Downtime Cost")]
     [Units("h")]
-    public string? DowntimeCost { get; set; }
+    public string? DowntimeCostH { get; set; }
 
     /// <summary>Reliability Source (Column: Reliability Source)</summary>
     [Category("Reliability")]
@@ -586,3 +586,4 @@ public class MCC
         return $"MCC: {MCCs}";
     }
 }
+

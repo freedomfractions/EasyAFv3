@@ -47,7 +47,7 @@ public class Filter
     /// <summary>Base kV (Column: Base kV)</summary>
     [Category("Electrical")]
     [Description("Base kV")]
-    public string? BasekV { get; set; }
+    public string? BaseKV { get; set; }
 
     /// <summary>Type (Column: Type)</summary>
     [Category("Physical")]
@@ -212,3 +212,4 @@ public class Filter
         return $"Filter: {Filters}";
     }
 }
+

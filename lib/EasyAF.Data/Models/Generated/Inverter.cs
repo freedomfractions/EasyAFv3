@@ -32,7 +32,7 @@ public class Inverter
     /// <summary>No of Phases (Column: No of Phases)</summary>
     [Category("Electrical")]
     [Description("No of Phases")]
-    public string? NoofPhases { get; set; }
+    public string? NoOfPhases { get; set; }
 
     /// <summary>To Bus ID (Column: To Bus ID)</summary>
     [Category("Identity")]
@@ -52,7 +52,7 @@ public class Inverter
     /// <summary>Base kV (Column: Base kV)</summary>
     [Category("Electrical")]
     [Description("Base kV")]
-    public string? BasekV { get; set; }
+    public string? BaseKV { get; set; }
 
     /// <summary>Nom kV (Column: Nom kV)</summary>
     [Category("Electrical")]
@@ -105,19 +105,19 @@ public class Inverter
     [Category("Reliability")]
     [Description("Failure Rate")]
     [Units("/year")]
-    public string? FailureRate { get; set; }
+    public string? FailureRatePerYear { get; set; }
 
     /// <summary>Repair Time (Column: Repair Time (h))</summary>
     [Category("Reliability")]
     [Description("Repair Time")]
     [Units("h")]
-    public string? RepairTime { get; set; }
+    public string? RepairTimeH { get; set; }
 
     /// <summary>Replace Time (Column: Replace Time (h))</summary>
     [Category("Reliability")]
     [Description("Replace Time")]
     [Units("h")]
-    public string? ReplaceTime { get; set; }
+    public string? ReplaceTimeH { get; set; }
 
     /// <summary>Repair Cost (Column: Repair Cost)</summary>
     [Category("Reliability")]
@@ -211,3 +211,4 @@ public class Inverter
         return $"Inverter: {Capacitors}";
     }
 }
+

@@ -32,7 +32,7 @@ public class Relay
     /// <summary>No of Phases (Column: No of Phases)</summary>
     [Category("Electrical")]
     [Description("No of Phases")]
-    public string? NoofPhases { get; set; }
+    public string? NoOfPhases { get; set; }
 
     /// <summary>Manufacturer (Column: Manufacturer)</summary>
     [Category("Physical")]
@@ -72,12 +72,12 @@ public class Relay
     /// <summary>TCC Mom kA (Column: TCC Mom kA)</summary>
     [Category("Protection")]
     [Description("TCC Mom kA")]
-    public string? TCCMomkA { get; set; }
+    public string? TCCMomKA { get; set; }
 
     /// <summary>TCC Int kA (Column: TCC Int kA)</summary>
     [Category("Protection")]
     [Description("TCC Int kA")]
-    public string? TCCIntkA { get; set; }
+    public string? TCCIntKA { get; set; }
 
     /// <summary>TCC 30 Cyc kA (Column: TCC 30 Cyc kA)</summary>
     [Category("Protection")]
@@ -87,17 +87,17 @@ public class Relay
     /// <summary>IEC TCC Initial kA (Column: IEC TCC Initial kA)</summary>
     [Category("Protection")]
     [Description("IEC TCC Initial kA")]
-    public string? IECTCCInitialkA { get; set; }
+    public string? IECTCCInitialKA { get; set; }
 
     /// <summary>IEC TCC Breaking kA (Column: IEC TCC Breaking kA)</summary>
     [Category("Protection")]
     [Description("IEC TCC Breaking kA")]
-    public string? IECTCCBreakingkA { get; set; }
+    public string? IECTCCBreakingKA { get; set; }
 
     /// <summary>IEC TCC SS kA (Column: IEC TCC SS kA)</summary>
     [Category("Protection")]
     [Description("IEC TCC SS kA")]
-    public string? IECTCCSSkA { get; set; }
+    public string? IECTCCSSKA { get; set; }
 
     /// <summary>Tap Range (Column: Tap Range)</summary>
     [Category("Control")]
@@ -306,3 +306,4 @@ public class Relay
         return $"Relay: {Relays}";
     }
 }
+

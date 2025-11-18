@@ -32,7 +32,7 @@ public class CT
     /// <summary>No of Phases (Column: No of Phases)</summary>
     [Category("Electrical")]
     [Description("No of Phases")]
-    public string? NoofPhases { get; set; }
+    public string? NoOfPhases { get; set; }
 
     /// <summary>Item Connection (Column: Item Connection)</summary>
     [Category("General")]
@@ -57,7 +57,7 @@ public class CT
     /// <summary>No. of CTs (Column: No. of CTs)</summary>
     [Category("General")]
     [Description("No. of CTs")]
-    public string? NoofCTs { get; set; }
+    public string? NoOfCTs { get; set; }
 
     /// <summary>Full CT Ratio (Column: Full CT Ratio)</summary>
     [Category("General")]
@@ -106,3 +106,4 @@ public class CT
         return $"CT: {CTs}";
     }
 }
+
