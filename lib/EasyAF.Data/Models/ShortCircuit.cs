@@ -65,30 +65,34 @@ public class ShortCircuit
     [Description("Per-unit voltage during fault")]
     public string? Vpu { get; set; }
     
-    /// <summary>Bus base kV. (Column: Bus Base kV)</summary>
+    /// <summary>Bus base voltage. (Column: Bus Base kV)</summary>
     [Category("Study Results")]
     [Units("kV")]
-    [Description("Bus voltage level")]
+    [Description("Bus nominal voltage")]
     public string? BusBaseKV { get; set; }
     
     /// <summary>Bus number of phases. (Column: Bus No. of Phases)</summary>
     [Category("Study Results")]
     [Description("Number of phases at bus")]
-    public string? BusPhases { get; set; }
+    public string? BusNoOfPhases { get; set; }
+
+    // ========================================
+    // EQUIPMENT DETAILS
+    // ========================================
     
     /// <summary>Equipment manufacturer. (Column: Equipment Manufacturer)</summary>
     [Category("Study Results")]
     [Description("Equipment manufacturer")]
-    public string? Manufacturer { get; set; }
+    public string? EquipmentManufacturer { get; set; }
     
     /// <summary>Equipment style. (Column: Equipment Style)</summary>
     [Category("Study Results")]
-    [Description("Equipment style or model")]
-    public string? Style { get; set; }
+    [Description("Equipment model or style")]
+    public string? EquipmentStyle { get; set; }
     
     /// <summary>Test standard. (Column: Test Standard)</summary>
     [Category("Study Results")]
-    [Description("Test standard for equipment rating")]
+    [Description("Short-circuit test standard")]
     public string? TestStandard { get; set; }
     
     /// <summary>1/2 cycle rating in kA. (Column: 1/2 Cycle Rating (kA))</summary>

@@ -59,7 +59,7 @@ public class ArcFlash
     [Category("Study Results")]
     [Units("kV")]
     [Description("Bus voltage level")]
-    public string? BusKV { get; set; }
+    public string? ArcFaultBusKV { get; set; }
 
     // ========================================
     // UPSTREAM PROTECTIVE DEVICE
@@ -68,12 +68,12 @@ public class ArcFlash
     /// <summary>Upstream trip device name. (Column: Upstream Trip Device Name)</summary>
     [Category("Study Results")]
     [Description("Upstream protective device identifier")]
-    public string? UpstreamDevice { get; set; }
+    public string? UpstreamTripDeviceName { get; set; }
     
     /// <summary>Upstream trip device function. (Column: Upstream Trip Device Function)</summary>
     [Category("Study Results")]
     [Description("Upstream device trip function or element")]
-    public string? UpstreamDeviceFunction { get; set; }
+    public string? UpstreamTripDeviceFunction { get; set; }
 
     // ========================================
     // ARC FLASH PARAMETERS
@@ -103,13 +103,13 @@ public class ArcFlash
     [Category("Study Results")]
     [Units("kA")]
     [Description("Bolted short-circuit current at bus")]
-    public string? BoltedFaultKA { get; set; }
+    public string? BusBoltedFaultKA { get; set; }
     
     /// <summary>Bus arc fault current. (Column: Bus Arc Fault (kA))</summary>
     [Category("Study Results")]
     [Units("kA")]
     [Description("Arcing fault current")]
-    public string? ArcFaultKA { get; set; }
+    public string? BusArcFaultKA { get; set; }
 
     // ========================================
     // TIMING
@@ -141,13 +141,13 @@ public class ArcFlash
     [Category("Study Results")]
     [Units("in")]
     [Description("Calculated arc flash boundary distance")]
-    public string? ArcFlashBoundaryIn { get; set; }
+    public string? EstArcFlashBoundaryInches { get; set; }
     
     /// <summary>Working distance. (Column: Working Distance (inches))</summary>
     [Category("Study Results")]
     [Units("in")]
     [Description("Assumed working distance for calculation")]
-    public string? WorkingDistanceIn { get; set; }
+    public string? WorkingDistanceInches { get; set; }
     
     /// <summary>Incident energy. (Column: Incident Energy (cal/cm2))</summary>
     [Category("Study Results")]
@@ -178,6 +178,6 @@ public class ArcFlash
     /// </summary>
     public override string ToString()
     {
-        return $"ArcFaultBusName: {ArcFaultBusName}, Scenario: {Scenario}, IE: {IncidentEnergyCalPerCm2} cal/cm², AFB: {ArcFlashBoundaryIn} in";
+        return $"ArcFaultBusName: {ArcFaultBusName}, Scenario: {Scenario}, IE: {IncidentEnergyCalPerCm2} cal/cm², AFB: {EstArcFlashBoundaryInches} in";
     }
 }

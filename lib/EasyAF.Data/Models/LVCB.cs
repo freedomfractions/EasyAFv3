@@ -56,19 +56,19 @@ public class LVCB
     [Category("Electrical")]
     [Description("Number of phases (1, 2, or 3)")]
     [Required]
-    public string? Phases { get; set; }
+    public string? NoOfPhases { get; set; }
     
     /// <summary>Bus to which the breaker is connected. (Column: On Bus)</summary>
     [Category("Electrical")]
     [Description("Source bus connection")]
     [Required]
-    public string? Bus { get; set; }
+    public string? OnBus { get; set; }
     
     /// <summary>Base kV of the system. (Column: Base kV)</summary>
     [Category("Electrical")]
     [Units("kV")]
     [Description("System nominal voltage")]
-    public string? Voltage { get; set; }
+    public string? BaseKV { get; set; }
     
     /// <summary>Connection type. (Column: Conn Type)</summary>
     [Category("Electrical")]
@@ -646,7 +646,7 @@ public class LVCB
     /// </summary>
     public override string ToString()
     {
-        return $"LVBreakers: {LVBreakers}, Bus: {Bus}, Mfr: {Manufacturer}, Type: {BreakerType}, Style: {Style}, Frame: {FrameSize}, AIC: {AIC}";
+        return $"LVBreakers: {LVBreakers}, OnBus: {OnBus}, Mfr: {Manufacturer}, Type: {BreakerType}, Style: {Style}, Frame: {FrameSize}, AIC: {AIC}";
     }
 
     /// <summary>

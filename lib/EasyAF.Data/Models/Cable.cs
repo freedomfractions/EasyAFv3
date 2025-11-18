@@ -50,7 +50,7 @@ public class Cable
     /// <summary>Number of phases. (Column: No of Phases)</summary>
     [Category("Electrical")]
     [Description("Number of phases (1, 2, or 3)")]
-    public string? Phases { get; set; }
+    public string? NoOfPhases { get; set; }
 
     // ========================================
     // FROM CONNECTION

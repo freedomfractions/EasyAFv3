@@ -52,13 +52,13 @@ public class Bus
     [Units("kV")]
     [Description("Nominal voltage rating")]
     [Required]
-    public string? Voltage { get; set; }
+    public string? BaseKV { get; set; }
     
     /// <summary>Number of phases. (Column: No of Phases)</summary>
     [Category("Electrical")]
     [Description("Number of phases (1, 2, or 3)")]
     [Required]
-    public string? Phases { get; set; }
+    public string? NoOfPhases { get; set; }
     
     /// <summary>Service type designation. (Column: Service)</summary>
     [Category("Electrical")]
@@ -425,6 +425,6 @@ public class Bus
     /// </summary>
     public override string ToString()
     {
-        return $"Buses: {Buses}, Voltage: {Voltage}, Phases: {Phases}";
+        return $"Buses: {Buses}, Voltage: {BaseKV}, Phases: {NoOfPhases}";
     }
 }

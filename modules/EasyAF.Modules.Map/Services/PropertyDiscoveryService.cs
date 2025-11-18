@@ -44,11 +44,11 @@ namespace EasyAF.Modules.Map.Services
         /// </summary>
         /// <remarks>
         /// <para>
-        /// These properties are critical for specific data types:
-        /// - Bus: Buses (ID), kV (voltage rating for calculations)
-        /// - LVCB: LVBreakers (ID), BreakerType (affects protection logic)
-        /// - Fuse: Fuses (ID)
-        /// - Cable: Cables (ID)
+        /// These properties are critical for specific data types (using exact CSV column names):
+        /// - Bus: Buses (ID), BaseKV (voltage rating for calculations), NoOfPhases
+        /// - LVCB: LVBreakers (ID), OnBus, BaseKV
+        /// - Fuse: Fuses (ID), OnBus, BaseKV
+        /// - Cable: Cables (ID), NoOfPhases
         /// - ArcFlash: ArcFaultBusName (ID), Scenario (multi-scenario differentiation)
         /// - ShortCircuit: EquipmentName (ID), BusName (location), Scenario (multi-scenario)
         /// </para>
@@ -57,7 +57,7 @@ namespace EasyAF.Modules.Map.Services
         /// {
         ///   "Map": {
         ///     "RequiredProperties": {
-        ///       "Bus": ["Buses", "Name", "kV", "CustomField"]
+        ///       "Bus": ["Buses", "BaseKV", "NoOfPhases", "CustomField"]
         ///     }
         ///   }
         /// }
@@ -65,10 +65,10 @@ namespace EasyAF.Modules.Map.Services
         /// </remarks>
         private static readonly Dictionary<string, string[]> DefaultRequiredProperties = new()
         {
-            { "Bus", new[] { "Buses", "kV" } },
-            { "LVCB", new[] { "LVBreakers", "BreakerType" } },
-            { "Fuse", new[] { "Fuses" } },
-            { "Cable", new[] { "Cables" } },
+            { "Bus", new[] { "Buses", "BaseKV", "NoOfPhases" } },
+            { "LVCB", new[] { "LVBreakers", "OnBus", "BaseKV" } },
+            { "Fuse", new[] { "Fuses", "OnBus", "BaseKV" } },
+            { "Cable", new[] { "Cables", "NoOfPhases" } },
             { "ArcFlash", new[] { "ArcFaultBusName", "Scenario" } },
             { "ShortCircuit", new[] { "EquipmentName", "BusName", "Scenario" } }
         };
