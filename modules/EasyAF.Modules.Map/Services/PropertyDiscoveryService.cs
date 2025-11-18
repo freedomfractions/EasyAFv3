@@ -275,7 +275,12 @@ namespace EasyAF.Modules.Map.Services
                         Description = GetPropertyDescription(p),
                         IsRequired = requiredNames.Contains(p.Name)  // Mark as required if in the set
                     })
-                    .OrderBy(p => p.PropertyName)
+                    // CROSS-MODULE EDIT: 2025-01-18 Required Properties Float to Top
+                    // Modified for: Sort required properties to the top for visibility in map editor
+                    // Related modules: Map (DataTypeMappingView displays this list)
+                    // Rollback instructions: Remove OrderByDescending, use OrderBy(PropertyName) only
+                    .OrderByDescending(p => p.IsRequired)  // Required properties first
+                    .ThenBy(p => p.PropertyName)           // Then alphabetically
                     .ToList();
 
                 // Cache the results

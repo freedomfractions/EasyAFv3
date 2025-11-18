@@ -65,13 +65,20 @@ namespace EasyAF.Modules.Map.ViewModels
             var enabledSet = new HashSet<string>(_originalEnabledProperties);
             var isWildcard = enabledSet.Contains("*");
 
-            foreach (var propInfo in allPropsList.OrderBy(p => p.PropertyName))
+            // CROSS-MODULE EDIT: 2025-01-18 Required Properties Float to Top
+            // Modified for: Sort required properties to the top for visibility
+            // Related modules: Map (PropertyInfo.IsRequired)
+            // Rollback instructions: Remove ThenBy clause, sort by PropertyName only
+            
+            // Sort: Required properties first (descending), then by PropertyName (ascending)
+            foreach (var propInfo in allPropsList.OrderByDescending(p => p.IsRequired).ThenBy(p => p.PropertyName))
             {
                 var item = new PropertyItem
                 {
                     PropertyName = propInfo.PropertyName,
                     Description = propInfo.Description,
                     PropertyType = propInfo.PropertyType,
+                    IsRequired = propInfo.IsRequired,  // Copy required flag
                     IsEnabled = isWildcard || enabledSet.Contains(propInfo.PropertyName)
                 };
 
@@ -201,12 +208,25 @@ namespace EasyAF.Modules.Map.ViewModels
 
         private void ExecuteSelectNone()
         {
+            // CROSS-MODULE EDIT: 2025-01-18 Select None Safety - Preserve Required Properties
+            // Modified for: Keep required properties enabled when user clicks "Select None"
+            // Related modules: Map (PropertyInfo.IsRequired)
+            // Rollback instructions: Remove IsRequired check, disable all properties
+            
             foreach (var prop in Properties)
             {
-                prop.IsEnabled = false;
+                // Keep required properties enabled, disable everything else
+                if (!prop.IsRequired)
+                {
+                    prop.IsEnabled = false;
+                }
+                // Required properties remain enabled (safety feature)
             }
             RaisePropertyChanged(nameof(EnabledCount));
-            Log.Debug("Deselected all properties for {DataType}", DataTypeName);
+            
+            var requiredCount = Properties.Count(p => p.IsRequired);
+            Log.Debug("Deselected all non-required properties for {DataType} ({RequiredCount} required properties remain enabled)", 
+                DataTypeName, requiredCount);
         }
 
         private void ExecuteResetToDefaults()
@@ -312,6 +332,7 @@ namespace EasyAF.Modules.Map.ViewModels
         private string? _description;
         private string? _propertyType;
         private bool _isEnabled;
+        private bool _isRequired;
 
         /// <summary>
         /// Gets or sets the property name.
@@ -347,6 +368,21 @@ namespace EasyAF.Modules.Map.ViewModels
         {
             get => _isEnabled;
             set => SetProperty(ref _isEnabled, value);
+        }
+
+        /// <summary>
+        /// Gets or sets whether this property is required (cannot be disabled).
+        /// </summary>
+        /// <remarks>
+        /// CROSS-MODULE EDIT: 2025-01-18 Required Property Safety
+        /// Modified for: Track required state for safety features (Select None, visual indicators)
+        /// Related modules: Map (PropertyDiscoveryService marks required properties)
+        /// Rollback instructions: Remove this property
+        /// </remarks>
+        public bool IsRequired
+        {
+            get => _isRequired;
+            set => SetProperty(ref _isRequired, value);
         }
 
         /// <summary>
