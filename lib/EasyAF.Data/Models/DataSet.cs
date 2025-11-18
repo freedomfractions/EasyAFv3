@@ -23,6 +23,12 @@ namespace EasyAF.Data.Models
     /// <item><description><strong>Cable</strong> - Cable/conductor data (keyed by Id)</description></item>
     /// <item><description><strong>ArcFlash</strong> - Arc flash study results (keyed by (Id, Scenario))</description></item>
     /// <item><description><strong>ShortCircuit</strong> - Short circuit study results (keyed by (Id, Bus, Scenario))</description></item>
+    /// <item><description><strong>Transformer</strong> - Transformer data (keyed by Id)</description></item>
+    /// <item><description><strong>Motor</strong> - Motor data (keyed by Id)</description></item>
+    /// <item><description><strong>Generator</strong> - Generator data (keyed by Id)</description></item>
+    /// <item><description><strong>Utility</strong> - Utility connection data (keyed by Id)</description></item>
+    /// <item><description><strong>Capacitor</strong> - Capacitor bank data (keyed by Id)</description></item>
+    /// <item><description><strong>Load</strong> - Electrical load data (keyed by Id)</description></item>
     /// </list>
     /// <para>
     /// <strong>Dictionary Key Structures:</strong>
@@ -232,6 +238,36 @@ namespace EasyAF.Data.Models
         /// Properties include Name, Voltage, Phase configuration, and Grounding.
         /// </remarks>
         public Dictionary<string, Bus>? BusEntries { get; set; } = new Dictionary<string, Bus>();
+
+        /// <summary>
+        /// Gets or sets the dictionary of transformer entries, keyed by Id.
+        /// </summary>
+        public Dictionary<string, Transformer>? TransformerEntries { get; set; } = new Dictionary<string, Transformer>();
+
+        /// <summary>
+        /// Gets or sets the dictionary of motor entries, keyed by Id.
+        /// </summary>
+        public Dictionary<string, Motor>? MotorEntries { get; set; } = new Dictionary<string, Motor>();
+
+        /// <summary>
+        /// Gets or sets the dictionary of generator entries, keyed by Id.
+        /// </summary>
+        public Dictionary<string, Generator>? GeneratorEntries { get; set; } = new Dictionary<string, Generator>();
+
+        /// <summary>
+        /// Gets or sets the dictionary of utility connection entries, keyed by Id.
+        /// </summary>
+        public Dictionary<string, Utility>? UtilityEntries { get; set; } = new Dictionary<string, Utility>();
+
+        /// <summary>
+        /// Gets or sets the dictionary of capacitor entries, keyed by Id.
+        /// </summary>
+        public Dictionary<string, Capacitor>? CapacitorEntries { get; set; } = new Dictionary<string, Capacitor>();
+
+        /// <summary>
+        /// Gets or sets the dictionary of load entries, keyed by Id.
+        /// </summary>
+        public Dictionary<string, Load>? LoadEntries { get; set; } = new Dictionary<string, Load>();
 
         /// <summary>
         /// Produces a detailed comparison between this DataSet (old) and another DataSet (new).
