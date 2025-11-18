@@ -58,9 +58,14 @@ namespace EasyAF.Modules.Map.Models
         public bool IsCsvFile => FileExtension == ".csv";
 
         /// <summary>
-        /// Gets a composite display name combining file and table (e.g., "data.xlsx ? Sheet1").
+        /// Gets a composite display name combining file and table.
         /// </summary>
-        public string DisplayName => $"{FileName} ? {TableName}";
+        /// <remarks>
+        /// Format: "FileName | TableName" (e.g., "sample.csv | BusData")
+        /// This format is saved to .ezmap files and must be stable across systems.
+        /// Uses pipe character (|) for portability across different systems and character encodings.
+        /// </remarks>
+        public string DisplayName => $"{FileName} | {TableName}";
 
         /// <summary>
         /// Returns a string representation of this table reference.

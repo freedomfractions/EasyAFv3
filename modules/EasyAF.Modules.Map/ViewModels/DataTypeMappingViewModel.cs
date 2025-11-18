@@ -393,9 +393,10 @@ namespace EasyAF.Modules.Map.ViewModels
         /// Rollback instructions: Revert to version without enhanced logging
         /// 
         /// The saved reference is the DisplayName from TableReference, which uses format:
-        /// "FileName ? TableName" (e.g., "sample.csv ? BusData")
+        /// "FileName | TableName" (e.g., "sample.csv | BusData")
         /// 
         /// This must match EXACTLY what TableReference.DisplayName returns.
+        /// Uses simple ASCII pipe (|) character for cross-system compatibility.
         /// </remarks>
         public void RestoreTableSelection()
         {
