@@ -344,7 +344,7 @@ namespace EasyAF.Data.Models
                         EntryKey = entryKey,
                         EntryType = "ArcFlash",
                         ChangeType = ChangeType.Added,
-                        PropertyChanges = newArc[key].Diff(null)
+                        PropertyChanges = DiffUtil.DiffObjects<ArcFlash>(null, newArc[key])
                     });
                 }
                 else if (!newArc.ContainsKey(key))
@@ -354,14 +354,14 @@ namespace EasyAF.Data.Models
                         EntryKey = entryKey,
                         EntryType = "ArcFlash",
                         ChangeType = ChangeType.Removed,
-                        PropertyChanges = oldArc[key].Diff(null)
+                        PropertyChanges = DiffUtil.DiffObjects<ArcFlash>(oldArc[key], null)
                     });
                 }
                 else
                 {
                     var oldEntry = oldArc[key];
                     var newEntry = newArc[key];
-                    var changes = oldEntry.Diff(newEntry);
+                    var changes = DiffUtil.DiffObjects(oldEntry, newEntry);
                     if (changes.Count > 0)
                     {
                         diff.EntryDiffs.Add(new EntryDiff

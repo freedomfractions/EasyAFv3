@@ -68,11 +68,11 @@ namespace EasyAF.Export
                 .GroupBy(e => e.Bus!.Trim(), StringComparer.OrdinalIgnoreCase);
             foreach (var g in groups)
             {
-                // Try numeric DutyKA first
+                // Try numeric HalfCycleDutyKA first
                 ShortCircuit? numericMax = null; double maxDuty = double.MinValue;
                 foreach (var e in g)
                 {
-                    if (TryParseDutyKA(e.DutyKA, out var d))
+                    if (TryParseDutyKA(e.HalfCycleDutyKA, out var d))
                     {
                         if (d > maxDuty) { maxDuty = d; numericMax = e; }
                     }
@@ -116,16 +116,41 @@ namespace EasyAF.Export
             var dict = new Dictionary<string,string?>(StringComparer.OrdinalIgnoreCase);
             string GetSc(string name) => ScProps.TryGetValue(name, out var p) ? (Format(p.GetValue(sc)) ?? string.Empty) : string.Empty;
             // Provide raw values only; template supplies units.
-            var rawRating = SanitizeNumeric(GetSc("RatingKA"));
+            var rawRating = SanitizeNumeric(GetSc("HalfCycleRatingKA"));
             dict["ShortCircuit.Id"] = GetSc("Id");
-            dict["ShortCircuit.RatingKA"] = RoundWhole(rawRating);
-            dict["ShortCircuit.DutyKA"] = SanitizeNumeric(GetSc("DutyKA"));
+            dict["ShortCircuit.RatingKA"] = RoundWhole(rawRating); // legacy tag for backward compatibility
+            dict["ShortCircuit.HalfCycleRatingKA"] = RoundWhole(rawRating);
+            dict["ShortCircuit.DutyKA"] = SanitizeNumeric(GetSc("HalfCycleDutyKA")); // legacy tag
+            dict["ShortCircuit.HalfCycleDutyKA"] = SanitizeNumeric(GetSc("HalfCycleDutyKA"));
+            dict["ShortCircuit.DutyPercent"] = GetSc("HalfCycleDutyPercent"); // legacy tag
+            dict["ShortCircuit.HalfCycleDutyPercent"] = GetSc("HalfCycleDutyPercent");
+            
+            // Add all other properties
+            foreach (var prop in ScProps.Values)
+            {
+                var tag = $"ShortCircuit.{prop.Name}";
+                if (!dict.ContainsKey(tag))
+                {
+                    dict[tag] = Format(prop.GetValue(sc));
+                }
+            }
+            
             if (project != null)
             {
                 var globalFmt = GlobalSettings.Current.DateFormat;
                 var effectiveFmt = string.IsNullOrWhiteSpace(project.PreferredDateFormat) ? globalFmt : project.PreferredDateFormat;
                 var formattedStudy = string.IsNullOrWhiteSpace(effectiveFmt) ? project.StudyDate : project.StudyDate; // TODO: Apply format
                 dict["Project.StudyDate"] = formattedStudy;
+                
+                // Add all other project properties
+                foreach (var prop in ProjectProps.Values)
+                {
+                    var tag = $"Project.{prop.Name}";
+                    if (!dict.ContainsKey(tag) && prop.PropertyType != typeof(DataSet))
+                    {
+                        dict[tag] = Format(prop.GetValue(project));
+                    }
+                }
             }
             return dict;
         }
