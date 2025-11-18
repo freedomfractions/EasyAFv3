@@ -1098,9 +1098,18 @@ namespace EasyAF.Modules.Map.ViewModels
                 // Get default properties (use wildcard "*" as default)
                 var defaultProperties = new List<string> { "*" };
 
+                // CROSS-MODULE EDIT: 2025-01-18 Property Selector Friendly Names
+                // Modified for: Pass friendly data type description to property selector dialog
+                // Related modules: Map (PropertyDiscoveryService.GetDataTypeDescription, PropertySelectorViewModel)
+                // Rollback instructions: Remove dataTypeDisplayName parameter, revert to old constructor
+                
+                // Get the friendly display name for this data type (e.g., "LV Breakers" instead of "LVBreaker")
+                var dataTypeDisplayName = _propertyDiscovery.GetDataTypeDescription(_dataType);
+
                 // Create and show dialog
                 var viewModel = new PropertySelectorViewModel(
                     _dataType,
+                    dataTypeDisplayName,  // Pass friendly name
                     allProperties,
                     enabledProperties,
                     defaultProperties);

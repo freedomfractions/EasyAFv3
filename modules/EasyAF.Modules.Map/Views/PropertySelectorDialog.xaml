@@ -1,7 +1,7 @@
 <Window x:Class="EasyAF.Modules.Map.Views.PropertySelectorDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="{Binding DataTypeName, StringFormat='Configure {0} Properties'}"
+        Title="{Binding DataTypeDisplayName, StringFormat='Configure {0} Properties'}"
         Width="500" Height="600"
         MinWidth="400" MinHeight="500"
         WindowStartupLocation="CenterOwner"
@@ -114,16 +114,35 @@
                                   Foreground="{DynamicResource TextPrimaryBrush}">
                             <CheckBox.Content>
                                 <StackPanel Margin="4,0">
-                                    <!-- Property Name -->
-                                    <TextBlock Text="{Binding PropertyName}"
-                                               FontWeight="SemiBold"
-                                               Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                    <!-- CROSS-MODULE EDIT: 2025-01-18 Property Selector Friendly Names -->
+                                    <!-- Modified for: Display friendly Description first, PropertyName second -->
+                                    <!-- Related modules: Map (PropertyDiscoveryService extracts Description from [Description] attribute) -->
+                                    <!-- Rollback instructions: Swap order back (PropertyName first, Description second) -->
                                     
-                                    <!-- Property Description (if available) -->
-                                    <TextBlock Text="{Binding Description}"
-                                               FontSize="11"
+                                    <!-- Primary Display: Description (friendly name) -->
+                                    <TextBlock FontWeight="SemiBold"
+                                               Foreground="{DynamicResource TextPrimaryBrush}">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <!-- Default: show Description -->
+                                                <Setter Property="Text" Value="{Binding Description}"/>
+                                                <Style.Triggers>
+                                                    <!-- Fallback to PropertyName if Description is missing -->
+                                                    <DataTrigger Binding="{Binding Description}" Value="{x:Null}">
+                                                        <Setter Property="Text" Value="{Binding PropertyName}"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Description}" Value="">
+                                                        <Setter Property="Text" Value="{Binding PropertyName}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                    
+                                    <!-- Secondary Display: PropertyName (C# property name) - only if Description exists -->
+                                    <TextBlock Text="{Binding PropertyName}"
+                                               FontSize="10"
                                                Foreground="{DynamicResource TextSecondaryBrush}"
-                                               TextWrapping="Wrap"
                                                Margin="0,2,0,0"
                                                Visibility="{Binding HasDescription, Converter={StaticResource BoolToVisibilityConverter}}"/>
                                 </StackPanel>

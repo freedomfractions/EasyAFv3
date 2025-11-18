@@ -31,6 +31,7 @@ namespace EasyAF.Modules.Map.ViewModels
     public class PropertySelectorViewModel : BindableBase
     {
         private string _dataTypeName;
+        private string _dataTypeDisplayName;
         private string _searchText = string.Empty;
         private readonly List<string> _originalEnabledProperties;
         private readonly List<string> _defaultEnabledProperties;
@@ -39,16 +40,19 @@ namespace EasyAF.Modules.Map.ViewModels
         /// Initializes a new instance of the PropertySelectorViewModel.
         /// </summary>
         /// <param name="dataTypeName">The name of the data type being configured.</param>
+        /// <param name="dataTypeDisplayName">The friendly display name for the data type.</param>
         /// <param name="allProperties">All available properties for this data type (with descriptions).</param>
         /// <param name="enabledPropertyNames">Currently enabled property names.</param>
         /// <param name="defaultPropertyNames">Default enabled property names (for reset).</param>
         public PropertySelectorViewModel(
             string dataTypeName,
+            string dataTypeDisplayName,
             IEnumerable<MapPropertyInfo> allProperties,
             IEnumerable<string> enabledPropertyNames,
             IEnumerable<string>? defaultPropertyNames = null)
         {
             _dataTypeName = dataTypeName ?? throw new ArgumentNullException(nameof(dataTypeName));
+            _dataTypeDisplayName = dataTypeDisplayName ?? dataTypeName;
             
             // Store original state for cancel operation
             _originalEnabledProperties = enabledPropertyNames?.ToList() ?? new List<string>();
@@ -95,12 +99,21 @@ namespace EasyAF.Modules.Map.ViewModels
         #region Properties
 
         /// <summary>
-        /// Gets the data type name being configured.
+        /// Gets the data type name being configured (internal class name).
         /// </summary>
         public string DataTypeName
         {
             get => _dataTypeName;
             set => SetProperty(ref _dataTypeName, value);
+        }
+
+        /// <summary>
+        /// Gets the friendly display name for the data type (e.g., "LV Breakers" instead of "LVBreaker").
+        /// </summary>
+        public string DataTypeDisplayName
+        {
+            get => _dataTypeDisplayName;
+            set => SetProperty(ref _dataTypeDisplayName, value);
         }
 
         /// <summary>
@@ -264,10 +277,6 @@ namespace EasyAF.Modules.Map.ViewModels
         /// </summary>
         private void OnPropertyItemChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(PropertyItem.IsEnabled))
-            {
-                RaisePropertyChanged(nameof(EnabledCount));
-            }
         }
 
         #endregion

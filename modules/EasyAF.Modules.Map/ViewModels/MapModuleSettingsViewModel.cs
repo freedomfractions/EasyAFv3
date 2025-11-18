@@ -152,11 +152,17 @@ namespace EasyAF.Modules.Map.ViewModels
                 // Get all properties with descriptions
                 var allPropertiesWithInfo = _propertyDiscovery.GetAllPropertiesForType(item.DataTypeName);
 
+                // CROSS-MODULE EDIT: 2025-01-18 Property Selector Friendly Names
+                // Modified for: Pass friendly display name and correct parameter order
+                // Related modules: Map (PropertySelectorViewModel constructor now takes dataTypeName AND dataTypeDisplayName)
+                // Rollback instructions: Revert to old constructor signature (3 parameters instead of 4)
+                
                 var viewModel = new PropertySelectorViewModel(
-                    item.DataTypeDisplayName, // NEW: Use display name for dialog title
-                    allPropertiesWithInfo,  // Pass full PropertyInfo objects with descriptions
-                    item.EnabledProperties,
-                    defaultProperties);
+                    item.DataTypeName,           // Internal name (e.g., "LVBreaker")
+                    item.DataTypeDisplayName,    // Friendly name (e.g., "LV Breakers")
+                    allPropertiesWithInfo,       // Full PropertyInfo objects with descriptions
+                    item.EnabledProperties,      // Currently enabled property names
+                    defaultProperties);          // Default properties (wildcard)
 
                 var dialog = new PropertySelectorDialog
                 {
