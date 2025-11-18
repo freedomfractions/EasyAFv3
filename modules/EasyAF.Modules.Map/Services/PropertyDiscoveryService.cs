@@ -375,13 +375,34 @@ namespace EasyAF.Modules.Map.Services
         }
 
         /// <summary>
-        /// Gets a description for a property (placeholder for future attributes).
+        /// Gets a description for a property from its [Description] attribute.
         /// </summary>
+        /// <param name="property">The property to get the description for.</param>
+        /// <returns>The description from the [Description] attribute, or null if not present.</returns>
         private string? GetPropertyDescription(System.Reflection.PropertyInfo property)
         {
-            // Future enhancement: Read from [Description] attribute if present
-            // For now, return null (no descriptions available)
-            return null;
+            // CROSS-MODULE EDIT: 2025-01-18 Property Description Extraction
+            // Modified for: Read [Description] attribute from model properties
+            // Related modules: Data (all model classes with [Description] attributes)
+            // Rollback instructions: Return null (placeholder implementation)
+            
+            try
+            {
+                // Try to get the [Description] attribute from the property
+                var descriptionAttr = property.GetCustomAttribute<DescriptionAttribute>();
+                if (descriptionAttr != null && !string.IsNullOrWhiteSpace(descriptionAttr.Description))
+                {
+                    return descriptionAttr.Description;
+                }
+
+                // Fallback: No description attribute found
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Failed to extract description for property {PropertyName}", property.Name);
+                return null;
+            }
         }
 
         /// <summary>
