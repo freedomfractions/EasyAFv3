@@ -23,10 +23,23 @@
         <TextBlock Grid.Row="1"
                    TextWrapping="Wrap"
                    Foreground="{DynamicResource TextSecondaryBrush}"
-                   Margin="0,0,0,16">
+                   Margin="0,0,0,8">
             <Run Text="Control which data types and properties are available in the Map Editor."/>
             <LineBreak/>
             <Run Text="Unchecked data types will not appear as tabs. Click 'Properties...' to configure which properties are available for mapping."/>
+        </TextBlock>
+        
+        <!-- Data Type Count -->
+        <TextBlock Grid.Row="1"
+                   HorizontalAlignment="Right"
+                   VerticalAlignment="Bottom"
+                   Foreground="{DynamicResource TextSecondaryBrush}"
+                   FontSize="12"
+                   Margin="0,0,0,8">
+            <Run Text="{Binding EnabledCount, Mode=OneWay}" FontWeight="SemiBold"/>
+            <Run Text="of"/>
+            <Run Text="{Binding TotalCount, Mode=OneWay}" FontWeight="SemiBold"/>
+            <Run Text="data types enabled"/>
         </TextBlock>
         
         <!-- Data Types Grid -->

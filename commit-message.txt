@@ -1,0 +1,27 @@
+feat: Add user-friendly display names throughout Map Editor UI
+
+Add GetDataTypeDescription() to PropertyDiscoveryService
+  - Loads [EasyPowerClass] attributes at startup
+  - Returns friendly names (e.g., 'Buses' instead of 'Bus')
+  - Graceful fallback to class name if attribute missing
+
+Update all Map Editor UI to use display names:
+  - Tab headers: Show 'Buses', 'LV Breakers' instead of raw class names
+  - Settings grid: Display 'Arc Flash Scenario Report' vs 'ArcFlash'
+  - Property selector dialog: Use friendly names in title
+  - GroupBox headers: 'Target Properties (Buses)' vs 'Bus'
+  - Summary statistics: User-friendly equipment type names
+
+Add DisplayName properties across ViewModels:
+  - TabHeaderInfo.DisplayName
+  - DataTypeItem.DataTypeDisplayName
+  - DataTypeMappingViewModel.DataTypeDisplayName
+  - DataTypePropertySummary.TypeDisplayName
+
+Maintain separation of concerns:
+  - Internal logic uses raw class names (Bus, LVBreaker)
+  - UI displays user-friendly names from attributes
+  - No breaking changes to data structures or settings
+
+Improves UX by showing human-readable equipment type names everywhere
+instead of technical class names.

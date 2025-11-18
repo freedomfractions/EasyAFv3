@@ -31,6 +31,7 @@ namespace EasyAF.Modules.Map.ViewModels
     {
         private readonly ISettingsService _settingsService;
         private readonly Services.IPropertyDiscoveryService _propertyDiscovery;
+        private readonly IUserDialogService _dialogService; // NEW: For confirmation dialogs
         private DataTypeVisibilitySettings _settings;
 
         /// <summary>
@@ -38,12 +39,15 @@ namespace EasyAF.Modules.Map.ViewModels
         /// </summary>
         /// <param name="settingsService">Service for accessing application settings.</param>
         /// <param name="propertyDiscovery">Service for discovering data type properties.</param>
+        /// <param name="dialogService">Service for showing user dialogs.</param>
         public MapModuleSettingsViewModel(
             ISettingsService settingsService,
-            Services.IPropertyDiscoveryService propertyDiscovery)
+            Services.IPropertyDiscoveryService propertyDiscovery,
+            IUserDialogService dialogService)
         {
             _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
             _propertyDiscovery = propertyDiscovery ?? throw new ArgumentNullException(nameof(propertyDiscovery));
+            _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
 
             // Load current settings
             _settings = _settingsService.GetMapVisibilitySettings();
@@ -65,6 +69,16 @@ namespace EasyAF.Modules.Map.ViewModels
         /// Gets the collection of data type configuration items.
         /// </summary>
         public ObservableCollection<DataTypeItem> DataTypes { get; }
+
+        /// <summary>
+        /// Gets the count of enabled data types.
+        /// </summary>
+        public int EnabledCount => DataTypes.Count(dt => dt.IsEnabled);
+
+        /// <summary>
+        /// Gets the total count of data types.
+        /// </summary>
+        public int TotalCount => DataTypes.Count;
 
         #endregion
 
@@ -168,27 +182,92 @@ namespace EasyAF.Modules.Map.ViewModels
             }
         }
 
+        /// <summary>
+        /// Executes the reset to defaults command.
+        /// </summary>
+        /// <remarks>
+        /// Prompts the user for confirmation before resetting all data types to wildcard mode.
+        /// This ensures accidental resets don't lose custom property configurations.
+        /// </remarks>
         private void ExecuteResetToDefaults()
         {
-            // Reset all data types to: Enabled=true, EnabledProperties=["*"]
-            foreach (var item in DataTypes)
+            // CROSS-MODULE EDIT: 2025-01-17 Reset to Defaults Confirmation
+            // Modified for: Add confirmation dialog to prevent accidental resets
+            // Related modules: Core (IUserDialogService)
+            // Rollback instructions: Remove confirmation dialog logic
+            
+            // Count how many data types will be affected
+            var disabledCount = DataTypes.Count(dt => !dt.IsEnabled);
+            var customPropertiesCount = DataTypes.Count(dt => 
+                dt.EnabledProperties != null && 
+                dt.EnabledProperties.Count > 0 && 
+                !dt.EnabledProperties.Contains("*"));
+
+            // Build confirmation message
+            var message = "Reset all data types to default configuration?\n\n" +
+                         "This will:\n" +
+                         $"• Enable all {TotalCount} data types\n" +
+                         $"• Reset all properties to wildcard mode (*)\n";
+
+            if (customPropertiesCount > 0)
             {
-                item.IsEnabled = true;
-                item.EnabledProperties = new List<string> { "*" };
-                item.EnabledPropertiesCount = item.TotalPropertiesCount;
+                message += $"\nThis will affect {customPropertiesCount} data type(s) with custom property selections.\n";
             }
 
-            Log.Information("Reset all Map module settings to defaults");
+            message += "\nThis action cannot be undone.";
+
+            // Show confirmation dialog
+            var confirmed = _dialogService.Confirm(message, "Reset to Defaults?");
+            if (!confirmed)
+            {
+                Log.Debug("User canceled reset to defaults");
+                return; // User canceled
+            }
+
+            try
+            {
+                Log.Information("Resetting {Count} data types to defaults", DataTypes.Count);
+
+                // Reset all data types
+                foreach (var dataType in DataTypes)
+                {
+                    dataType.IsEnabled = true;
+                    dataType.EnabledProperties = new List<string> { "*" };
+                    dataType.EnabledPropertiesCount = dataType.AllProperties?.Count ?? 0;
+                }
+
+                // Update counts
+                RaisePropertyChanged(nameof(EnabledCount));
+                RaisePropertyChanged(nameof(TotalCount));
+
+                Log.Information("Reset to defaults complete");
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error resetting to defaults");
+            }
         }
 
         #endregion
 
         #region Event Handlers
 
+        /// <summary>
+        /// Handles property changes on individual DataTypeItem instances.
+        /// </summary>
+        /// <param name="sender">The DataTypeItem that changed.</param>
+        /// <param name="e">Event args containing the property name.</param>
         private void OnDataTypeItemChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            // No action needed here - changes are tracked automatically
-            // Settings will be saved when user clicks OK in Options dialog
+            if (e.PropertyName == nameof(DataTypeItem.IsEnabled))
+            {
+                // Enabled state changed - update counts
+                RaisePropertyChanged(nameof(EnabledCount));
+                RaisePropertyChanged(nameof(TotalCount));
+                
+                Log.Debug("Data type enabled state changed: {EnabledCount}/{TotalCount} enabled", 
+                    EnabledCount, TotalCount);
+            }
         }
 
         #endregion
