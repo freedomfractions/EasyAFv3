@@ -62,15 +62,31 @@ namespace EasyAF.Core.Services
                 };
             }
 
-            // Case-insensitive exact match (95% confidence)
+            // Case-insensitive exact match (98% confidence - boosted from 95% for CSV column priority)
+            // This is critical for matching CSV column names like "LV Breakers" to property "LVBreakers"
             if (!caseSensitive && string.Equals(source, target, StringComparison.OrdinalIgnoreCase))
             {
                 return new FuzzyMatchResult
                 {
                     Source = source,
                     Target = target,
-                    Score = 0.95,
+                    Score = 0.98,
                     Reason = MatchReason.CaseInsensitive
+                };
+            }
+
+            // Normalized exact match (96% confidence) - NEW for CSV column matching
+            // Handles "LV Breakers" ? "LVBreakers", "Fuses" ? "fuses", etc.
+            var normalizedSource = NormalizeColumnName(source);
+            var normalizedTarget = NormalizeColumnName(target);
+            if (normalizedSource == normalizedTarget)
+            {
+                return new FuzzyMatchResult
+                {
+                    Source = source,
+                    Target = target,
+                    Score = 0.96,
+                    Reason = MatchReason.Normalized
                 };
             }
 
@@ -106,6 +122,21 @@ namespace EasyAF.Core.Services
                 Score = hybridScore,
                 Reason = reason
             };
+        }
+
+        /// <summary>
+        /// Normalizes a column/property name for matching by removing spaces, underscores, and converting to lowercase.
+        /// This helps match CSV column names like "LV Breakers" to property names like "LVBreakers".
+        /// </summary>
+        /// <param name="name">The name to normalize.</param>
+        /// <returns>Normalized name (lowercase, no spaces/underscores/dashes).</returns>
+        private static string NormalizeColumnName(string name)
+        {
+            return name.Replace(" ", "")
+                       .Replace("_", "")
+                       .Replace("-", "")
+                       .Replace("/", "")
+                       .ToLowerInvariant();
         }
 
         /// <summary>

@@ -14,9 +14,15 @@ namespace EasyAF.Core.Models
         Exact,
 
         /// <summary>
-        /// Case-insensitive exact match (95% confidence).
+        /// Case-insensitive exact match (98% confidence).
         /// </summary>
         CaseInsensitive,
+
+        /// <summary>
+        /// Normalized match - spaces, underscores, and case ignored (96% confidence).
+        /// Critical for matching CSV column names like "LV Breakers" to property "LVBreakers".
+        /// </summary>
+        Normalized,
 
         /// <summary>
         /// Fuzzy match using Levenshtein distance algorithm.
