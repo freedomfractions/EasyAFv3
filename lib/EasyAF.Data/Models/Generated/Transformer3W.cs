@@ -47,7 +47,7 @@ public class Transformer3W
     /// <summary>Pri Base kV (Column: Pri Base kV)</summary>
     [Category("Electrical")]
     [Description("Pri Base kV")]
-    public string? PriBasekV { get; set; }
+    public string? PriBaseKV { get; set; }
 
     /// <summary>Pri Conn (Column: Pri Conn)</summary>
     [Category("General")]
@@ -72,7 +72,7 @@ public class Transformer3W
     /// <summary>Sec Base kV (Column: Sec Base kV)</summary>
     [Category("Electrical")]
     [Description("Sec Base kV")]
-    public string? SecBasekV { get; set; }
+    public string? SecBaseKV { get; set; }
 
     /// <summary>Sec Conn (Column: Sec Conn)</summary>
     [Category("General")]
@@ -97,7 +97,7 @@ public class Transformer3W
     /// <summary>Ter Base kV (Column: Ter Base kV)</summary>
     [Category("Electrical")]
     [Description("Ter Base kV")]
-    public string? TerBasekV { get; set; }
+    public string? TerBaseKV { get; set; }
 
     /// <summary>Ter Conn (Column: Ter Conn)</summary>
     [Category("General")]
@@ -132,12 +132,12 @@ public class Transformer3W
     /// <summary>Pri Nom kV (Column: Pri Nom kV)</summary>
     [Category("Electrical")]
     [Description("Pri Nom kV")]
-    public string? PriNomkV { get; set; }
+    public string? PriNomKV { get; set; }
 
     /// <summary>Pri Tap kV (Column: Pri Tap kV)</summary>
     [Category("Electrical")]
     [Description("Pri Tap kV")]
-    public string? PriTapkV { get; set; }
+    public string? PriTapKV { get; set; }
 
     /// <summary>Pri MVA (Column: Pri MVA)</summary>
     [Category("General")]
@@ -169,12 +169,12 @@ public class Transformer3W
     /// <summary>Sec Nom kV (Column: Sec Nom kV)</summary>
     [Category("Electrical")]
     [Description("Sec Nom kV")]
-    public string? SecNomkV { get; set; }
+    public string? SecNomKV { get; set; }
 
     /// <summary>Sec Tap kV (Column: Sec Tap kV)</summary>
     [Category("Electrical")]
     [Description("Sec Tap kV")]
-    public string? SecTapkV { get; set; }
+    public string? SecTapKV { get; set; }
 
     /// <summary>Sec MVA (Column: Sec MVA)</summary>
     [Category("General")]
@@ -206,12 +206,12 @@ public class Transformer3W
     /// <summary>Ter Nom kV (Column: Ter Nom kV)</summary>
     [Category("Electrical")]
     [Description("Ter Nom kV")]
-    public string? TerNomkV { get; set; }
+    public string? TerNomKV { get; set; }
 
     /// <summary>Ter Tap kV (Column: Ter Tap kV)</summary>
     [Category("Electrical")]
     [Description("Ter Tap kV")]
-    public string? TerTapkV { get; set; }
+    public string? TerTapKV { get; set; }
 
     /// <summary>Ter MVA (Column: Ter MVA)</summary>
     [Category("General")]
@@ -703,4 +703,5 @@ public class Transformer3W
         return $"Transformer3W: {Transformers3W}";
     }
 }
+
 

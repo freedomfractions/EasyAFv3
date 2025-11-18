@@ -168,32 +168,32 @@ public class TransmissionLine
     /// <summary>R1 pu (Column: R1 pu)</summary>
     [Category("General")]
     [Description("R1 pu")]
-    public string? R1pu { get; set; }
+    public string? R1Pu { get; set; }
 
     /// <summary>X1 pu (Column: X1 pu)</summary>
     [Category("General")]
     [Description("X1 pu")]
-    public string? X1pu { get; set; }
+    public string? X1Pu { get; set; }
 
     /// <summary>R0 pu (Column: R0 pu)</summary>
     [Category("General")]
     [Description("R0 pu")]
-    public string? R0pu { get; set; }
+    public string? R0Pu { get; set; }
 
     /// <summary>X0 pu (Column: X0 pu)</summary>
     [Category("General")]
     [Description("X0 pu")]
-    public string? X0pu { get; set; }
+    public string? X0Pu { get; set; }
 
     /// <summary>B1 pu (Column: B1 pu)</summary>
     [Category("General")]
     [Description("B1 pu")]
-    public string? B1pu { get; set; }
+    public string? B1Pu { get; set; }
 
     /// <summary>B0 pu (Column: B0 pu)</summary>
     [Category("General")]
     [Description("B0 pu")]
-    public string? B0pu { get; set; }
+    public string? B0Pu { get; set; }
 
     /// <summary>IEC Field Temp (Column: IEC Field Temp (C))</summary>
     [Category("General")]
@@ -350,4 +350,5 @@ public class TransmissionLine
         return $"TransmissionLine: {TransmissionLines}";
     }
 }
+
 
