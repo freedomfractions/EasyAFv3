@@ -119,25 +119,37 @@
                                     <!-- Related modules: Map (PropertyDiscoveryService extracts Description from [Description] attribute) -->
                                     <!-- Rollback instructions: Swap order back (PropertyName first, Description second) -->
                                     
-                                    <!-- Primary Display: Description (friendly name) -->
-                                    <TextBlock FontWeight="SemiBold"
-                                               Foreground="{DynamicResource TextPrimaryBrush}">
-                                        <TextBlock.Style>
-                                            <Style TargetType="TextBlock">
-                                                <!-- Default: show Description -->
-                                                <Setter Property="Text" Value="{Binding Description}"/>
-                                                <Style.Triggers>
-                                                    <!-- Fallback to PropertyName if Description is missing -->
-                                                    <DataTrigger Binding="{Binding Description}" Value="{x:Null}">
-                                                        <Setter Property="Text" Value="{Binding PropertyName}"/>
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding Description}" Value="">
-                                                        <Setter Property="Text" Value="{Binding PropertyName}"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBlock.Style>
-                                    </TextBlock>
+                                    <!-- Primary Display: Description (friendly name) with required indicator -->
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource TextPrimaryBrush}">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <!-- Default: show Description -->
+                                                    <Setter Property="Text" Value="{Binding Description}"/>
+                                                    <Style.Triggers>
+                                                        <!-- Fallback to PropertyName if Description is missing -->
+                                                        <DataTrigger Binding="{Binding Description}" Value="{x:Null}">
+                                                            <Setter Property="Text" Value="{Binding PropertyName}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Description}" Value="">
+                                                            <Setter Property="Text" Value="{Binding PropertyName}"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                        
+                                        <!-- CROSS-MODULE EDIT: 2025-01-18 Required Property Visual Indicator -->
+                                        <!-- Modified for: Add red asterisk (*) for required properties (matching map editor) -->
+                                        <!-- Related modules: Map (PropertyInfo.IsRequired, PropertyDiscoveryService) -->
+                                        <!-- Rollback instructions: Remove this TextBlock with asterisk -->
+                                        <TextBlock Text=" *"
+                                                   FontWeight="Bold"
+                                                   Foreground="Red"
+                                                   Visibility="{Binding IsRequired, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                   ToolTip="This property is required for a valid mapping configuration"/>
+                                    </StackPanel>
                                     
                                     <!-- Secondary Display: PropertyName (C# property name) - only if Description exists -->
                                     <TextBlock Text="{Binding PropertyName}"
