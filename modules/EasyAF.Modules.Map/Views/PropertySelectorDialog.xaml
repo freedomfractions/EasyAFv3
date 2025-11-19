@@ -109,9 +109,24 @@
                      ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
+                        <!-- CROSS-MODULE EDIT: 2025-01-18 Required Properties Locked -->
+                        <!-- Modified for: Disable checkboxes for required properties (cannot be unchecked) -->
+                        <!-- Related modules: Map (PropertyItem.IsRequired) -->
+                        <!-- Rollback instructions: Remove IsEnabled binding -->
                         <CheckBox IsChecked="{Binding IsEnabled}"
                                   Margin="4,4"
                                   Foreground="{DynamicResource TextPrimaryBrush}">
+                            <CheckBox.Style>
+                                <Style TargetType="CheckBox">
+                                    <Style.Triggers>
+                                        <!-- Disable checkbox for required properties (they must stay enabled) -->
+                                        <DataTrigger Binding="{Binding IsRequired}" Value="True">
+                                            <Setter Property="IsEnabled" Value="False"/>
+                                            <Setter Property="ToolTip" Value="This property is required and cannot be disabled"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </CheckBox.Style>
                             <CheckBox.Content>
                                 <StackPanel Margin="4,0">
                                     <!-- CROSS-MODULE EDIT: 2025-01-18 Property Selector Friendly Names -->

@@ -79,7 +79,11 @@ namespace EasyAF.Modules.Map.ViewModels
                     Description = propInfo.Description,
                     PropertyType = propInfo.PropertyType,
                     IsRequired = propInfo.IsRequired,  // Copy required flag
-                    IsEnabled = isWildcard || enabledSet.Contains(propInfo.PropertyName)
+                    // CROSS-MODULE EDIT: 2025-01-18 Required Properties Always Enabled
+                    // Modified for: Force required properties to be enabled (locked in UI)
+                    // Related modules: Map (PropertySelectorDialog.xaml disables checkboxes for required)
+                    // Rollback instructions: Remove special case for required properties
+                    IsEnabled = propInfo.IsRequired || isWildcard || enabledSet.Contains(propInfo.PropertyName)
                 };
 
                 // Subscribe to property changes to update EnabledCount
