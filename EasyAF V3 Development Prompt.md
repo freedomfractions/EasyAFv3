@@ -342,6 +342,115 @@ Next Task: [What should be worked on next]
 **NOTE: Newest entries appear at the top**
 
 ```
+Date: 2025-01-20T11:45:00-06:00
+Task: Task 20 - Build Project Overview Tab
+Status: Complete
+Blocking Issue: None
+Cross-Module Edits:
+- modules/EasyAF.Modules.Project/ViewModels/ProjectDocumentViewModel.cs: Main coordinator
+- modules/EasyAF.Modules.Project/ViewModels/ProjectSummaryViewModel.cs: Summary tab VM
+- modules/EasyAF.Modules.Project/Views/ProjectDocumentView.xaml: TabControl view
+- modules/EasyAF.Modules.Project/Views/ProjectSummaryView.xaml: Metadata + statistics view
+- modules/EasyAF.Modules.Project/Models/ProjectDocument.cs: Added ViewModel property
+- modules/EasyAF.Modules.Project/ProjectModule.cs: ViewModel wiring
+- modules/EasyAF.Modules.Project/EasyAF.Modules.Project.csproj: Added UseWindowsForms
+Notes:
+✅ COMPLETE: Project Summary tab with exact stopgap layout
+
+VIEWMODELS CREATED:
+1. ProjectDocumentViewModel (Coordinator)
+   - Manages tab collection (Summary + future data tabs)
+   - Tab selection/activation
+   - Document-level state
+   - Implements IDisposable
+   - TabHeaderInfo class for tab metadata
+
+2. ProjectSummaryViewModel
+   - 12 metadata properties (2-way binding to Project.*)
+   - 4 file path properties (Map, Spec, Template, Output)
+   - 10 statistics properties (New/Old data counts)
+   - 6 commands (Add/Remove files, Browse Map/Spec/Template/Output)
+   - RefreshStatistics() method (manual, since Project doesn't impl INotifyPropertyChanged)
+   - Implements IDisposable
+
+VIEWS CREATED:
+1. ProjectDocumentView.xaml
+   - TabControl bound to TabHeaders collection
+   - ContentControl with DataTemplate mapping
+   - ViewModel → View mapping (ProjectSummaryViewModel → ProjectSummaryView)
+   - Theme-compliant (DynamicResource bindings)
+
+2. ProjectSummaryView.xaml
+   - EXACT STOPGAP LAYOUT (two-column Grid)
+   - LEFT COLUMN:
+     * Project GroupBox (metadata 8-row Grid)
+     * Report GroupBox (Map/Spec/Template/Output paths)
+   - RIGHT COLUMN:
+     * Project Summary GroupBox (New/Old data statistics)
+   - All theme brush bindings
+   - Zero code-behind logic
+
+METADATA FIELDS (exact stopgap layout):
+Row 0: LB Project Number (140px) | Site Name (*)
+Row 1: Client | Study Engineer
+Row 2: Address Line 1 (spans 3 columns)
+Row 3: Address Line 2 (spans 3 columns)
+Row 4: Address Line 3 (spans 3 columns)
+Row 5: City | State (40px, 2 char) | Zip (80px, 5 digit)
+Row 6: Study Date | Revision Month
+Row 7: Comments (multiline, 80px height, spans 3 columns)
+
+REPORT SECTION:
+- Map path + Browse button
+- Spec path + Browse button
+- Template path + Browse button
+- Output folder + Browse button (FolderBrowserDialog)
+
+STATISTICS (right column):
+New Data:
+- Buses, Breakers, Fuses, Short Circuit, Arc Flash
+
+Old Data:
+- Buses, Breakers, Fuses, Short Circuit, Arc Flash
+
+MVVM COMPLIANCE:
+✅ Zero code-behind logic (only InitializeComponent)
+✅ All logic in ViewModels
+✅ Commands for all interactions
+✅ 2-way property bindings with UpdateSourceTrigger=PropertyChanged
+✅ IsDirty tracking (manual via MarkDirty())
+
+THEME COMPLIANCE:
+✅ All brushes use DynamicResource
+✅ GroupBox borders use ControlBorderBrush
+✅ TextBlocks use TextPrimaryBrush/TextSecondaryBrush
+✅ No hard-coded colors
+
+PROJECT INTEGRATION:
+- ProjectModule.CreateNewDocument() creates ProjectDocumentViewModel
+- ProjectModule.OpenDocument() creates ProjectDocumentViewModel
+- ProjectDocument.ViewModel property stores VM for shell rendering
+- Shell's DataTemplate system will render view based on ViewModel type
+
+DEFERRED TO TASK 21:
+- File import functionality (CSV/Excel → DataSet)
+- Dynamic data type tabs
+- DiffGrid control integration
+
+BUILD STATUS: ✅ Successful compilation (0 errors, 0 warnings)
+
+ARCHITECTURE NOTES:
+- Same pattern as Map Module (proven successful)
+- Project class doesn't impl INotifyPropertyChanged (manual MarkDirty)
+- ViewModels bind directly to Project.* properties
+- Statistics refresh is manual (called after import operations)
+- UseWindowsForms enabled for FolderBrowserDialog
+
+Next Task: Task 21 - Create Dynamic Data Tabs (DiffGrid integration)
+Rollback Instructions: Remove ViewModels/, Views/ files; remove ViewModel property from ProjectDocument
+```
+
+```
 Date: 2025-01-20T10:20:00-06:00
 Task: Task 18 & 19 - Project Module Structure and Data Model
 Status: Complete
@@ -438,112 +547,6 @@ READY FOR NEXT STEPS:
 
 Next Task: Task 20 - Build Project Overview Tab (Summary with metadata + file management)
 Rollback Instructions: Remove modules/EasyAF.Modules.Project/ folder and remove from EasyAFv3.sln
-```
-
-```
-Date: 2025-01-20T00:30:00-06:00
-Task: Phase 4 Preparation - DiffGrid and ProjectView Research
-Status: In Progress
-Blocking Issue: None
-Cross-Module Edits: None (research phase only)
-Notes:
-🔍 PHASE 4 RESEARCH - Analyzing reference code before implementation
-
-REFERENCE CODE LOCATED:
-1. DiffGrid Control (EasyAFv2)
-   - Location: C:\src\EasyAFv3\sandbox\EasyAFv2\src\Controls\ModularUI.Controls.DiffGrid\
-   - Key files identified:
-     * DiffGrid.State.cs - State preservation system
-     * DiffGrid.Selection.cs - Cell selection management
-     * DiffGrid.Scrolling.cs - Scroll position tracking
-     * DiffGrid.Editing.cs - In-cell editing
-     * DiffGrid.Filtering.cs - Column filtering
-     * DiffGrid.Columns.cs - Column configuration
-   - Tests: ModularUI.Controls.DiffGrid.Tests (extensive test coverage)
-
-2. ProjectView Metadata Layout (Stopgap)
-   - Location: C:\src\EasyAFv3\sandbox\EasyAF-stopgap\EasyAF.UI\Views\
-   - Files: ProjectView.xaml, ProjectView.xaml.cs
-   - Key findings from XAML:
-     * Metadata GroupBox with 8-row Grid
-     * Fields: LB Project Number, Site Name, Client, Study Engineer
-     * Address: 3 lines (Addr1, Addr2, Addr3)
-     * City/State/Zip row (multi-column)
-     * Study Date (DatePicker), Revision Month (MonthYearPicker)
-     * Comments (multiline TextBox, 80px height)
-   - Report GroupBox: Project/Map/Spec/Template/Output paths
-   - Drag-drop zones for New/Old data with statistics
-
-DIFFGRID STATE PRESERVATION ANALYSIS (from DiffGrid.State.cs):
-✅ Uses logical positions (NOT absolute pixels):
-   - SelectedRowKey (string identifier, NOT index)
-   - SelectedColumnDisplayIndex (logical column order)
-   - FirstVisibleRowIndex (row number, NOT pixel offset)
-   - ViewportRowOffset (partial scroll within row)
-   - HorizontalOffset (horizontal scroll)
-   - SelectedCells collection (for multi-select)
-
-✅ DPI-safe approach:
-   - Stores row KEY (survives data refresh)
-   - Falls back to TargetRowIndex if key not found
-   - No hardcoded pixel positions
-   - State captured via CaptureState() method
-   - State restored via pending restore mechanism
-
-✅ State persistence pattern:
-   ```csharp
-   public DiffGridViewState CaptureState()
-   {
-       // Captures focused cell, selection, scroll position
-       // Returns immutable state object
-   }
-   
-   private DiffGridViewState? _pendingRestore;
-   // Hooked to grid events to restore when layout complete
-   ```
-
-PROJECTVIEW METADATA FIELDS (exact layout):
-Row 0: LB Project Number (TextBox, 140px) | Site Name (TextBox, *)
-Row 1: Client (TextBox) | Study Engineer (TextBox)
-Row 2: Address Line1 (TextBox, spans 3 columns)
-Row 3: Address Line2 (TextBox, spans 3 columns)
-Row 4: Address Line3 (TextBox, spans 3 columns)
-Row 5: City (TextBox) | State (TextBox, 40px, 2 char) | Zip (TextBox, 80px, 5 digit)
-Row 6: Study Date (DatePicker) | Revision Month (MonthYearPicker)
-Row 7: Comments (TextBox, multiline, 80px height, spans 3 columns)
-
-STOPGAP LAYOUT (two columns):
-LEFT: Project metadata + Report inputs (stacked GroupBoxes)
-RIGHT: Project Summary with drag-drop zones (New/Old data statistics)
-
-KEY INSIGHTS:
-1. DiffGrid already solves state preservation problem
-   - No need to reinvent - use existing implementation
-   - State capture/restore is built-in
-   - Handles DPI changes via logical positions
-
-2. ProjectView metadata is simple Grid layout
-   - Easy to port to MVVM
-   - Need to create MonthYearPicker control (or use DatePicker)
-   - All standard WPF controls
-
-3. Integration plan forming:
-   - Copy DiffGrid control as-is (it's already a reusable UserControl)
-   - Create ProjectDocument wrapping existing Project class
-   - Summary tab: Metadata GroupBox + File management (Map Editor pattern)
-   - Data tabs: DiffGrid for each equipment type
-
-NEXT STEPS:
-1. Create detailed DiffGrid integration document
-2. Document exact ProjectView field bindings
-3. Plan MonthYearPicker control (or alternative)
-4. Start Task 18 (Project Module Structure)
-
-DOCUMENTATION CREATED:
-- journal/PHASE-4-REFERENCE-CODE-RESEARCH.md (research tracking)
-
-Next Task: Create detailed integration plan, then Task 18 - Create Project Module Structure
-Rollback Instructions: No code changes yet (research only)
 ```
 
 ```

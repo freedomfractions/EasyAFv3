@@ -162,6 +162,16 @@ namespace EasyAF.Modules.Project.Models
         /// </remarks>
         public Data.Models.Project Project => _project;
 
+        /// <summary>
+        /// Gets or sets the ViewModel for this document.
+        /// </summary>
+        /// <remarks>
+        /// Used by the Shell to display the document's UI via DataTemplate.
+        /// The shell's ContentControl will bind to this property and use
+        /// a DataTemplate to render the appropriate view.
+        /// </remarks>
+        public object? ViewModel { get; set; }
+
         #endregion
 
         #region INotifyPropertyChanged Implementation

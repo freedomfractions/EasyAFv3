@@ -89,6 +89,23 @@ namespace EasyAF.Modules.Project
             document.OwnerModule = this;
             document.MarkDirty(); // New documents are dirty until saved
             
+            // Create ViewModel for the document
+            var viewModel = new ViewModels.ProjectDocumentViewModel(document);
+            
+            // Store ViewModel in a way the shell can access it
+            // (Shell uses DataTemplate to render based on document type)
+            document.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == "ViewModel")
+                {
+                    // ViewModel attached, nothing to do
+                }
+            };
+            
+            // Attach ViewModel to document for shell's DataTemplate system
+            // (We'll use a custom property or tag for this)
+            SetDocumentViewModel(document, viewModel);
+            
             Log.Information("New project document created");
             
             return document;
@@ -110,6 +127,10 @@ namespace EasyAF.Modules.Project
             
             var document = ProjectDocument.LoadFrom(filePath);
             document.OwnerModule = this;
+            
+            // Create ViewModel for the document
+            var viewModel = new ViewModels.ProjectDocumentViewModel(document);
+            SetDocumentViewModel(document, viewModel);
             
             Log.Information("Project document opened successfully: {FilePath}", filePath);
             
@@ -180,6 +201,20 @@ namespace EasyAF.Modules.Project
         {
             Log.Information("Shutting down Project module");
             // Cleanup if needed
+        }
+
+        /// <summary>
+        /// Attaches a ViewModel to a document for the shell's DataTemplate rendering.
+        /// </summary>
+        private void SetDocumentViewModel(ProjectDocument document, ViewModels.ProjectDocumentViewModel viewModel)
+        {
+            // CROSS-MODULE EDIT: 2025-01-20 Task 20
+            // Modified for: Attach ViewModel to document for shell rendering
+            // Related modules: Project (ProjectDocument)
+            // Rollback instructions: Remove ViewModel property from ProjectDocument
+            
+            document.ViewModel = viewModel;
+            Log.Debug("ViewModel attached to document");
         }
     }
 }
