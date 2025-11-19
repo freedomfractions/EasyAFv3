@@ -2,7 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Windows.Media;
 using EasyAF.Core.Contracts;
-using Prism.Ioc;
+using EasyAF.Modules.Project.Models;
+using Unity;
 using Serilog;
 
 namespace EasyAF.Modules.Project
@@ -50,7 +51,7 @@ namespace EasyAF.Modules.Project
         /// <remarks>
         /// Provides friendly names and filter strings for Open/Save dialogs.
         /// </remarks>
-        public FileTypeDefinition[] SupportedFileTypes => new[]
+        public IReadOnlyList<FileTypeDefinition> SupportedFileTypes => new[]
         {
             new FileTypeDefinition("ezproj", "EasyAF Project Files")
         };
@@ -64,11 +65,11 @@ namespace EasyAF.Modules.Project
         /// Initializes the module and registers services with the DI container.
         /// </summary>
         /// <param name="container">The Unity container for dependency injection.</param>
-        public void Initialize(IContainerProvider container)
+        public void Initialize(IUnityContainer container)
         {
             Log.Information("Initializing Project module v{Version}", ModuleVersion);
             
-            // TODO Task 19: Register ProjectDocument wrapper
+            // TODO Task 20: Register ProjectDocumentViewModel
             // TODO Task 20: Register ProjectSummaryViewModel
             // TODO Task 21: Register DataTypeTabViewModel
             // TODO Task 22: Register ribbon commands
@@ -84,9 +85,13 @@ namespace EasyAF.Modules.Project
         {
             Log.Debug("Creating new project document");
             
-            // TODO Task 19: Implement ProjectDocument wrapper
-            // For now, throw NotImplementedException to maintain contract
-            throw new NotImplementedException("CreateNewDocument will be implemented in Task 19");
+            var document = ProjectDocument.CreateNew();
+            document.OwnerModule = this;
+            document.MarkDirty(); // New documents are dirty until saved
+            
+            Log.Information("New project document created");
+            
+            return document;
         }
 
         /// <summary>
@@ -103,11 +108,12 @@ namespace EasyAF.Modules.Project
 
             Log.Information("Opening project document: {FilePath}", filePath);
             
-            // TODO Task 19: Implement using ProjectPersist.Load()
-            // var project = ProjectPersist.Load(filePath);
-            // return new ProjectDocument(project, filePath);
+            var document = ProjectDocument.LoadFrom(filePath);
+            document.OwnerModule = this;
             
-            throw new NotImplementedException("OpenDocument will be implemented in Task 19");
+            Log.Information("Project document opened successfully: {FilePath}", filePath);
+            
+            return document;
         }
 
         /// <summary>
@@ -116,6 +122,7 @@ namespace EasyAF.Modules.Project
         /// <param name="document">The document to save.</param>
         /// <param name="filePath">Path where the file should be saved.</param>
         /// <exception cref="ArgumentNullException">If document or filePath is null.</exception>
+        /// <exception cref="InvalidCastException">If document is not a ProjectDocument.</exception>
         public void SaveDocument(IDocument document, string filePath)
         {
             if (document == null)
@@ -125,13 +132,11 @@ namespace EasyAF.Modules.Project
 
             Log.Information("Saving project document: {FilePath}", filePath);
             
-            // TODO Task 19: Implement using ProjectPersist.Save()
-            // var projectDoc = (ProjectDocument)document;
-            // ProjectPersist.Save(projectDoc.Project, filePath);
-            // projectDoc.FilePath = filePath;
-            // projectDoc.IsDirty = false;
+            if (document is not ProjectDocument projectDoc)
+                throw new InvalidCastException($"Document must be a ProjectDocument, but was {document.GetType().Name}");
             
-            throw new NotImplementedException("SaveDocument will be implemented in Task 19");
+            projectDoc.SaveAs(filePath);
+            Log.Information("Project document saved successfully: {FilePath}", filePath);
         }
 
         /// <summary>
