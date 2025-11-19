@@ -1,7 +1,9 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:mapVM="clr-namespace:EasyAF.Modules.Map.ViewModels;assembly=EasyAF.Modules.Map"
-                    xmlns:mapView="clr-namespace:EasyAF.Modules.Map.Views;assembly=EasyAF.Modules.Map">
+                    xmlns:mapView="clr-namespace:EasyAF.Modules.Map.Views;assembly=EasyAF.Modules.Map"
+                    xmlns:projectVM="clr-namespace:EasyAF.Modules.Project.ViewModels;assembly=EasyAF.Modules.Project"
+                    xmlns:projectView="clr-namespace:EasyAF.Modules.Project.Views;assembly=EasyAF.Modules.Project">
     
     <!-- CROSS-MODULE EDIT: 2025-01-15 Map Module View Hosting -->
     <!-- Modified for: Register DataTemplate to display MapDocumentViewModel with MapDocumentView -->
@@ -21,6 +23,16 @@
     <!-- Map Module Settings View Template -->
     <DataTemplate DataType="{x:Type mapVM:MapModuleSettingsViewModel}">
         <mapView:MapModuleSettingsView />
+    </DataTemplate>
+
+    <!-- CROSS-MODULE EDIT: 2025-01-20 Task 20 - Project Module View Hosting -->
+    <!-- Modified for: Register DataTemplate to display ProjectDocumentViewModel with ProjectDocumentView -->
+    <!-- Related modules: Project (ProjectDocumentViewModel, ProjectDocumentView) -->
+    <!-- Rollback instructions: Remove this DataTemplate and xmlns:projectVM/projectView declarations -->
+    
+    <!-- Project Module Document View Template -->
+    <DataTemplate DataType="{x:Type projectVM:ProjectDocumentViewModel}">
+        <projectView:ProjectDocumentView />
     </DataTemplate>
     
 </ResourceDictionary>
