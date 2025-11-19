@@ -342,6 +342,112 @@ Next Task: [What should be worked on next]
 **NOTE: Newest entries appear at the top**
 
 ```
+Date: 2025-01-20T00:30:00-06:00
+Task: Phase 4 Preparation - DiffGrid and ProjectView Research
+Status: In Progress
+Blocking Issue: None
+Cross-Module Edits: None (research phase only)
+Notes:
+🔍 PHASE 4 RESEARCH - Analyzing reference code before implementation
+
+REFERENCE CODE LOCATED:
+1. DiffGrid Control (EasyAFv2)
+   - Location: C:\src\EasyAFv3\sandbox\EasyAFv2\src\Controls\ModularUI.Controls.DiffGrid\
+   - Key files identified:
+     * DiffGrid.State.cs - State preservation system
+     * DiffGrid.Selection.cs - Cell selection management
+     * DiffGrid.Scrolling.cs - Scroll position tracking
+     * DiffGrid.Editing.cs - In-cell editing
+     * DiffGrid.Filtering.cs - Column filtering
+     * DiffGrid.Columns.cs - Column configuration
+   - Tests: ModularUI.Controls.DiffGrid.Tests (extensive test coverage)
+
+2. ProjectView Metadata Layout (Stopgap)
+   - Location: C:\src\EasyAFv3\sandbox\EasyAF-stopgap\EasyAF.UI\Views\
+   - Files: ProjectView.xaml, ProjectView.xaml.cs
+   - Key findings from XAML:
+     * Metadata GroupBox with 8-row Grid
+     * Fields: LB Project Number, Site Name, Client, Study Engineer
+     * Address: 3 lines (Addr1, Addr2, Addr3)
+     * City/State/Zip row (multi-column)
+     * Study Date (DatePicker), Revision Month (MonthYearPicker)
+     * Comments (multiline TextBox, 80px height)
+   - Report GroupBox: Project/Map/Spec/Template/Output paths
+   - Drag-drop zones for New/Old data with statistics
+
+DIFFGRID STATE PRESERVATION ANALYSIS (from DiffGrid.State.cs):
+✅ Uses logical positions (NOT absolute pixels):
+   - SelectedRowKey (string identifier, NOT index)
+   - SelectedColumnDisplayIndex (logical column order)
+   - FirstVisibleRowIndex (row number, NOT pixel offset)
+   - ViewportRowOffset (partial scroll within row)
+   - HorizontalOffset (horizontal scroll)
+   - SelectedCells collection (for multi-select)
+
+✅ DPI-safe approach:
+   - Stores row KEY (survives data refresh)
+   - Falls back to TargetRowIndex if key not found
+   - No hardcoded pixel positions
+   - State captured via CaptureState() method
+   - State restored via pending restore mechanism
+
+✅ State persistence pattern:
+   ```csharp
+   public DiffGridViewState CaptureState()
+   {
+       // Captures focused cell, selection, scroll position
+       // Returns immutable state object
+   }
+   
+   private DiffGridViewState? _pendingRestore;
+   // Hooked to grid events to restore when layout complete
+   ```
+
+PROJECTVIEW METADATA FIELDS (exact layout):
+Row 0: LB Project Number (TextBox, 140px) | Site Name (TextBox, *)
+Row 1: Client (TextBox) | Study Engineer (TextBox)
+Row 2: Address Line1 (TextBox, spans 3 columns)
+Row 3: Address Line2 (TextBox, spans 3 columns)
+Row 4: Address Line3 (TextBox, spans 3 columns)
+Row 5: City (TextBox) | State (TextBox, 40px, 2 char) | Zip (TextBox, 80px, 5 digit)
+Row 6: Study Date (DatePicker) | Revision Month (MonthYearPicker)
+Row 7: Comments (TextBox, multiline, 80px height, spans 3 columns)
+
+STOPGAP LAYOUT (two columns):
+LEFT: Project metadata + Report inputs (stacked GroupBoxes)
+RIGHT: Project Summary with drag-drop zones (New/Old data statistics)
+
+KEY INSIGHTS:
+1. DiffGrid already solves state preservation problem
+   - No need to reinvent - use existing implementation
+   - State capture/restore is built-in
+   - Handles DPI changes via logical positions
+
+2. ProjectView metadata is simple Grid layout
+   - Easy to port to MVVM
+   - Need to create MonthYearPicker control (or use DatePicker)
+   - All standard WPF controls
+
+3. Integration plan forming:
+   - Copy DiffGrid control as-is (it's already a reusable UserControl)
+   - Create ProjectDocument wrapping existing Project class
+   - Summary tab: Metadata GroupBox + File management (Map Editor pattern)
+   - Data tabs: DiffGrid for each equipment type
+
+NEXT STEPS:
+1. Create detailed DiffGrid integration document
+2. Document exact ProjectView field bindings
+3. Plan MonthYearPicker control (or alternative)
+4. Start Task 18 (Project Module Structure)
+
+DOCUMENTATION CREATED:
+- journal/PHASE-4-REFERENCE-CODE-RESEARCH.md (research tracking)
+
+Next Task: Create detailed integration plan, then Task 18 - Create Project Module Structure
+Rollback Instructions: No code changes yet (research only)
+```
+
+```
 Date: 2025-01-19T23:15:00-06:00
 Task: Phase 3 Complete - Map Module with 34 Data Models
 Status: Complete
@@ -500,3 +606,4 @@ ARCHITECTURE NOTES:
 - Initialize() method ready for service registration in Task 13
 - Document view hosting will use DataTemplate approach (per shell architecture decision)
 Next Task: Task 13 - Implement Map Data Model
+```
