@@ -38,6 +38,15 @@ namespace EasyAF.Modules.Map.Models
         /// Headers are never indented (they're top-level file names).
         /// </summary>
         public override bool ShouldIndent => false;
+        
+        /// <summary>
+        /// Gets the "used by" status - always null for headers (only tables can be "used").
+        /// </summary>
+        /// <remarks>
+        /// This property exists to prevent binding errors in the XAML tooltip.
+        /// Headers are never "used" by tabs, so this is always null.
+        /// </remarks>
+        public string? UsedByDataType => null;
     }
 
     /// <summary>
@@ -45,6 +54,8 @@ namespace EasyAF.Modules.Map.Models
     /// </summary>
     public class TableItem : ComboBoxItemBase
     {
+        private string? _usedByDataType;
+
         public TableItem(TableReference tableReference)
         {
             TableReference = tableReference;
@@ -52,7 +63,27 @@ namespace EasyAF.Modules.Map.Models
 
         public TableReference TableReference { get; set; }
 
-        public override bool IsSelectable => true;
+        /// <summary>
+        /// Gets or sets the friendly name of the data type that's currently using this table.
+        /// </summary>
+        /// <remarks>
+        /// When set, indicates this table is assigned to another data type and should be disabled.
+        /// Example: "LV Breakers" means the table is currently assigned to the LV Breakers tab.
+        /// This is set dynamically when the dropdown opens, not persisted.
+        /// </remarks>
+        public string? UsedByDataType
+        {
+            get => _usedByDataType;
+            set => SetProperty(ref _usedByDataType, value);
+        }
+
+        /// <summary>
+        /// Gets whether this item is selectable.
+        /// </summary>
+        /// <remarks>
+        /// A table is selectable only if it's not currently assigned to another data type.
+        /// </remarks>
+        public override bool IsSelectable => string.IsNullOrEmpty(_usedByDataType);
 
         /// <summary>
         /// Gets the display text - shows filename for single-table files, table name for multi-table files.

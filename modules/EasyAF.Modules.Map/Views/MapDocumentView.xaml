@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:EasyAF.Modules.Map.ViewModels"
              xmlns:views="clr-namespace:EasyAF.Modules.Map.Views"
+             xmlns:converters="clr-namespace:EasyAF.Modules.Map.Converters"
              HorizontalAlignment="Stretch"
              VerticalAlignment="Stretch"
              Background="{DynamicResource PrimaryBackgroundBrush}">
@@ -13,6 +14,15 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/EasyAF.Modules.Map;component/Styles/MapEditorStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+            
+            <!-- CROSS-MODULE EDIT: 2025-01-19 Status Enum Converters -->
+            <!-- Modified for: Convert MappingStatus enum to MDL2 glyphs and theme brushes -->
+            <!-- Related modules: Map (MappingStatus enum, converters) -->
+            <!-- Rollback instructions: Remove converter declarations and use string binding -->
+            
+            <!-- Status Enum Converters -->
+            <converters:MappingStatusToGlyphConverter x:Key="StatusToGlyphConverter"/>
+            <converters:MappingStatusToBrushConverter x:Key="StatusToBrushConverter"/>
             
             <!-- DataTemplates to map ViewModels to Views -->
             <DataTemplate DataType="{x:Type vm:MapSummaryViewModel}">
@@ -52,29 +62,13 @@
             <TabControl.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal" Margin="8,4">
-                        <!-- Status Indicator (?, ?, ?) -->
-                        <TextBlock Text="{Binding Status}" 
+                        <!-- Status Indicator (converted from enum to MDL2 glyph with themed color) -->
+                        <TextBlock Text="{Binding Status, Converter={StaticResource StatusToGlyphConverter}}" 
+                                   FontFamily="Segoe MDL2 Assets"
                                    FontSize="14"
                                    Margin="0,0,6,0"
-                                   VerticalAlignment="Center">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
-                                    <Style.Triggers>
-                                        <!-- Color coding for status using theme brushes -->
-                                        <DataTrigger Binding="{Binding Status}" Value="?">
-                                            <Setter Property="Foreground" Value="{DynamicResource StatusUnmappedBrush}"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding Status}" Value="?">
-                                            <Setter Property="Foreground" Value="{DynamicResource StatusPartialBrush}"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding Status}" Value="?">
-                                            <Setter Property="Foreground" Value="{DynamicResource StatusCompleteBrush}"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
+                                   VerticalAlignment="Center"
+                                   Foreground="{Binding Status, Converter={StaticResource StatusToBrushConverter}}"/>
                         
                         <!-- Tab Header Text - NOW USING DISPLAY NAME -->
                         <TextBlock Text="{Binding DisplayName}"

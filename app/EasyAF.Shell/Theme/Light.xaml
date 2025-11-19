@@ -45,7 +45,8 @@
     <Color x:Key="SuccessColor">#FF059669</Color>
     <Color x:Key="WarningColor">#FFD97706</Color>
     <Color x:Key="InfoColor">#FF2563EB</Color>
-    
+    <Color x:Key="RequiredIndicatorColor">#FFDC2626</Color> <!-- Red for required field indicator -->
+
     <!-- Highlight Colors -->
     <Color x:Key="HighlightSelectionColor">#FFE0F2FF</Color>
     <Color x:Key="ReadonlyBackgroundColor">#FFF9FAFB</Color>
@@ -97,7 +98,8 @@
     <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource SuccessColor}"/>
     <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource WarningColor}"/>
     <SolidColorBrush x:Key="InfoBrush" Color="{StaticResource InfoColor}"/>
-    
+    <SolidColorBrush x:Key="RequiredIndicatorBrush" Color="{StaticResource RequiredIndicatorColor}"/>
+
     <SolidColorBrush x:Key="HighlightSelectionBrush" Color="{StaticResource HighlightSelectionColor}"/>
     <SolidColorBrush x:Key="ReadonlyBackgroundBrush" Color="{StaticResource ReadonlyBackgroundColor}"/>
     <SolidColorBrush x:Key="HoverBackgroundBrush" Color="{StaticResource HoverBackgroundColor}"/>

@@ -301,6 +301,11 @@ namespace EasyAF.Modules.Map.ViewModels
         /// </summary>
         private void OnPropertyItemChanged(object? sender, PropertyChangedEventArgs e)
         {
+            // When IsEnabled changes on any PropertyItem, update the EnabledCount display
+            if (e.PropertyName == nameof(PropertyItem.IsEnabled))
+            {
+                RaisePropertyChanged(nameof(EnabledCount));
+            }
         }
 
         #endregion

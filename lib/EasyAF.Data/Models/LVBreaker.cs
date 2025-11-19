@@ -83,6 +83,7 @@ public class LVBreaker
     [Category("General")]
     [Description("Frame (A)")]
     [Units("A")]
+    [Required]
     public string? FrameA { get; set; }
 
     /// <summary>Trip (Column: Trip)</summary>
@@ -129,6 +130,7 @@ public class LVBreaker
     [Category("Protection")]
     [Description("Trip (A)")]
     [Units("A")]
+    [Required]
     public string? TripA { get; set; }
 
     /// <summary>LT Curve (Column: LT Curve)</summary>

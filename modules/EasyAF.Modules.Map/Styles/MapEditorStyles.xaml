@@ -306,9 +306,6 @@
                                                     <Trigger Property="IsMouseOver" Value="True">
                                                         <Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
                                                     </Trigger>
-                                                    <Trigger Property="IsChecked" Value="True">
-                                                        <Setter TargetName="Border" Property="Background" Value="{DynamicResource HoverBackgroundBrush}"/>
-                                                    </Trigger>
                                                     <Trigger Property="IsEnabled" Value="False">
                                                         <Setter TargetName="Border" Property="Opacity" Value="0.5"/>
                                                         <Setter TargetName="Arrow" Property="Fill" Value="{DynamicResource TextSecondaryBrush}"/>
@@ -391,6 +388,9 @@
     </Style>
     
     <!-- ComboBoxItem Style for dropdown items -->
+    <!-- DISABLED: Custom ItemContainerStyle is now defined inline in DataTypeMappingView.xaml -->
+    <!-- This global style was interfering with the custom template that handles cross-tab exclusivity -->
+    <!--
     <Style TargetType="ComboBoxItem">
         <Setter Property="Padding" Value="8,4"/>
         <Setter Property="Background" Value="Transparent"/>
@@ -421,5 +421,6 @@
             </Setter.Value>
         </Setter>
     </Style>
+    -->
 
 </ResourceDictionary>

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
@@ -224,7 +225,7 @@ namespace EasyAF.Modules.Map.ViewModels
             {
                 Header = "Summary",
                 DisplayName = "Summary", // Summary tab uses same name
-                Status = string.Empty,
+                Status = MappingStatus.Unmapped, // Summary tab doesn't have a status
                 ViewModel = summaryVm,
                 DataType = null
             });
@@ -278,23 +279,23 @@ namespace EasyAF.Modules.Map.ViewModels
         /// <summary>
         /// Gets the initial mapping status indicator for a data type.
         /// </summary>
-        private string GetInitialStatus(string dataType)
+        private MappingStatus GetInitialStatus(string dataType)
         {
             if (!_document.MappingsByDataType.TryGetValue(dataType, out var mappings))
-                return "?"; // Empty circle = unmapped
+                return MappingStatus.Unmapped;
 
             if (mappings.Count == 0)
-                return "?"; // Empty circle = unmapped
+                return MappingStatus.Unmapped;
 
             var properties = _propertyDiscovery.GetPropertiesForType(dataType);
             if (properties.Count == 0)
-                return "?";
+                return MappingStatus.Unmapped;
 
             // Check mapping completion
             if (mappings.Count >= properties.Count)
-                return "?"; // Filled circle = complete
+                return MappingStatus.Complete;
 
-            return "?"; // Half-filled circle = partial
+            return MappingStatus.Partial;
         }
 
         /// <summary>
@@ -311,15 +312,9 @@ namespace EasyAF.Modules.Map.ViewModels
                 return;
             }
 
-            tab.Status = status switch
-            {
-                MappingStatus.Unmapped => "?",
-                MappingStatus.Partial => "?",
-                MappingStatus.Complete => "?",
-                _ => "?"
-            };
+            tab.Status = status;
 
-            Log.Debug("Updated tab status for {DataType}: {Status}", dataType, tab.Status);
+            Log.Debug("Updated tab status for {DataType}: {Status}", dataType, status);
         }
 
         /// <summary>
@@ -332,13 +327,7 @@ namespace EasyAF.Modules.Map.ViewModels
                 if (tab.DataType == null) continue;
 
                 var status = CalculateMappingStatus(tab.DataType);
-                tab.Status = status switch
-                {
-                    MappingStatus.Unmapped => "?",
-                    MappingStatus.Partial => "?",
-                    MappingStatus.Complete => "?",
-                    _ => "?"
-                };
+                tab.Status = status;
 
                 // Refresh available tables when files are added/removed
                 if (tab.ViewModel is DataTypeMappingViewModel dataTypeVm)
@@ -366,18 +355,11 @@ namespace EasyAF.Modules.Map.ViewModels
                     if (tab.DataType == null) continue;
 
                     var status = CalculateMappingStatus(tab.DataType);
-                    var statusIcon = status switch
-                    {
-                        MappingStatus.Unmapped => "?",
-                        MappingStatus.Partial => "?",
-                        MappingStatus.Complete => "?",
-                        _ => "?"
-                    };
 
                     // Update on UI thread
                     System.Windows.Application.Current?.Dispatcher.Invoke(() =>
                     {
-                        tab.Status = statusIcon;
+                        tab.Status = status;
                     });
 
                     // REMOVED: RefreshAvailableTables() call
@@ -625,6 +607,8 @@ namespace EasyAF.Modules.Map.ViewModels
 
         #endregion
 
+        #region Helper Methods
+
         /// <summary>
         /// Gets the user dialog service for child ViewModels.
         /// </summary>
@@ -637,6 +621,34 @@ namespace EasyAF.Modules.Map.ViewModels
         {
             return _dialogService;
         }
+
+        /// <summary>
+        /// Gets a dictionary of currently selected tables by data type.
+        /// </summary>
+        /// <returns>Dictionary where key=dataType, value=TableReference.DisplayName</returns>
+        /// <remarks>
+        /// Used by the cross-tab table exclusivity feature to prevent the same table
+        /// from being selected on multiple tabs simultaneously.
+        /// </remarks>
+        public Dictionary<string, string> GetSelectedTablesByDataType()
+        {
+            var selectedTables = new Dictionary<string, string>();
+            
+            foreach (var tab in TabHeaders.Where(t => t.ViewModel is DataTypeMappingViewModel))
+            {
+                if (tab.ViewModel is DataTypeMappingViewModel dataTypeVm && 
+                    tab.DataType != null &&
+                    dataTypeVm.SelectedTable != null &&
+                    !string.IsNullOrEmpty(dataTypeVm.SelectedTable.DisplayName))
+                {
+                    selectedTables[tab.DataType] = dataTypeVm.SelectedTable.DisplayName;
+                }
+            }
+            
+            return selectedTables;
+        }
+
+        #endregion
     }
 
     /// <summary>
@@ -646,7 +658,7 @@ namespace EasyAF.Modules.Map.ViewModels
     {
         private string _header = string.Empty;
         private string _displayName = string.Empty; // NEW: User-friendly display name
-        private string _status = string.Empty;
+        private MappingStatus _status = MappingStatus.Unmapped;
 
         /// <summary>
         /// Gets or sets the tab header text (e.g., "Summary", "Bus", "LVBreaker") - raw class name.
@@ -673,14 +685,9 @@ namespace EasyAF.Modules.Map.ViewModels
         }
 
         /// <summary>
-        /// Gets or sets the status indicator glyph (?, ?, ?).
+        /// Gets or sets the mapping status (enum instead of string glyph).
         /// </summary>
-        /// <remarks>
-        /// ? = Unmapped (empty circle)
-        /// ? = Partial (half-filled circle)
-        /// ? = Complete (filled circle)
-        /// </remarks>
-        public string Status
+        public MappingStatus Status
         {
             get => _status;
             set => SetProperty(ref _status, value);

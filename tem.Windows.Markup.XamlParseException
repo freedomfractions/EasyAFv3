@@ -1,0 +1,15 @@
+50caed0 docs: Add cross-tab table exclusivity implementation guide
+db22e87 feat(map): Simple cross-tab table exclusivity with tab-activation trigger
+3b802bd feat(map): Lock required properties in Property Selector (cannot be disabled)
+e569a03 feat(map): Add red asterisk to required properties in Property Selector dialog
+9377ed3 feat(map): Required properties float to top and protected from Select None
+66995d6 feat(map): Add friendly names to Property Selector dialog
+18f451a fix(map): ACTUALLY implement GetPropertyDescription to read Description attribute
+a59aee0 fix(map): Fix XAML binding error in DataTypeMappingView
+7cd9c33 fix(map): Display friendly property descriptions in mapping view
+7f87a36 fix(map): Populate property descriptions from Description attributes
+a3ee603 fix(map): Add ShouldIndent property to FileHeaderItem to fix binding error
+9eb14b6 chore: Remove temporary commit message file
+06e2e9c feat(map): Add settings UI polish - counters and confirmations
+4fe39c4 feat: Add user-friendly display names throughout Map Editor UI
+56cae41 fix(models): FINAL batch - Last 5 models complete! (18-22/22)

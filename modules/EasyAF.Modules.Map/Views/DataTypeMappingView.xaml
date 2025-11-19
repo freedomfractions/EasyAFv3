@@ -98,37 +98,59 @@
                           MinWidth="250"
                           MaxDropDownHeight="400"
                           Style="{StaticResource ThemedComboBoxStyle}"
-                          ToolTip="Select a table/sheet from your loaded files">
+                          ToolTip="Select a table/sheet from your loaded files"
+                          Loaded="ComboBox_Loaded">
                     
                     <!-- Item Template with visual differentiation for headers vs items -->
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
+                            <!-- Removed checkmark from ItemTemplate - now handled in ItemContainerStyle ControlTemplate -->
+                            <!-- This eliminates the binding warning when ComboBox is closed -->
                             <TextBlock Text="{Binding DisplayText}"
                                        Foreground="{DynamicResource TextPrimaryBrush}">
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
-                                        <!-- Default style for single-table items (no indent) -->
+                                        <!-- FORCE PRIMARY TEXT EVERYWHERE -->
+                                        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
                                         <Setter Property="Margin" Value="4"/>
                                         <Setter Property="FontWeight" Value="Normal"/>
+                                        
+                                        <!-- Tooltip - only show when UsedByDataType has a value -->
+                                        <Setter Property="ToolTip">
+                                            <Setter.Value>
+                                                <Binding Path="UsedByDataType" StringFormat="This table is currently assigned to {0}"/>
+                                            </Setter.Value>
+                                        </Setter>
+                                        
                                         <Style.Triggers>
+                                            <!-- Strikethrough text for unavailable tables -->
+                                            <DataTrigger Binding="{Binding UsedByDataType, Converter={StaticResource NullToVisibilityConverter}}" Value="Visible">
+                                                <Setter Property="TextDecorations" Value="Strikethrough"/>
+                                            </DataTrigger>
+                                            
+                                            <!-- Hide tooltip if UsedByDataType is null/empty -->
+                                            <DataTrigger Binding="{Binding UsedByDataType}" Value="{x:Null}">
+                                                <Setter Property="ToolTip" Value="{x:Null}"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding UsedByDataType}" Value="">
+                                                <Setter Property="ToolTip" Value="{x:Null}"/>
+                                            </DataTrigger>
+                                            
                                             <!-- Header style (non-selectable) - includes placeholder -->
                                             <DataTrigger Binding="{Binding IsSelectable}" Value="False">
                                                 <Setter Property="Margin" Value="0,6,0,2"/>
                                                 <Setter Property="FontWeight" Value="SemiBold"/>
                                                 <Setter Property="FontSize" Value="11"/>
-                                                <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                                                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
                                                 <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
                                                 <Setter Property="Padding" Value="6,4"/>
-                                                <!-- CROSS-MODULE EDIT: 2025-01-16 Empty Files Placeholder -->
-                                                <!-- Modified for: Make placeholder text wrap and italic -->
-                                                <!-- Related modules: Map (DataTypeMappingViewModel) -->
-                                                <!-- Rollback instructions: Remove TextWrapping and FontStyle setters -->
                                                 <Setter Property="TextWrapping" Value="Wrap"/>
                                                 <Setter Property="FontStyle" Value="Italic"/>
                                             </DataTrigger>
+                                            
                                             <!-- Indent multi-table items -->
                                             <DataTrigger Binding="{Binding ShouldIndent}" Value="True">
-                                                <Setter Property="Margin" Value="16,4,4,4"/>
+                                                <Setter Property="Margin" Value="20,4,4,4"/>
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
@@ -137,10 +159,78 @@
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
                     
-                    <!-- Custom ItemContainerStyle to prevent selecting headers -->
+                    <!-- Custom ItemContainerStyle for styling and exclusivity -->
                     <ComboBox.ItemContainerStyle>
                         <Style TargetType="ComboBoxItem">
+                            <!-- FORCE PRIMARY TEXT EVERYWHERE -->
+                            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="BorderThickness" Value="0"/>
+                            
+                            <!-- Override template to remove opaque backgrounds and add checkmark -->
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ComboBoxItem">
+                                        <Border Name="Bd"
+                                                Background="Transparent"
+                                                BorderThickness="0"
+                                                Padding="{TemplateBinding Padding}">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/> <!-- Checkmark -->
+                                                    <ColumnDefinition Width="*"/>    <!-- Content -->
+                                                </Grid.ColumnDefinitions>
+                                                
+                                                <!-- Checkmark for selected item (in dropdown only) -->
+                                                <TextBlock Grid.Column="0"
+                                                           x:Name="CheckMark"
+                                                           Text="&#xE73E;"
+                                                           FontFamily="Segoe MDL2 Assets"
+                                                           FontSize="14"
+                                                           Foreground="{DynamicResource AccentBrush}"
+                                                           Margin="0,0,6,0"
+                                                           VerticalAlignment="Center"
+                                                           Visibility="Collapsed"/>
+                                                
+                                                <ContentPresenter Grid.Column="1"
+                                                                  HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                                  TextBlock.Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                            </Grid>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <!-- Show checkmark when item is selected -->
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter TargetName="CheckMark" Property="Visibility" Value="Visible"/>
+                                            </Trigger>
+                                            
+                                            <!-- Enabled + Highlighted = show highlight background -->
+                                            <MultiTrigger>
+                                                <MultiTrigger.Conditions>
+                                                    <Condition Property="IsHighlighted" Value="True"/>
+                                                    <Condition Property="IsEnabled" Value="True"/>
+                                                </MultiTrigger.Conditions>
+                                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource HighlightSelectionBrush}"/>
+                                            </MultiTrigger>
+                                            
+                                            <!-- Disabled = dim text -->
+                                            <Trigger Property="IsEnabled" Value="False">
+                                                <Setter Property="Foreground" Value="{DynamicResource TextDisabledBrush}"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            
+
                             <Style.Triggers>
+                                <!-- Tables used by other tabs are non-selectable -->
+                                <DataTrigger Binding="{Binding UsedByDataType, Converter={StaticResource NullToVisibilityConverter}}" Value="Visible">
+                                    <Setter Property="IsEnabled" Value="False"/>
+                                    <Setter Property="Focusable" Value="False"/>
+                                </DataTrigger>
+                                
+                                <!-- Headers are non-selectable -->
                                 <DataTrigger Binding="{Binding IsSelectable}" Value="False">
                                     <Setter Property="IsEnabled" Value="False"/>
                                     <Setter Property="Focusable" Value="False"/>
@@ -238,7 +328,9 @@
                 <ListBox Grid.Row="1"
                          ItemsSource="{Binding TargetPropertiesView}"
                          SelectedItem="{Binding SelectedTargetProperty}"
-                         Style="{StaticResource MappingListBoxStyle}">
+                         Style="{StaticResource MappingListBoxStyle}"
+                         VirtualizingStackPanel.IsVirtualizing="True"
+                         ScrollViewer.CanContentScroll="True">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <Border Padding="4"
@@ -295,7 +387,7 @@
                                             <!-- Rollback instructions: Remove this TextBlock with asterisk -->
                                             <TextBlock Text=" *"
                                                        FontWeight="Bold"
-                                                       Foreground="Red"
+                                                       Foreground="{DynamicResource RequiredIndicatorBrush}"
                                                        Visibility="{Binding IsRequired, Converter={StaticResource BoolToVisibilityConverter}}"
                                                        ToolTip="This property is required for a valid mapping configuration"/>
                                         </StackPanel>
@@ -310,7 +402,8 @@
                                     
                                     <!-- Mapping Indicator -->
                                     <TextBlock Grid.Column="1"
-                                               Text="?"
+                                               Text="&#xE73E;"
+                                               FontFamily="Segoe MDL2 Assets"
                                                FontSize="16"
                                                Foreground="{DynamicResource SuccessBrush}"
                                                VerticalAlignment="Center"
@@ -345,20 +438,28 @@
                     Grid.Column="1"
                     VerticalAlignment="Center"
                     Margin="10,0">
-            <Button Content="Map ?"
+            <Button Style="{StaticResource BaseButtonStyle}"
                     Command="{Binding MapSelectedCommand}"
-                    Style="{StaticResource BaseButtonStyle}"
                     Padding="12,8"
                     Margin="0,4"
                     MinWidth="80"
-                    ToolTip="Map selected property to selected column"/>
-            <Button Content="? Unmap"
+                    ToolTip="Create mapping between selected property and column">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="&#xE71B;" FontFamily="Segoe MDL2 Assets" FontSize="16" Margin="0,0,6,0"/>
+                    <TextBlock Text="Map"/>
+                </StackPanel>
+            </Button>
+            <Button Style="{StaticResource BaseButtonStyle}"
                     Command="{Binding UnmapSelectedCommand}"
-                    Style="{StaticResource BaseButtonStyle}"
                     Padding="12,8"
                     Margin="0,4"
                     MinWidth="80"
-                    ToolTip="Remove mapping from selected property"/>
+                    ToolTip="Remove mapping from selected property">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="&#xEDAE;" FontFamily="Segoe MDL2 Assets" FontSize="16" Margin="0,0,6,0"/>
+                    <TextBlock Text="Unmap"/>
+                </StackPanel>
+            </Button>
         </StackPanel>
         
         <!-- Source Columns (RIGHT Pane) -->
@@ -423,7 +524,9 @@
                 <ListBox Grid.Row="1"
                          ItemsSource="{Binding SourceColumnsView}"
                          SelectedItem="{Binding SelectedSourceColumn}"
-                         Style="{StaticResource MappingListBoxStyle}">
+                         Style="{StaticResource MappingListBoxStyle}"
+                         VirtualizingStackPanel.IsVirtualizing="True"
+                         ScrollViewer.CanContentScroll="True">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <Border Padding="4"

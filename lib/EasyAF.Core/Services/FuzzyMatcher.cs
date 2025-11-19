@@ -127,16 +127,27 @@ namespace EasyAF.Core.Services
         /// <summary>
         /// Normalizes a column/property name for matching by removing spaces, underscores, and converting to lowercase.
         /// This helps match CSV column names like "LV Breakers" to property names like "LVBreakers".
+        /// Also handles numeric representations like "1/2" matching "OneTwoC" or "HalfC".
         /// </summary>
         /// <param name="name">The name to normalize.</param>
-        /// <returns>Normalized name (lowercase, no spaces/underscores/dashes).</returns>
+        /// <returns>Normalized name (lowercase, no spaces/underscores/dashes, numeric substitutions applied).</returns>
         private static string NormalizeColumnName(string name)
         {
-            return name.Replace(" ", "")
+            // First normalize standard separators
+            var normalized = name.Replace(" ", "")
                        .Replace("_", "")
                        .Replace("-", "")
                        .Replace("/", "")
+                       .Replace("(", "")
+                       .Replace(")", "")
                        .ToLowerInvariant();
+            
+            // Handle common numeric representations
+            // "1/2" or "12" ? "onetwo" or "half"
+            normalized = normalized.Replace("12cycle", "onetwocycle");
+            normalized = normalized.Replace("halfcycle", "onetwocycle");
+            
+            return normalized;
         }
 
         /// <summary>

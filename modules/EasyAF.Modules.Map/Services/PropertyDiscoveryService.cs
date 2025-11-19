@@ -26,9 +26,9 @@ namespace EasyAF.Modules.Map.Services
         private readonly Dictionary<string, string> _dataTypeDescriptions = new(); // NEW: Cache for descriptions
 
         // CROSS-MODULE EDIT: 2025-01-16 Required Property Validation
-        // Modified for: Define universal and type-specific required properties
-        // Related modules: Map (PropertyInfo model)
-        // Rollback instructions: Remove UniversalRequiredProperties and DefaultRequiredProperties constants
+        // Modified for: Read [Required] attribute from model properties dynamically (removed hardcoded lists)
+        // Related modules: Data (all model classes with [Required] attributes)
+        // Rollback instructions: Restore UniversalRequiredProperties and DefaultRequiredProperties constants
         
         /// <summary>
         /// Properties that are required for ALL data types.
@@ -306,59 +306,58 @@ namespace EasyAF.Modules.Map.Services
         /// <remarks>
         /// <para>
         /// CROSS-MODULE EDIT: 2025-01-16 Required Property Validation
-        /// Modified for: Implement hybrid required property detection (universal + type-specific + settings override)
-        /// Related modules: None (self-contained in Map module)
-        /// Rollback instructions: Remove this method entirely
+        /// Modified for: Read [Required] attribute from model properties dynamically
+        /// Related modules: Data (all model classes with [Required] attributes)
+        /// Rollback instructions: Revert to hardcoded DefaultRequiredProperties dictionary
         /// </para>
         /// <para>
-        /// Required property determination (in order of precedence):
-        /// 1. Universal required properties (Id, Name) - always included
-        /// 2. Type-specific defaults from DefaultRequiredProperties dictionary
-        /// 3. Settings override (future enhancement) - replaces defaults if present
-        /// </para>
-        /// <para>
-        /// Example for Bus data type:
-        /// - Universal: Id, Name
-        /// - Type-specific: kV
-        /// - Final result: { "Id", "Name", "kV" }
+        /// Required property determination:
+        /// Reads the [Required] attribute directly from the model class properties.
+        /// This ensures the Map Editor always reflects the current model requirements
+        /// without needing manual updates to hardcoded lists.
         /// </para>
         /// </remarks>
         private HashSet<string> GetRequiredPropertyNames(string dataTypeName)
         {
-            var required = new HashSet<string>(UniversalRequiredProperties, StringComparer.OrdinalIgnoreCase);
+            var required = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            // Add type-specific defaults
-            if (DefaultRequiredProperties.TryGetValue(dataTypeName, out var typeDefaults))
+            try
             {
-                required.UnionWith(typeDefaults);
-                Log.Debug("Added {Count} type-specific required properties for {DataType}", 
-                    typeDefaults.Length, dataTypeName);
+                // Get the type from EasyAF.Data.Models
+                var type = typeof(Bus).Assembly
+                    .GetTypes()
+                    .FirstOrDefault(t => t.Name == dataTypeName && t.Namespace == "EasyAF.Data.Models");
+
+                if (type == null)
+                {
+                    Log.Warning("Could not find type {DataType} for required property detection", dataTypeName);
+                    return required;
+                }
+
+                // Scan properties for [Required] attribute
+                var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                    .Where(p => p.CanRead && p.CanWrite);
+
+                foreach (var prop in properties)
+                {
+                    // Check if property has [Required] attribute
+                    var hasRequiredAttr = prop.GetCustomAttribute<RequiredAttribute>() != null;
+                    
+                    if (hasRequiredAttr)
+                    {
+                        required.Add(prop.Name);
+                        Log.Debug("Property {DataType}.{Property} marked as Required (has [Required] attribute)", 
+                            dataTypeName, prop.Name);
+                    }
+                }
+
+                Log.Information("Found {Count} required properties for {DataType} via [Required] attribute: {Properties}", 
+                    required.Count, dataTypeName, string.Join(", ", required));
             }
-
-            // Future Enhancement: Allow settings override
-            // This would let power users customize required properties per data type
-            // Example settings.json:
-            // {
-            //   "Map": {
-            //     "RequiredProperties": {
-            //       "Bus": ["Id", "Name", "kV", "Description"]
-            //     }
-            //   }
-            // }
-            //
-            // Implementation (when needed):
-            // var settingsOverride = _settingsService.GetModuleSettings("Map")
-            //     ?.GetValue<string[]>($"RequiredProperties.{dataTypeName}");
-            // if (settingsOverride != null)
-            // {
-            //     required.Clear();
-            //     required.UnionWith(UniversalRequiredProperties);  // Always keep universals
-            //     required.UnionWith(settingsOverride);
-            //     Log.Information("Applied settings override for required properties: {DataType}", dataTypeName);
-            // }
-
-            Log.Debug("Required properties for {DataType}: {Properties}", 
-                dataTypeName, string.Join(", ", required));
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to detect required properties for {DataType}", dataTypeName);
+            }
 
             return required;
         }

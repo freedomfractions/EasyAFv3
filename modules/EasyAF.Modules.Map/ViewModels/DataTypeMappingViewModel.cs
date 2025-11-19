@@ -914,13 +914,34 @@ namespace EasyAF.Modules.Map.ViewModels
                 // Match each unmapped property to best column
                 foreach (var property in unmappedProperties)
                 {
-                    // Find best matching columns using fuzzy search
+                    // STRATEGY 1: Match against PropertyName
                     var matches = _fuzzyMatcher.FindBestMatches(
                         query: property.PropertyName,
                         candidates: unmappedColumnNames,
-                        maxResults: 1, // Only need the best match
-                        minScore: 0.4, // Lower threshold for reporting (we filter to 0.6 for mapping)
+                        maxResults: 1,
+                        minScore: 0.4,
                         caseSensitive: false);
+
+                    // STRATEGY 2: Also try matching against Description (friendly text) if available
+                    // This handles cases where column names match friendly text like "1/2 Cycle Duty (kA)"
+                    if (!string.IsNullOrWhiteSpace(property.Description))
+                    {
+                        var descriptionMatches = _fuzzyMatcher.FindBestMatches(
+                            query: property.Description,
+                            candidates: unmappedColumnNames,
+                            maxResults: 1,
+                            minScore: 0.4,
+                            caseSensitive: false);
+
+                        // Use description match if it's better than property name match
+                        if (descriptionMatches.Any() && 
+                            (!matches.Any() || descriptionMatches[0].Score > matches[0].Score))
+                        {
+                            matches = descriptionMatches;
+                            Log.Debug("Auto-Map: Using Description match for '{Property}' (Description: '{Description}') - score {Score:P0}",
+                                property.PropertyName, property.Description, descriptionMatches[0].Score);
+                        }
+                    }
 
                     if (!matches.Any())
                     {
@@ -1295,6 +1316,30 @@ namespace EasyAF.Modules.Map.ViewModels
 
             // Update parent tab status
             UpdateTabStatus();
+        }
+
+        /// <summary>
+        /// Gets the user-friendly description for a data type (e.g., "Buses", "LV Breakers").
+        /// </summary>
+        /// <param name="dataType">The raw data type name (e.g., "Bus", "LVBreaker").</param>
+        /// <returns>Friendly display name from [EasyPowerClass] attribute.</returns>
+        public string GetFriendlyDataTypeName(string dataType)
+        {
+            return _propertyDiscovery.GetDataTypeDescription(dataType);
+        }
+
+        /// <summary>
+        /// Gets the currently selected tables from all other tabs (excluding this one).
+        /// </summary>
+        /// <returns>Dictionary where key=dataType, value=TableReference.DisplayName</returns>
+        /// <remarks>
+        /// Used by the cross-tab table exclusivity feature to prevent the same table
+        /// from being selected on multiple tabs simultaneously.
+        /// This method is called when the table dropdown opens to dynamically update availability.
+        /// </remarks>
+        public Dictionary<string, string> GetSelectedTablesFromOtherTabs()
+        {
+            return _parentViewModel.GetSelectedTablesByDataType();
         }
 
         #endregion
