@@ -7,7 +7,11 @@
     <Grid Background="{DynamicResource PrimaryBackgroundBrush}">
         <TabControl ItemsSource="{Binding TabHeaders}"
                     SelectedIndex="{Binding SelectedTabIndex}"
-                    BorderThickness="0">
+                    BorderThickness="0"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    HorizontalContentAlignment="Stretch"
+                    VerticalContentAlignment="Stretch">
             
             <!-- Tab Header Template -->
             <TabControl.ItemTemplate>
@@ -21,7 +25,11 @@
             <!-- Tab Content Template -->
             <TabControl.ContentTemplate>
                 <DataTemplate>
-                    <ContentControl Content="{Binding ViewModel}">
+                    <ContentControl Content="{Binding ViewModel}"
+                                    HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Stretch"
+                                    HorizontalContentAlignment="Stretch"
+                                    VerticalContentAlignment="Stretch">
                         <ContentControl.Resources>
                             <!-- Map ViewModels to Views -->
                             <DataTemplate DataType="{x:Type vm:ProjectSummaryViewModel}">

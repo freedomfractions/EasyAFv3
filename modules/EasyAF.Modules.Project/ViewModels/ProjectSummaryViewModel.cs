@@ -230,6 +230,42 @@ namespace EasyAF.Modules.Project.ViewModels
                     _document.Project.StudyDate = value;
                     _document.MarkDirty();
                     RaisePropertyChanged();
+                    RaisePropertyChanged(nameof(StudyDateValue)); // Notify DatePicker binding
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the Study Date as a DateTime for DatePicker binding.
+        /// </summary>
+        /// <remarks>
+        /// This property converts between the string StudyDate (stored in Project)
+        /// and DateTime? (required by DatePicker).
+        /// Always displays in "MMM dd, yyyy" format regardless of user's regional settings.
+        /// When a date is selected and Revision is blank, auto-populates Revision with "MMMM yyyy".
+        /// </remarks>
+        public DateTime? StudyDateValue
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(StudyDate))
+                    return null;
+                
+                if (DateTime.TryParse(StudyDate, out var date))
+                    return date;
+                
+                return null;
+            }
+            set
+            {
+                // Store in consistent "MMM dd, yyyy" format for all users
+                StudyDate = value?.ToString("MMM dd, yyyy", System.Globalization.CultureInfo.InvariantCulture);
+                
+                // Auto-populate Revision (Study Month) if blank and date is selected
+                if (value.HasValue && string.IsNullOrWhiteSpace(Revision))
+                {
+                    Revision = value.Value.ToString("MMMM yyyy", System.Globalization.CultureInfo.InvariantCulture);
+                    Log.Debug("Auto-populated Revision from Study Date: {Revision}", Revision);
                 }
             }
         }

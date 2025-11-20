@@ -1,218 +1,215 @@
 <UserControl x:Class="EasyAF.Modules.Project.Views.ProjectSummaryView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:conv="clr-namespace:EasyAF.Modules.Project.Converters"
+             HorizontalAlignment="Stretch"
+             VerticalAlignment="Stretch">
+    <UserControl.Resources>
+        <!-- Force GroupBox content to stretch -->
+        <Style TargetType="GroupBox" BasedOn="{StaticResource {x:Type GroupBox}}">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+        </Style>
+        <conv:MultiplyConverter x:Key="MultiplyConverter"/>
+    </UserControl.Resources>
     
     <ScrollViewer VerticalScrollBarVisibility="Auto"
-                  Background="{DynamicResource PrimaryBackgroundBrush}">
-        <Grid Margin="20">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>      <!-- Left column: Metadata + Report -->
-                <ColumnDefinition Width="320"/>    <!-- Right column: Statistics -->
-            </Grid.ColumnDefinitions>
-
-            <!-- LEFT COLUMN: Project Metadata + Report Inputs -->
-            <StackPanel Grid.Column="0" Margin="0,0,8,0">
-                
-                <!-- Project Metadata GroupBox -->
-                <GroupBox Header="Project" Margin="0,0,0,8"
-                          BorderBrush="{DynamicResource ControlBorderBrush}">
-                    <Grid Margin="8">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>   <!-- Label 1 -->
-                            <ColumnDefinition Width="Auto"/>   <!-- Value 1 -->
-                            <ColumnDefinition Width="Auto"/>   <!-- Label 2 -->
-                            <ColumnDefinition Width="*"/>      <!-- Value 2 -->
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>  <!-- Row 0: LB Project # | Site Name -->
-                            <RowDefinition Height="Auto"/>  <!-- Row 1: Client | Study Engineer -->
-                            <RowDefinition Height="Auto"/>  <!-- Row 2: Address Line 1 -->
-                            <RowDefinition Height="Auto"/>  <!-- Row 3: Address Line 2 -->
-                            <RowDefinition Height="Auto"/>  <!-- Row 4: Address Line 3 -->
-                            <RowDefinition Height="Auto"/>  <!-- Row 5: City | State | Zip -->
-                            <RowDefinition Height="Auto"/>  <!-- Row 6: Study Date | Revision -->
-                            <RowDefinition Height="Auto"/>  <!-- Row 7: Comments -->
-                        </Grid.RowDefinitions>
-
-                        <!-- Row 0: LB Project Number | Site Name -->
-                        <TextBlock Grid.Row="0" Grid.Column="0" 
-                                   Text="L&amp;B Project Number:" 
-                                   VerticalAlignment="Center" Margin="0,0,8,0"
-                                   Foreground="{DynamicResource TextPrimaryBrush}"/>
-                        <TextBox Grid.Row="0" Grid.Column="1" 
-                                 Width="140" MaxLength="10"
-                                 Text="{Binding LBProjectNumber, UpdateSourceTrigger=PropertyChanged}"/>
-                        <TextBlock Grid.Row="0" Grid.Column="2" 
-                                   Text="Site Name:" 
-                                   VerticalAlignment="Center" Margin="16,0,8,0"
-                                   Foreground="{DynamicResource TextPrimaryBrush}"/>
-                        <TextBox Grid.Row="0" Grid.Column="3" 
-                                 Text="{Binding SiteName, UpdateSourceTrigger=PropertyChanged}"/>
-
-                        <!-- Row 1: Client | Study Engineer -->
-                        <TextBlock Grid.Row="1" Grid.Column="0" 
-                                   Text="Client:" 
-                                   VerticalAlignment="Center" Margin="0,6,8,0"
-                                   Foreground="{DynamicResource TextPrimaryBrush}"/>
-                        <TextBox Grid.Row="1" Grid.Column="1" 
-                                 Margin="0,6,0,0"
-                                 Text="{Binding Client, UpdateSourceTrigger=PropertyChanged}"/>
-                        <TextBlock Grid.Row="1" Grid.Column="2" 
-                                   Text="Study Engineer:" 
-                                   VerticalAlignment="Center" Margin="16,6,8,0"
-                                   Foreground="{DynamicResource TextPrimaryBrush}"/>
-                        <TextBox Grid.Row="1" Grid.Column="3" 
-                                 Margin="0,6,0,0"
-                                 Text="{Binding StudyEngineer, UpdateSourceTrigger=PropertyChanged}"/>
-
-                        <!-- Row 2: Address Line 1 (spans 3 columns) -->
-                        <TextBlock Grid.Row="2" Grid.Column="0" 
-                                   Text="Address Line 1:" 
-                                   VerticalAlignment="Center" Margin="0,6,8,0"
-                                   Foreground="{DynamicResource TextPrimaryBrush}"/>
-                        <TextBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" 
-                                 Margin="0,6,0,0"
-                                 Text="{Binding AddressLine1, UpdateSourceTrigger=PropertyChanged}"/>
-
-                        <!-- Row 3: Address Line 2 -->
-                        <TextBlock Grid.Row="3" Grid.Column="0" 
-                                   Text="Address Line 2:" 
-                                   VerticalAlignment="Center" Margin="0,6,8,0"
-                                   Foreground="{DynamicResource TextPrimaryBrush}"/>
-                        <TextBox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3" 
-                                 Margin="0,6,0,0"
-                                 Text="{Binding AddressLine2, UpdateSourceTrigger=PropertyChanged}"/>
-
-                        <!-- Row 4: Address Line 3 -->
-                        <TextBlock Grid.Row="4" Grid.Column="0" 
-                                   Text="Address Line 3:" 
-                                   VerticalAlignment="Center" Margin="0,6,8,0"
-                                   Foreground="{DynamicResource TextPrimaryBrush}"/>
-                        <TextBox Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="3" 
-                                 Margin="0,6,0,0"
-                                 Text="{Binding AddressLine3, UpdateSourceTrigger=PropertyChanged}"/>
-
-                        <!-- Row 5: City | State | Zip -->
-                        <TextBlock Grid.Row="5" Grid.Column="0" 
-                                   Text="City:" 
-                                   VerticalAlignment="Center" Margin="0,6,8,0"
-                                   Foreground="{DynamicResource TextPrimaryBrush}"/>
-                        <TextBox Grid.Row="5" Grid.Column="1" 
-                                 Margin="0,6,0,0"
-                                 Text="{Binding City, UpdateSourceTrigger=PropertyChanged}"/>
-                        <TextBlock Grid.Row="5" Grid.Column="2" 
-                                   Text="State:" 
-                                   VerticalAlignment="Center" Margin="16,6,8,0"
-                                   Foreground="{DynamicResource TextPrimaryBrush}"/>
-                        <StackPanel Grid.Row="5" Grid.Column="3" 
-                                    Orientation="Horizontal" Margin="0,6,0,0">
-                            <TextBox Width="40" MaxLength="2" CharacterCasing="Upper"
-                                     Text="{Binding State, UpdateSourceTrigger=PropertyChanged}"/>
-                            <TextBlock Text="Zip:" VerticalAlignment="Center" Margin="12,0,8,0"
-                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
-                            <TextBox Width="80" MaxLength="5"
-                                     Text="{Binding Zip, UpdateSourceTrigger=PropertyChanged}"/>
-                        </StackPanel>
-
-                        <!-- Row 6: Study Date | Revision Month -->
-                        <TextBlock Grid.Row="6" Grid.Column="0" 
-                                   Text="Study Date:" 
-                                   VerticalAlignment="Center" Margin="0,6,8,0"
-                                   Foreground="{DynamicResource TextPrimaryBrush}"/>
-                        <TextBox Grid.Row="6" Grid.Column="1" 
-                                 Margin="0,6,0,0"
-                                 Text="{Binding StudyDate, UpdateSourceTrigger=PropertyChanged}"/>
-                        <TextBlock Grid.Row="6" Grid.Column="2" 
-                                   Text="Revision Month:" 
-                                   VerticalAlignment="Center" Margin="16,6,8,0"
-                                   Foreground="{DynamicResource TextPrimaryBrush}"/>
-                        <TextBox Grid.Row="6" Grid.Column="3" 
-                                 Margin="0,6,0,0"
-                                 Text="{Binding Revision, UpdateSourceTrigger=PropertyChanged}"/>
-
-                        <!-- Row 7: Comments (multiline) -->
-                        <TextBlock Grid.Row="7" Grid.Column="0" 
-                                   Text="Comments:" 
-                                   VerticalAlignment="Top" Margin="0,6,8,0"
-                                   Foreground="{DynamicResource TextPrimaryBrush}"/>
-                        <TextBox Grid.Row="7" Grid.Column="1" Grid.ColumnSpan="3" 
-                                 Margin="0,6,0,0" AcceptsReturn="True" TextWrapping="Wrap" 
-                                 Height="80" VerticalScrollBarVisibility="Auto"
-                                 Text="{Binding Comments, UpdateSourceTrigger=PropertyChanged}"/>
-                    </Grid>
-                </GroupBox>
-
-                <!-- Report GroupBox -->
-                <GroupBox Header="Report" 
-                          BorderBrush="{DynamicResource ControlBorderBrush}">
-                    <Grid Margin="8">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-
-                        <!-- Map -->
-                        <TextBlock Grid.Row="0" Text="Map:" 
-                                   VerticalAlignment="Center" Margin="0,0,8,0"
-                                   Foreground="{DynamicResource TextPrimaryBrush}"/>
-                        <TextBox Grid.Row="0" Grid.Column="1" 
-                                 Margin="0,0,8,0"
-                                 Text="{Binding MapPath, UpdateSourceTrigger=PropertyChanged}"/>
-                        <Button Grid.Row="0" Grid.Column="2" 
-                                Content="Browse" 
-                                Command="{Binding BrowseMapCommand}"/>
-
-                        <!-- Spec -->
-                        <TextBlock Grid.Row="1" Text="Spec:" 
-                                   VerticalAlignment="Center" Margin="0,8,8,0"
-                                   Foreground="{DynamicResource TextPrimaryBrush}"/>
-                        <TextBox Grid.Row="1" Grid.Column="1" 
-                                 Margin="0,8,8,0"
-                                 Text="{Binding SpecPath, UpdateSourceTrigger=PropertyChanged}"/>
-                        <Button Grid.Row="1" Grid.Column="2" 
-                                Content="Browse" Margin="0,8,0,0"
-                                Command="{Binding BrowseSpecCommand}"/>
-
-                        <!-- Template -->
-                        <TextBlock Grid.Row="2" Text="Template:" 
-                                   VerticalAlignment="Center" Margin="0,8,8,0"
-                                   Foreground="{DynamicResource TextPrimaryBrush}"/>
-                        <TextBox Grid.Row="2" Grid.Column="1" 
-                                 Margin="0,8,8,0"
-                                 Text="{Binding TemplatePath, UpdateSourceTrigger=PropertyChanged}"/>
-                        <Button Grid.Row="2" Grid.Column="2" 
-                                Content="Browse" Margin="0,8,0,0"
-                                Command="{Binding BrowseTemplateCommand}"/>
-
-                        <!-- Output Folder -->
-                        <TextBlock Grid.Row="3" Text="Output Folder:" 
-                                   VerticalAlignment="Center" Margin="0,8,8,0"
-                                   Foreground="{DynamicResource TextPrimaryBrush}"/>
-                        <TextBox Grid.Row="3" Grid.Column="1" 
-                                 Margin="0,8,8,0"
-                                 Text="{Binding OutputPath, UpdateSourceTrigger=PropertyChanged}"/>
-                        <Button Grid.Row="3" Grid.Column="2" 
-                                Content="Browse" Margin="0,8,0,0"
-                                Command="{Binding BrowseOutputCommand}"/>
-                    </Grid>
-                </GroupBox>
-                
-            </StackPanel>
-
-            <!-- RIGHT COLUMN: Project Summary (Statistics) -->
-            <GroupBox Grid.Column="1" Header="Project Summary" 
+                  HorizontalScrollBarVisibility="Disabled"
+                  Background="{DynamicResource PrimaryBackgroundBrush}"
+                  HorizontalAlignment="Stretch"
+                  VerticalAlignment="Stretch"
+                  Padding="0,0,0,0">
+        <!-- Bind inner Grid width to viewport so ScrollViewer's infinite measure doesn't collapse stretch -->
+        <!-- Constrain to reasonable max width for readability -->
+        <Grid Margin="20,20,0,20"
+              Width="{Binding ViewportWidth, RelativeSource={RelativeSource AncestorType=ScrollViewer}}"
+              MaxWidth="1200"
+              x:Name="MainProjectGrid">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            
+            <!-- Project GroupBox -->
+            <GroupBox Grid.Row="0"
+                      Header="Project" 
+                      Margin="0,0,0,16"
+                      HorizontalAlignment="Stretch"
                       BorderBrush="{DynamicResource ControlBorderBrush}">
-                <StackPanel Margin="8">
+                <Grid x:Name="ProjectFieldsGrid" Margin="8" Grid.IsSharedSizeScope="True">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="Label1"/>    <!-- Label 1 - auto-size to content -->
+                        <ColumnDefinition Width="1.5*"/>    <!-- Values column 1 (proportional) -->
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="Label2"/>    <!-- Label 2 - auto-size to content -->
+                        <ColumnDefinition Width="2*"/>      <!-- Values column 2 (more space) -->
+                        <ColumnDefinition Width="Auto"/>    <!-- State label - auto-size -->
+                        <ColumnDefinition Width="0.5*"/>    <!-- State field - minimal stretch -->
+                        <ColumnDefinition Width="Auto"/>    <!-- Zip label - auto-size -->
+                        <ColumnDefinition Width="0.5*"/>    <!-- Zip field - minimal stretch -->
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="32"/>
+                        <RowDefinition Height="32"/>
+                        <RowDefinition Height="32"/>
+                        <RowDefinition Height="32"/>
+                        <RowDefinition Height="32"/>
+                        <RowDefinition Height="32"/>
+                        <RowDefinition Height="32"/>
+                        <RowDefinition Height="12"/>  <!-- Spacer row before Comments -->
+                        <RowDefinition Height="80"/>  <!-- Comments row -->
+                    </Grid.RowDefinitions>
+                    
+                    <!-- Row 0: LB Project Number | Site Name -->
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="LB Project Number:" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding LBProjectNumber, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" Margin="0,0,20,0" HorizontalAlignment="Stretch"/>
+                    
+                    <TextBlock Grid.Row="0" Grid.Column="2" Text="Site Name:" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                    <TextBox Grid.Row="0" Grid.Column="3" Grid.ColumnSpan="5" Text="{Binding SiteName, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+                    
+                    <!-- Row 1: Client | Study Engineer -->
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Client:" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Client, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" Margin="0,0,20,0" HorizontalAlignment="Stretch"/>
+                    
+                    <TextBlock Grid.Row="1" Grid.Column="2" Text="Study Engineer:" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                    <TextBox Grid.Row="1" Grid.Column="3" Grid.ColumnSpan="5" Text="{Binding StudyEngineer, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+                    
+                    <!-- Row 2: Address Line 1 -->
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Address Line 1:" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                    <TextBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="7" Text="{Binding AddressLine1, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+                    
+                    <!-- Row 3: Address Line 2 -->
+                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Address Line 2:" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                    <TextBox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="7" Text="{Binding AddressLine2, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+                    
+                    <!-- Row 4: Address Line 3 -->
+                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Address Line 3:" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                    <TextBox Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="7" Text="{Binding AddressLine3, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+                    
+                    <!-- Row 5: City | State | Zip - Nested grid with 90% growth rate -->
+                    <Grid Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="8" HorizontalAlignment="Left"
+                          Width="{Binding ActualWidth, ElementName=ProjectFieldsGrid, Converter={StaticResource MultiplyConverter}, ConverterParameter=0.9}"
+                          MaxWidth="1080">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="Label1"/>    <!-- Label: City - matches main grid -->
+                            <ColumnDefinition Width="1.5*"/>    <!-- Field: City -->
+                            <ColumnDefinition Width="Auto"/>    <!-- Label: State -->
+                            <ColumnDefinition Width="0.5*"/>    <!-- Field: State -->
+                            <ColumnDefinition Width="Auto"/>    <!-- Label: Zip -->
+                            <ColumnDefinition Width="0.5*"/>    <!-- Field: Zip -->
+                        </Grid.ColumnDefinitions>
+                        
+                        <TextBlock Grid.Column="0" Text="City:" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                        <TextBox Grid.Column="1" Text="{Binding City, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" Margin="0,0,20,0" HorizontalAlignment="Stretch"/>
+                        
+                        <TextBlock Grid.Column="2" Text="State:" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                        <ComboBox Grid.Column="3" SelectedItem="{Binding State, UpdateSourceTrigger=PropertyChanged}" 
+                                  VerticalAlignment="Center" Margin="0,0,20,0" HorizontalAlignment="Stretch" IsEditable="True">
+                            <ComboBox.Items>
+                                <ComboBoxItem Content="AL"/>
+                                <ComboBoxItem Content="AK"/>
+                                <ComboBoxItem Content="AZ"/>
+                                <ComboBoxItem Content="AR"/>
+                                <ComboBoxItem Content="CA"/>
+                                <ComboBoxItem Content="CO"/>
+                                <ComboBoxItem Content="CT"/>
+                                <ComboBoxItem Content="DE"/>
+                                <ComboBoxItem Content="FL"/>
+                                <ComboBoxItem Content="GA"/>
+                                <ComboBoxItem Content="HI"/>
+                                <ComboBoxItem Content="ID"/>
+                                <ComboBoxItem Content="IL"/>
+                                <ComboBoxItem Content="IN"/>
+                                <ComboBoxItem Content="IA"/>
+                                <ComboBoxItem Content="KS"/>
+                                <ComboBoxItem Content="KY"/>
+                                <ComboBoxItem Content="LA"/>
+                                <ComboBoxItem Content="ME"/>
+                                <ComboBoxItem Content="MD"/>
+                                <ComboBoxItem Content="MA"/>
+                                <ComboBoxItem Content="MI"/>
+                                <ComboBoxItem Content="MN"/>
+                                <ComboBoxItem Content="MS"/>
+                                <ComboBoxItem Content="MO"/>
+                                <ComboBoxItem Content="MT"/>
+                                <ComboBoxItem Content="NE"/>
+                                <ComboBoxItem Content="NV"/>
+                                <ComboBoxItem Content="NH"/>
+                                <ComboBoxItem Content="NJ"/>
+                                <ComboBoxItem Content="NM"/>
+                                <ComboBoxItem Content="NY"/>
+                                <ComboBoxItem Content="NC"/>
+                                <ComboBoxItem Content="ND"/>
+                                <ComboBoxItem Content="OH"/>
+                                <ComboBoxItem Content="OK"/>
+                                <ComboBoxItem Content="OR"/>
+                                <ComboBoxItem Content="PA"/>
+                                <ComboBoxItem Content="RI"/>
+                                <ComboBoxItem Content="SC"/>
+                                <ComboBoxItem Content="SD"/>
+                                <ComboBoxItem Content="TN"/>
+                                <ComboBoxItem Content="TX"/>
+                                <ComboBoxItem Content="UT"/>
+                                <ComboBoxItem Content="VT"/>
+                                <ComboBoxItem Content="VA"/>
+                                <ComboBoxItem Content="WA"/>
+                                <ComboBoxItem Content="WV"/>
+                                <ComboBoxItem Content="WI"/>
+                                <ComboBoxItem Content="WY"/>
+                            </ComboBox.Items>
+                        </ComboBox>
+                        
+                        <TextBlock Grid.Column="4" Text="Zip:" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                        <TextBox Grid.Column="5" Text="{Binding Zip, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" MaxLength="5" HorizontalAlignment="Stretch"/>
+                    </Grid>
+                    
+                    <!-- Row 6: Study Date | Revision Month - Nested grid with 90% growth rate -->
+                    <Grid Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="8" HorizontalAlignment="Left"
+                          Width="{Binding ActualWidth, ElementName=ProjectFieldsGrid, Converter={StaticResource MultiplyConverter}, ConverterParameter=0.9}"
+                          MaxWidth="1080">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="Label1"/>    <!-- Label: Study Date - matches main grid -->
+                            <ColumnDefinition Width="1*"/>      <!-- Field: Study Date -->
+                            <ColumnDefinition Width="Auto"/>    <!-- Label: Revision -->
+                            <ColumnDefinition Width="1.5*"/>    <!-- Field: Revision -->
+                        </Grid.ColumnDefinitions>
+                        
+                        <TextBlock Grid.Column="0" Text="Study Date:" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                        <DatePicker Grid.Column="1" SelectedDate="{Binding StudyDateValue, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" Margin="0,0,20,0" HorizontalAlignment="Stretch"/>
+                        
+                        <TextBlock Grid.Column="2" Text="Revision Month:" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                        <TextBox Grid.Column="3" Text="{Binding Revision, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+                    </Grid>
+                    
+                    <!-- Row 7: Spacer (empty) -->
+                    
+                    <!-- Row 8: Comments -->
+                    <TextBlock Grid.Row="8" Grid.Column="0" Text="Comments:" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                    <TextBox Grid.Row="8" Grid.Column="1" Grid.ColumnSpan="7" 
+                             Text="{Binding Comments, UpdateSourceTrigger=PropertyChanged}" 
+                             TextWrapping="Wrap" 
+                             AcceptsReturn="True" 
+                             VerticalScrollBarVisibility="Auto"
+                             HorizontalAlignment="Stretch"
+                             VerticalAlignment="Stretch"/>
+                </Grid>
+            </GroupBox>
+            
+            <!-- Project Summary GroupBox -->
+            <GroupBox Grid.Row="1"
+                      Header="Project Summary" 
+                      Margin="0,0,0,16"
+                      HorizontalAlignment="Stretch"
+                      BorderBrush="{DynamicResource ControlBorderBrush}">
+                <Grid Margin="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
                     
                     <!-- New Data GroupBox -->
-                    <GroupBox Header="New Data" Margin="0,0,0,8"
+                    <GroupBox Grid.Column="0" Header="New Data"
+                              HorizontalAlignment="Stretch"
                               BorderBrush="{DynamicResource ControlBorderBrush}">
                         <Grid Margin="8">
                             <Grid.ColumnDefinitions>
@@ -220,94 +217,106 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="24"/>
+                                <RowDefinition Height="24"/>
+                                <RowDefinition Height="24"/>
+                                <RowDefinition Height="24"/>
+                                <RowDefinition Height="24"/>
                             </Grid.RowDefinitions>
+                            
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Buses" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding NewBusCount}" Margin="8,0,0,0" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                            
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Breakers" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding NewBreakerCount}" Margin="8,0,0,0" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                            
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Fuses" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding NewFuseCount}" Margin="8,0,0,0" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                            
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Short Circuit" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding NewShortCircuitCount}" Margin="8,0,0,0" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                            
 
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Buses"
-                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
-                            <TextBlock Grid.Row="0" Grid.Column="1" 
-                                       Text="{Binding NewBusCount}"
-                                       Foreground="{DynamicResource TextSecondaryBrush}"/>
-                            
-                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Breakers"
-                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
-                            <TextBlock Grid.Row="1" Grid.Column="1" 
-                                       Text="{Binding NewBreakerCount}"
-                                       Foreground="{DynamicResource TextSecondaryBrush}"/>
-                            
-                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Fuses"
-                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
-                            <TextBlock Grid.Row="2" Grid.Column="1" 
-                                       Text="{Binding NewFuseCount}"
-                                       Foreground="{DynamicResource TextSecondaryBrush}"/>
-                            
-                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Short Circuit"
-                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
-                            <TextBlock Grid.Row="3" Grid.Column="1" 
-                                       Text="{Binding NewShortCircuitCount}"
-                                       Foreground="{DynamicResource TextSecondaryBrush}"/>
-                            
-                            <TextBlock Grid.Row="4" Grid.Column="0" Text="Arc Flash"
-                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
-                            <TextBlock Grid.Row="4" Grid.Column="1" 
-                                       Text="{Binding NewArcFlashCount}"
-                                       Foreground="{DynamicResource TextSecondaryBrush}"/>
-                        </Grid>
-                    </GroupBox>
-
-                    <!-- Old Data GroupBox -->
-                    <GroupBox Header="Old Data"
-                              BorderBrush="{DynamicResource ControlBorderBrush}">
-                        <Grid Margin="8">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Buses"
-                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
-                            <TextBlock Grid.Row="0" Grid.Column="1" 
-                                       Text="{Binding OldBusCount}"
-                                       Foreground="{DynamicResource TextSecondaryBrush}"/>
-                            
-                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Breakers"
-                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
-                            <TextBlock Grid.Row="1" Grid.Column="1" 
-                                       Text="{Binding OldBreakerCount}"
-                                       Foreground="{DynamicResource TextSecondaryBrush}"/>
-                            
-                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Fuses"
-                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
-                            <TextBlock Grid.Row="2" Grid.Column="1" 
-                                       Text="{Binding OldFuseCount}"
-                                       Foreground="{DynamicResource TextSecondaryBrush}"/>
-                            
-                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Short Circuit"
-                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
-                            <TextBlock Grid.Row="3" Grid.Column="1" 
-                                       Text="{Binding OldShortCircuitCount}"
-                                       Foreground="{DynamicResource TextSecondaryBrush}"/>
-                            
-                            <TextBlock Grid.Row="4" Grid.Column="0" Text="Arc Flash"
-                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
-                            <TextBlock Grid.Row="4" Grid.Column="1" 
-                                       Text="{Binding OldArcFlashCount}"
-                                       Foreground="{DynamicResource TextSecondaryBrush}"/>
+                            <TextBlock Grid.Row="4" Grid.Column="0" Text="Arc Flash" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding NewArcFlashCount}" Margin="8,0,0,0" Foreground="{DynamicResource TextSecondaryBrush}"/>
                         </Grid>
                     </GroupBox>
                     
-                </StackPanel>
+                    <!-- Old Data GroupBox -->
+                    <GroupBox Grid.Column="2" Header="Old Data"
+                              HorizontalAlignment="Stretch"
+                              BorderBrush="{DynamicResource ControlBorderBrush}">
+                        <Grid Margin="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="24"/>
+                                <RowDefinition Height="24"/>
+                                <RowDefinition Height="24"/>
+                                <RowDefinition Height="24"/>
+                                <RowDefinition Height="24"/>
+                            </Grid.RowDefinitions>
+                            
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Buses" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding OldBusCount}" Margin="8,0,0,0" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                            
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Breakers" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding OldBreakerCount}" Margin="8,0,0,0" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                            
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Fuses" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding OldFuseCount}" Margin="8,0,0,0" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                            
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Short Circuit" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding OldShortCircuitCount}" Margin="8,0,0,0" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                            
+
+                            <TextBlock Grid.Row="4" Grid.Column="0" Text="Arc Flash" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding OldArcFlashCount}" Margin="8,0,0,0" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        </Grid>
+                    </GroupBox>
+                </Grid>
+            </GroupBox>
+            
+            <!-- Report GroupBox -->
+            <GroupBox Grid.Row="2"
+                      Header="Report"
+                      HorizontalAlignment="Stretch"
+                      BorderBrush="{DynamicResource ControlBorderBrush}">
+                <Grid Margin="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="140"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="32"/>
+                        <RowDefinition Height="32"/>
+                        <RowDefinition Height="32"/>
+                        <RowDefinition Height="32"/>
+                    </Grid.RowDefinitions>
+                    
+                    <!-- Map Path -->
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Map:" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding MapPath, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" Margin="0,0,8,0" HorizontalAlignment="Stretch"/>
+                    <Button Grid.Row="0" Grid.Column="2" Content="Browse..." Command="{Binding BrowseMapCommand}" Padding="8,4" Style="{StaticResource BaseButtonStyle}"/>
+                    
+                    <!-- Spec Path -->
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Spec:" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding SpecPath, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" Margin="0,0,8,0" HorizontalAlignment="Stretch"/>
+                    <Button Grid.Row="1" Grid.Column="2" Content="Browse..." Command="{Binding BrowseSpecCommand}" Padding="8,4" Style="{StaticResource BaseButtonStyle}"/>
+                    
+                    <!-- Template Path -->
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Template:" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding TemplatePath, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" Margin="0,0,8,0" HorizontalAlignment="Stretch"/>
+                    <Button Grid.Row="2" Grid.Column="2" Content="Browse..." Command="{Binding BrowseTemplateCommand}" Padding="8,4" Style="{StaticResource BaseButtonStyle}"/>
+                    
+                    <!-- Output Folder -->
+                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Output Folder:" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                    <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding OutputPath, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" Margin="0,0,8,0" HorizontalAlignment="Stretch"/>
+                    <Button Grid.Row="3" Grid.Column="2" Content="Browse..." Command="{Binding BrowseOutputCommand}" Padding="8,4" Style="{StaticResource BaseButtonStyle}"/>
+                </Grid>
             </GroupBox>
             
         </Grid>
