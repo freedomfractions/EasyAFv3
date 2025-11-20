@@ -33,7 +33,7 @@
             <!-- Project GroupBox -->
             <GroupBox Grid.Row="0"
                       Header="Project" 
-                      Margin="0,0,0,16"
+                      Margin="0,0,22,16"
                       HorizontalAlignment="Stretch"
                       BorderBrush="{DynamicResource ControlBorderBrush}">
                 <Grid x:Name="ProjectFieldsGrid" Margin="8" Grid.IsSharedSizeScope="True">
@@ -197,7 +197,7 @@
             <!-- Project Summary GroupBox -->
             <GroupBox Grid.Row="1"
                       Header="Project Summary" 
-                      Margin="0,0,0,16"
+                      Margin="0,0,22,16"
                       HorizontalAlignment="Stretch"
                       BorderBrush="{DynamicResource ControlBorderBrush}">
                 <Grid Margin="8">
@@ -282,6 +282,7 @@
             <!-- Report GroupBox -->
             <GroupBox Grid.Row="2"
                       Header="Report"
+                      Margin="0,0,22,0"
                       HorizontalAlignment="Stretch"
                       BorderBrush="{DynamicResource ControlBorderBrush}">
                 <Grid Margin="8">
