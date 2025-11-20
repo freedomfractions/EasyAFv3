@@ -27,6 +27,8 @@ namespace EasyAF.Modules.Project
     /// </remarks>
     public class ProjectModule : IDocumentModule
     {
+        private IUnityContainer? _container;
+
         /// <summary>
         /// Gets the display name of this module.
         /// </summary>
@@ -69,6 +71,9 @@ namespace EasyAF.Modules.Project
         {
             Log.Information("Initializing Project module v{Version}", ModuleVersion);
             
+            // Store container reference for later use
+            _container = container ?? throw new ArgumentNullException(nameof(container));
+            
             // TODO Task 20: Register ProjectDocumentViewModel
             // TODO Task 20: Register ProjectSummaryViewModel
             // TODO Task 21: Register DataTypeTabViewModel
@@ -89,8 +94,12 @@ namespace EasyAF.Modules.Project
             document.OwnerModule = this;
             document.MarkDirty(); // New documents are dirty until saved
             
+            // Resolve IUserDialogService from container
+            var dialogService = _container?.Resolve<IUserDialogService>() 
+                ?? throw new InvalidOperationException("IUserDialogService not registered in container");
+            
             // Create ViewModel for the document
-            var viewModel = new ViewModels.ProjectDocumentViewModel(document);
+            var viewModel = new ViewModels.ProjectDocumentViewModel(document, dialogService);
             
             // Store ViewModel in a way the shell can access it
             // (Shell uses DataTemplate to render based on document type)
@@ -128,8 +137,12 @@ namespace EasyAF.Modules.Project
             var document = ProjectDocument.LoadFrom(filePath);
             document.OwnerModule = this;
             
+            // Resolve IUserDialogService from container
+            var dialogService = _container?.Resolve<IUserDialogService>() 
+                ?? throw new InvalidOperationException("IUserDialogService not registered in container");
+            
             // Create ViewModel for the document
-            var viewModel = new ViewModels.ProjectDocumentViewModel(document);
+            var viewModel = new ViewModels.ProjectDocumentViewModel(document, dialogService);
             SetDocumentViewModel(document, viewModel);
             
             Log.Information("Project document opened successfully: {FilePath}", filePath);

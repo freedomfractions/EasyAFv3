@@ -57,6 +57,8 @@
                         <RowDefinition Height="32"/>
                         <RowDefinition Height="12"/>  <!-- Spacer row before Comments -->
                         <RowDefinition Height="80"/>  <!-- Comments row -->
+                        <RowDefinition Height="12"/>  <!-- Spacer row before Project Type -->
+                        <RowDefinition Height="32"/>  <!-- Project Type row -->
                     </Grid.RowDefinitions>
                     
                     <!-- Row 0: LB Project Number | Site Name -->
@@ -183,7 +185,7 @@
                     <!-- Row 7: Spacer (empty) -->
                     
                     <!-- Row 8: Comments -->
-                    <TextBlock Grid.Row="8" Grid.Column="0" Text="Comments:" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                    <TextBlock Grid.Row="8" Grid.Column="0" Text="Comments:" VerticalAlignment="Top" Margin="0,4,8,0" Foreground="{DynamicResource TextPrimaryBrush}"/>
                     <TextBox Grid.Row="8" Grid.Column="1" Grid.ColumnSpan="7" 
                              Text="{Binding Comments, UpdateSourceTrigger=PropertyChanged}" 
                              TextWrapping="Wrap" 
@@ -191,6 +193,22 @@
                              VerticalScrollBarVisibility="Auto"
                              HorizontalAlignment="Stretch"
                              VerticalAlignment="Stretch"/>
+                    
+                    <!-- Row 9: Spacer (empty) -->
+                    
+                    <!-- Row 10: Project Type -->
+                    <TextBlock Grid.Row="10" Grid.Column="0" Text="Project Type:" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                    <StackPanel Grid.Row="10" Grid.Column="1" Grid.ColumnSpan="7" Orientation="Horizontal">
+                        <RadioButton Content="Standard EasyPower Model" 
+                                     IsChecked="{Binding IsStandardProjectType}" 
+                                     GroupName="ProjectType" 
+                                     Margin="0,0,20,0"
+                                     VerticalAlignment="Center"/>
+                        <RadioButton Content="Composite Model" 
+                                     IsChecked="{Binding IsCompositeProjectType}" 
+                                     GroupName="ProjectType"
+                                     VerticalAlignment="Center"/>
+                    </StackPanel>
                 </Grid>
             </GroupBox>
             

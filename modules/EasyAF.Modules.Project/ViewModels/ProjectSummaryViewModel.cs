@@ -7,6 +7,8 @@ using Microsoft.Win32;
 using Prism.Commands;
 using Prism.Mvvm;
 using EasyAF.Modules.Project.Models;
+using EasyAF.Data.Models;
+using EasyAF.Core.Contracts;
 using Serilog;
 
 namespace EasyAF.Modules.Project.ViewModels
@@ -19,20 +21,24 @@ namespace EasyAF.Modules.Project.ViewModels
     /// - Project metadata editing (LB Project Number, Site Name, Client, etc.)
     /// - File management (add/remove referenced files)
     /// - Data statistics (equipment counts for New/Old data)
+    /// - Project type selection (Standard vs Composite pipeline)
     /// </remarks>
     public class ProjectSummaryViewModel : BindableBase, IDisposable
     {
         private readonly ProjectDocument _document;
+        private readonly IUserDialogService _dialogService;
         private bool _disposed;
 
         /// <summary>
         /// Initializes a new instance of the ProjectSummaryViewModel.
         /// </summary>
         /// <param name="document">The project document.</param>
-        /// <exception cref="ArgumentNullException">If document is null.</exception>
-        public ProjectSummaryViewModel(ProjectDocument document)
+        /// <param name="dialogService">Service for showing user dialogs.</param>
+        /// <exception cref="ArgumentNullException">If document or dialogService is null.</exception>
+        public ProjectSummaryViewModel(ProjectDocument document, IUserDialogService dialogService)
         {
             _document = document ?? throw new ArgumentNullException(nameof(document));
+            _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
 
             // Commands
             AddFileCommand = new DelegateCommand(ExecuteAddFile);
@@ -304,6 +310,84 @@ namespace EasyAF.Modules.Project.ViewModels
             }
         }
 
+        /// <summary>
+        /// Gets or sets the Project Type (Standard or Composite pipeline).
+        /// </summary>
+        /// <remarks>
+        /// CRITICAL: Changing this value requires purging all dataset entries to prevent invalid data.
+        /// User will be prompted with a confirmation dialog if datasets contain data.
+        /// Summary information is preserved.
+        /// </remarks>
+        public ProjectType ProjectType
+        {
+            get => _document.Project.ProjectType;
+            set
+            {
+                if (_document.Project.ProjectType != value)
+                {
+                    // Check if datasets have data
+                    if (HasDatasetEntries())
+                    {
+                        // Show confirmation dialog
+                        var confirmed = _dialogService.Confirm(
+                            "Changing the project type will delete all imported data to prevent invalid reports.\n\n" +
+                            "Summary information (metadata, file paths) will be preserved.\n\n" +
+                            "All equipment entries and calculation results will be lost.\n\n" +
+                            "Are you sure you want to continue?",
+                            "Confirm Project Type Change");
+
+                        if (!confirmed)
+                        {
+                            // User cancelled - revert the UI
+                            RaisePropertyChanged();
+                            Log.Information("User cancelled project type change");
+                            return;
+                        }
+
+                        // User confirmed - purge datasets
+                        PurgeDatasets();
+                        Log.Warning("Project type changed from {Old} to {New} - datasets purged",
+                            _document.Project.ProjectType, value);
+                    }
+
+                    _document.Project.ProjectType = value;
+                    _document.MarkDirty();
+                    RaisePropertyChanged();
+                    RaisePropertyChanged(nameof(IsStandardProjectType));
+                    RaisePropertyChanged(nameof(IsCompositeProjectType));
+                    RefreshStatistics(); // Update counts to show 0
+
+                    Log.Information("Project type set to: {ProjectType}", value);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets whether the Standard project type is selected.
+        /// </summary>
+        public bool IsStandardProjectType
+        {
+            get => ProjectType == ProjectType.Standard;
+            set
+            {
+                if (value)
+                    ProjectType = ProjectType.Standard;
+            }
+        }
+
+        /// <summary>
+        /// Gets whether the Composite project type is selected.
+        /// </summary>
+        public bool IsCompositeProjectType
+        {
+            get => ProjectType == ProjectType.Composite;
+            set
+            {
+                if (value)
+                    ProjectType = ProjectType.Composite;
+            }
+        }
+
         #endregion
 
         #region File Paths (Report Section)
@@ -547,6 +631,73 @@ namespace EasyAF.Modules.Project.ViewModels
             RaisePropertyChanged(nameof(OldFuseCount));
             RaisePropertyChanged(nameof(OldShortCircuitCount));
             RaisePropertyChanged(nameof(OldArcFlashCount));
+        }
+
+        /// <summary>
+        /// Checks if either NewData or OldData contains any entries.
+        /// </summary>
+        /// <returns>True if any data exists, false if both datasets are empty.</returns>
+        private bool HasDatasetEntries()
+        {
+            return HasDatasetEntriesInternal(_document.Project.NewData) ||
+                   HasDatasetEntriesInternal(_document.Project.OldData);
+        }
+
+        /// <summary>
+        /// Checks if a specific DataSet has any entries.
+        /// </summary>
+        private bool HasDatasetEntriesInternal(DataSet? dataset)
+        {
+            if (dataset == null) return false;
+
+            // Check all dictionary properties for entries
+            return (dataset.BusEntries?.Count ?? 0) > 0 ||
+                   (dataset.LVBreakerEntries?.Count ?? 0) > 0 ||
+                   (dataset.FuseEntries?.Count ?? 0) > 0 ||
+                   (dataset.CableEntries?.Count ?? 0) > 0 ||
+                   (dataset.ArcFlashEntries?.Count ?? 0) > 0 ||
+                   (dataset.ShortCircuitEntries?.Count ?? 0) > 0 ||
+                   (dataset.AFDEntries?.Count ?? 0) > 0 ||
+                   (dataset.ATSEntries?.Count ?? 0) > 0 ||
+                   (dataset.BatteryEntries?.Count ?? 0) > 0 ||
+                   (dataset.BuswayEntries?.Count ?? 0) > 0 ||
+                   (dataset.CapacitorEntries?.Count ?? 0) > 0 ||
+                   (dataset.CLReactorEntries?.Count ?? 0) > 0 ||
+                   (dataset.CTEntries?.Count ?? 0) > 0 ||
+                   (dataset.FilterEntries?.Count ?? 0) > 0 ||
+                   (dataset.GeneratorEntries?.Count ?? 0) > 0 ||
+                   (dataset.HVBreakerEntries?.Count ?? 0) > 0 ||
+                   (dataset.InverterEntries?.Count ?? 0) > 0 ||
+                   (dataset.LoadEntries?.Count ?? 0) > 0 ||
+                   (dataset.MCCEntries?.Count ?? 0) > 0 ||
+                   (dataset.MeterEntries?.Count ?? 0) > 0 ||
+                   (dataset.MotorEntries?.Count ?? 0) > 0 ||
+                   (dataset.PanelEntries?.Count ?? 0) > 0 ||
+                   (dataset.PhotovoltaicEntries?.Count ?? 0) > 0 ||
+                   (dataset.POCEntries?.Count ?? 0) > 0 ||
+                   (dataset.RectifierEntries?.Count ?? 0) > 0 ||
+                   (dataset.RelayEntries?.Count ?? 0) > 0 ||
+                   (dataset.ShuntEntries?.Count ?? 0) > 0 ||
+                   (dataset.SwitchEntries?.Count ?? 0) > 0 ||
+                   (dataset.Transformer2WEntries?.Count ?? 0) > 0 ||
+                   (dataset.Transformer3WEntries?.Count ?? 0) > 0 ||
+                   (dataset.TransmissionLineEntries?.Count ?? 0) > 0 ||
+                   (dataset.UPSEntries?.Count ?? 0) > 0 ||
+                   (dataset.UtilityEntries?.Count ?? 0) > 0 ||
+                   (dataset.ZigzagTransformerEntries?.Count ?? 0) > 0;
+        }
+
+        /// <summary>
+        /// Purges all entries from NewData and OldData datasets.
+        /// Summary information is preserved.
+        /// </summary>
+        private void PurgeDatasets()
+        {
+            // Create fresh empty datasets
+            _document.Project.NewData = new DataSet();
+            _document.Project.OldData = new DataSet();
+
+            Log.Information("Datasets purged due to project type change");
         }
 
         #endregion

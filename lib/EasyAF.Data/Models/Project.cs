@@ -44,6 +44,12 @@ namespace EasyAF.Data.Models
         public string? Comments { get; set; }
         /// <summary>Optional per-project preferred date format template (overrides global settings.json DateFormat if provided).</summary>
         public string? PreferredDateFormat { get; set; }
+        /// <summary>
+        /// Type of import pipeline for this project.
+        /// CRITICAL: Changing this value requires purging all dataset entries to prevent invalid data.
+        /// Summary information is preserved, but NewData and OldData must be cleared.
+        /// </summary>
+        public ProjectType ProjectType { get; set; } = ProjectType.Standard;
 
         /// <summary>Data set for new entries.</summary>
         public DataSet? NewData { get; set; } = new DataSet();
@@ -440,6 +446,7 @@ namespace EasyAF.Data.Models
         public string? StudyEngineer { get; set; }
         public string? Comments { get; set; }
         public string? PreferredDateFormat { get; set; }
+        public ProjectType ProjectType { get; set; } = ProjectType.Standard;
         public string? NewDataImportMapFile { get; set; }
         public string? OldDataImportMapFile { get; set; }
         public Dictionary<long,string>? ProjectLog { get; set; }
@@ -476,6 +483,7 @@ namespace EasyAF.Data.Models
                 StudyEngineer = p.StudyEngineer,
                 Comments = p.Comments,
                 PreferredDateFormat = p.PreferredDateFormat,
+                ProjectType = p.ProjectType,
                 NewDataImportMapFile = p.NewDataImportMapFile,
                 OldDataImportMapFile = p.OldDataImportMapFile,
                 ProjectLog = p.ProjectLog,
@@ -501,6 +509,7 @@ namespace EasyAF.Data.Models
             {
                 NewDataImportMapFile = NewDataImportMapFile,
                 OldDataImportMapFile = OldDataImportMapFile,
+                ProjectType = ProjectType,
                 ProjectLog = ProjectLog,
                 NewData = NewData?.ToDataSet(),
                 OldData = OldData?.ToDataSet(),

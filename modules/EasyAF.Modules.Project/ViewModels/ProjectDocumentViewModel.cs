@@ -6,6 +6,7 @@ using System.Windows.Input;
 using Prism.Commands;
 using Prism.Mvvm;
 using EasyAF.Modules.Project.Models;
+using EasyAF.Core.Contracts;
 using Serilog;
 
 namespace EasyAF.Modules.Project.ViewModels
@@ -23,6 +24,7 @@ namespace EasyAF.Modules.Project.ViewModels
     public class ProjectDocumentViewModel : BindableBase, IDisposable
     {
         private readonly ProjectDocument _document;
+        private readonly IUserDialogService _dialogService;
         private bool _disposed;
         private object? _selectedTabContent;
         private int _selectedTabIndex;
@@ -31,10 +33,12 @@ namespace EasyAF.Modules.Project.ViewModels
         /// Initializes a new instance of the ProjectDocumentViewModel.
         /// </summary>
         /// <param name="document">The project document this VM represents.</param>
-        /// <exception cref="ArgumentNullException">If document is null.</exception>
-        public ProjectDocumentViewModel(ProjectDocument document)
+        /// <param name="dialogService">Service for showing user dialogs.</param>
+        /// <exception cref="ArgumentNullException">If document or dialogService is null.</exception>
+        public ProjectDocumentViewModel(ProjectDocument document, IUserDialogService dialogService)
         {
             _document = document ?? throw new ArgumentNullException(nameof(document));
+            _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
 
             // Initialize collections
             TabHeaders = new ObservableCollection<TabHeaderInfo>();
@@ -106,7 +110,7 @@ namespace EasyAF.Modules.Project.ViewModels
             TabHeaders.Clear();
 
             // Summary tab (always first)
-            var summaryVm = new ProjectSummaryViewModel(_document);
+            var summaryVm = new ProjectSummaryViewModel(_document, _dialogService);
             TabHeaders.Add(new TabHeaderInfo
             {
                 Header = "Summary",
