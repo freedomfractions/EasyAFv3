@@ -37,6 +37,7 @@ public class ShortCircuit
     /// <summary>Scenario (Column: Scenario)</summary>
     [Category("General")]
     [Description("Scenario")]
+    [Required]
     public string? Scenario { get; set; }
 
     /// <summary>Fault Type (Column: Fault Type)</summary>
@@ -101,6 +102,15 @@ public class ShortCircuit
     [System.Text.Json.Serialization.JsonIgnore]
     [Newtonsoft.Json.JsonIgnore]
     public string? Id
+    {
+        get => BusName;
+        set => BusName = value;
+    }
+
+    /// <summary>Alias for BusName (second alias for composite key - not serialized).</summary>
+    [System.Text.Json.Serialization.JsonIgnore]
+    [Newtonsoft.Json.JsonIgnore]
+    public string? Bus
     {
         get => BusName;
         set => BusName = value;
