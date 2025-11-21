@@ -606,44 +606,45 @@ namespace EasyAF.Data.Models
             return new DataSetPersist
             {
                 SoftwareVersion = ds.SoftwareVersion,
-                ArcFlashEntries = ds.ArcFlashEntries?.Select(kv => new ArcFlashEntry { Id = kv.Key.Id, Scenario = kv.Key.Scenario, Value = kv.Value }).ToList(),
-                ShortCircuitEntries = ds.ShortCircuitEntries?.Select(kv => new ShortCircuitEntry { Id = kv.Key.Id, Bus = kv.Key.Bus, Scenario = kv.Key.Scenario, Value = kv.Value }).ToList(),
+                ArcFlashEntries = ds.ArcFlashEntries?.Select(kv => new ArcFlashEntry { KeyComponents = kv.Key.Components, Value = kv.Value }).ToList(),
+                ShortCircuitEntries = ds.ShortCircuitEntries?.Select(kv => new ShortCircuitEntry { KeyComponents = kv.Key.Components, Value = kv.Value }).ToList(),
                 
-                // Original 6
-                LVBreakerEntries = ds.LVBreakerEntries,
-                FuseEntries = ds.FuseEntries,
-                CableEntries = ds.CableEntries,
-                BusEntries = ds.BusEntries,
+                // Equipment types with CompositeKey - convert to Dictionary<string, T> for JSON
+                // Single-component keys: extract first component
+                LVBreakerEntries = ds.LVBreakerEntries?.ToDictionary(kv => kv.Key.Components[0], kv => kv.Value),
+                FuseEntries = ds.FuseEntries?.ToDictionary(kv => kv.Key.Components[0], kv => kv.Value),
+                CableEntries = ds.CableEntries?.ToDictionary(kv => kv.Key.Components[0], kv => kv.Value),
+                BusEntries = ds.BusEntries?.ToDictionary(kv => kv.Key.Components[0], kv => kv.Value),
                 
-                // Extended (alphabetically)
-                AFDEntries = ds.AFDEntries,
-                ATSEntries = ds.ATSEntries,
-                BatteryEntries = ds.BatteryEntries,
-                BuswayEntries = ds.BuswayEntries,
-                CapacitorEntries = ds.CapacitorEntries,
-                CLReactorEntries = ds.CLReactorEntries,
-                CTEntries = ds.CTEntries,
-                FilterEntries = ds.FilterEntries,
-                GeneratorEntries = ds.GeneratorEntries,
-                HVBreakerEntries = ds.HVBreakerEntries,
-                InverterEntries = ds.InverterEntries,
-                LoadEntries = ds.LoadEntries,
-                MCCEntries = ds.MCCEntries,
-                MeterEntries = ds.MeterEntries,
-                MotorEntries = ds.MotorEntries,
-                PanelEntries = ds.PanelEntries,
-                PhotovoltaicEntries = ds.PhotovoltaicEntries,
-                POCEntries = ds.POCEntries,
-                RectifierEntries = ds.RectifierEntries,
-                RelayEntries = ds.RelayEntries,
-                ShuntEntries = ds.ShuntEntries,
-                SwitchEntries = ds.SwitchEntries,
-                Transformer2WEntries = ds.Transformer2WEntries,
-                Transformer3WEntries = ds.Transformer3WEntries,
-                TransmissionLineEntries = ds.TransmissionLineEntries,
-                UPSEntries = ds.UPSEntries,
-                UtilityEntries = ds.UtilityEntries,
-                ZigzagTransformerEntries = ds.ZigzagTransformerEntries
+                // Extended (alphabetically) - all single-component keys
+                AFDEntries = ds.AFDEntries?.ToDictionary(kv => kv.Key.Components[0], kv => kv.Value),
+                ATSEntries = ds.ATSEntries?.ToDictionary(kv => kv.Key.Components[0], kv => kv.Value),
+                BatteryEntries = ds.BatteryEntries?.ToDictionary(kv => kv.Key.Components[0], kv => kv.Value),
+                BuswayEntries = ds.BuswayEntries?.ToDictionary(kv => kv.Key.Components[0], kv => kv.Value),
+                CapacitorEntries = ds.CapacitorEntries?.ToDictionary(kv => kv.Key.Components[0], kv => kv.Value),
+                CLReactorEntries = ds.CLReactorEntries?.ToDictionary(kv => kv.Key.Components[0], kv => kv.Value),
+                CTEntries = ds.CTEntries?.ToDictionary(kv => kv.Key.Components[0], kv => kv.Value),
+                FilterEntries = ds.FilterEntries?.ToDictionary(kv => kv.Key.Components[0], kv => kv.Value),
+                GeneratorEntries = ds.GeneratorEntries?.ToDictionary(kv => kv.Key.Components[0], kv => kv.Value),
+                HVBreakerEntries = ds.HVBreakerEntries?.ToDictionary(kv => kv.Key.Components[0], kv => kv.Value),
+                InverterEntries = ds.InverterEntries?.ToDictionary(kv => kv.Key.Components[0], kv => kv.Value),
+                LoadEntries = ds.LoadEntries?.ToDictionary(kv => kv.Key.Components[0], kv => kv.Value),
+                MCCEntries = ds.MCCEntries?.ToDictionary(kv => kv.Key.Components[0], kv => kv.Value),
+                MeterEntries = ds.MeterEntries?.ToDictionary(kv => kv.Key.Components[0], kv => kv.Value),
+                MotorEntries = ds.MotorEntries?.ToDictionary(kv => kv.Key.Components[0], kv => kv.Value),
+                PanelEntries = ds.PanelEntries?.ToDictionary(kv => kv.Key.Components[0], kv => kv.Value),
+                PhotovoltaicEntries = ds.PhotovoltaicEntries?.ToDictionary(kv => kv.Key.Components[0], kv => kv.Value),
+                POCEntries = ds.POCEntries?.ToDictionary(kv => kv.Key.Components[0], kv => kv.Value),
+                RectifierEntries = ds.RectifierEntries?.ToDictionary(kv => kv.Key.Components[0], kv => kv.Value),
+                RelayEntries = ds.RelayEntries?.ToDictionary(kv => kv.Key.Components[0], kv => kv.Value),
+                ShuntEntries = ds.ShuntEntries?.ToDictionary(kv => kv.Key.Components[0], kv => kv.Value),
+                SwitchEntries = ds.SwitchEntries?.ToDictionary(kv => kv.Key.Components[0], kv => kv.Value),
+                Transformer2WEntries = ds.Transformer2WEntries?.ToDictionary(kv => kv.Key.Components[0], kv => kv.Value),
+                Transformer3WEntries = ds.Transformer3WEntries?.ToDictionary(kv => kv.Key.Components[0], kv => kv.Value),
+                TransmissionLineEntries = ds.TransmissionLineEntries?.ToDictionary(kv => kv.Key.Components[0], kv => kv.Value),
+                UPSEntries = ds.UPSEntries?.ToDictionary(kv => kv.Key.Components[0], kv => kv.Value),
+                UtilityEntries = ds.UtilityEntries?.ToDictionary(kv => kv.Key.Components[0], kv => kv.Value),
+                ZigzagTransformerEntries = ds.ZigzagTransformerEntries?.ToDictionary(kv => kv.Key.Components[0], kv => kv.Value)
             };
         }
         
@@ -651,51 +652,65 @@ namespace EasyAF.Data.Models
         {
             var ds = new DataSet { SoftwareVersion = SoftwareVersion };
             
-            // Composite key entries
+            // Composite key entries - rebuild CompositeKey from components
             if (ArcFlashEntries != null)
-                ds.ArcFlashEntries = ArcFlashEntries.ToDictionary(e => (e.Id, e.Scenario), e => e.Value!);
-            if (ShortCircuitEntries != null)
-                ds.ShortCircuitEntries = ShortCircuitEntries.ToDictionary(e => (e.Id, e.Bus, e.Scenario), e => e.Value!);
+                ds.ArcFlashEntries = ArcFlashEntries.ToDictionary(
+                    e => new CompositeKey(e.KeyComponents), 
+                    e => e.Value!);
             
-            // All equipment dictionaries (alphabetically)
-            ds.AFDEntries = AFDEntries ?? new Dictionary<string, AFD>();
-            ds.ATSEntries = ATSEntries ?? new Dictionary<string, ATS>();
-            ds.BatteryEntries = BatteryEntries ?? new Dictionary<string, Battery>();
-            ds.BusEntries = BusEntries ?? new Dictionary<string, Bus>();
-            ds.BuswayEntries = BuswayEntries ?? new Dictionary<string, Busway>();
-            ds.CableEntries = CableEntries ?? new Dictionary<string, Cable>();
-            ds.CapacitorEntries = CapacitorEntries ?? new Dictionary<string, Capacitor>();
-            ds.CLReactorEntries = CLReactorEntries ?? new Dictionary<string, CLReactor>();
-            ds.CTEntries = CTEntries ?? new Dictionary<string, CT>();
-            ds.FilterEntries = FilterEntries ?? new Dictionary<string, Filter>();
-            ds.FuseEntries = FuseEntries ?? new Dictionary<string, Fuse>();
-            ds.GeneratorEntries = GeneratorEntries ?? new Dictionary<string, Generator>();
-            ds.HVBreakerEntries = HVBreakerEntries ?? new Dictionary<string, HVBreaker>();
-            ds.InverterEntries = InverterEntries ?? new Dictionary<string, Inverter>();
-            ds.LoadEntries = LoadEntries ?? new Dictionary<string, Load>();
-            ds.LVBreakerEntries = LVBreakerEntries ?? new Dictionary<string, LVBreaker>();
-            ds.MCCEntries = MCCEntries ?? new Dictionary<string, MCC>();
-            ds.MeterEntries = MeterEntries ?? new Dictionary<string, Meter>();
-            ds.MotorEntries = MotorEntries ?? new Dictionary<string, Motor>();
-            ds.PanelEntries = PanelEntries ?? new Dictionary<string, Panel>();
-            ds.PhotovoltaicEntries = PhotovoltaicEntries ?? new Dictionary<string, Photovoltaic>();
-            ds.POCEntries = POCEntries ?? new Dictionary<string, POC>();
-            ds.RectifierEntries = RectifierEntries ?? new Dictionary<string, Rectifier>();
-            ds.RelayEntries = RelayEntries ?? new Dictionary<string, Relay>();
-            ds.ShuntEntries = ShuntEntries ?? new Dictionary<string, Shunt>();
-            ds.SwitchEntries = SwitchEntries ?? new Dictionary<string, Switch>();
-            ds.Transformer2WEntries = Transformer2WEntries ?? new Dictionary<string, Transformer2W>();
-            ds.Transformer3WEntries = Transformer3WEntries ?? new Dictionary<string, Transformer3W>();
-            ds.TransmissionLineEntries = TransmissionLineEntries ?? new Dictionary<string, TransmissionLine>();
-            ds.UPSEntries = UPSEntries ?? new Dictionary<string, UPS>();
-            ds.UtilityEntries = UtilityEntries ?? new Dictionary<string, Utility>();
-            ds.ZigzagTransformerEntries = ZigzagTransformerEntries ?? new Dictionary<string, ZigzagTransformer>();
+            if (ShortCircuitEntries != null)
+                ds.ShortCircuitEntries = ShortCircuitEntries.ToDictionary(
+                    e => new CompositeKey(e.KeyComponents), 
+                    e => e.Value!);
+            
+            // All equipment dictionaries - rebuild CompositeKey from string key
+            ds.AFDEntries = AFDEntries?.ToDictionary(kv => new CompositeKey(kv.Key), kv => kv.Value) ?? new Dictionary<CompositeKey, AFD>();
+            ds.ATSEntries = ATSEntries?.ToDictionary(kv => new CompositeKey(kv.Key), kv => kv.Value) ?? new Dictionary<CompositeKey, ATS>();
+            ds.BatteryEntries = BatteryEntries?.ToDictionary(kv => new CompositeKey(kv.Key), kv => kv.Value) ?? new Dictionary<CompositeKey, Battery>();
+            ds.BusEntries = BusEntries?.ToDictionary(kv => new CompositeKey(kv.Key), kv => kv.Value) ?? new Dictionary<CompositeKey, Bus>();
+            ds.BuswayEntries = BuswayEntries?.ToDictionary(kv => new CompositeKey(kv.Key), kv => kv.Value) ?? new Dictionary<CompositeKey, Busway>();
+            ds.CableEntries = CableEntries?.ToDictionary(kv => new CompositeKey(kv.Key), kv => kv.Value) ?? new Dictionary<CompositeKey, Cable>();
+            ds.CapacitorEntries = CapacitorEntries?.ToDictionary(kv => new CompositeKey(kv.Key), kv => kv.Value) ?? new Dictionary<CompositeKey, Capacitor>();
+            ds.CLReactorEntries = CLReactorEntries?.ToDictionary(kv => new CompositeKey(kv.Key), kv => kv.Value) ?? new Dictionary<CompositeKey, CLReactor>();
+            ds.CTEntries = CTEntries?.ToDictionary(kv => new CompositeKey(kv.Key), kv => kv.Value) ?? new Dictionary<CompositeKey, CT>();
+            ds.FilterEntries = FilterEntries?.ToDictionary(kv => new CompositeKey(kv.Key), kv => kv.Value) ?? new Dictionary<CompositeKey, Filter>();
+            ds.FuseEntries = FuseEntries?.ToDictionary(kv => new CompositeKey(kv.Key), kv => kv.Value) ?? new Dictionary<CompositeKey, Fuse>();
+            ds.GeneratorEntries = GeneratorEntries?.ToDictionary(kv => new CompositeKey(kv.Key), kv => kv.Value) ?? new Dictionary<CompositeKey, Generator>();
+            ds.HVBreakerEntries = HVBreakerEntries?.ToDictionary(kv => new CompositeKey(kv.Key), kv => kv.Value) ?? new Dictionary<CompositeKey, HVBreaker>();
+            ds.InverterEntries = InverterEntries?.ToDictionary(kv => new CompositeKey(kv.Key), kv => kv.Value) ?? new Dictionary<CompositeKey, Inverter>();
+            ds.LoadEntries = LoadEntries?.ToDictionary(kv => new CompositeKey(kv.Key), kv => kv.Value) ?? new Dictionary<CompositeKey, Load>();
+            ds.LVBreakerEntries = LVBreakerEntries?.ToDictionary(kv => new CompositeKey(kv.Key), kv => kv.Value) ?? new Dictionary<CompositeKey, LVBreaker>();
+            ds.MCCEntries = MCCEntries?.ToDictionary(kv => new CompositeKey(kv.Key), kv => kv.Value) ?? new Dictionary<CompositeKey, MCC>();
+            ds.MeterEntries = MeterEntries?.ToDictionary(kv => new CompositeKey(kv.Key), kv => kv.Value) ?? new Dictionary<CompositeKey, Meter>();
+            ds.MotorEntries = MotorEntries?.ToDictionary(kv => new CompositeKey(kv.Key), kv => kv.Value) ?? new Dictionary<CompositeKey, Motor>();
+            ds.PanelEntries = PanelEntries?.ToDictionary(kv => new CompositeKey(kv.Key), kv => kv.Value) ?? new Dictionary<CompositeKey, Panel>();
+            ds.PhotovoltaicEntries = PhotovoltaicEntries?.ToDictionary(kv => new CompositeKey(kv.Key), kv => kv.Value) ?? new Dictionary<CompositeKey, Photovoltaic>();
+            ds.POCEntries = POCEntries?.ToDictionary(kv => new CompositeKey(kv.Key), kv => kv.Value) ?? new Dictionary<CompositeKey, POC>();
+            ds.RectifierEntries = RectifierEntries?.ToDictionary(kv => new CompositeKey(kv.Key), kv => kv.Value) ?? new Dictionary<CompositeKey, Rectifier>();
+            ds.RelayEntries = RelayEntries?.ToDictionary(kv => new CompositeKey(kv.Key), kv => kv.Value) ?? new Dictionary<CompositeKey, Relay>();
+            ds.ShuntEntries = ShuntEntries?.ToDictionary(kv => new CompositeKey(kv.Key), kv => kv.Value) ?? new Dictionary<CompositeKey, Shunt>();
+            ds.SwitchEntries = SwitchEntries?.ToDictionary(kv => new CompositeKey(kv.Key), kv => kv.Value) ?? new Dictionary<CompositeKey, Switch>();
+            ds.Transformer2WEntries = Transformer2WEntries?.ToDictionary(kv => new CompositeKey(kv.Key), kv => kv.Value) ?? new Dictionary<CompositeKey, Transformer2W>();
+            ds.Transformer3WEntries = Transformer3WEntries?.ToDictionary(kv => new CompositeKey(kv.Key), kv => kv.Value) ?? new Dictionary<CompositeKey, Transformer3W>();
+            ds.TransmissionLineEntries = TransmissionLineEntries?.ToDictionary(kv => new CompositeKey(kv.Key), kv => kv.Value) ?? new Dictionary<CompositeKey, TransmissionLine>();
+            ds.UPSEntries = UPSEntries?.ToDictionary(kv => new CompositeKey(kv.Key), kv => kv.Value) ?? new Dictionary<CompositeKey, UPS>();
+            ds.UtilityEntries = UtilityEntries?.ToDictionary(kv => new CompositeKey(kv.Key), kv => kv.Value) ?? new Dictionary<CompositeKey, Utility>();
+            ds.ZigzagTransformerEntries = ZigzagTransformerEntries?.ToDictionary(kv => new CompositeKey(kv.Key), kv => kv.Value) ?? new Dictionary<CompositeKey, ZigzagTransformer>();
             
             return ds;
         }
     }
-    internal class ArcFlashEntry { public string Id { get; set; } = string.Empty; public string Scenario { get; set; } = string.Empty; public ArcFlash? Value { get; set; } }
-    internal class ShortCircuitEntry { public string Id { get; set; } = string.Empty; public string Bus { get; set; } = string.Empty; public string Scenario { get; set; } = string.Empty; public ShortCircuit? Value { get; set; } }
+    internal class ArcFlashEntry 
+    { 
+        public string[] KeyComponents { get; set; } = Array.Empty<string>(); 
+        public ArcFlash? Value { get; set; } 
+    }
+    
+    internal class ShortCircuitEntry 
+    { 
+        public string[] KeyComponents { get; set; } = Array.Empty<string>(); 
+        public ShortCircuit? Value { get; set; } 
+    }
 }
 
 
