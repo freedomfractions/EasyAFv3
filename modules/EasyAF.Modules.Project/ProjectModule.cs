@@ -9,7 +9,7 @@ using Serilog;
 namespace EasyAF.Modules.Project
 {
     /// <summary>
-    /// Project Editor module for managing EasyAF project files (.ezproj).
+    /// Project Editor module for managing EasyAF project files (.ezaf).
     /// </summary>
     /// <remarks>
     /// <para>
@@ -43,9 +43,9 @@ namespace EasyAF.Modules.Project
         /// Gets the file extensions this module can handle.
         /// </summary>
         /// <remarks>
-        /// The Project module handles .ezproj files (EasyAF Project files).
+        /// The Project module handles .ezaf files (EasyAF Project files).
         /// </remarks>
-        public string[] SupportedFileExtensions => new[] { "ezproj" };
+        public string[] SupportedFileExtensions => new[] { "ezaf" };
 
         /// <summary>
         /// Gets the file type definitions for use in file dialogs.
@@ -55,7 +55,7 @@ namespace EasyAF.Modules.Project
         /// </remarks>
         public IReadOnlyList<FileTypeDefinition> SupportedFileTypes => new[]
         {
-            new FileTypeDefinition("ezproj", "EasyAF Project Files")
+            new FileTypeDefinition("ezaf", "EasyAF Project Files")
         };
 
         /// <summary>
@@ -193,7 +193,7 @@ namespace EasyAF.Modules.Project
         /// Determines if this module can handle a given file.
         /// </summary>
         /// <param name="filePath">The file path to check.</param>
-        /// <returns>True if the file extension is .ezproj; otherwise false.</returns>
+        /// <returns>True if the file extension is .ezaf; otherwise false.</returns>
         public bool CanHandleFile(string filePath)
         {
             if (string.IsNullOrEmpty(filePath))

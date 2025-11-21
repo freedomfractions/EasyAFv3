@@ -367,9 +367,9 @@ public partial class OpenBackstageViewModel : BindableBase, IDisposable
         }
         if (list.Count == 0)
         {
-            list.Add(new FileTypeDefinition("ezmap", "EasyAF Map Files (PLACEHOLDER)"));
-            list.Add(new FileTypeDefinition("ezproj", "EasyAF Project Files (PLACEHOLDER)"));
-            list.Add(new FileTypeDefinition("ezspec", "EasyAF Spec Files (PLACEHOLDER)"));
+            list.Add(new FileTypeDefinition("ezmap", "EasyAF Map Files"));
+            list.Add(new FileTypeDefinition("ezaf", "EasyAF Project Files"));
+            list.Add(new FileTypeDefinition("ezspec", "EasyAF Spec Files"));
         }
         return list;
     }
