@@ -47,6 +47,8 @@ namespace EasyAF.Modules.Project.ViewModels
             BrowseSpecCommand = new DelegateCommand(ExecuteBrowseSpec);
             BrowseTemplateCommand = new DelegateCommand(ExecuteBrowseTemplate);
             BrowseOutputCommand = new DelegateCommand(ExecuteBrowseOutput);
+            ImportNewDataCommand = new DelegateCommand(ExecuteImportNewData);
+            ImportOldDataCommand = new DelegateCommand(ExecuteImportOldData);
 
             Log.Debug("ProjectSummaryViewModel initialized");
         }
@@ -524,6 +526,8 @@ namespace EasyAF.Modules.Project.ViewModels
         public ICommand BrowseSpecCommand { get; }
         public ICommand BrowseTemplateCommand { get; }
         public ICommand BrowseOutputCommand { get; }
+        public ICommand ImportNewDataCommand { get; }
+        public ICommand ImportOldDataCommand { get; }
 
         private void ExecuteAddFile()
         {
@@ -604,6 +608,99 @@ namespace EasyAF.Modules.Project.ViewModels
                 OutputPath = dialog.SelectedPath;
                 RaisePropertyChanged(nameof(OutputPath));
                 Log.Information("Output folder selected: {Path}", dialog.SelectedPath);
+            }
+        }
+
+        private void ExecuteImportNewData()
+        {
+            ExecuteImport(isNewData: true);
+        }
+
+        private void ExecuteImportOldData()
+        {
+            ExecuteImport(isNewData: false);
+        }
+
+        private void ExecuteImport(bool isNewData)
+        {
+            try
+            {
+                // Step 1: Validate mapping file exists
+                if (string.IsNullOrWhiteSpace(MapPath) || !System.IO.File.Exists(MapPath))
+                {
+                    _dialogService.ShowError(
+                        "Please select a mapping file first using the 'Map' field in the Report section below.",
+                        "No Mapping File");
+                    return;
+                }
+
+                // Step 2: Select data file to import
+                var dialog = new OpenFileDialog
+                {
+                    Title = $"Select Data File to Import ({(isNewData ? "New" : "Old")} Data)",
+                    Filter = "Data Files (*.csv;*.xlsx;*.xls)|*.csv;*.xlsx;*.xls|CSV Files (*.csv)|*.csv|Excel Files (*.xlsx;*.xls)|*.xlsx;*.xls|All Files (*.*)|*.*",
+                    CheckFileExists = true
+                };
+
+                if (dialog.ShowDialog() != true)
+                    return; // User cancelled
+
+                var dataFilePath = dialog.FileName;
+                Log.Information("Importing {Target} data from: {Path}", isNewData ? "New" : "Old", dataFilePath);
+
+                // Step 3: Load mapping config
+                var mappingConfig = EasyAF.Import.MappingConfig.Load(MapPath);
+                var validation = mappingConfig.Validate();
+                
+                if (validation.HasErrors)
+                {
+                    var errors = string.Join("\n", validation.Errors);
+                    _dialogService.ShowError($"Mapping configuration has errors:\n\n{errors}", "Invalid Mapping");
+                    return;
+                }
+
+                if (validation.Warnings.Any())
+                {
+                    var warnings = string.Join("\n", validation.Warnings);
+                    Log.Warning("Mapping validation warnings: {Warnings}", warnings);
+                }
+
+                // Step 4: Ensure target dataset exists
+                var targetDataSet = isNewData ? _document.Project.NewData : _document.Project.OldData;
+                if (targetDataSet == null)
+                {
+                    targetDataSet = new DataSet();
+                    if (isNewData)
+                        _document.Project.NewData = targetDataSet;
+                    else
+                        _document.Project.OldData = targetDataSet;
+                }
+
+                // Step 5: Execute import
+                var importManager = new EasyAF.Import.ImportManager();
+                importManager.Import(dataFilePath, mappingConfig, targetDataSet);
+
+                // Step 6: Success - mark dirty and refresh UI
+                _document.MarkDirty();
+                RefreshStatistics();
+
+                _dialogService.ShowMessage(
+                    $"Import completed successfully!\n\nData imported into {(isNewData ? "New" : "Old")} Data.",
+                    "Import Successful");
+
+                Log.Information("Import completed: {Target} data, file: {File}", isNewData ? "New" : "Old", dataFilePath);
+            }
+            catch (System.IO.IOException ioEx)
+            {
+                Log.Error(ioEx, "I/O error during import");
+                _dialogService.ShowError(
+                    $"File error: {ioEx.Message}\n\nMake sure the file is not open in another program.",
+                    "Import Failed");
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error during import");
+                _dialogService.ShowError($"Import failed: {ex.Message}", "Import Failed");
             }
         }
 
