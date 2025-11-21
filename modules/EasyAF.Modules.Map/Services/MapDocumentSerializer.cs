@@ -75,47 +75,47 @@ namespace EasyAF.Modules.Map.Services
             {
                 // DateModified is automatically updated by MarkDirty() - no need to set it here
 
-                // Build the JSON structure
-                var json = new
+                // Build the JSON structure using JObject to support $schema property
+                var json = new JObject();
+                
+                // Optional JSON schema reference (ignored by parsers, helpful for editors)
+                json["$schema"] = "https://easyaf.app/schemas/mapping-v3.json";
+                
+                // Map Editor metadata (ignored by ImportManager)
+                json["MapName"] = document.MapName;
+                json["Description"] = string.IsNullOrWhiteSpace(document.Description) ? null : document.Description;
+                json["DateModified"] = document.DateModified;
+                json["ReferencedFiles"] = JArray.FromObject(document.ReferencedFiles.Select(f => new
                 {
-                    // Optional JSON schema reference (ignored by parsers, helpful for editors)
-                    schema = "https://easyaf.app/schemas/mapping-v3.json",
-                    
-                    // Map Editor metadata (ignored by ImportManager)
-                    MapName = document.MapName,
-                    Description = string.IsNullOrWhiteSpace(document.Description) ? null : document.Description,
-                    DateModified = document.DateModified,
-                    ReferencedFiles = document.ReferencedFiles.Select(f => new
+                    FilePath = f.FilePath
+                    // Status is transient - don't persist it
+                }).ToArray());
+                
+                // CROSS-MODULE EDIT: 2025-01-16 Table Reference Persistence
+                // Modified for: Save table selections per data type for better UX on reopen
+                // Related modules: Map (MapDocument, MapDocumentSerializer, DataTypeMappingViewModel)
+                // Rollback instructions: Remove TableReferences field below and from Load method
+                if (document.TableReferencesByDataType.Count > 0)
+                {
+                    json["TableReferences"] = JObject.FromObject(document.TableReferencesByDataType);
+                }
+                
+                // MappingConfig fields (used by ImportManager)
+                json["SoftwareVersion"] = document.SoftwareVersion;
+                json["MapVersion"] = "1.0";
+                json["ImportMap"] = JArray.FromObject(document.MappingsByDataType
+                    .SelectMany(kvp => kvp.Value.Select(m => new MappingEntry
                     {
-                        FilePath = f.FilePath,
-                        // Status is transient - don't persist it
-                    }).ToArray(),
-                    
-                    // CROSS-MODULE EDIT: 2025-01-16 Table Reference Persistence
-                    // Modified for: Save table selections per data type for better UX on reopen
-                    // Related modules: Map (MapDocument, MapDocumentSerializer, DataTypeMappingViewModel)
-                    // Rollback instructions: Remove TableReferences field below and from Load method
-                    TableReferences = document.TableReferencesByDataType.Count > 0 
-                        ? document.TableReferencesByDataType 
-                        : null, // Don't save empty dictionaries
-                    
-                    // MappingConfig fields (used by ImportManager)
-                    SoftwareVersion = document.SoftwareVersion,
-                    MapVersion = "1.0",
-                    ImportMap = document.MappingsByDataType
-                        .SelectMany(kvp => kvp.Value.Select(m => new MappingEntry
-                        {
-                            TargetType = kvp.Key,
-                            PropertyName = m.PropertyName,
-                            ColumnHeader = m.ColumnHeader,
-                            Required = false, // Map editor doesn't currently support Required flag
-                            Severity = MappingSeverity.Info
-                        }))
-                        .ToArray()
-                };
+                        TargetType = kvp.Key,
+                        PropertyName = m.PropertyName,
+                        ColumnHeader = m.ColumnHeader,
+                        Required = false, // Map editor doesn't currently support Required flag
+                        Severity = MappingSeverity.Info
+                    }))
+                    .ToArray());
 
                 // Serialize to JSON
-                var jsonText = JsonConvert.SerializeObject(json, JsonSettings);
+                var jsonText = json.ToString(Formatting.Indented);
                 
                 // Write to file
                 File.WriteAllText(filePath, jsonText);
