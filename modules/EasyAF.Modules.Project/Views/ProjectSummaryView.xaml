@@ -35,7 +35,8 @@
                       Header="Project" 
                       Margin="0,0,22,16"
                       HorizontalAlignment="Stretch"
-                      BorderBrush="{DynamicResource ControlBorderBrush}">
+                      BorderBrush="{DynamicResource ControlBorderBrush}"
+                      Foreground="{DynamicResource TextPrimaryBrush}">
                 <Grid x:Name="ProjectFieldsGrid" Margin="8" Grid.IsSharedSizeScope="True">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" SharedSizeGroup="Label1"/>    <!-- Label 1 - auto-size to content -->
@@ -337,7 +338,8 @@
                       Header="Report"
                       Margin="0,0,22,0"
                       HorizontalAlignment="Stretch"
-                      BorderBrush="{DynamicResource ControlBorderBrush}">
+                      BorderBrush="{DynamicResource ControlBorderBrush}"
+                      Foreground="{DynamicResource TextPrimaryBrush}">
                 <Grid Margin="8">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="140"/>
