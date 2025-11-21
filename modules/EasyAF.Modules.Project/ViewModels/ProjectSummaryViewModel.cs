@@ -47,6 +47,7 @@ namespace EasyAF.Modules.Project.ViewModels
             BrowseSpecCommand = new DelegateCommand(ExecuteBrowseSpec);
             BrowseTemplateCommand = new DelegateCommand(ExecuteBrowseTemplate);
             BrowseOutputCommand = new DelegateCommand(ExecuteBrowseOutput);
+            ImportDataCommand = new DelegateCommand(ExecuteImportData);
 
             Log.Debug("ProjectSummaryViewModel initialized");
         }
@@ -524,11 +525,47 @@ namespace EasyAF.Modules.Project.ViewModels
         public ICommand BrowseSpecCommand { get; }
         public ICommand BrowseTemplateCommand { get; }
         public ICommand BrowseOutputCommand { get; }
+        public ICommand ImportDataCommand { get; }
 
         private void ExecuteAddFile()
         {
-            // TODO Task 21: Implement file import (CSV/Excel to DataSet)
-            Log.Information("AddFile command - To be implemented in Task 21");
+            // Launch Import Data Dialog
+            ExecuteImportData();
+        }
+
+        private void ExecuteImportData()
+        {
+            try
+            {
+                // Determine target dataset (NewData or OldData)
+                var targetDataSet = _document.Project.NewData ?? new DataSet();
+                if (targetDataSet == _document.Project.NewData && _document.Project.NewData == null)
+                {
+                    _document.Project.NewData = targetDataSet;
+                }
+
+                // Create and show Import Data Dialog
+                var viewModel = new ImportDataViewModel(targetDataSet);
+                var dialog = new Views.ImportDataDialog
+                {
+                    DataContext = viewModel,
+                    Owner = System.Windows.Application.Current.MainWindow
+                };
+
+                if (dialog.ShowDialog() == true)
+                {
+                    // Import succeeded
+                    _document.MarkDirty();
+                    RefreshStatistics();
+                    
+                    Log.Information("Data import completed successfully");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to import data");
+                _dialogService.ShowError($"Import failed: {ex.Message}", "Import Error");
+            }
         }
 
         private bool CanExecuteRemoveFile()
