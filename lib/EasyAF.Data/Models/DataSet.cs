@@ -501,7 +501,9 @@ namespace EasyAF.Data.Models
 
             foreach (var key in allArcKeys)
             {
-                var entryKey = $"ArcFlash:{key.Component0}|{key.Component1}";
+                // Build entryKey string from Components
+                var entryKey = $"ArcFlash:{string.Join("|", key.Components)}";
+                
                 if (!oldArc.ContainsKey(key))
                 {
                     diff.EntryDiffs.Add(new EntryDiff
@@ -550,7 +552,9 @@ namespace EasyAF.Data.Models
 
             foreach (var key in allScKeys)
             {
-                var entryKey = $"ShortCircuit:{key.Component0}|{key.Component1}|{key.Component2}";
+                // Build entryKey string from Components
+                var entryKey = $"ShortCircuit:{string.Join("|", key.Components)}";
+                
                 if (!oldSc.ContainsKey(key))
                 {
                     diff.EntryDiffs.Add(new EntryDiff
@@ -582,7 +586,7 @@ namespace EasyAF.Data.Models
                         {
                             EntryKey = entryKey,
                             EntryType = "ShortCircuit",
-                            ChangeType = "Modified",
+                            ChangeType = ChangeType.Modified,
                             PropertyChanges = changes
                         });
                     }

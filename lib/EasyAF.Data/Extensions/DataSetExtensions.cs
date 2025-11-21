@@ -52,23 +52,25 @@ namespace EasyAF.Data.Extensions
 
             var scenarios = new HashSet<string>();
 
-            // Extract scenarios from ArcFlash entries
+            // Extract scenarios from ArcFlash entries (Component[1] = Scenario)
             if (dataSet.ArcFlashEntries != null)
             {
                 foreach (var key in dataSet.ArcFlashEntries.Keys)
                 {
-                    if (!string.IsNullOrWhiteSpace(key.Scenario))
-                        scenarios.Add(key.Scenario);
+                    // ArcFlash: Components[0] = ArcFaultBusName, Components[1] = Scenario
+                    if (key.Components.Length >= 2 && !string.IsNullOrWhiteSpace(key.Components[1]))
+                        scenarios.Add(key.Components[1]);
                 }
             }
 
-            // Extract scenarios from ShortCircuit entries
+            // Extract scenarios from ShortCircuit entries (Component[2] = Scenario)
             if (dataSet.ShortCircuitEntries != null)
             {
                 foreach (var key in dataSet.ShortCircuitEntries.Keys)
                 {
-                    if (!string.IsNullOrWhiteSpace(key.Scenario))
-                        scenarios.Add(key.Scenario);
+                    // ShortCircuit: Components[0] = BusName, Components[1] = EquipmentName, Components[2] = Scenario
+                    if (key.Components.Length >= 3 && !string.IsNullOrWhiteSpace(key.Components[2]))
+                        scenarios.Add(key.Components[2]);
                 }
             }
 
@@ -117,8 +119,8 @@ namespace EasyAF.Data.Extensions
                 return result;
 
             // Scenario-based types
-            AddScenarioBasedStatistics(result, "ArcFlash", dataSet.ArcFlashEntries?.Keys);
-            AddScenarioBasedStatistics(result, "ShortCircuit", dataSet.ShortCircuitEntries?.Keys);
+            AddScenarioBasedStatistics(result, "ArcFlash", dataSet.ArcFlashEntries?.Keys, scenarioComponentIndex: 1);
+            AddScenarioBasedStatistics(result, "ShortCircuit", dataSet.ShortCircuitEntries?.Keys, scenarioComponentIndex: 2);
 
             // Non-scenario types (simple dictionaries)
             AddSimpleStatistics(result, "Bus", dataSet.BusEntries?.Count);
@@ -189,18 +191,20 @@ namespace EasyAF.Data.Extensions
             if (dataSet == null || string.IsNullOrWhiteSpace(scenarioName))
                 return result;
 
-            // Count ArcFlash entries for this scenario
+            // Count ArcFlash entries for this scenario (Component[1])
             if (dataSet.ArcFlashEntries != null)
             {
-                var count = dataSet.ArcFlashEntries.Keys.Count(k => k.Scenario == scenarioName);
+                var count = dataSet.ArcFlashEntries.Keys.Count(k => 
+                    k.Components.Length >= 2 && k.Components[1] == scenarioName);
                 if (count > 0)
                     result["ArcFlash"] = count;
             }
 
-            // Count ShortCircuit entries for this scenario
+            // Count ShortCircuit entries for this scenario (Component[2])
             if (dataSet.ShortCircuitEntries != null)
             {
-                var count = dataSet.ShortCircuitEntries.Keys.Count(k => k.Scenario == scenarioName);
+                var count = dataSet.ShortCircuitEntries.Keys.Count(k => 
+                    k.Components.Length >= 3 && k.Components[2] == scenarioName);
                 if (count > 0)
                     result["ShortCircuit"] = count;
             }
@@ -257,10 +261,11 @@ namespace EasyAF.Data.Extensions
         /// <summary>
         /// Adds statistics for scenario-based data types (composite keys).
         /// </summary>
-        private static void AddScenarioBasedStatistics<TKey>(
+        private static void AddScenarioBasedStatistics(
             Dictionary<string, Dictionary<string, int>> result,
             string dataTypeName,
-            IEnumerable<TKey>? keys) where TKey : notnull
+            IEnumerable<CompositeKey>? keys,
+            int scenarioComponentIndex)
         {
             if (keys == null)
                 return;
@@ -269,14 +274,19 @@ namespace EasyAF.Data.Extensions
 
             foreach (var key in keys)
             {
-                // Extract scenario from composite key using reflection
-                var scenarioProperty = typeof(TKey).GetProperty("Scenario");
-                var scenario = scenarioProperty?.GetValue(key) as string ?? "(Unknown)";
+                // Extract scenario from Components array at specified index
+                if (key.Components.Length > scenarioComponentIndex)
+                {
+                    var scenario = key.Components[scenarioComponentIndex];
+                    
+                    if (!string.IsNullOrWhiteSpace(scenario))
+                    {
+                        if (!scenarioCounts.ContainsKey(scenario))
+                            scenarioCounts[scenario] = 0;
 
-                if (!scenarioCounts.ContainsKey(scenario))
-                    scenarioCounts[scenario] = 0;
-
-                scenarioCounts[scenario]++;
+                        scenarioCounts[scenario]++;
+                    }
+                }
             }
 
             if (scenarioCounts.Count > 0)

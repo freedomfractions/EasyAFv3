@@ -169,44 +169,36 @@ namespace EasyAF.Import
                         switch (targetType)
                         {
                             case "ArcFlash":
-                                var afKey = (ValueTuple<string, string>)key;
-                                if (!targetDataSet.ArcFlashEntries.ContainsKey(afKey))
-                                    targetDataSet.ArcFlashEntries[afKey] = (ArcFlash)instance;
+                                if (!targetDataSet.ArcFlashEntries.ContainsKey(key))
+                                    targetDataSet.ArcFlashEntries[key] = (ArcFlash)instance;
                                 else
                                     _logger.Error(nameof(Import), $"Duplicate ArcFlash key {key} at row {physicalRow} (skipped)");
                                 break;
 
                             case "ShortCircuit":
-                                // ShortCircuit has special 3-part key structure: (Id, Bus, Scenario)
-                                // Even though Id and Bus are both aliases to BusName
-                                var scObj = (ShortCircuit)instance;
-                                var scKey = (scObj.Id!, scObj.Bus!, scObj.Scenario!);
-                                if (!targetDataSet.ShortCircuitEntries.ContainsKey(scKey))
-                                    targetDataSet.ShortCircuitEntries[scKey] = scObj;
+                                if (!targetDataSet.ShortCircuitEntries.ContainsKey(key))
+                                    targetDataSet.ShortCircuitEntries[key] = (ShortCircuit)instance;
                                 else
-                                    _logger.Error(nameof(Import), $"Duplicate ShortCircuit key {scKey} at row {physicalRow} (skipped)");
+                                    _logger.Error(nameof(Import), $"Duplicate ShortCircuit key {key} at row {physicalRow} (skipped)");
                                 break;
 
                             case "LVBreaker":
-                                var lvcbKey = (string)key;
-                                if (!targetDataSet.LVBreakerEntries.ContainsKey(lvcbKey))
-                                    targetDataSet.LVBreakerEntries[lvcbKey] = (LVBreaker)instance;
+                                if (!targetDataSet.LVBreakerEntries.ContainsKey(key))
+                                    targetDataSet.LVBreakerEntries[key] = (LVBreaker)instance;
                                 else
                                     _logger.Error(nameof(Import), $"Duplicate LVBreaker key {key} at row {physicalRow} (skipped)");
                                 break;
 
                             case "Fuse":
-                                var fuseKey = (string)key;
-                                if (!targetDataSet.FuseEntries.ContainsKey(fuseKey))
-                                    targetDataSet.FuseEntries[fuseKey] = (Fuse)instance;
+                                if (!targetDataSet.FuseEntries.ContainsKey(key))
+                                    targetDataSet.FuseEntries[key] = (Fuse)instance;
                                 else
                                     _logger.Error(nameof(Import), $"Duplicate Fuse key {key} at row {physicalRow} (skipped)");
                                 break;
 
                             case "Cable":
-                                var cableKey = (string)key;
-                                if (!targetDataSet.CableEntries.ContainsKey(cableKey))
-                                    targetDataSet.CableEntries[cableKey] = (Cable)instance;
+                                if (!targetDataSet.CableEntries.ContainsKey(key))
+                                    targetDataSet.CableEntries[key] = (Cable)instance;
                                 else
                                     _logger.Error(nameof(Import), $"Duplicate Cable key {key} at row {physicalRow} (skipped)");
                                 break;

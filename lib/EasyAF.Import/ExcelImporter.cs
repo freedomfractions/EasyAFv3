@@ -112,51 +112,43 @@ namespace EasyAF.Import
                                 switch (targetType)
                                 {
                                     case "ArcFlash":
-                                        var afKey = (ValueTuple<string, string>)key;
-                                        if (!targetDataSet.ArcFlashEntries.ContainsKey(afKey))
-                                            targetDataSet.ArcFlashEntries[afKey] = (ArcFlash)instance;
+                                        if (!targetDataSet.ArcFlashEntries.ContainsKey(key))
+                                            targetDataSet.ArcFlashEntries[key] = (ArcFlash)instance;
                                         else
                                             LogDuplicate("ArcFlash");
                                         break;
 
                                     case "ShortCircuit":
-                                        // ShortCircuit has special 3-part key structure: (Id, Bus, Scenario)
-                                        var scObj = (ShortCircuit)instance;
-                                        var scKey = (scObj.Id!, scObj.Bus!, scObj.Scenario!);
-                                        if (!targetDataSet.ShortCircuitEntries.ContainsKey(scKey))
-                                            targetDataSet.ShortCircuitEntries[scKey] = scObj;
+                                        if (!targetDataSet.ShortCircuitEntries.ContainsKey(key))
+                                            targetDataSet.ShortCircuitEntries[key] = (ShortCircuit)instance;
                                         else
                                             LogDuplicate("ShortCircuit");
                                         break;
 
                                     case "LVBreaker":
-                                        var lvcbKey = (string)key;
-                                        if (!targetDataSet.LVBreakerEntries.ContainsKey(lvcbKey))
-                                            targetDataSet.LVBreakerEntries[lvcbKey] = (LVBreaker)instance;
+                                        if (!targetDataSet.LVBreakerEntries.ContainsKey(key))
+                                            targetDataSet.LVBreakerEntries[key] = (LVBreaker)instance;
                                         else
                                             LogDuplicate("LVBreaker");
                                         break;
 
                                     case "Fuse":
-                                        var fuseKey = (string)key;
-                                        if (!targetDataSet.FuseEntries.ContainsKey(fuseKey))
-                                            targetDataSet.FuseEntries[fuseKey] = (Fuse)instance;
+                                        if (!targetDataSet.FuseEntries.ContainsKey(key))
+                                            targetDataSet.FuseEntries[key] = (Fuse)instance;
                                         else
                                             LogDuplicate("Fuse");
                                         break;
 
                                     case "Cable":
-                                        var cableKey = (string)key;
-                                        if (!targetDataSet.CableEntries.ContainsKey(cableKey))
-                                            targetDataSet.CableEntries[cableKey] = (Cable)instance;
+                                        if (!targetDataSet.CableEntries.ContainsKey(key))
+                                            targetDataSet.CableEntries[key] = (Cable)instance;
                                         else
                                             LogDuplicate("Cable");
                                         break;
 
                                     case "Bus":
-                                        var busKey = (string)key;
-                                        if (!targetDataSet.BusEntries.ContainsKey(busKey))
-                                            targetDataSet.BusEntries[busKey] = (Bus)instance;
+                                        if (!targetDataSet.BusEntries.ContainsKey(key))
+                                            targetDataSet.BusEntries[key] = (Bus)instance;
                                         else
                                             LogDuplicate("Bus");
                                         break;
