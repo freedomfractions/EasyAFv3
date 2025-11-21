@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
+using EasyAF.Data.Models;
 
 namespace EasyAF.Import
 {
@@ -32,7 +33,7 @@ namespace EasyAF.Import
     /// // Build composite key from instance
     /// var af = new ArcFlash { ArcFaultBusName = "BUS-1", Scenario = "Main-Max" };
     /// var key = CompositeKeyHelper.BuildCompositeKey(af, typeof(ArcFlash));
-    /// // Returns: ("BUS-1", "Main-Max")
+    /// // Returns: CompositeKey with 2 components: ("BUS-1", "Main-Max")
     /// </code>
     /// </remarks>
     public static class CompositeKeyHelper
@@ -105,16 +106,14 @@ namespace EasyAF.Import
         /// <param name="instance">The object instance to extract key values from.</param>
         /// <param name="type">The type of the instance (for key property discovery).</param>
         /// <returns>
-        /// A tuple representing the composite key, or null if any key property is null/empty.
-        /// The tuple size matches the number of key properties (2-tuple, 3-tuple, etc.).
+        /// A CompositeKey containing N components discovered from [Required] properties,
+        /// or null if any key property is null/empty.
         /// </returns>
         /// <remarks>
         /// <para>
         /// <strong>Return Value:</strong>
-        /// - 1 key property: returns string (not tuple)
-        /// - 2 key properties: returns (string, string)
-        /// - 3 key properties: returns (string, string, string)
-        /// - 4+ key properties: throws NotSupportedException (DataSet doesn't support this)
+        /// Returns a CompositeKey with N components based on discovered [Required] properties.
+        /// Supports 1 to N components with no hardcoded limits.
         /// </para>
         /// <para>
         /// <strong>Null Handling:</strong> If ANY key property is null/empty, returns null.
@@ -127,17 +126,21 @@ namespace EasyAF.Import
         /// // ArcFlash with 2-part key
         /// var af = new ArcFlash { ArcFaultBusName = "BUS-1", Scenario = "Main-Max" };
         /// var key = BuildCompositeKey(af, typeof(ArcFlash));
-        /// // Returns: ("BUS-1", "Main-Max")
+        /// // Returns: CompositeKey("BUS-1", "Main-Max")
         /// 
-        /// // ShortCircuit with incomplete key (Bus is null)
-        /// var sc = new ShortCircuit { BusName = "BUS-1", Scenario = "Main-Max" }; // Bus property null!
+        /// // ShortCircuit with 3-part key
+        /// var sc = new ShortCircuit { BusName = "BUS-1", EquipmentName = "CB-101", Scenario = "Main-Max" };
         /// var key = BuildCompositeKey(sc, typeof(ShortCircuit));
-        /// // Returns: null (incomplete key)
+        /// // Returns: CompositeKey("BUS-1", "CB-101", "Main-Max")
+        /// 
+        /// // Incomplete key returns null
+        /// var sc2 = new ShortCircuit { BusName = "BUS-1", Scenario = "Main-Max" }; // Missing EquipmentName!
+        /// var key2 = BuildCompositeKey(sc2, typeof(ShortCircuit));
+        /// // Returns: null
         /// </code>
         /// </remarks>
         /// <exception cref="ArgumentNullException">If instance or type is null.</exception>
-        /// <exception cref="NotSupportedException">If more than 3 key properties exist.</exception>
-        public static object? BuildCompositeKey(object instance, Type type)
+        public static CompositeKey? BuildCompositeKey(object instance, Type type)
         {
             if (instance == null)
                 throw new ArgumentNullException(nameof(instance));
@@ -149,27 +152,21 @@ namespace EasyAF.Import
                 return null; // No composite key defined
 
             // Extract values from instance
-            var values = new string?[keyProps.Length];
+            var values = new List<string>();
             for (int i = 0; i < keyProps.Length; i++)
             {
                 var prop = type.GetProperty(keyProps[i]);
-                values[i] = prop?.GetValue(instance) as string;
+                var value = prop?.GetValue(instance) as string;
 
                 // If any key component is null/empty, the entire key is invalid
-                if (string.IsNullOrWhiteSpace(values[i]))
+                if (string.IsNullOrWhiteSpace(value))
                     return null;
+                
+                values.Add(value);
             }
 
-            // Build appropriate tuple based on number of key properties
-            return keyProps.Length switch
-            {
-                1 => values[0]!, // Single key - return string directly
-                2 => (values[0]!, values[1]!), // 2-tuple
-                3 => (values[0]!, values[1]!, values[2]!), // 3-tuple
-                _ => throw new NotSupportedException(
-                    $"Composite keys with {keyProps.Length} properties are not supported. " +
-                    $"DataSet dictionaries support up to 3-part keys. Type: {type.Name}")
-            };
+            // Build CompositeKey from discovered values
+            return new CompositeKey(values.ToArray());
         }
 
         /// <summary>

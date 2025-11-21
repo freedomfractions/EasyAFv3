@@ -24,16 +24,17 @@ Replace all DataSet dictionary keys from hardcoded tuples `(string, string)` to 
 - [x] Refactor importers to use dynamic key building
 - [x] Test basic import functionality
 
-### **Phase 2: Core Infrastructure** (IN PROGRESS)
+### **Phase 2: Core Infrastructure** (COMPLETE)
 - [x] **Task 1:** Create `CompositeKey` class in `EasyAF.Data` ? COMPLETE
   - Location: `lib/EasyAF.Data/Models/CompositeKey.cs`
   - Features: `IEquatable<CompositeKey>`, proper `GetHashCode()`, ToString()
   - Status: ? COMPLETE
 
-- [ ] **Task 2:** Update `CompositeKeyHelper` to return `CompositeKey`
+- [x] **Task 2:** Update `CompositeKeyHelper` to return `CompositeKey` ? COMPLETE
   - File: `lib/EasyAF.Import/CompositeKeyHelper.cs`
   - Change: Return type from `object?` to `CompositeKey?`
-  - Status: ? NOT STARTED
+  - Status: ? COMPLETE
+  - Note: ?? Breaks importers (expected - will fix in Phase 5)
 
 ### **Phase 3: DataSet Dictionary Changes** (PENDING)
 - [ ] **Task 3:** Update DataSet model class
@@ -139,11 +140,11 @@ Replace all DataSet dictionary keys from hardcoded tuples `(string, string)` to 
 - `lib/EasyAF.Data/Models/CompositeKey.cs` - ? COMPLETE
 
 ### **Modified**
-- `lib/EasyAF.Import/CompositeKeyHelper.cs` - ? NOT STARTED
+- `lib/EasyAF.Import/CompositeKeyHelper.cs` - ? COMPLETE (returns CompositeKey)
 - `lib/EasyAF.Data/Models/DataSet.cs` - ? NOT STARTED
 - `lib/EasyAF.Data/Models/Project.cs` - ? NOT STARTED
-- `lib/EasyAF.Import/CsvImporter.cs` - ? NOT STARTED
-- `lib/EasyAF.Import/ExcelImporter.cs` - ? NOT STARTED
+- `lib/EasyAF.Import/CsvImporter.cs` - ?? BROKEN (waiting on DataSet changes)
+- `lib/EasyAF.Import/ExcelImporter.cs` - ?? BROKEN (waiting on DataSet changes)
 - `lib/EasyAF.Data/Extensions/DataSetExtensions.cs` - ? NOT STARTED
 - `modules/EasyAF.Modules.Project/ViewModels/ProjectSummaryViewModel.cs` - ? NOT STARTED
 
@@ -154,7 +155,7 @@ Replace all DataSet dictionary keys from hardcoded tuples `(string, string)` to 
 | Phase | Tasks | Status |
 |-------|-------|--------|
 | Phase 1: Foundation | 4 tasks | ? COMPLETE |
-| Phase 2: Core Infrastructure | 2 tasks | ? 1/2 (50%) |
+| Phase 2: Core Infrastructure | 2 tasks | ? COMPLETE |
 | Phase 3: DataSet Changes | 1 task | ? 0/1 (0%) |
 | Phase 4: Serialization | 1 task | ? 0/1 (0%) |
 | Phase 5: Import System | 2 tasks | ? 0/2 (0%) |
@@ -162,7 +163,7 @@ Replace all DataSet dictionary keys from hardcoded tuples `(string, string)` to 
 | Phase 7: Diff Logic | 2 tasks | ? 0/2 (0%) |
 | Phase 8: UI Layer | 1 task | ? 0/1 (0%) |
 | Phase 9: Reports | 1 task | ? 0/1 (0%) |
-| **TOTAL** | **15 tasks** | **? 1/15 (7%)** |
+| **TOTAL** | **15 tasks** | **? 2/15 (13%)** |
 
 ---
 
@@ -286,5 +287,5 @@ This refactor is complete when:
 
 ---
 
-**Last Updated:** Task 1 complete - CompositeKey class created  
-**Status:** ?? In Progress (7% complete - 1/15 tasks)
+**Last Updated:** Phase 2 complete - CompositeKeyHelper now returns CompositeKey  
+**Status:** ?? In Progress (13% complete - 2/15 tasks) - ?? Build broken (expected)
