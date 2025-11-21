@@ -8,6 +8,7 @@ using Prism.Commands;
 using Prism.Mvvm;
 using EasyAF.Modules.Project.Models;
 using EasyAF.Data.Models;
+using EasyAF.Data.Extensions;
 using EasyAF.Core.Contracts;
 using Serilog;
 
@@ -705,6 +706,9 @@ namespace EasyAF.Modules.Project.ViewModels
                 _document.MarkDirty();
                 RefreshStatistics();
 
+                // Log scenario discovery for verification
+                LogScenarioDiscovery(targetDataSet, isNewData);
+
                 if (successCount == fileNames.Length)
                 {
                     // All files imported successfully
@@ -834,6 +838,54 @@ namespace EasyAF.Modules.Project.ViewModels
             _document.Project.OldData = new DataSet();
 
             Log.Information("Datasets purged due to project type change");
+        }
+
+        /// <summary>
+        /// Logs scenario discovery results for verification and debugging.
+        /// </summary>
+        private void LogScenarioDiscovery(DataSet dataSet, bool isNewData)
+        {
+            var target = isNewData ? "New" : "Old";
+            
+            // Get available scenarios
+            var scenarios = dataSet.GetAvailableScenarios();
+            
+            if (scenarios.Count > 0)
+            {
+                Log.Information("{Target} Data: Discovered {Count} scenario(s): {Scenarios}", 
+                    target, scenarios.Count, string.Join(", ", scenarios));
+
+                // Get detailed statistics per scenario
+                var stats = dataSet.GetStatisticsByScenario();
+                
+                foreach (var dataType in stats.Keys.OrderBy(k => k))
+                {
+                    var scenarioStats = stats[dataType];
+                    
+                    if (scenarioStats.ContainsKey("(All)"))
+                    {
+                        // Non-scenario type
+                        Log.Debug("{Target} Data: {DataType} = {Count} entries (no scenarios)",
+                            target, dataType, scenarioStats["(All)"]);
+                    }
+                    else
+                    {
+                        // Scenario-based type
+                        var isUniform = dataSet.IsScenariosUniform(dataType);
+                        var uniformIndicator = isUniform ? "?" : "?";
+                        
+                        var scenarioSummary = string.Join(", ", 
+                            scenarioStats.OrderBy(kvp => kvp.Key).Select(kvp => $"{kvp.Key}={kvp.Value}"));
+                        
+                        Log.Information("{Target} Data: {DataType} {Indicator} = {Summary}",
+                            target, dataType, uniformIndicator, scenarioSummary);
+                    }
+                }
+            }
+            else
+            {
+                Log.Debug("{Target} Data: No scenarios discovered (non-scenario data types only)", target);
+            }
         }
 
         #endregion
