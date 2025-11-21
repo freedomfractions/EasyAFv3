@@ -141,53 +141,74 @@ namespace EasyAF.Import
 
                     try
                     {
+                        // Dynamically create instance based on target type
+                        object? instance = targetType switch
+                        {
+                            "ArcFlash" => new ArcFlash(),
+                            "ShortCircuit" => new ShortCircuit(),
+                            "LVBreaker" => new LVBreaker(),
+                            "Fuse" => new Fuse(),
+                            "Cable" => new Cable(),
+                            _ => null
+                        };
+
+                        if (instance == null) continue;
+
+                        // Populate object from CSV using mapping
+                        PopulateObjectByIndex(instance, mapEntries, csv, currentHeaderIndex, currentHeaderSet, missingHeaders, missingRequired, strict);
+
+                        // Build composite key dynamically using reflection
+                        var key = CompositeKeyHelper.BuildCompositeKey(instance, instance.GetType());
+                        if (key == null)
+                        {
+                            _logger.Error(nameof(Import), $"Incomplete composite key for {targetType} at row {physicalRow} - skipped");
+                            continue;
+                        }
+
+                        // Add to appropriate dictionary based on target type
                         switch (targetType)
                         {
                             case "ArcFlash":
-                                var af = new ArcFlash();
-                                PopulateObjectByIndex(af, mapEntries, csv, currentHeaderIndex, currentHeaderSet, missingHeaders, missingRequired, strict);
-                                if (!string.IsNullOrWhiteSpace(af.Id) && !string.IsNullOrWhiteSpace(af.Scenario))
-                                {
-                                    var key = (af.Id, af.Scenario);
-                                    if (!targetDataSet.ArcFlashEntries.ContainsKey(key)) targetDataSet.ArcFlashEntries[key] = af; else _logger.Error(nameof(Import), $"Duplicate ArcFlash key {key} at row {physicalRow} (skipped)");
-                                }
+                                var afKey = (ValueTuple<string, string>)key;
+                                if (!targetDataSet.ArcFlashEntries.ContainsKey(afKey))
+                                    targetDataSet.ArcFlashEntries[afKey] = (ArcFlash)instance;
+                                else
+                                    _logger.Error(nameof(Import), $"Duplicate ArcFlash key {key} at row {physicalRow} (skipped)");
                                 break;
+
                             case "ShortCircuit":
-                                var sc = new ShortCircuit();
-                                PopulateObjectByIndex(sc, mapEntries, csv, currentHeaderIndex, currentHeaderSet, missingHeaders, missingRequired, strict);
-                                var bus = sc.GetType().GetProperty("Bus")?.GetValue(sc) as string;
-                                var scen = sc.GetType().GetProperty("Scenario")?.GetValue(sc) as string;
-                                if (!string.IsNullOrWhiteSpace(sc.Id) && !string.IsNullOrWhiteSpace(bus) && !string.IsNullOrWhiteSpace(scen))
-                                {
-                                    var key = (sc.Id!, bus!, scen!);
-                                    if (!targetDataSet.ShortCircuitEntries.ContainsKey(key)) targetDataSet.ShortCircuitEntries[key] = sc; else _logger.Error(nameof(Import), $"Duplicate ShortCircuit key {key} at row {physicalRow} (skipped)");
-                                }
+                                // ShortCircuit has special 3-part key structure: (Id, Bus, Scenario)
+                                // Even though Id and Bus are both aliases to BusName
+                                var scObj = (ShortCircuit)instance;
+                                var scKey = (scObj.Id!, scObj.Bus!, scObj.Scenario!);
+                                if (!targetDataSet.ShortCircuitEntries.ContainsKey(scKey))
+                                    targetDataSet.ShortCircuitEntries[scKey] = scObj;
+                                else
+                                    _logger.Error(nameof(Import), $"Duplicate ShortCircuit key {scKey} at row {physicalRow} (skipped)");
                                 break;
+
                             case "LVBreaker":
-                                var LVBreaker = new LVBreaker();
-                                PopulateObjectByIndex(LVBreaker, mapEntries, csv, currentHeaderIndex, currentHeaderSet, missingHeaders, missingRequired, strict);
-                                // Trip unit properties are now flattened directly on LVBreaker (no nested object)
-                                // Mappings with TargetType="LVBreaker" and PropertyName="TripUnitXxx" will populate automatically
-                                if (!string.IsNullOrWhiteSpace(LVBreaker.Id))
-                                {
-                                    if (!targetDataSet.LVBreakerEntries.ContainsKey(LVBreaker.Id)) targetDataSet.LVBreakerEntries[LVBreaker.Id] = LVBreaker; else _logger.Error(nameof(Import), $"Duplicate LVBreaker key {LVBreaker.Id} at row {physicalRow} (skipped)");
-                                }
+                                var lvcbKey = (string)key;
+                                if (!targetDataSet.LVBreakerEntries.ContainsKey(lvcbKey))
+                                    targetDataSet.LVBreakerEntries[lvcbKey] = (LVBreaker)instance;
+                                else
+                                    _logger.Error(nameof(Import), $"Duplicate LVBreaker key {key} at row {physicalRow} (skipped)");
                                 break;
+
                             case "Fuse":
-                                var fuse = new Fuse();
-                                PopulateObjectByIndex(fuse, mapEntries, csv, currentHeaderIndex, currentHeaderSet, missingHeaders, missingRequired, strict);
-                                if (!string.IsNullOrWhiteSpace(fuse.Id))
-                                {
-                                    if (!targetDataSet.FuseEntries.ContainsKey(fuse.Id)) targetDataSet.FuseEntries[fuse.Id] = fuse; else _logger.Error(nameof(Import), $"Duplicate Fuse key {fuse.Id} at row {physicalRow} (skipped)");
-                                }
+                                var fuseKey = (string)key;
+                                if (!targetDataSet.FuseEntries.ContainsKey(fuseKey))
+                                    targetDataSet.FuseEntries[fuseKey] = (Fuse)instance;
+                                else
+                                    _logger.Error(nameof(Import), $"Duplicate Fuse key {key} at row {physicalRow} (skipped)");
                                 break;
+
                             case "Cable":
-                                var cable = new Cable();
-                                PopulateObjectByIndex(cable, mapEntries, csv, currentHeaderIndex, currentHeaderSet, missingHeaders, missingRequired, strict);
-                                if (!string.IsNullOrWhiteSpace(cable.Id))
-                                {
-                                    if (!targetDataSet.CableEntries.ContainsKey(cable.Id)) targetDataSet.CableEntries[cable.Id] = cable; else _logger.Error(nameof(Import), $"Duplicate Cable key {cable.Id} at row {physicalRow} (skipped)");
-                                }
+                                var cableKey = (string)key;
+                                if (!targetDataSet.CableEntries.ContainsKey(cableKey))
+                                    targetDataSet.CableEntries[cableKey] = (Cable)instance;
+                                else
+                                    _logger.Error(nameof(Import), $"Duplicate Cable key {key} at row {physicalRow} (skipped)");
                                 break;
                         }
                     }

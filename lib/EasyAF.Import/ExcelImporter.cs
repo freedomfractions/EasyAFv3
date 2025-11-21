@@ -74,7 +74,99 @@ namespace EasyAF.Import
                         if (!inKnownSection) continue;
                         foreach (var targetType in activeTargetTypes.ToList())
                         {
-                            if (!groupsByType.TryGetValue(targetType, out var mapEntries)) continue; var idEntry = mapEntries.FirstOrDefault(e => e.PropertyName == "Id"); if (idEntry == null) continue; if (!currentHeaderIndex.TryGetValue(idEntry.ColumnHeader.Trim(), out int idCol)) continue; var idValue = row.Cell(idCol).GetString()?.Trim(); if (string.IsNullOrWhiteSpace(idValue)) continue; try { switch (targetType) { case "ArcFlash": var af = new ArcFlash(); PopulateObject(af, mapEntries, row, currentHeaderIndex, worksheetMissing, missingRequired, strict); if (!string.IsNullOrWhiteSpace(af.Id) && !string.IsNullOrWhiteSpace(af.Scenario)) { var key = (af.Id, af.Scenario); if (!targetDataSet.ArcFlashEntries.ContainsKey(key)) targetDataSet.ArcFlashEntries[key] = af; else LogDuplicate("ArcFlash"); } break; case "ShortCircuit": var sc = new ShortCircuit(); PopulateObject(sc, mapEntries, row, currentHeaderIndex, worksheetMissing, missingRequired, strict); var bus = sc.GetType().GetProperty("Bus")?.GetValue(sc) as string; var scen = sc.GetType().GetProperty("Scenario")?.GetValue(sc) as string; if (!string.IsNullOrWhiteSpace(sc.Id) && !string.IsNullOrWhiteSpace(bus) && !string.IsNullOrWhiteSpace(scen)) { var key = (sc.Id!, bus!, scen!); if (!targetDataSet.ShortCircuitEntries.ContainsKey(key)) targetDataSet.ShortCircuitEntries[key] = sc; else LogDuplicate("ShortCircuit"); } break; case "LVBreaker": var LVBreaker = new LVBreaker(); PopulateObject(LVBreaker, mapEntries, row, currentHeaderIndex, worksheetMissing, missingRequired, strict); if (!string.IsNullOrWhiteSpace(LVBreaker.Id)) { if (!targetDataSet.LVBreakerEntries.ContainsKey(LVBreaker.Id)) targetDataSet.LVBreakerEntries[LVBreaker.Id] = LVBreaker; else LogDuplicate("LVBreaker"); } break; case "Fuse": var fuse = new Fuse(); PopulateObject(fuse, mapEntries, row, currentHeaderIndex, worksheetMissing, missingRequired, strict); if (!string.IsNullOrWhiteSpace(fuse.Id)) { if (!targetDataSet.FuseEntries.ContainsKey(fuse.Id)) targetDataSet.FuseEntries[fuse.Id] = fuse; else LogDuplicate("Fuse"); } break; case "Cable": var cable = new Cable(); PopulateObject(cable, mapEntries, row, currentHeaderIndex, worksheetMissing, missingRequired, strict); if (!string.IsNullOrWhiteSpace(cable.Id)) { if (!targetDataSet.CableEntries.ContainsKey(cable.Id)) targetDataSet.CableEntries[cable.Id] = cable; else LogDuplicate("Cable"); } break; case "Bus": var busObj = new Bus(); PopulateObject(busObj, mapEntries, row, currentHeaderIndex, worksheetMissing, missingRequired, strict); if (!string.IsNullOrWhiteSpace(busObj.Id)) { if (!targetDataSet.BusEntries.ContainsKey(busObj.Id)) targetDataSet.BusEntries[busObj.Id] = busObj; else LogDuplicate("Bus"); } break; } } catch (Exception ex) { _logger.Error(nameof(Import), $"Exception processing {targetType} in worksheet '{ws.Name}' at row {row.RowNumber()}: {ex.Message}"); } }
+                            if (!groupsByType.TryGetValue(targetType, out var mapEntries)) continue;
+                            var idEntry = mapEntries.FirstOrDefault(e => e.PropertyName == "Id");
+                            if (idEntry == null) continue;
+                            if (!currentHeaderIndex.TryGetValue(idEntry.ColumnHeader.Trim(), out int idCol)) continue;
+                            var idValue = row.Cell(idCol).GetString()?.Trim();
+                            if (string.IsNullOrWhiteSpace(idValue)) continue;
+                            
+                            try
+                            {
+                                // Dynamically create instance based on target type
+                                object? instance = targetType switch
+                                {
+                                    "ArcFlash" => new ArcFlash(),
+                                    "ShortCircuit" => new ShortCircuit(),
+                                    "LVBreaker" => new LVBreaker(),
+                                    "Fuse" => new Fuse(),
+                                    "Cable" => new Cable(),
+                                    "Bus" => new Bus(),
+                                    _ => null
+                                };
+
+                                if (instance == null) continue;
+
+                                // Populate object from Excel using mapping
+                                PopulateObject(instance, mapEntries, row, currentHeaderIndex, worksheetMissing, missingRequired, strict);
+
+                                // Build composite key dynamically using reflection
+                                var key = CompositeKeyHelper.BuildCompositeKey(instance, instance.GetType());
+                                if (key == null)
+                                {
+                                    _logger.Error(nameof(Import), $"Incomplete composite key for {targetType} at row {row.RowNumber()} - skipped");
+                                    continue;
+                                }
+
+                                // Add to appropriate dictionary based on target type
+                                switch (targetType)
+                                {
+                                    case "ArcFlash":
+                                        var afKey = (ValueTuple<string, string>)key;
+                                        if (!targetDataSet.ArcFlashEntries.ContainsKey(afKey))
+                                            targetDataSet.ArcFlashEntries[afKey] = (ArcFlash)instance;
+                                        else
+                                            LogDuplicate("ArcFlash");
+                                        break;
+
+                                    case "ShortCircuit":
+                                        // ShortCircuit has special 3-part key structure: (Id, Bus, Scenario)
+                                        var scObj = (ShortCircuit)instance;
+                                        var scKey = (scObj.Id!, scObj.Bus!, scObj.Scenario!);
+                                        if (!targetDataSet.ShortCircuitEntries.ContainsKey(scKey))
+                                            targetDataSet.ShortCircuitEntries[scKey] = scObj;
+                                        else
+                                            LogDuplicate("ShortCircuit");
+                                        break;
+
+                                    case "LVBreaker":
+                                        var lvcbKey = (string)key;
+                                        if (!targetDataSet.LVBreakerEntries.ContainsKey(lvcbKey))
+                                            targetDataSet.LVBreakerEntries[lvcbKey] = (LVBreaker)instance;
+                                        else
+                                            LogDuplicate("LVBreaker");
+                                        break;
+
+                                    case "Fuse":
+                                        var fuseKey = (string)key;
+                                        if (!targetDataSet.FuseEntries.ContainsKey(fuseKey))
+                                            targetDataSet.FuseEntries[fuseKey] = (Fuse)instance;
+                                        else
+                                            LogDuplicate("Fuse");
+                                        break;
+
+                                    case "Cable":
+                                        var cableKey = (string)key;
+                                        if (!targetDataSet.CableEntries.ContainsKey(cableKey))
+                                            targetDataSet.CableEntries[cableKey] = (Cable)instance;
+                                        else
+                                            LogDuplicate("Cable");
+                                        break;
+
+                                    case "Bus":
+                                        var busKey = (string)key;
+                                        if (!targetDataSet.BusEntries.ContainsKey(busKey))
+                                            targetDataSet.BusEntries[busKey] = (Bus)instance;
+                                        else
+                                            LogDuplicate("Bus");
+                                        break;
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.Error(nameof(Import), $"Exception processing {targetType} in worksheet '{ws.Name}' at row {row.RowNumber()}: {ex.Message}");
+                            }
+                        }
                     }
                     if (worksheetMissing.Count > 0) { foreach (var m in worksheetMissing) globalMissing.Add(m); _logger.Error(nameof(Import), $"Missing headers in worksheet '{ws.Name}'", string.Join(", ", worksheetMissing)); }
                 }
