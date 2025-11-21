@@ -55,9 +55,9 @@
                         <RowDefinition Height="32"/>
                         <RowDefinition Height="32"/>
                         <RowDefinition Height="32"/>
-                        <RowDefinition Height="12"/>  <!-- Spacer row before Comments -->
+                        <RowDefinition Height="16"/>  <!-- Spacer row before Comments (increased from 12) -->
                         <RowDefinition Height="80"/>  <!-- Comments row -->
-                        <RowDefinition Height="12"/>  <!-- Spacer row before Project Type -->
+                        <RowDefinition Height="16"/>  <!-- Spacer row before Project Type (increased from 12) -->
                         <RowDefinition Height="32"/>  <!-- Project Type row -->
                     </Grid.RowDefinitions>
                     
@@ -185,7 +185,7 @@
                     <!-- Row 7: Spacer (empty) -->
                     
                     <!-- Row 8: Comments -->
-                    <TextBlock Grid.Row="8" Grid.Column="0" Text="Comments:" VerticalAlignment="Top" Margin="0,4,8,0" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                    <TextBlock Grid.Row="8" Grid.Column="0" Text="Comments:" VerticalAlignment="Top" Margin="0,8,8,0" Foreground="{DynamicResource TextPrimaryBrush}"/>
                     <TextBox Grid.Row="8" Grid.Column="1" Grid.ColumnSpan="7" 
                              Text="{Binding Comments, UpdateSourceTrigger=PropertyChanged}" 
                              TextWrapping="Wrap" 
