@@ -27,6 +27,7 @@ public class ShortCircuit
     /// <summary>Equipment Name (Column: Equipment Name)</summary>
     [Category("General")]
     [Description("Equipment Name")]
+    [Required]
     public string? EquipmentName { get; set; }
 
     /// <summary>Worst Case (Column: Worst Case)</summary>
