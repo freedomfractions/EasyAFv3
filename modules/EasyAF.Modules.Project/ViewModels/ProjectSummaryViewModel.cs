@@ -634,28 +634,32 @@ namespace EasyAF.Modules.Project.ViewModels
                     return;
                 }
 
-                // Step 2: Select data file to import
+                // Step 2: Select data file(s) to import (MULTI-SELECT enabled)
                 var dialog = new OpenFileDialog
                 {
-                    Title = $"Select Data File to Import ({(isNewData ? "New" : "Old")} Data)",
+                    Title = $"Select Data File(s) to Import ({(isNewData ? "New" : "Old")} Data)",
                     Filter = "Data Files (*.csv;*.xlsx;*.xls)|*.csv;*.xlsx;*.xls|CSV Files (*.csv)|*.csv|Excel Files (*.xlsx;*.xls)|*.xlsx;*.xls|All Files (*.*)|*.*",
-                    CheckFileExists = true
+                    CheckFileExists = true,
+                    Multiselect = true // Enable multi-select
                 };
 
                 if (dialog.ShowDialog() != true)
                     return; // User cancelled
 
-                var dataFilePath = dialog.FileName;
-                Log.Information("Importing {Target} data from: {Path}", isNewData ? "New" : "Old", dataFilePath);
+                var fileNames = dialog.FileNames; // Get all selected files
+                if (fileNames == null || fileNames.Length == 0)
+                    return;
 
-                // Step 3: Load mapping config
+                Log.Information("Importing {Count} file(s) into {Target} data", fileNames.Length, isNewData ? "New" : "Old");
+
+                // Step 3: Load mapping config once (reuse for all files)
                 var mappingConfig = EasyAF.Import.MappingConfig.Load(MapPath);
                 var validation = mappingConfig.Validate();
                 
                 if (validation.HasErrors)
                 {
-                    var errors = string.Join("\n", validation.Errors);
-                    _dialogService.ShowError($"Mapping configuration has errors:\n\n{errors}", "Invalid Mapping");
+                    var validationErrors = string.Join("\n", validation.Errors);
+                    _dialogService.ShowError($"Mapping configuration has errors:\n\n{validationErrors}", "Invalid Mapping");
                     return;
                 }
 
@@ -676,19 +680,54 @@ namespace EasyAF.Modules.Project.ViewModels
                         _document.Project.OldData = targetDataSet;
                 }
 
-                // Step 5: Execute import
+                // Step 5: Import each file
                 var importManager = new EasyAF.Import.ImportManager();
-                importManager.Import(dataFilePath, mappingConfig, targetDataSet);
+                int successCount = 0;
+                var errors = new System.Collections.Generic.List<string>();
 
-                // Step 6: Success - mark dirty and refresh UI
+                foreach (var filePath in fileNames)
+                {
+                    try
+                    {
+                        Log.Information("Importing file: {File}", System.IO.Path.GetFileName(filePath));
+                        importManager.Import(filePath, mappingConfig, targetDataSet);
+                        successCount++;
+                    }
+                    catch (Exception fileEx)
+                    {
+                        var fileName = System.IO.Path.GetFileName(filePath);
+                        errors.Add($"{fileName}: {fileEx.Message}");
+                        Log.Error(fileEx, "Error importing file: {File}", filePath);
+                    }
+                }
+
+                // Step 6: Report results
                 _document.MarkDirty();
                 RefreshStatistics();
 
-                _dialogService.ShowMessage(
-                    $"Import completed successfully!\n\nData imported into {(isNewData ? "New" : "Old")} Data.",
-                    "Import Successful");
+                if (successCount == fileNames.Length)
+                {
+                    // All files imported successfully
+                    _dialogService.ShowMessage(
+                        $"Import completed successfully!\n\n{successCount} file(s) imported into {(isNewData ? "New" : "Old")} Data.",
+                        "Import Successful");
+                }
+                else if (successCount > 0)
+                {
+                    // Some files failed
+                    var errorSummary = string.Join("\n", errors);
+                    _dialogService.ShowWarning(
+                        $"{successCount} of {fileNames.Length} file(s) imported successfully.\n\nErrors:\n{errorSummary}",
+                        "Partial Import");
+                }
+                else
+                {
+                    // All files failed
+                    var errorSummary = string.Join("\n", errors);
+                    _dialogService.ShowError($"All imports failed:\n\n{errorSummary}", "Import Failed");
+                }
 
-                Log.Information("Import completed: {Target} data, file: {File}", isNewData ? "New" : "Old", dataFilePath);
+                Log.Information("Import completed: {Success} of {Total} files imported successfully", successCount, fileNames.Length);
             }
             catch (System.IO.IOException ioEx)
             {

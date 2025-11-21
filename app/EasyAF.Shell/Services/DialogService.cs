@@ -18,6 +18,11 @@ public class UserDialogService : IUserDialogService
         MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Error);
     }
 
+    public void ShowWarning(string message, string title = "Warning")
+    {
+        MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Warning);
+    }
+
     public bool Confirm(string message, string title = "Confirm")
     {
         var result = MessageBox.Show(message, title, MessageBoxButton.YesNo, MessageBoxImage.Question);

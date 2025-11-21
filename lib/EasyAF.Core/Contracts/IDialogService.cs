@@ -18,6 +18,11 @@ public interface IUserDialogService
     void ShowError(string message, string title = "Error");
 
     /// <summary>
+    /// Shows a warning dialog.
+    /// </summary>
+    void ShowWarning(string message, string title = "Warning");
+
+    /// <summary>
     /// Shows a confirmation dialog with Yes/No buttons.
     /// </summary>
     bool Confirm(string message, string title = "Confirm");
