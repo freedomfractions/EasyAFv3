@@ -245,7 +245,11 @@ namespace EasyAF.Import
             }
             if (invalid.Count > 0)
             {
-                throw new InvalidDataException("Invalid (non-PascalCase) mapping JSON field names: " + string.Join(", ", invalid.OrderBy(s => s)));
+                var invalidNames = string.Join(", ", invalid.OrderBy(s => s));
+                throw new InvalidDataException(
+                    $"Invalid (non-PascalCase) mapping JSON field names: {invalidNames}\n\n" +
+                    $"Hint: All property names must start with an uppercase letter (PascalCase).\n" +
+                    $"If you meant to use JSON Schema, the property should be '$schema' (with $ prefix), not 'schema'.");
             }
 
             var cfg = JsonConvert.DeserializeObject<MappingConfig>(json) ?? new MappingConfig();
