@@ -471,6 +471,16 @@ namespace EasyAF.Modules.Project.ViewModels
         #region Statistics
 
         /// <summary>
+        /// Gets the table rows for data statistics (unified New/Old comparison).
+        /// </summary>
+        public ObservableCollection<DataStatisticsRowViewModel> DataStatisticsRows { get; } = new();
+
+        /// <summary>
+        /// Gets the flattened list of visible rows (including expanded children).
+        /// </summary>
+        public ObservableCollection<DataStatisticsRowViewModel> VisibleStatisticsRows { get; } = new();
+
+        /// <summary>
         /// Gets the tree nodes for New data.
         /// </summary>
         public ObservableCollection<DataTypeNodeViewModel> NewDataTreeNodes { get; } = new();
@@ -774,7 +784,19 @@ namespace EasyAF.Modules.Project.ViewModels
         /// </remarks>
         public void RefreshStatistics()
         {
-            // Rebuild tree nodes
+            // Rebuild table rows (new unified view)
+            DataStatisticsRows.Clear();
+            foreach (var row in BuildStatisticsRows(_document.Project.NewData, _document.Project.OldData))
+            {
+                DataStatisticsRows.Add(row);
+                // Subscribe to IsExpanded changes
+                row.PropertyChanged += StatisticsRow_PropertyChanged;
+            }
+
+            // Build flattened visible list
+            RebuildVisibleRows();
+
+            // Rebuild tree nodes (legacy view - kept for compatibility)
             NewDataTreeNodes.Clear();
             OldDataTreeNodes.Clear();
 
@@ -795,6 +817,30 @@ namespace EasyAF.Modules.Project.ViewModels
             RaisePropertyChanged(nameof(OldFuseCount));
             RaisePropertyChanged(nameof(OldShortCircuitCount));
             RaisePropertyChanged(nameof(OldArcFlashCount));
+        }
+
+        private void StatisticsRow_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(DataStatisticsRowViewModel.IsExpanded))
+            {
+                RebuildVisibleRows();
+            }
+        }
+
+        private void RebuildVisibleRows()
+        {
+            VisibleStatisticsRows.Clear();
+            foreach (var row in DataStatisticsRows)
+            {
+                VisibleStatisticsRows.Add(row);
+                if (row.IsExpanded)
+                {
+                    foreach (var child in row.Children)
+                    {
+                        VisibleStatisticsRows.Add(child);
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -999,6 +1045,94 @@ namespace EasyAF.Modules.Project.ViewModels
                 "ZigzagTransformer" => "Zigzag Transformers",
                 _ => dataTypeName // Use as-is for others (Bus, Fuse, Cable, etc.)
             };
+        }
+
+        /// <summary>
+        /// Builds statistics table rows comparing New and Old data.
+        /// </summary>
+        /// <param name="newData">New DataSet.</param>
+        /// <param name="oldData">Old DataSet.</param>
+        /// <returns>Observable collection of table rows with hierarchical scenario support.</returns>
+        private ObservableCollection<DataStatisticsRowViewModel> BuildStatisticsRows(DataSet? newData, DataSet? oldData)
+        {
+            var rows = new ObservableCollection<DataStatisticsRowViewModel>();
+
+            // Get statistics from both datasets
+            var newStats = newData?.GetStatisticsByScenario() ?? new System.Collections.Generic.Dictionary<string, System.Collections.Generic.Dictionary<string, int>>();
+            var oldStats = oldData?.GetStatisticsByScenario() ?? new System.Collections.Generic.Dictionary<string, System.Collections.Generic.Dictionary<string, int>>();
+
+            // Collect all unique data type names from both datasets
+            var allDataTypes = newStats.Keys.Union(oldStats.Keys).OrderBy(k => k);
+
+            // Separate scenario-based types from simple types
+            var scenarioTypes = allDataTypes.Where(dt => 
+                (newStats.ContainsKey(dt) && !newStats[dt].ContainsKey("(All)")) ||
+                (oldStats.ContainsKey(dt) && !oldStats[dt].ContainsKey("(All)")))
+                .OrderBy(dt => dt);
+
+            var simpleTypes = allDataTypes.Where(dt =>
+                (newStats.ContainsKey(dt) && newStats[dt].ContainsKey("(All)")) ||
+                (oldStats.ContainsKey(dt) && oldStats[dt].ContainsKey("(All)")))
+                .OrderBy(dt => dt);
+
+            // Add scenario-based types first (Arc Flash, Short Circuit)
+            foreach (var dataTypeName in scenarioTypes)
+            {
+                var newScenarios = newStats.ContainsKey(dataTypeName) ? newStats[dataTypeName] : new System.Collections.Generic.Dictionary<string, int>();
+                var oldScenarios = oldStats.ContainsKey(dataTypeName) ? oldStats[dataTypeName] : new System.Collections.Generic.Dictionary<string, int>();
+
+                var newTotal = newScenarios.Values.Sum();
+                var oldTotal = oldScenarios.Values.Sum();
+
+                var row = new DataStatisticsRowViewModel
+                {
+                    DataTypeName = dataTypeName,
+                    DisplayName = GetFriendlyName(dataTypeName),
+                    NewCount = newTotal,
+                    OldCount = oldTotal,
+                    IsScenariosUniform = newData?.IsScenariosUniform(dataTypeName) ?? true
+                };
+
+                // Add child rows for each scenario
+                var allScenarios = newScenarios.Keys.Union(oldScenarios.Keys).OrderBy(s => s);
+                foreach (var scenario in allScenarios)
+                {
+                    var newCount = newScenarios.ContainsKey(scenario) ? newScenarios[scenario] : 0;
+                    var oldCount = oldScenarios.ContainsKey(scenario) ? oldScenarios[scenario] : 0;
+
+                    row.Children.Add(new DataStatisticsRowViewModel
+                    {
+                        DataTypeName = dataTypeName,
+                        ScenarioName = scenario,
+                        DisplayName = scenario,
+                        NewCount = newCount,
+                        OldCount = oldCount
+                    });
+                }
+
+                rows.Add(row);
+            }
+
+            // Add simple types (Bus, Breakers, Fuses, etc.)
+            foreach (var dataTypeName in simpleTypes)
+            {
+                var newCount = newStats.ContainsKey(dataTypeName) && newStats[dataTypeName].ContainsKey("(All)") 
+                    ? newStats[dataTypeName]["(All)"] 
+                    : 0;
+                var oldCount = oldStats.ContainsKey(dataTypeName) && oldStats[dataTypeName].ContainsKey("(All)") 
+                    ? oldStats[dataTypeName]["(All)"] 
+                    : 0;
+
+                rows.Add(new DataStatisticsRowViewModel
+                {
+                    DataTypeName = dataTypeName,
+                    DisplayName = GetFriendlyName(dataTypeName),
+                    NewCount = newCount,
+                    OldCount = oldCount
+                });
+            }
+
+            return rows;
         }
 
         #endregion

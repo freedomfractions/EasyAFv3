@@ -10,7 +10,48 @@
         <Style TargetType="GroupBox" BasedOn="{StaticResource {x:Type GroupBox}}">
             <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
         </Style>
+        
+        <!-- Converters -->
         <conv:MultiplyConverter x:Key="MultiplyConverter"/>
+        
+        <!-- Boolean to Visibility Converters -->
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        
+        <!-- Inverse Boolean to Visibility Converter -->
+        <conv:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter"/>
+        
+        <!-- Boolean to FontWeight Converter -->
+        <conv:BooleanToFontWeightConverter x:Key="BooleanToFontWeightConverter"/>
+        
+        <!-- Right-aligned TextBlock Style -->
+        <Style x:Key="RightAlignedTextBlockStyle" TargetType="TextBlock">
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="TextAlignment" Value="Right"/>
+            <Setter Property="Margin" Value="0,0,10,0"/>
+        </Style>
+        
+        <!-- Expander Toggle Button Style -->
+        <Style x:Key="ExpanderToggleButtonStyle" TargetType="ToggleButton">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border Background="Transparent">
+                            <TextBlock x:Name="ExpanderIcon" 
+                                       Text="?" 
+                                       FontSize="10"
+                                       Foreground="{DynamicResource TextPrimaryBrush}"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="ExpanderIcon" Property="Text" Value="?"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </UserControl.Resources>
     
     <ScrollViewer VerticalScrollBarVisibility="Auto"
@@ -222,143 +263,102 @@
                       BorderBrush="{DynamicResource ControlBorderBrush}"
                       Foreground="{DynamicResource TextPrimaryBrush}">
                 <Grid Margin="8">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="16"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
                     
-                    <!-- New Data Section (using Map Editor's Border style) -->
-                    <Border Grid.Column="0"
-                            BorderBrush="{DynamicResource ControlBorderBrush}"
-                            BorderThickness="1"
-                            CornerRadius="4"
-                            Padding="10">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="*"/>
-                            </Grid.RowDefinitions>
-                            
-                            <!-- Section Header -->
-                            <TextBlock Grid.Row="0" 
-                                       Text="New Data" 
-                                       FontWeight="SemiBold"
-                                       FontSize="14"
-                                       Margin="0,0,0,10"
-                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
-                            
-                            <!-- Import Button -->
-                            <Button Grid.Row="1"
-                                    Content="Import..."
-                                    Command="{Binding ImportNewDataCommand}"
-                                    Style="{StaticResource BaseButtonStyle}"
-                                    Padding="12,6"
-                                    Margin="0,0,0,10"
-                                    HorizontalAlignment="Left"/>
-                            
-                            <!-- Tree View -->
-                            <TreeView Grid.Row="2"
-                                      ItemsSource="{Binding NewDataTreeNodes}"
-                                      BorderThickness="0"
-                                      Background="Transparent">
-                                <TreeView.ItemContainerStyle>
-                                    <Style TargetType="TreeViewItem">
-                                        <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
-                                        <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
-                                        <Setter Property="FontSize" Value="13"/>
-                                        <Setter Property="Padding" Value="2"/>
-                                    </Style>
-                                </TreeView.ItemContainerStyle>
-                                <TreeView.Resources>
-                                    <HierarchicalDataTemplate DataType="{x:Type local:DataTypeNodeViewModel}" 
-                                                              ItemsSource="{Binding Children}">
+                    <!-- Import Buttons Row -->
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
+                        <Button Content="Import New Data..."
+                                Command="{Binding ImportNewDataCommand}"
+                                Style="{StaticResource BaseButtonStyle}"
+                                Padding="12,6"
+                                Margin="0,0,10,0"/>
+                        <Button Content="Import Old Data..."
+                                Command="{Binding ImportOldDataCommand}"
+                                Style="{StaticResource BaseButtonStyle}"
+                                Padding="12,6"/>
+                    </StackPanel>
+                    
+                    <!-- Data Statistics Table -->
+                    <DataGrid Grid.Row="2"
+                              ItemsSource="{Binding VisibleStatisticsRows}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              HeadersVisibility="Column"
+                              GridLinesVisibility="Horizontal"
+                              BorderThickness="1"
+                              BorderBrush="{DynamicResource ControlBorderBrush}"
+                              Background="Transparent"
+                              RowBackground="Transparent"
+                              AlternatingRowBackground="{DynamicResource PrimaryBackgroundBrush}"
+                              CanUserAddRows="False"
+                              CanUserDeleteRows="False"
+                              CanUserReorderColumns="False"
+                              CanUserResizeRows="False"
+                              SelectionMode="Single"
+                              SelectionUnit="FullRow">
+                        
+                        <DataGrid.Columns>
+                            <!-- Data Type Column with Expander -->
+                            <DataGridTemplateColumn Header="Data Type" Width="2*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
                                         <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="{Binding Icon}" 
-                                                       Margin="0,0,6,0" 
-                                                       FontSize="12"
-                                                       VerticalAlignment="Center"/>
+                                            <!-- Indentation for child rows -->
+                                            <Border Width="{Binding IndentLevel, Converter={StaticResource MultiplyConverter}, ConverterParameter=20}"/>
+                                            
+                                            <!-- Expander button (visible only for parent rows with children) -->
+                                            <ToggleButton IsChecked="{Binding IsExpanded, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                          Visibility="{Binding ShowExpander, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                          Width="16"
+                                                          Height="16"
+                                                          Margin="0,0,4,0"
+                                                          VerticalAlignment="Center"
+                                                          Style="{StaticResource ExpanderToggleButtonStyle}"/>
+                                            
+                                            <!-- Spacer for non-expandable rows -->
+                                            <Border Width="20" 
+                                                    Visibility="{Binding ShowExpander, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
+                                            
+                                            <!-- Display Name -->
                                             <TextBlock Text="{Binding DisplayName}" 
+                                                       FontWeight="{Binding IsRootRow, Converter={StaticResource BooleanToFontWeightConverter}}"
                                                        Foreground="{DynamicResource TextPrimaryBrush}"
                                                        VerticalAlignment="Center"/>
+                                            
+                                            <!-- Warning Indicator -->
                                             <TextBlock Text="{Binding WarningIndicator}" 
-                                                       Margin="6,0,0,0" 
+                                                       Margin="6,0,0,0"
                                                        FontSize="12"
                                                        VerticalAlignment="Center"
                                                        ToolTip="Scenario counts are inconsistent"/>
                                         </StackPanel>
-                                    </HierarchicalDataTemplate>
-                                </TreeView.Resources>
-                            </TreeView>
-                        </Grid>
-                    </Border>
-                    
-                    <!-- Old Data Section (using Map Editor's Border style) -->
-                    <Border Grid.Column="2"
-                            BorderBrush="{DynamicResource ControlBorderBrush}"
-                            BorderThickness="1"
-                            CornerRadius="4"
-                            Padding="10">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="*"/>
-                            </Grid.RowDefinitions>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
                             
-                            <!-- Section Header -->
-                            <TextBlock Grid.Row="0" 
-                                       Text="Old Data" 
-                                       FontWeight="SemiBold"
-                                       FontSize="14"
-                                       Margin="0,0,0,10"
-                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <!-- New Data Column -->
+                            <DataGridTextColumn Header="New Data" 
+                                                Binding="{Binding NewCountDisplay}" 
+                                                Width="*"
+                                                ElementStyle="{StaticResource RightAlignedTextBlockStyle}"/>
                             
-                            <!-- Import Button -->
-                            <Button Grid.Row="1"
-                                    Content="Import..."
-                                    Command="{Binding ImportOldDataCommand}"
-                                    Style="{StaticResource BaseButtonStyle}"
-                                    Padding="12,6"
-                                    Margin="0,0,0,10"
-                                    HorizontalAlignment="Left"/>
+                            <!-- Old Data Column -->
+                            <DataGridTextColumn Header="Old Data" 
+                                                Binding="{Binding OldCountDisplay}" 
+                                                Width="*"
+                                                ElementStyle="{StaticResource RightAlignedTextBlockStyle}"/>
                             
-                            <!-- Tree View -->
-                            <TreeView Grid.Row="2"
-                                      ItemsSource="{Binding OldDataTreeNodes}"
-                                      BorderThickness="0"
-                                      Background="Transparent">
-                                <TreeView.ItemContainerStyle>
-                                    <Style TargetType="TreeViewItem">
-                                        <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
-                                        <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
-                                        <Setter Property="FontSize" Value="13"/>
-                                        <Setter Property="Padding" Value="2"/>
-                                    </Style>
-                                </TreeView.ItemContainerStyle>
-                                <TreeView.Resources>
-                                    <HierarchicalDataTemplate DataType="{x:Type local:DataTypeNodeViewModel}" 
-                                                              ItemsSource="{Binding Children}">
-                                        <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="{Binding Icon}" 
-                                                       Margin="0,0,6,0" 
-                                                       FontSize="12"
-                                                       VerticalAlignment="Center"/>
-                                            <TextBlock Text="{Binding DisplayName}" 
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       VerticalAlignment="Center"/>
-                                            <TextBlock Text="{Binding WarningIndicator}" 
-                                                       Margin="6,0,0,0" 
-                                                       FontSize="12"
-                                                       VerticalAlignment="Center"
-                                                       ToolTip="Scenario counts are inconsistent"/>
-                                        </StackPanel>
-                                    </HierarchicalDataTemplate>
-                                </TreeView.Resources>
-                            </TreeView>
-                        </Grid>
-                    </Border>
+                            <!-- Delta Column -->
+                            <DataGridTextColumn Header="? Change" 
+                                                Binding="{Binding DeltaDisplay}" 
+                                                Width="*"
+                                                ElementStyle="{StaticResource RightAlignedTextBlockStyle}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
                 </Grid>
             </GroupBox>
             
