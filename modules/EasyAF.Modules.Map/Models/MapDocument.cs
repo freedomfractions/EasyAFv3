@@ -76,9 +76,33 @@ namespace EasyAF.Modules.Map.Models
         { 
             get => _isDirty;
             set 
-            { 
-                _isDirty = value; 
-                OnPropertyChanged(nameof(IsDirty)); 
+            {
+                if (_isDirty != value)
+                {
+                    _isDirty = value;
+                    
+                    // DIAGNOSTIC: Log when dirty flag changes with stack trace
+                    var stackTrace = new System.Diagnostics.StackTrace(1, true); // Skip this setter
+                    var callingMethod = stackTrace.GetFrame(0)?.GetMethod();
+                    var callingClass = callingMethod?.DeclaringType?.Name ?? "Unknown";
+                    var callingMethodName = callingMethod?.Name ?? "Unknown";
+                    
+                    Log.Warning("MapDocument IsDirty changed to {IsDirty} from {CallingClass}.{CallingMethod} (FilePath: {FilePath})", 
+                        value, callingClass, callingMethodName, FilePath ?? "(null)");
+                    
+                    // Log first few stack frames for context
+                    for (int i = 0; i < Math.Min(5, stackTrace.FrameCount); i++)
+                    {
+                        var frame = stackTrace.GetFrame(i);
+                        var method = frame?.GetMethod();
+                        if (method != null)
+                        {
+                            Log.Debug("  [{Index}] {Type}.{Method}", i, method.DeclaringType?.Name, method.Name);
+                        }
+                    }
+                    
+                    OnPropertyChanged(nameof(IsDirty));
+                }
             }
         }
 
@@ -96,6 +120,13 @@ namespace EasyAF.Modules.Map.Models
         /// </summary>
         public void MarkDirty()
         {
+            var stackTrace = new System.Diagnostics.StackTrace(1, true);
+            var callingMethod = stackTrace.GetFrame(0)?.GetMethod();
+            var callingClass = callingMethod?.DeclaringType?.Name ?? "Unknown";
+            var callingMethodName = callingMethod?.Name ?? "Unknown";
+            
+            Log.Warning("MapDocument.MarkDirty() called from {CallingClass}.{CallingMethod}", callingClass, callingMethodName);
+            
             IsDirty = true;
             DateModified = DateTime.Now;
         }
