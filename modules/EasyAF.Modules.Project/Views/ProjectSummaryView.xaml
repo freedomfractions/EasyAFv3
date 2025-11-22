@@ -342,7 +342,7 @@
                                 <Setter Property="FontSize" Value="13"/>
                                 <Setter Property="Padding" Value="12,12,12,8"/>
                                 <Setter Property="BorderThickness" Value="0"/>
-                                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                <Setter Property="HorizontalContentAlignment" Value="Left"/>
                             </Style>
                             
                             <!-- Row Style - transparent, child rows handled by cell templates -->
@@ -377,10 +377,21 @@
                         
                         <DataGrid.Columns>
                             <!-- Data Type Column with Expander -->
-                            <DataGridTemplateColumn Header="Data Type" Width="1.5*">
+                            <DataGridTemplateColumn Width="1.5*">
+                                <DataGridTemplateColumn.HeaderTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="Data Type" 
+                                                   HorizontalAlignment="Left"
+                                                   FontWeight="SemiBold"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.HeaderTemplate>
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Grid>
+                                            <!-- Shaded background for child rows only (no border) -->
+                                            <Border Background="{DynamicResource SecondaryBackgroundBrush}"
+                                                    Visibility="{Binding IsRootRow, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
+                                            
                                             <StackPanel Orientation="Horizontal" Margin="12,6">
                                                 <!-- Indentation for child rows -->
                                                 <Border Width="{Binding IndentLevel, Converter={StaticResource MultiplyConverter}, ConverterParameter=20}"/>
