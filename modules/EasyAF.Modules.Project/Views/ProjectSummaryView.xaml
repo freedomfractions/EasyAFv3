@@ -378,15 +378,15 @@
                         <DataGrid.Columns>
                             <!-- Data Type Column with Expander -->
                             <DataGridTemplateColumn Width="1.5*">
+                                <DataGridTemplateColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
+                                        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                                    </Style>
+                                </DataGridTemplateColumn.HeaderStyle>
                                 <DataGridTemplateColumn.HeaderTemplate>
                                     <DataTemplate>
-                                        <Grid HorizontalAlignment="Stretch">
-                                            <TextBlock Text="Data Type" 
-                                                       HorizontalAlignment="Left"
-                                                       TextAlignment="Left"
-                                                       FontWeight="SemiBold"
-                                                       Margin="0"/>
-                                        </Grid>
+                                        <TextBlock Text="Data Type" 
+                                                   FontWeight="SemiBold"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.HeaderTemplate>
                                 <DataGridTemplateColumn.CellTemplate>
