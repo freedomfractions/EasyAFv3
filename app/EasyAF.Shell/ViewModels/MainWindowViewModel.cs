@@ -707,7 +707,7 @@ public class MainWindowViewModel : BindableBase
     /// <summary>
     /// Gets the chevron glyph for the file tab strip toggle button.
     /// </summary>
-    public string FileTabStripChevronGlyph => IsFileTabStripVisible ? "\uE76C" : "\uE76B"; // ChevronRight : ChevronLeft
+    public string FileTabStripChevronGlyph => IsFileTabStripVisible ? "\uE76B" : "\uE76C"; // ChevronLeft : ChevronRight
     
     /// <summary>
     /// Gets the tooltip text for the file tab strip toggle button.

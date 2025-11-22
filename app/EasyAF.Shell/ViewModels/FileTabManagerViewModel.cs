@@ -33,6 +33,7 @@ public class FileTabManagerViewModel : BindableBase, IDisposable
     private readonly DispatcherTimer _timestampUpdateTimer;
     private bool _disposed;
     private object? _selectedTab;
+    private bool _isWelcomeTabActive;
     
     /// <summary>
     /// Initializes a new instance of the <see cref="FileTabManagerViewModel"/> class.
@@ -72,6 +73,18 @@ public class FileTabManagerViewModel : BindableBase, IDisposable
     /// - FileTabGroupViewModel (for each module type with files)
     /// </remarks>
     public ObservableCollection<object> FileTabItems { get; }
+    
+    /// <summary>
+    /// Gets or sets whether the Welcome tab is currently active.
+    /// </summary>
+    /// <remarks>
+    /// Used to control visibility of the Welcome screen in MainWindow.
+    /// </remarks>
+    public bool IsWelcomeTabActive
+    {
+        get => _isWelcomeTabActive;
+        private set => SetProperty(ref _isWelcomeTabActive, value);
+    }
     
     /// <summary>
     /// Gets or sets the selected tab (can be FileTabItemViewModel or WelcomeTabViewModel).
@@ -117,6 +130,8 @@ public class FileTabManagerViewModel : BindableBase, IDisposable
         if (_documentManager.OpenDocuments.Count == 0)
         {
             Log.Debug("No documents open, only Welcome tab visible");
+            welcomeTab.IsActive = true;
+            IsWelcomeTabActive = true;
             return;
         }
         
@@ -162,6 +177,11 @@ public class FileTabManagerViewModel : BindableBase, IDisposable
         if (_documentManager.ActiveDocument == null)
         {
             welcomeTab.IsActive = true;
+            IsWelcomeTabActive = true;
+        }
+        else
+        {
+            IsWelcomeTabActive = false;
         }
         
         Log.Debug("Rebuilt file tab list: {GroupCount} groups, {DocCount} documents", 
@@ -235,6 +255,9 @@ public class FileTabManagerViewModel : BindableBase, IDisposable
                 }
             }
         }
+        
+        // Update IsWelcomeTabActive for binding to Welcome screen visibility
+        IsWelcomeTabActive = activeDocument == null;
         
         Log.Debug("Active document changed: {Title}", activeDocument?.Title ?? "None (Welcome)");
     }

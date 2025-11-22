@@ -38,6 +38,7 @@
             <conv:PathToDirectoryConverter x:Key="PathToDirectoryConverter" />
             <conv:NonZeroToVisibilityConverter x:Key="NonZeroToVisibilityConverter" />
             <conv:BooleanOrToVisibilityConverter x:Key="BooleanOrToVisibilityConverter" />
+            <conv:VisibilityOrConverter x:Key="VisibilityOrConverter" />
             <conv:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVisibility" />
             <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
             <Style BasedOn="{StaticResource BaseButtonStyle}" TargetType="Button" />
@@ -239,64 +240,83 @@
                         Visibility="{Binding IsFileTabStripVisible, Converter={StaticResource BoolToVisibility}}">
                     <Grid>
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="*"/>
                             <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
                         
+                        <!-- Header with toggle button -->
+                        <Border Grid.Row="0"
+                                Background="{DynamicResource SecondaryBackgroundBrush}"
+                                BorderBrush="{DynamicResource ControlBorderBrush}"
+                                BorderThickness="0,0,0,1"
+                                Height="32">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <!-- "Recent Files" text (rotated vertical would go here if needed) -->
+                                <TextBlock Grid.Column="0"
+                                           Text="Open Files"
+                                           FontSize="11"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"
+                                           VerticalAlignment="Center"
+                                           Margin="12,0,0,0"/>
+                                
+                                <!-- Toggle Button -->
+                                <Button Grid.Column="1"
+                                        Content="{Binding FileTabStripChevronGlyph}" 
+                                        FontFamily="Segoe MDL2 Assets"
+                                        FontSize="12"
+                                        ToolTip="{Binding FileTabStripToggleTooltip}"
+                                        Command="{Binding ToggleFileTabStripCommand}"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        Foreground="{DynamicResource TextPrimaryBrush}"
+                                        Padding="8,4"
+                                        Margin="0,0,4,0"
+                                        Cursor="Hand">
+                                    <Button.Style>
+                                        <Style TargetType="Button">
+                                            <Setter Property="Background" Value="Transparent"/>
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="Button">
+                                                        <Border Background="{TemplateBinding Background}"
+                                                                BorderThickness="0"
+                                                                Padding="{TemplateBinding Padding}"
+                                                                CornerRadius="2">
+                                                            <TextBlock Text="{TemplateBinding Content}"
+                                                                       FontFamily="{TemplateBinding FontFamily}"
+                                                                       FontSize="{TemplateBinding FontSize}"
+                                                                       Foreground="{TemplateBinding Foreground}"
+                                                                       HorizontalAlignment="Center"
+                                                                       VerticalAlignment="Center"/>
+                                                        </Border>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="{DynamicResource HoverBackgroundBrush}"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+                            </Grid>
+                        </Border>
+                        
                         <!-- File Tab ScrollViewer -->
-                        <ScrollViewer Grid.Row="0"
+                        <ScrollViewer Grid.Row="1"
                                       VerticalScrollBarVisibility="Auto"
                                       HorizontalScrollBarVisibility="Disabled">
                             <ItemsControl ItemsSource="{Binding FileTabManager.FileTabItems}"/>
                         </ScrollViewer>
-                        
-                        <!-- Toggle Button at bottom -->
-                        <Border Grid.Row="1"
-                                Background="{DynamicResource SecondaryBackgroundBrush}"
-                                BorderBrush="{DynamicResource ControlBorderBrush}"
-                                BorderThickness="0,1,0,0"
-                                Height="32">
-                            <Button Content="{Binding FileTabStripChevronGlyph}" 
-                                    FontFamily="Segoe MDL2 Assets"
-                                    FontSize="12"
-                                    ToolTip="{Binding FileTabStripToggleTooltip}"
-                                    Command="{Binding ToggleFileTabStripCommand}"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"
-                                    Background="Transparent"
-                                    BorderThickness="0"
-                                    Foreground="{DynamicResource TextPrimaryBrush}"
-                                    Padding="8,4"
-                                    Cursor="Hand">
-                                <Button.Style>
-                                    <Style TargetType="Button">
-                                        <Setter Property="Background" Value="Transparent"/>
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Border Background="{TemplateBinding Background}"
-                                                            BorderThickness="0"
-                                                            Padding="{TemplateBinding Padding}"
-                                                            CornerRadius="2">
-                                                        <TextBlock Text="{TemplateBinding Content}"
-                                                                   FontFamily="{TemplateBinding FontFamily}"
-                                                                   FontSize="{TemplateBinding FontSize}"
-                                                                   Foreground="{TemplateBinding Foreground}"
-                                                                   HorizontalAlignment="Center"
-                                                                   VerticalAlignment="Center"/>
-                                                    </Border>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                        <Style.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter Property="Background" Value="{DynamicResource HoverBackgroundBrush}"/>
-                                            </Trigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                            </Button>
-                        </Border>
                     </Grid>
                 </Border>
                 
@@ -305,7 +325,7 @@
                         Background="{DynamicResource SecondaryBackgroundBrush}"
                         BorderBrush="{DynamicResource ControlBorderBrush}"
                         BorderThickness="0,0,1,0"
-                        Width="24"
+                        Width="32"
                         Visibility="{Binding IsFileTabStripVisible, Converter={StaticResource InverseBoolToVisibility}}">
                     <Button Content="{Binding FileTabStripChevronGlyph}"
                             FontFamily="Segoe MDL2 Assets"
@@ -355,8 +375,8 @@
             <Grid Grid.Column="1" 
                   MinWidth="0"
                   Background="{DynamicResource PrimaryBackgroundBrush}">
-                <!-- Welcome Screen (shown when no documents are open) -->
-                <Border Visibility="{Binding Documents.Count, Converter={StaticResource ZeroToVisibilityConverter}}">
+                <!-- Welcome Screen (shown when no documents open OR Welcome tab is active) -->
+                <Border Visibility="{Binding FileTabManager.IsWelcomeTabActive, Converter={StaticResource BoolToVisibility}}">
                     <StackPanel HorizontalAlignment="Center" 
                               VerticalAlignment="Center">
                         <TextBlock Text="Welcome to EasyAF v3" 
@@ -454,7 +474,7 @@
                               HorizontalContentAlignment="Stretch"
                               VerticalAlignment="Stretch"
                               VerticalContentAlignment="Stretch"
-                              Visibility="{Binding Documents.Count, Converter={StaticResource NonZeroToVisibilityConverter}}"/>
+                              Visibility="{Binding FileTabManager.IsWelcomeTabActive, Converter={StaticResource InverseBoolToVisibility}}"/>
             </Grid>
         </Grid>
 
