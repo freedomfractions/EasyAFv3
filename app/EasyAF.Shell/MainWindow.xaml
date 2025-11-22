@@ -22,13 +22,25 @@
         <!-- Modified for: Add glyph icons to Ribbon buttons using Segoe MDL2 Assets for consistent visual language -->
         <!-- Related modules: Shell (MainWindow) -->
         <!-- Rollback instructions: Remove <fluent:Button.Icon> elements -->
-        <conv:NullToBooleanConverter x:Key="NullToBooleanConverter" />
-        <conv:ZeroToVisibilityConverter x:Key="ZeroToVisibilityConverter" />
-        <conv:PathToFileNameConverter x:Key="PathToFileNameConverter" />
-        <conv:PathToDirectoryConverter x:Key="PathToDirectoryConverter" />
-        <conv:NonZeroToVisibilityConverter x:Key="NonZeroToVisibilityConverter" />
-        <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
-        <Style BasedOn="{StaticResource BaseButtonStyle}" TargetType="Button" />
+        
+        <!-- CROSS-MODULE EDIT: 2025-01-20 Vertical File Tab System -->
+        <!-- Modified for: Merge file tab styles resource dictionary -->
+        <!-- Related modules: Shell (FileTabStyles.xaml) -->
+        <!-- Rollback instructions: Remove merged dictionary below -->
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Styles/FileTabStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            
+            <conv:NullToBooleanConverter x:Key="NullToBooleanConverter" />
+            <conv:ZeroToVisibilityConverter x:Key="ZeroToVisibilityConverter" />
+            <conv:PathToFileNameConverter x:Key="PathToFileNameConverter" />
+            <conv:PathToDirectoryConverter x:Key="PathToDirectoryConverter" />
+            <conv:NonZeroToVisibilityConverter x:Key="NonZeroToVisibilityConverter" />
+            <conv:BooleanOrToVisibilityConverter x:Key="BooleanOrToVisibilityConverter" />
+            <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+            <Style BasedOn="{StaticResource BaseButtonStyle}" TargetType="Button" />
+        </ResourceDictionary>
     </fluent:RibbonWindow.Resources>
     <Grid Background="{DynamicResource PrimaryBackgroundBrush}">
         <Grid.RowDefinitions>
@@ -207,14 +219,21 @@
             </Grid.ColumnDefinitions>
 
             <!-- Vertical Tab Strip Panel (Left Side) -->
+            <!-- CROSS-MODULE EDIT: 2025-01-20 Vertical File Tab System -->
+            <!-- Modified for: Replace old DocumentTabControl with new grouped file tab UI -->
+            <!-- Related modules: Shell (FileTabManagerViewModel) -->
+            <!-- Rollback instructions: Restore old DocumentTabControl binding to Documents collection -->
             <Border Grid.Column="0" 
                     Background="{DynamicResource SecondaryBackgroundBrush}"
                     BorderBrush="{DynamicResource ControlBorderBrush}"
                     BorderThickness="0,0,1,0"
-                    MinWidth="48">
-                <controls:DocumentTabControl ItemsSource="{Binding Documents}"
-                                           SelectedDocument="{Binding SelectedDocument, Mode=TwoWay}"
-                                           CloseDocumentCommand="{Binding CloseDocumentCommand}"/>
+                    MinWidth="200"
+                    MaxWidth="300">
+                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled">
+                    <ItemsControl ItemsSource="{Binding FileTabManager.FileTabItems}"
+                                  ItemTemplate="{StaticResource FileTabListItemTemplate}"/>
+                </ScrollViewer>
             </Border>
 
             <!-- Document Content Area -->

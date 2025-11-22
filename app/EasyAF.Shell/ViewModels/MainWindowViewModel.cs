@@ -75,6 +75,14 @@ public class MainWindowViewModel : BindableBase
         LogViewerViewModel = logViewerViewModel;
 
         Documents = _documentManager.OpenDocuments;
+        
+        // CROSS-MODULE EDIT: 2025-01-20 Vertical File Tab System
+        // Modified for: Add FileTabManager for left-side vertical file tabs
+        // Related modules: Shell (FileTabManagerViewModel, FileTabItemViewModel, FileTabGroupViewModel)
+        // Rollback instructions: Remove FileTabManager property and initialization
+        
+        // Initialize file tab manager for vertical file list
+        FileTabManager = new FileTabManagerViewModel(documentManager);
 
         ExitCommand = new DelegateCommand(Exit);
         CloseDocumentCommand = new DelegateCommand<IDocument?>(CloseDocument, CanCloseDocument);
@@ -219,6 +227,15 @@ public class MainWindowViewModel : BindableBase
     /// It automatically updates when documents are opened or closed via <see cref="IDocumentManager"/>.
     /// </remarks>
     public ObservableCollection<IDocument> Documents { get; }
+    
+    /// <summary>
+    /// Gets the file tab manager for the vertical file tab list.
+    /// </summary>
+    /// <remarks>
+    /// Manages the vertical file tab UI on the left side, including Welcome tab,
+    /// file groups by module type, and tab selection synchronization.
+    /// </remarks>
+    public FileTabManagerViewModel FileTabManager { get; }
 
     private IDocument? _selectedDocument;
     

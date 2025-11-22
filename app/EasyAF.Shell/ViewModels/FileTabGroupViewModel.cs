@@ -1,4 +1,6 @@
 using System.Collections.ObjectModel;
+using System.Windows.Input;
+using Prism.Commands;
 using Prism.Mvvm;
 using EasyAF.Core.Contracts;
 
@@ -25,6 +27,9 @@ public class FileTabGroupViewModel : BindableBase
     {
         Module = module;
         Items = new ObservableCollection<FileTabItemViewModel>();
+        
+        // Command to toggle expand/collapse
+        ToggleExpandCommand = new DelegateCommand(() => IsExpanded = !IsExpanded);
     }
     
     /// <summary>
@@ -48,7 +53,13 @@ public class FileTabGroupViewModel : BindableBase
     public bool IsExpanded
     {
         get => _isExpanded;
-        set => SetProperty(ref _isExpanded, value);
+        set
+        {
+            if (SetProperty(ref _isExpanded, value))
+            {
+                RaisePropertyChanged(nameof(ExpanderIcon));
+            }
+        }
     }
     
     /// <summary>
@@ -58,4 +69,9 @@ public class FileTabGroupViewModel : BindableBase
     /// "?" when collapsed, "?" when expanded.
     /// </remarks>
     public string ExpanderIcon => IsExpanded ? "?" : "?";
+    
+    /// <summary>
+    /// Gets the command to toggle expand/collapse.
+    /// </summary>
+    public ICommand ToggleExpandCommand { get; }
 }
