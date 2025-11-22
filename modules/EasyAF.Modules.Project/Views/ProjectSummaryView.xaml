@@ -490,7 +490,8 @@
                                                 <!-- Warning Indicator -->
                                                 <TextBlock Text="{Binding WarningIndicator}" 
                                                            Margin="8,0,0,0"
-                                                           FontSize="11"
+                                                           FontFamily="Segoe MDL2 Assets"
+                                                           FontSize="14"
                                                            VerticalAlignment="Center"
                                                            Foreground="{DynamicResource WarningBrush}"
                                                            ToolTip="Scenario counts are inconsistent"/>
@@ -721,7 +722,7 @@
                     <!-- Template Path -->
                     <TextBlock Grid.Row="2" Grid.Column="0" Text="Template:" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimaryBrush}"/>
                     <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding TemplatePath, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" Margin="0,0,8,0" HorizontalAlignment="Stretch"/>
-                    <Button Grid.Row="2" Grid.Column="2" Content="Browse..." Command="{Binding BrowseTemplateCommand}" Padding="8,4" Style="{StaticResource BaseButtonStyle}"/>
+                    <Button Grid.Row="2" Grid.RowSpan="1" Grid.Column="2" Content="Browse..." Command="{Binding BrowseTemplateCommand}" Padding="8,4" Style="{StaticResource BaseButtonStyle}"/>
                     
                     <!-- Output Folder -->
                     <TextBlock Grid.Row="3" Grid.Column="0" Text="Output Folder:" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimaryBrush}"/>
@@ -733,5 +734,7 @@
         </Grid>
     </ScrollViewer>
 </UserControl>
+
+
 
 

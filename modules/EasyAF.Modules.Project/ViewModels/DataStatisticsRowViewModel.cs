@@ -155,7 +155,7 @@ namespace EasyAF.Modules.Project.ViewModels
         /// <summary>
         /// Gets the warning indicator text if scenarios are not uniform.
         /// </summary>
-        public string? WarningIndicator => !IsScenariosUniform && HasChildren ? " ??" : null;
+        public string? WarningIndicator => !IsScenariosUniform && HasChildren ? "\uE7BA" : null;
 
         /// <summary>
         /// Gets or sets whether this is the first child in its parent's collection.
