@@ -132,33 +132,58 @@ namespace EasyAF.Import
                 foreach (var targetType in activeTargetTypes.ToList())
                 {
                     if (!groupsByType.TryGetValue(targetType, out var mapEntries)) continue;
-                    var idEntry = mapEntries.FirstOrDefault(e => e.PropertyName == "Id");
-                    if (idEntry == null) continue;
-                    var idHeader = idEntry.ColumnHeader.Trim();
-                    if (!currentHeaderIndex.TryGetValue(idHeader, out int idCol)) continue;
-                    var idValue = SafeGet(csv, idCol);
-                    if (string.IsNullOrWhiteSpace(idValue)) continue; // no id means skip entity for this row
+                    
+                    // Get the type for this target
+                    Type? instanceType = targetType switch
+                    {
+                        "ArcFlash" => typeof(ArcFlash),
+                        "ShortCircuit" => typeof(ShortCircuit),
+                        "LVBreaker" => typeof(LVBreaker),
+                        "Fuse" => typeof(Fuse),
+                        "Cable" => typeof(Cable),
+                        "Bus" => typeof(Bus),
+                        _ => null
+                    };
+
+                    if (instanceType == null) continue;
+
+                    // Discover composite key properties for this type
+                    var keyProps = CompositeKeyHelper.GetCompositeKeyProperties(instanceType);
+                    if (keyProps.Length == 0)
+                    {
+                        _logger.Error(nameof(Import), $"No composite key properties found for {targetType} - skipping type");
+                        continue;
+                    }
+
+                    // Check if at least one key property is mapped and has a value in this row
+                    bool hasKeyValue = false;
+                    foreach (var keyProp in keyProps)
+                    {
+                        var keyMapping = mapEntries.FirstOrDefault(e => e.PropertyName == keyProp);
+                        if (keyMapping != null && currentHeaderIndex.TryGetValue(keyMapping.ColumnHeader.Trim(), out int keyCol))
+                        {
+                            var keyValue = SafeGet(csv, keyCol);
+                            if (!string.IsNullOrWhiteSpace(keyValue))
+                            {
+                                hasKeyValue = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!hasKeyValue) continue; // Skip this row if no key values present
 
                     try
                     {
                         // Dynamically create instance based on target type
-                        object? instance = targetType switch
-                        {
-                            "ArcFlash" => new ArcFlash(),
-                            "ShortCircuit" => new ShortCircuit(),
-                            "LVBreaker" => new LVBreaker(),
-                            "Fuse" => new Fuse(),
-                            "Cable" => new Cable(),
-                            _ => null
-                        };
-
+                        object? instance = Activator.CreateInstance(instanceType);
                         if (instance == null) continue;
 
                         // Populate object from CSV using mapping
                         PopulateObjectByIndex(instance, mapEntries, csv, currentHeaderIndex, currentHeaderSet, missingHeaders, missingRequired, strict);
 
                         // Build composite key dynamically using reflection
-                        var key = CompositeKeyHelper.BuildCompositeKey(instance, instance.GetType());
+                        var key = CompositeKeyHelper.BuildCompositeKey(instance, instanceType);
                         if (key == null)
                         {
                             _logger.Error(nameof(Import), $"Incomplete composite key for {targetType} at row {physicalRow} - skipped");
@@ -201,6 +226,13 @@ namespace EasyAF.Import
                                     targetDataSet.CableEntries[key] = (Cable)instance;
                                 else
                                     _logger.Error(nameof(Import), $"Duplicate Cable key {key} at row {physicalRow} (skipped)");
+                                break;
+
+                            case "Bus":
+                                if (!targetDataSet.BusEntries.ContainsKey(key))
+                                    targetDataSet.BusEntries[key] = (Bus)instance;
+                                else
+                                    _logger.Error(nameof(Import), $"Duplicate Bus key {key} at row {physicalRow} (skipped)");
                                 break;
                         }
                     }

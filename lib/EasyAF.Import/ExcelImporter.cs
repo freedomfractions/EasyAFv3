@@ -52,18 +52,53 @@ namespace EasyAF.Import
                             activeTargetTypes.Clear();
                             foreach (var kvp in groupsByType)
                             {
-                                if (kvp.Key.Contains('.')) continue; // skip nested groups here
+                                if (kvp.Key.Contains('.')) continue; // skip nested groups
+
+                                // Get the type for this target
+                                Type? instanceType = kvp.Key switch
+                                {
+                                    "ArcFlash" => typeof(ArcFlash),
+                                    "ShortCircuit" => typeof(ShortCircuit),
+                                    "LVBreaker" => typeof(LVBreaker),
+                                    "Fuse" => typeof(Fuse),
+                                    "Cable" => typeof(Cable),
+                                    "Bus" => typeof(Bus),
+                                    _ => null
+                                };
+
+                                if (instanceType == null) continue;
+
+                                // Discover composite key properties for this type
+                                var keyProps = CompositeKeyHelper.GetCompositeKeyProperties(instanceType);
+                                if (keyProps.Length == 0) continue;
+
+                                // Get the mapping entries for this type
                                 var mapEntries = kvp.Value;
-                                var idEntry = mapEntries.FirstOrDefault(e => e.PropertyName == "Id");
-                                bool hasIdHeader = idEntry != null && currentHeaderIndex.ContainsKey(idEntry.ColumnHeader.Trim());
-                                if (hasIdHeader) activeTargetTypes.Add(kvp.Key);
+
+                                // Check if any key property is present in headers
+                                bool hasKeyHeader = false;
+                                foreach (var keyProp in keyProps)
+                                {
+                                    var keyMapping = mapEntries.FirstOrDefault(e => e.PropertyName == keyProp);
+                                    if (keyMapping != null && currentHeaderIndex.ContainsKey(keyMapping.ColumnHeader.Trim()))
+                                    {
+                                        hasKeyHeader = true;
+                                        break;
+                                    }
+                                }
+
+                                if (hasKeyHeader)
+                                {
+                                    activeTargetTypes.Add(kvp.Key);
+                                }
                                 else
                                 {
-                                    // Heuristic: if multiple headers for this type are present but Id is missing, warn for diagnostics
+                                    // Heuristic: if multiple headers for this type are present but no key headers, warn for diagnostics
                                     int presentCount = mapEntries.Count(e => currentHeaderIndex.ContainsKey(e.ColumnHeader.Trim()));
                                     if (presentCount >= 2)
                                     {
-                                        _logger.Info(nameof(Import), $"Warning: Detected headers for '{kvp.Key}' but missing Id header '{idEntry?.ColumnHeader}'. Cannot import without Id.");
+                                        var keyNames = string.Join(", ", keyProps);
+                                        _logger.Info(nameof(Import), $"Warning: Detected headers for '{kvp.Key}' but missing key headers ({keyNames}). Cannot import without key properties.");
                                     }
                                 }
                             }
@@ -75,33 +110,58 @@ namespace EasyAF.Import
                         foreach (var targetType in activeTargetTypes.ToList())
                         {
                             if (!groupsByType.TryGetValue(targetType, out var mapEntries)) continue;
-                            var idEntry = mapEntries.FirstOrDefault(e => e.PropertyName == "Id");
-                            if (idEntry == null) continue;
-                            if (!currentHeaderIndex.TryGetValue(idEntry.ColumnHeader.Trim(), out int idCol)) continue;
-                            var idValue = row.Cell(idCol).GetString()?.Trim();
-                            if (string.IsNullOrWhiteSpace(idValue)) continue;
+                            
+                            // Get the type for this target
+                            Type? instanceType = targetType switch
+                            {
+                                "ArcFlash" => typeof(ArcFlash),
+                                "ShortCircuit" => typeof(ShortCircuit),
+                                "LVBreaker" => typeof(LVBreaker),
+                                "Fuse" => typeof(Fuse),
+                                "Cable" => typeof(Cable),
+                                "Bus" => typeof(Bus),
+                                _ => null
+                            };
+
+                            if (instanceType == null) continue;
+
+                            // Discover composite key properties for this type
+                            var keyProps = CompositeKeyHelper.GetCompositeKeyProperties(instanceType);
+                            if (keyProps.Length == 0)
+                            {
+                                _logger.Error(nameof(Import), $"No composite key properties found for {targetType} - skipping type");
+                                continue;
+                            }
+
+                            // Check if at least one key property is mapped and has a value in this row
+                            bool hasKeyValue = false;
+                            foreach (var keyProp in keyProps)
+                            {
+                                var keyMapping = mapEntries.FirstOrDefault(e => e.PropertyName == keyProp);
+                                if (keyMapping != null && currentHeaderIndex.TryGetValue(keyMapping.ColumnHeader.Trim(), out int keyCol))
+                                {
+                                    var keyValue = row.Cell(keyCol).GetString()?.Trim();
+                                    if (!string.IsNullOrWhiteSpace(keyValue))
+                                    {
+                                        hasKeyValue = true;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if (!hasKeyValue) continue; // Skip this row if no key values present
                             
                             try
                             {
                                 // Dynamically create instance based on target type
-                                object? instance = targetType switch
-                                {
-                                    "ArcFlash" => new ArcFlash(),
-                                    "ShortCircuit" => new ShortCircuit(),
-                                    "LVBreaker" => new LVBreaker(),
-                                    "Fuse" => new Fuse(),
-                                    "Cable" => new Cable(),
-                                    "Bus" => new Bus(),
-                                    _ => null
-                                };
-
+                                object? instance = Activator.CreateInstance(instanceType);
                                 if (instance == null) continue;
 
                                 // Populate object from Excel using mapping
                                 PopulateObject(instance, mapEntries, row, currentHeaderIndex, worksheetMissing, missingRequired, strict);
 
                                 // Build composite key dynamically using reflection
-                                var key = CompositeKeyHelper.BuildCompositeKey(instance, instance.GetType());
+                                var key = CompositeKeyHelper.BuildCompositeKey(instance, instanceType);
                                 if (key == null)
                                 {
                                     _logger.Error(nameof(Import), $"Incomplete composite key for {targetType} at row {row.RowNumber()} - skipped");
