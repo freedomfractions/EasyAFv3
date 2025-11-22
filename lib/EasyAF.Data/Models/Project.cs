@@ -375,20 +375,20 @@ namespace EasyAF.Data.Models
                 {
                     var b = kv.Value;
                     if (b == null) continue;
-                    
+
                     // Step 1 / 2 cross-copy between BreakerMfr and TripMfr
                     if (string.IsNullOrWhiteSpace(b.BreakerMfr) && !string.IsNullOrWhiteSpace(b.TripMfr))
                         b.BreakerMfr = b.TripMfr!.Trim();
                     else if (string.IsNullOrWhiteSpace(b.TripMfr) && !string.IsNullOrWhiteSpace(b.BreakerMfr))
                         b.TripMfr = b.BreakerMfr!.Trim();
-                    
+
                     // Step 3 heuristics on breaker style
                     if (string.IsNullOrWhiteSpace(b.BreakerMfr))
                     {
                         var inferred = InferManufacturerFromStyle(b.BreakerStyle);
                         if (!string.IsNullOrEmpty(inferred)) b.BreakerMfr = inferred;
                     }
-                    
+
                     if (string.IsNullOrWhiteSpace(b.TripMfr))
                     {
                         var inferredTu = InferManufacturerFromStyle(b.TripStyle) ?? b.BreakerMfr;
@@ -653,16 +653,17 @@ namespace EasyAF.Data.Models
             var ds = new DataSet { SoftwareVersion = SoftwareVersion };
             
             // Composite key entries - rebuild CompositeKey from components
-            if (ArcFlashEntries != null)
-                ds.ArcFlashEntries = ArcFlashEntries.ToDictionary(
+            // Ensure dictionaries are never null (empty if source list is null)
+            ds.ArcFlashEntries = ArcFlashEntries?.ToDictionary(
                     e => new CompositeKey(e.KeyComponents), 
-                    e => e.Value!);
+                    e => e.Value!) 
+                ?? new Dictionary<CompositeKey, ArcFlash>();
             
-            if (ShortCircuitEntries != null)
-                ds.ShortCircuitEntries = ShortCircuitEntries.ToDictionary(
+            ds.ShortCircuitEntries = ShortCircuitEntries?.ToDictionary(
                     e => new CompositeKey(e.KeyComponents), 
-                    e => e.Value!);
-            
+                    e => e.Value!)
+                ?? new Dictionary<CompositeKey, ShortCircuit>();
+
             // All equipment dictionaries - rebuild CompositeKey from string key
             ds.AFDEntries = AFDEntries?.ToDictionary(kv => new CompositeKey(kv.Key), kv => kv.Value) ?? new Dictionary<CompositeKey, AFD>();
             ds.ATSEntries = ATSEntries?.ToDictionary(kv => new CompositeKey(kv.Key), kv => kv.Value) ?? new Dictionary<CompositeKey, ATS>();
