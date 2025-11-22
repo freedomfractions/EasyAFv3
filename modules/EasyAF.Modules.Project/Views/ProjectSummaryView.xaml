@@ -380,9 +380,13 @@
                             <DataGridTemplateColumn Width="1.5*">
                                 <DataGridTemplateColumn.HeaderTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="Data Type" 
-                                                   HorizontalAlignment="Left"
-                                                   FontWeight="SemiBold"/>
+                                        <Grid HorizontalAlignment="Stretch">
+                                            <TextBlock Text="Data Type" 
+                                                       HorizontalAlignment="Left"
+                                                       TextAlignment="Left"
+                                                       FontWeight="SemiBold"
+                                                       Margin="0"/>
+                                        </Grid>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.HeaderTemplate>
                                 <DataGridTemplateColumn.CellTemplate>
