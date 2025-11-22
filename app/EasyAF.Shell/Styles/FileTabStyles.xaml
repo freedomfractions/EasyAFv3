@@ -80,8 +80,8 @@
         </Style.Triggers>
     </Style>
     
-    <!-- File Tab Item DataTemplate -->
-    <DataTemplate x:Key="FileTabItemTemplate" DataType="{x:Type vm:FileTabItemViewModel}">
+    <!-- File Tab Item DataTemplate (implicit) -->
+    <DataTemplate DataType="{x:Type vm:FileTabItemViewModel}">
         <Border Style="{StaticResource FileTabItemStyle}"
                 behaviors:FileTabBehavior.EnableFileTabBehavior="True">
             
@@ -151,8 +151,8 @@
         </Border>
     </DataTemplate>
     
-    <!-- File Tab Group DataTemplate -->
-    <DataTemplate x:Key="FileTabGroupTemplate" DataType="{x:Type vm:FileTabGroupViewModel}">
+    <!-- File Tab Group DataTemplate (implicit) -->
+    <DataTemplate DataType="{x:Type vm:FileTabGroupViewModel}">
         <StackPanel>
             <!-- Group Header -->
             <Border Style="{StaticResource FileTabGroupHeaderStyle}">
@@ -186,8 +186,7 @@
             </Border>
             
             <!-- Group Items (collapsible) -->
-            <ItemsControl ItemsSource="{Binding Items}"
-                          ItemTemplate="{StaticResource FileTabItemTemplate}">
+            <ItemsControl ItemsSource="{Binding Items}">
                 <ItemsControl.Style>
                     <Style TargetType="ItemsControl">
                         <Setter Property="Visibility" Value="Visible"/>
@@ -200,20 +199,6 @@
                 </ItemsControl.Style>
             </ItemsControl>
         </StackPanel>
-    </DataTemplate>
-    
-    <!-- File Tab List DataTemplate Selector -->
-    <DataTemplate x:Key="FileTabListItemTemplate">
-        <ContentControl Content="{Binding}">
-            <ContentControl.Resources>
-                <DataTemplate DataType="{x:Type vm:FileTabItemViewModel}">
-                    <ContentControl ContentTemplate="{StaticResource FileTabItemTemplate}"/>
-                </DataTemplate>
-                <DataTemplate DataType="{x:Type vm:FileTabGroupViewModel}">
-                    <ContentControl ContentTemplate="{StaticResource FileTabGroupTemplate}"/>
-                </DataTemplate>
-            </ContentControl.Resources>
-        </ContentControl>
     </DataTemplate>
 
 </ResourceDictionary>

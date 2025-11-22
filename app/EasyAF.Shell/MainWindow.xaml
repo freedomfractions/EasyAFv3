@@ -231,8 +231,7 @@
                     MaxWidth="300">
                 <ScrollViewer VerticalScrollBarVisibility="Auto"
                               HorizontalScrollBarVisibility="Disabled">
-                    <ItemsControl ItemsSource="{Binding FileTabManager.FileTabItems}"
-                                  ItemTemplate="{StaticResource FileTabListItemTemplate}"/>
+                    <ItemsControl ItemsSource="{Binding FileTabManager.FileTabItems}"/>
                 </ScrollViewer>
             </Border>
 
