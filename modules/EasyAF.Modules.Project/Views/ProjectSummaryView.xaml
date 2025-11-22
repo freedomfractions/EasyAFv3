@@ -281,7 +281,7 @@
                     </StackPanel>
                     
                     <!-- Data Statistics Table -->
-                    <Grid Grid.Row="2">
+                    <Grid Grid.Row="2" x:Name="StatisticsTableContainer">
                         <!-- Background rounded rectangles for New Data and Old Data columns -->
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="1.5*"/> <!-- Data Type column (proportional) -->
@@ -290,21 +290,25 @@
                             <ColumnDefinition Width="0.8*"/> <!-- Delta column (smaller) -->
                         </Grid.ColumnDefinitions>
                         
-                        <!-- New Data Column Background - same color as cell borders, no opacity -->
+                        <!-- New Data Column Background - dynamically sized to match DataGrid height -->
                         <Border Grid.Column="1"
+                                x:Name="NewDataBackground"
                                 Background="Transparent"
                                 BorderBrush="{DynamicResource ControlBorderBrush}"
                                 BorderThickness="1"
                                 CornerRadius="8"
-                                Margin="6,4,3,20"/>
+                                Margin="6,4,3,4"
+                                VerticalAlignment="Stretch"/>
                         
-                        <!-- Old Data Column Background - same color as cell borders, no opacity -->
+                        <!-- Old Data Column Background - dynamically sized to match DataGrid height -->
                         <Border Grid.Column="2"
+                                x:Name="OldDataBackground"
                                 Background="Transparent"
                                 BorderBrush="{DynamicResource ControlBorderBrush}"
                                 BorderThickness="1"
                                 CornerRadius="8"
-                                Margin="3,4,6,20"/>
+                                Margin="3,4,6,4"
+                                VerticalAlignment="Stretch"/>
                         
                         <!-- DataGrid on top of backgrounds - DISABLE ALL SCROLLING -->
                         <DataGrid Grid.Column="0" Grid.ColumnSpan="4"
@@ -419,7 +423,7 @@
                                             
                                             <StackPanel Orientation="Horizontal" Margin="12,6">
                                                 <!-- Indentation for child rows -->
-                                                <Border Width="{Binding IndentLevel, Converter={StaticResource MultiplyConverter}, ConverterParameter=20}"/>
+                                                <Border Width="{Binding IndentLevel, Converter={StaticResource MultiplyConverter}, ConverterParameter=24}"/>
                                                 
                                                 <!-- Triangle Expander (visible only for parent rows with children) -->
                                                 <ToggleButton IsChecked="{Binding IsExpanded, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -729,3 +733,5 @@
         </Grid>
     </ScrollViewer>
 </UserControl>
+
+
