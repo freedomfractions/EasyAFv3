@@ -290,24 +290,33 @@
                             <ColumnDefinition Width="0.8*"/> <!-- Delta column (smaller) -->
                         </Grid.ColumnDefinitions>
                         
-                        <!-- New Data Column Background - same color as cell borders, no opacity -->
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/> <!-- DataGrid rows (auto-size to content) -->
+                        </Grid.RowDefinitions>
+                        
+                        <!-- New Data Column Background - stretch to bottom of container minus margin -->
                         <Border Grid.Column="1"
+                                Grid.RowSpan="1"
                                 Background="Transparent"
                                 BorderBrush="{DynamicResource ControlBorderBrush}"
                                 BorderThickness="1"
                                 CornerRadius="8"
-                                Margin="6,4,3,20"/>
+                                Margin="6,4,3,20"
+                                VerticalAlignment="Stretch"/>
                         
-                        <!-- Old Data Column Background - same color as cell borders, no opacity -->
+                        <!-- Old Data Column Background - stretch to bottom of container minus margin -->
                         <Border Grid.Column="2"
+                                Grid.RowSpan="1"
                                 Background="Transparent"
                                 BorderBrush="{DynamicResource ControlBorderBrush}"
                                 BorderThickness="1"
                                 CornerRadius="8"
-                                Margin="3,4,6,20"/>
+                                Margin="3,4,6,20"
+                                VerticalAlignment="Stretch"/>
                         
-                        <!-- DataGrid on top of backgrounds - DISABLE SCROLLING -->
+                        <!-- DataGrid on top of backgrounds - DISABLE INTERNAL SCROLLING, ALLOW NATURAL EXPANSION -->
                         <DataGrid Grid.Column="0" Grid.ColumnSpan="4"
+                                  Grid.Row="0"
                                   ItemsSource="{Binding VisibleStatisticsRows}"
                                   AutoGenerateColumns="False"
                                   IsReadOnly="True"
@@ -329,7 +338,9 @@
                                   HorizontalGridLinesBrush="Transparent"
                                   VerticalGridLinesBrush="Transparent"
                                   ScrollViewer.VerticalScrollBarVisibility="Disabled"
-                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                  ScrollViewer.CanContentScroll="False"
+                                  MaxHeight="{Binding RelativeSource={RelativeSource AncestorType=Grid}, Path=ActualHeight}">
                         
                         <!-- DataGrid Style -->
                         <DataGrid.Resources>
