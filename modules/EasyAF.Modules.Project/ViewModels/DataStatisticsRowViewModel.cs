@@ -156,5 +156,20 @@ namespace EasyAF.Modules.Project.ViewModels
         /// Gets the warning indicator text if scenarios are not uniform.
         /// </summary>
         public string? WarningIndicator => !IsScenariosUniform && HasChildren ? " ??" : null;
+
+        /// <summary>
+        /// Gets or sets whether this is the first child in its parent's collection.
+        /// </summary>
+        public bool IsFirstChild { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether this is the last child in its parent's collection.
+        /// </summary>
+        public bool IsLastChild { get; set; }
+
+        /// <summary>
+        /// Gets whether this is a middle child (not first, not last).
+        /// </summary>
+        public bool IsMiddleChild => !IsRootRow && !IsFirstChild && !IsLastChild;
     }
 }

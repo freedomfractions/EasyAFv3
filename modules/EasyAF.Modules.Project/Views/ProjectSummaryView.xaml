@@ -494,21 +494,34 @@
                                             <Border Background="{DynamicResource SecondaryBackgroundBrush}"
                                                     Visibility="{Binding IsRootRow, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
                                             
-                                            <!-- Individual cell border - NO rounded corners for child rows (connected bubble) -->
+                                            <!-- Individual cell border with conditional styling -->
                                             <Border Background="Transparent"
                                                     BorderBrush="{DynamicResource ControlBorderBrush}"
-                                                    BorderThickness="1"
                                                     Margin="10,3"
                                                     Padding="10,6">
                                                 <Border.Style>
                                                     <Style TargetType="Border">
                                                         <!-- Default: rounded corners for root rows -->
                                                         <Setter Property="CornerRadius" Value="4"/>
+                                                        <Setter Property="BorderThickness" Value="1"/>
                                                         <Style.Triggers>
-                                                            <!-- Child rows: no rounding (connected bubble effect) -->
-                                                            <DataTrigger Binding="{Binding IsRootRow}" Value="False">
+                                                            <!-- First child: rounded top, square bottom, full border -->
+                                                            <DataTrigger Binding="{Binding IsFirstChild}" Value="True">
+                                                                <Setter Property="CornerRadius" Value="4,4,0,0"/>
+                                                                <Setter Property="BorderThickness" Value="1"/>
+                                                                <Setter Property="Margin" Value="10,3,10,0"/>
+                                                            </DataTrigger>
+                                                            <!-- Middle child: no rounding, no top border -->
+                                                            <DataTrigger Binding="{Binding IsMiddleChild}" Value="True">
                                                                 <Setter Property="CornerRadius" Value="0"/>
                                                                 <Setter Property="BorderThickness" Value="1,0,1,1"/>
+                                                                <Setter Property="Margin" Value="10,0"/>
+                                                            </DataTrigger>
+                                                            <!-- Last child: square top, rounded bottom, no top border -->
+                                                            <DataTrigger Binding="{Binding IsLastChild}" Value="True">
+                                                                <Setter Property="CornerRadius" Value="0,0,4,4"/>
+                                                                <Setter Property="BorderThickness" Value="1,0,1,1"/>
+                                                                <Setter Property="Margin" Value="10,0,10,3"/>
                                                             </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>
@@ -542,21 +555,34 @@
                                             <Border Background="{DynamicResource SecondaryBackgroundBrush}"
                                                     Visibility="{Binding IsRootRow, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
                                             
-                                            <!-- Individual cell border - NO rounded corners for child rows (connected bubble) -->
+                                            <!-- Individual cell border with conditional styling -->
                                             <Border Background="Transparent"
                                                     BorderBrush="{DynamicResource ControlBorderBrush}"
-                                                    BorderThickness="1"
                                                     Margin="10,3"
                                                     Padding="10,6">
                                                 <Border.Style>
                                                     <Style TargetType="Border">
                                                         <!-- Default: rounded corners for root rows -->
                                                         <Setter Property="CornerRadius" Value="4"/>
+                                                        <Setter Property="BorderThickness" Value="1"/>
                                                         <Style.Triggers>
-                                                            <!-- Child rows: no rounding (connected bubble effect) -->
-                                                            <DataTrigger Binding="{Binding IsRootRow}" Value="False">
+                                                            <!-- First child: rounded top, square bottom, full border -->
+                                                            <DataTrigger Binding="{Binding IsFirstChild}" Value="True">
+                                                                <Setter Property="CornerRadius" Value="4,4,0,0"/>
+                                                                <Setter Property="BorderThickness" Value="1"/>
+                                                                <Setter Property="Margin" Value="10,3,10,0"/>
+                                                            </DataTrigger>
+                                                            <!-- Middle child: no rounding, no top border -->
+                                                            <DataTrigger Binding="{Binding IsMiddleChild}" Value="True">
                                                                 <Setter Property="CornerRadius" Value="0"/>
                                                                 <Setter Property="BorderThickness" Value="1,0,1,1"/>
+                                                                <Setter Property="Margin" Value="10,0"/>
+                                                            </DataTrigger>
+                                                            <!-- Last child: square top, rounded bottom, no top border -->
+                                                            <DataTrigger Binding="{Binding IsLastChild}" Value="True">
+                                                                <Setter Property="CornerRadius" Value="0,0,4,4"/>
+                                                                <Setter Property="BorderThickness" Value="1,0,1,1"/>
+                                                                <Setter Property="Margin" Value="10,0,10,3"/>
                                                             </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>

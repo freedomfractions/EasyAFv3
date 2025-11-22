@@ -1110,8 +1110,11 @@ namespace EasyAF.Modules.Project.ViewModels
 
                 // Add child rows for each scenario
                 var allScenarios = newScenarios.Keys.Union(oldScenarios.Keys).OrderBy(s => s);
-                foreach (var scenario in allScenarios)
+                var scenarioList = allScenarios.ToList();
+                
+                for (int i = 0; i < scenarioList.Count; i++)
                 {
+                    var scenario = scenarioList[i];
                     var newCount = newScenarios.ContainsKey(scenario) ? newScenarios[scenario] : 0;
                     var oldCount = oldScenarios.ContainsKey(scenario) ? oldScenarios[scenario] : 0;
 
@@ -1121,7 +1124,9 @@ namespace EasyAF.Modules.Project.ViewModels
                         ScenarioName = scenario,
                         DisplayName = scenario,
                         NewCount = newCount,
-                        OldCount = oldCount
+                        OldCount = oldCount,
+                        IsFirstChild = i == 0,
+                        IsLastChild = i == scenarioList.Count - 1
                     });
                 }
 
