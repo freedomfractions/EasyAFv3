@@ -65,4 +65,37 @@ public interface IDocumentModule : IModule
     /// May also peek at file content for format validation.
     /// </remarks>
     bool CanHandleFile(string filePath);
+
+    /// <summary>
+    /// Gets a suggested filename for the document based on its content.
+    /// </summary>
+    /// <param name="document">The document to suggest a filename for.</param>
+    /// <returns>
+    /// A valid filename (without extension) derived from document content,
+    /// or null to use the default Title-based naming.
+    /// </returns>
+    /// <remarks>
+    /// <para>
+    /// This method allows modules to provide intelligent default filenames
+    /// when saving new documents for the first time. The filename should:
+    /// </para>
+    /// <list type="bullet">
+    /// <item>Be derived from meaningful document content (e.g., project metadata)</item>
+    /// <item>Be valid on all file systems (no invalid characters)</item>
+    /// <item>Be concise but descriptive</item>
+    /// <item>Not include the file extension (added by dialog)</item>
+    /// </list>
+    /// <para>
+    /// If null is returned, the shell will fall back to using document.Title.
+    /// </para>
+    /// <para>
+    /// <strong>Example Implementations:</strong>
+    /// </para>
+    /// <list type="bullet">
+    /// <item>Project Module: "[LB Project Number] - [Site Name]"</item>
+    /// <item>Map Module: "[Data Type] Mapping"</item>
+    /// <item>Spec Module: "[Report Name] Spec"</item>
+    /// </list>
+    /// </remarks>
+    string? GetSuggestedFileName(IDocument document);
 }

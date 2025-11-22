@@ -46,6 +46,19 @@ public partial class App : PrismApplication
         
         Log.Information("Applied theme: {Theme}", savedTheme);
 
+        // CROSS-MODULE EDIT: 2025-01-20 Task 20 - Project Module Default
+        // Modified for: Set Project Editor as default document type for New command
+        // Related modules: Project (ProjectModule), Shell (FileCommandsViewModel)
+        // Rollback instructions: Remove this setting initialization
+        
+        // Configure Project Editor as default document type (internal setting, not user-exposed)
+        var defaultModule = settingsService.GetSetting("FileCommands.DefaultDocumentModule", string.Empty);
+        if (string.IsNullOrWhiteSpace(defaultModule))
+        {
+            settingsService.SetSetting("FileCommands.DefaultDocumentModule", "Project Editor");
+            Log.Information("Set default document module to: Project Editor");
+        }
+
         // Hook module loaded event for service-side tab aggregation and help registration
         var ribbonService = Container.Resolve<IModuleRibbonService>();
         var loader = Container.Resolve<IModuleLoader>();
@@ -65,6 +78,30 @@ public partial class App : PrismApplication
             // Register help pages if provided
             var helpCatalog = Container.Resolve<IHelpCatalog>();
             helpCatalog.RegisterModule(module);
+            
+            // CROSS-MODULE EDIT: 2025-01-20 Task 20 - Project Module Default
+            // Modified for: Update FileCommandsViewModel when Project Editor module loads
+            // Related modules: Project (ProjectModule), Shell (FileCommandsViewModel)
+            // Rollback instructions: Remove this module load handler
+            
+            // If this is the Project Editor module and FileCommandsViewModel exists, update its default
+            if (module.ModuleName == "Project Editor")
+            {
+                try
+                {
+                    var fileCommands = Container.Resolve<FileCommandsViewModel>();
+                    var projectModule = module as IDocumentModule;
+                    if (projectModule != null && fileCommands.SelectedModule?.ModuleName != "Project Editor")
+                    {
+                        fileCommands.SelectedModule = projectModule;
+                        Log.Information("Updated FileCommandsViewModel to use Project Editor as default");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Warning(ex, "Failed to update FileCommandsViewModel default module");
+                }
+            }
         };
         loader.DiscoverAndLoadModules();
     }
@@ -147,7 +184,7 @@ public partial class App : PrismApplication
         // Register ViewModels
         containerRegistry.Register<MainWindowViewModel>();
         containerRegistry.Register<LogViewerViewModel>();
-        containerRegistry.Register<FileCommandsViewModel>();
+        containerRegistry.RegisterSingleton<FileCommandsViewModel>();
         containerRegistry.Register<HelpDialogViewModel>();
         containerRegistry.Register<AboutDialogViewModel>();
         

@@ -653,5 +653,25 @@ namespace EasyAF.Modules.Map
             var extension = System.IO.Path.GetExtension(filePath).TrimStart('.');
             return string.Equals(extension, "ezmap", StringComparison.OrdinalIgnoreCase);
         }
+
+        /// <summary>
+        /// Gets a suggested filename for the document based on its content.
+        /// </summary>
+        /// <param name="document">The document to suggest a filename for.</param>
+        /// <returns>
+        /// Null (Map module uses default Title-based naming for now).
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// The Map module currently does not have a specific naming convention.
+        /// Future enhancement could use "[Data Type] Mapping" if data type is known.
+        /// </para>
+        /// </remarks>
+        public string? GetSuggestedFileName(IDocument document)
+        {
+            // Map module doesn't have a naming convention yet
+            // Could enhance later with "[Data Type] Mapping" if applicable
+            return null;
+        }
     }
 }

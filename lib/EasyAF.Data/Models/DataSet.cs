@@ -147,23 +147,23 @@ namespace EasyAF.Data.Models
         public string? SoftwareVersion { get; set; }
 
         /// <summary>
-        /// Gets or sets the dictionary of arc flash study results, keyed by (Id, Scenario).
+        /// Gets or sets the dictionary of arc flash study results, keyed by CompositeKey.
         /// </summary>
         /// <remarks>
         /// <para>
-        /// <strong>Key Structure:</strong> Composite tuple of (Id, Scenario)
+        /// <strong>Key Structure:</strong> CompositeKey with 2 components (discovered from [Required] attributes)
         /// </para>
         /// <list type="bullet">
-        /// <item><description><strong>Id</strong>: The bus or location identifier where the arc flash study was performed</description></item>
-        /// <item><description><strong>Scenario</strong>: The fault scenario name (e.g., "Main-Min", "Main-Max", "Service-Min")</description></item>
+        /// <item><description><strong>Component 0:</strong> ArcFaultBusName - The bus or location identifier where the arc flash study was performed</description></item>
+        /// <item><description><strong>Component 1:</strong> Scenario - The fault scenario name (e.g., "Main-Min", "Main-Max", "Service-Min")</description></item>
         /// </list>
         /// <para>
-        /// Multiple scenarios can exist for the same Id (different operating conditions, configurations, etc.).
+        /// Multiple scenarios can exist for the same bus (different operating conditions, configurations, etc.).
         /// </para>
         /// <para>
         /// <strong>Example Access:</strong>
         /// <code>
-        /// var key = ("BUS-001", "Main-Min");
+        /// var key = new CompositeKey("BUS-001", "Main-Min");
         /// if (dataSet.ArcFlashEntries.TryGetValue(key, out var entry))
         /// {
         ///     Console.WriteLine($"Incident Energy: {entry.IncidentEnergy} cal/cm²");
@@ -171,215 +171,232 @@ namespace EasyAF.Data.Models
         /// </code>
         /// </para>
         /// </remarks>
-        public Dictionary<(string Id, string Scenario), ArcFlash>? ArcFlashEntries { get; set; } = new Dictionary<(string, string), ArcFlash>();
+        public Dictionary<CompositeKey, ArcFlash>? ArcFlashEntries { get; set; } = new Dictionary<CompositeKey, ArcFlash>();
 
         /// <summary>
-        /// Gets or sets the dictionary of short circuit study results, keyed by (Id, Bus, Scenario).
+        /// Gets or sets the dictionary of short circuit study results, keyed by CompositeKey.
         /// </summary>
         /// <remarks>
         /// <para>
-        /// <strong>Key Structure:</strong> Composite triple tuple of (Id, Bus, Scenario)
+        /// <strong>Key Structure:</strong> CompositeKey with 3 components (discovered from [Required] attributes)
         /// </para>
         /// <list type="bullet">
-        /// <item><description><strong>Id</strong>: The device or equipment identifier</description></item>
-        /// <item><description><strong>Bus</strong>: The bus location where the device is connected</description></item>
-        /// <item><description><strong>Scenario</strong>: The fault scenario name (e.g., "Main-Max", "Service-Max")</description></item>
+        /// <item><description><strong>Component 0:</strong> BusName - The bus location identifier</description></item>
+        /// <item><description><strong>Component 1:</strong> EquipmentName - The device or equipment identifier</description></item>
+        /// <item><description><strong>Component 2:</strong> Scenario - The fault scenario name (e.g., "Main-Max", "Service-Max")</description></item>
         /// </list>
         /// <para>
-        /// The triple key allows the same device (Id) to have study results at multiple buses
-        /// and across multiple scenarios.
+        /// The 3-component key allows the same equipment to have study results across multiple scenarios.
         /// </para>
         /// <para>
         /// <strong>Example Access:</strong>
         /// <code>
-        /// var key = ("CB-123", "BUS-001", "Main-Max");
+        /// var key = new CompositeKey("BUS-001", "CB-123", "Main-Max");
         /// if (dataSet.ShortCircuitEntries.TryGetValue(key, out var entry))
         /// {
-        ///     Console.WriteLine($"Available Fault Current: {entry.DutyKA} kA");
+        ///     Console.WriteLine($"Available Fault Current: {entry.OneTwoCycleDuty} kA");
         /// }
         /// </code>
         /// </para>
         /// </remarks>
-        public Dictionary<(string Id, string Bus, string Scenario), ShortCircuit>? ShortCircuitEntries { get; set; } = new Dictionary<(string, string, string), ShortCircuit>();
+        public Dictionary<CompositeKey, ShortCircuit>? ShortCircuitEntries { get; set; } = new Dictionary<CompositeKey, ShortCircuit>();
 
         /// <summary>
-        /// Gets or sets the dictionary of low voltage circuit breaker entries, keyed by Id.
+        /// Gets or sets the dictionary of low voltage circuit breaker entries, keyed by CompositeKey.
         /// </summary>
         /// <remarks>
+        /// <para>
+        /// <strong>Key Structure:</strong> CompositeKey with 1 component (LVBreakerName)
+        /// </para>
         /// <para>
         /// Trip unit settings are flattened onto the LVBreaker model as TripUnit* properties.
         /// </para>
         /// </remarks>
-        public Dictionary<string, LVBreaker>? LVBreakerEntries { get; set; } = new Dictionary<string, LVBreaker>();
+        public Dictionary<CompositeKey, LVBreaker>? LVBreakerEntries { get; set; } = new Dictionary<CompositeKey, LVBreaker>();
 
         /// <summary>
-        /// Gets or sets the dictionary of fuse entries, keyed by Id.
+        /// Gets or sets the dictionary of fuse entries, keyed by CompositeKey.
         /// </summary>
         /// <remarks>
+        /// <para>
+        /// <strong>Key Structure:</strong> CompositeKey with 1 component (FuseName)
+        /// </para>
+        /// <para>
         /// Fuses are protective devices with simpler structure than circuit breakers.
         /// Common properties include Manufacturer, Style, Rating, and Voltage.
+        /// </para>
         /// </remarks>
-        public Dictionary<string, Fuse>? FuseEntries { get; set; } = new Dictionary<string, Fuse>();
+        public Dictionary<CompositeKey, Fuse>? FuseEntries { get; set; } = new Dictionary<CompositeKey, Fuse>();
 
         /// <summary>
-        /// Gets or sets the dictionary of cable/conductor entries, keyed by Id.
+        /// Gets or sets the dictionary of cable/conductor entries, keyed by CompositeKey.
         /// </summary>
         /// <remarks>
+        /// <para>
+        /// <strong>Key Structure:</strong> CompositeKey with 1 component (CableName)
+        /// </para>
+        /// <para>
         /// Cables represent the conductors connecting electrical equipment.
         /// Properties typically include Size, Insulation type, Ampacity, and Length.
+        /// </para>
         /// </remarks>
-        public Dictionary<string, Cable>? CableEntries { get; set; } = new Dictionary<string, Cable>();
+        public Dictionary<CompositeKey, Cable>? CableEntries { get; set; } = new Dictionary<CompositeKey, Cable>();
 
         /// <summary>
-        /// Gets or sets the dictionary of bus/switchgear entries, keyed by Id.
+        /// Gets or sets the dictionary of bus/switchgear entries, keyed by CompositeKey.
         /// </summary>
         /// <remarks>
+        /// <para>
+        /// <strong>Key Structure:</strong> CompositeKey with 1 component (Buss/Id)
+        /// </para>
+        /// <para>
         /// Buses are the primary nodes in the electrical system where equipment connects.
         /// Properties include Name, Voltage, Phase configuration, and Grounding.
+        /// </para>
         /// </remarks>
-        public Dictionary<string, Bus>? BusEntries { get; set; } = new Dictionary<string, Bus>();
+        public Dictionary<CompositeKey, Bus>? BusEntries { get; set; } = new Dictionary<CompositeKey, Bus>();
 
         /// <summary>
-        /// Gets or sets the dictionary of 2-winding transformer entries, keyed by Id.
+        /// Gets or sets the dictionary of 2-winding transformer entries, keyed by CompositeKey.
         /// </summary>
-        public Dictionary<string, Transformer2W>? Transformer2WEntries { get; set; } = new Dictionary<string, Transformer2W>();
+        public Dictionary<CompositeKey, Transformer2W>? Transformer2WEntries { get; set; } = new Dictionary<CompositeKey, Transformer2W>();
 
         /// <summary>
-        /// Gets or sets the dictionary of motor entries, keyed by Id.
+        /// Gets or sets the dictionary of motor entries, keyed by CompositeKey.
         /// </summary>
-        public Dictionary<string, Motor>? MotorEntries { get; set; } = new Dictionary<string, Motor>();
+        public Dictionary<CompositeKey, Motor>? MotorEntries { get; set; } = new Dictionary<CompositeKey, Motor>();
 
         /// <summary>
-        /// Gets or sets the dictionary of generator entries, keyed by Id.
+        /// Gets or sets the dictionary of generator entries, keyed by CompositeKey.
         /// </summary>
-        public Dictionary<string, Generator>? GeneratorEntries { get; set; } = new Dictionary<string, Generator>();
+        public Dictionary<CompositeKey, Generator>? GeneratorEntries { get; set; } = new Dictionary<CompositeKey, Generator>();
 
         /// <summary>
-        /// Gets or sets the dictionary of utility connection entries, keyed by Id.
+        /// Gets or sets the dictionary of utility connection entries, keyed by CompositeKey.
         /// </summary>
-        public Dictionary<string, Utility>? UtilityEntries { get; set; } = new Dictionary<string, Utility>();
+        public Dictionary<CompositeKey, Utility>? UtilityEntries { get; set; } = new Dictionary<CompositeKey, Utility>();
 
         /// <summary>
-        /// Gets or sets the dictionary of capacitor entries, keyed by Id.
+        /// Gets or sets the dictionary of capacitor entries, keyed by CompositeKey.
         /// </summary>
-        public Dictionary<string, Capacitor>? CapacitorEntries { get; set; } = new Dictionary<string, Capacitor>();
+        public Dictionary<CompositeKey, Capacitor>? CapacitorEntries { get; set; } = new Dictionary<CompositeKey, Capacitor>();
 
         /// <summary>
-        /// Gets or sets the dictionary of load entries, keyed by Id.
+        /// Gets or sets the dictionary of load entries, keyed by CompositeKey.
         /// </summary>
-        public Dictionary<string, Load>? LoadEntries { get; set; } = new Dictionary<string, Load>();
+        public Dictionary<CompositeKey, Load>? LoadEntries { get; set; } = new Dictionary<CompositeKey, Load>();
 
         // === Additional Equipment Types (Alphabetically) ===
 
         /// <summary>
-        /// Gets or sets the dictionary of adjustable frequency drive entries, keyed by Id.
+        /// Gets or sets the dictionary of adjustable frequency drive entries, keyed by CompositeKey.
         /// </summary>
-        public Dictionary<string, AFD>? AFDEntries { get; set; } = new Dictionary<string, AFD>();
+        public Dictionary<CompositeKey, AFD>? AFDEntries { get; set; } = new Dictionary<CompositeKey, AFD>();
 
         /// <summary>
-        /// Gets or sets the dictionary of automatic transfer switch entries, keyed by Id.
+        /// Gets or sets the dictionary of automatic transfer switch entries, keyed by CompositeKey.
         /// </summary>
-        public Dictionary<string, ATS>? ATSEntries { get; set; } = new Dictionary<string, ATS>();
+        public Dictionary<CompositeKey, ATS>? ATSEntries { get; set; } = new Dictionary<CompositeKey, ATS>();
 
         /// <summary>
-        /// Gets or sets the dictionary of battery entries, keyed by Id.
+        /// Gets or sets the dictionary of battery entries, keyed by CompositeKey.
         /// </summary>
-        public Dictionary<string, Battery>? BatteryEntries { get; set; } = new Dictionary<string, Battery>();
+        public Dictionary<CompositeKey, Battery>? BatteryEntries { get; set; } = new Dictionary<CompositeKey, Battery>();
 
         /// <summary>
-        /// Gets or sets the dictionary of busway entries, keyed by Id.
+        /// Gets or sets the dictionary of busway entries, keyed by CompositeKey.
         /// </summary>
-        public Dictionary<string, Busway>? BuswayEntries { get; set; } = new Dictionary<string, Busway>();
+        public Dictionary<CompositeKey, Busway>? BuswayEntries { get; set; } = new Dictionary<CompositeKey, Busway>();
 
         /// <summary>
-        /// Gets or sets the dictionary of current limiting reactor entries, keyed by Id.
+        /// Gets or sets the dictionary of current limiting reactor entries, keyed by CompositeKey.
         /// </summary>
-        public Dictionary<string, CLReactor>? CLReactorEntries { get; set; } = new Dictionary<string, CLReactor>();
+        public Dictionary<CompositeKey, CLReactor>? CLReactorEntries { get; set; } = new Dictionary<CompositeKey, CLReactor>();
 
         /// <summary>
-        /// Gets or sets the dictionary of current transformer entries, keyed by Id.
+        /// Gets or sets the dictionary of current transformer entries, keyed by CompositeKey.
         /// </summary>
-        public Dictionary<string, CT>? CTEntries { get; set; } = new Dictionary<string, CT>();
+        public Dictionary<CompositeKey, CT>? CTEntries { get; set; } = new Dictionary<CompositeKey, CT>();
 
         /// <summary>
-        /// Gets or sets the dictionary of filter entries, keyed by Id.
+        /// Gets or sets the dictionary of filter entries, keyed by CompositeKey.
         /// </summary>
-        public Dictionary<string, Filter>? FilterEntries { get; set; } = new Dictionary<string, Filter>();
+        public Dictionary<CompositeKey, Filter>? FilterEntries { get; set; } = new Dictionary<CompositeKey, Filter>();
 
         /// <summary>
-        /// Gets or sets the dictionary of high voltage breaker entries, keyed by Id.
+        /// Gets or sets the dictionary of high voltage breaker entries, keyed by CompositeKey.
         /// </summary>
-        public Dictionary<string, HVBreaker>? HVBreakerEntries { get; set; } = new Dictionary<string, HVBreaker>();
+        public Dictionary<CompositeKey, HVBreaker>? HVBreakerEntries { get; set; } = new Dictionary<CompositeKey, HVBreaker>();
 
         /// <summary>
-        /// Gets or sets the dictionary of inverter entries, keyed by Id.
+        /// Gets or sets the dictionary of inverter entries, keyed by CompositeKey.
         /// </summary>
-        public Dictionary<string, Inverter>? InverterEntries { get; set; } = new Dictionary<string, Inverter>();
+        public Dictionary<CompositeKey, Inverter>? InverterEntries { get; set; } = new Dictionary<CompositeKey, Inverter>();
 
         /// <summary>
-        /// Gets or sets the dictionary of motor control center entries, keyed by Id.
+        /// Gets or sets the dictionary of motor control center entries, keyed by CompositeKey.
         /// </summary>
-        public Dictionary<string, MCC>? MCCEntries { get; set; } = new Dictionary<string, MCC>();
+        public Dictionary<CompositeKey, MCC>? MCCEntries { get; set; } = new Dictionary<CompositeKey, MCC>();
 
         /// <summary>
-        /// Gets or sets the dictionary of meter entries, keyed by Id.
+        /// Gets or sets the dictionary of meter entries, keyed by CompositeKey.
         /// </summary>
-        public Dictionary<string, Meter>? MeterEntries { get; set; } = new Dictionary<string, Meter>();
+        public Dictionary<CompositeKey, Meter>? MeterEntries { get; set; } = new Dictionary<CompositeKey, Meter>();
 
         /// <summary>
-        /// Gets or sets the dictionary of panel entries, keyed by Id.
+        /// Gets or sets the dictionary of panel entries, keyed by CompositeKey.
         /// </summary>
-        public Dictionary<string, Panel>? PanelEntries { get; set; } = new Dictionary<string, Panel>();
+        public Dictionary<CompositeKey, Panel>? PanelEntries { get; set; } = new Dictionary<CompositeKey, Panel>();
 
         /// <summary>
-        /// Gets or sets the dictionary of photovoltaic entries, keyed by Id.
+        /// Gets or sets the dictionary of photovoltaic entries, keyed by CompositeKey.
         /// </summary>
-        public Dictionary<string, Photovoltaic>? PhotovoltaicEntries { get; set; } = new Dictionary<string, Photovoltaic>();
+        public Dictionary<CompositeKey, Photovoltaic>? PhotovoltaicEntries { get; set; } = new Dictionary<CompositeKey, Photovoltaic>();
 
         /// <summary>
-        /// Gets or sets the dictionary of point of common coupling entries, keyed by Id.
+        /// Gets or sets the dictionary of point of common coupling entries, keyed by CompositeKey.
         /// </summary>
-        public Dictionary<string, POC>? POCEntries { get; set; } = new Dictionary<string, POC>();
+        public Dictionary<CompositeKey, POC>? POCEntries { get; set; } = new Dictionary<CompositeKey, POC>();
 
         /// <summary>
-        /// Gets or sets the dictionary of rectifier entries, keyed by Id.
+        /// Gets or sets the dictionary of rectifier entries, keyed by CompositeKey.
         /// </summary>
-        public Dictionary<string, Rectifier>? RectifierEntries { get; set; } = new Dictionary<string, Rectifier>();
+        public Dictionary<CompositeKey, Rectifier>? RectifierEntries { get; set; } = new Dictionary<CompositeKey, Rectifier>();
 
         /// <summary>
-        /// Gets or sets the dictionary of relay entries, keyed by Id.
+        /// Gets or sets the dictionary of relay entries, keyed by CompositeKey.
         /// </summary>
-        public Dictionary<string, Relay>? RelayEntries { get; set; } = new Dictionary<string, Relay>();
+        public Dictionary<CompositeKey, Relay>? RelayEntries { get; set; } = new Dictionary<CompositeKey, Relay>();
 
         /// <summary>
-        /// Gets or sets the dictionary of shunt entries, keyed by Id.
+        /// Gets or sets the dictionary of shunt entries, keyed by CompositeKey.
         /// </summary>
-        public Dictionary<string, Shunt>? ShuntEntries { get; set; } = new Dictionary<string, Shunt>();
+        public Dictionary<CompositeKey, Shunt>? ShuntEntries { get; set; } = new Dictionary<CompositeKey, Shunt>();
 
         /// <summary>
-        /// Gets or sets the dictionary of switch entries, keyed by Id.
+        /// Gets or sets the dictionary of switch entries, keyed by CompositeKey.
         /// </summary>
-        public Dictionary<string, Switch>? SwitchEntries { get; set; } = new Dictionary<string, Switch>();
+        public Dictionary<CompositeKey, Switch>? SwitchEntries { get; set; } = new Dictionary<CompositeKey, Switch>();
 
         /// <summary>
-        /// Gets or sets the dictionary of 3-winding transformer entries, keyed by Id.
+        /// Gets or sets the dictionary of 3-winding transformer entries, keyed by CompositeKey.
         /// </summary>
-        public Dictionary<string, Transformer3W>? Transformer3WEntries { get; set; } = new Dictionary<string, Transformer3W>();
+        public Dictionary<CompositeKey, Transformer3W>? Transformer3WEntries { get; set; } = new Dictionary<CompositeKey, Transformer3W>();
 
         /// <summary>
-        /// Gets or sets the dictionary of transmission line entries, keyed by Id.
+        /// Gets or sets the dictionary of transmission line entries, keyed by CompositeKey.
         /// </summary>
-        public Dictionary<string, TransmissionLine>? TransmissionLineEntries { get; set; } = new Dictionary<string, TransmissionLine>();
+        public Dictionary<CompositeKey, TransmissionLine>? TransmissionLineEntries { get; set; } = new Dictionary<CompositeKey, TransmissionLine>();
 
         /// <summary>
-        /// Gets or sets the dictionary of UPS entries, keyed by Id.
+        /// Gets or sets the dictionary of UPS entries, keyed by CompositeKey.
         /// </summary>
-        public Dictionary<string, UPS>? UPSEntries { get; set; } = new Dictionary<string, UPS>();
+        public Dictionary<CompositeKey, UPS>? UPSEntries { get; set; } = new Dictionary<CompositeKey, UPS>();
 
         /// <summary>
-        /// Gets or sets the dictionary of zigzag transformer entries, keyed by Id.
+        /// Gets or sets the dictionary of zigzag transformer entries, keyed by CompositeKey.
         /// </summary>
-        public Dictionary<string, ZigzagTransformer>? ZigzagTransformerEntries { get; set; } = new Dictionary<string, ZigzagTransformer>();
+        public Dictionary<CompositeKey, ZigzagTransformer>? ZigzagTransformerEntries { get; set; } = new Dictionary<CompositeKey, ZigzagTransformer>();
 
         /// <summary>
         /// Produces a detailed comparison between this DataSet (old) and another DataSet (new).
@@ -476,15 +493,17 @@ namespace EasyAF.Data.Models
 
         private void DiffArcFlashEntries(DataSetDiff diff, DataSet? newer)
         {
-            var oldArc = this.ArcFlashEntries ?? new Dictionary<(string, string), ArcFlash>();
-            var newArc = newer?.ArcFlashEntries ?? new Dictionary<(string, string), ArcFlash>();
+            var oldArc = this.ArcFlashEntries ?? new Dictionary<CompositeKey, ArcFlash>();
+            var newArc = newer?.ArcFlashEntries ?? new Dictionary<CompositeKey, ArcFlash>();
 
-            var allArcKeys = new HashSet<(string, string)>(oldArc.Keys);
+            var allArcKeys = new HashSet<CompositeKey>(oldArc.Keys);
             foreach (var k in newArc.Keys) allArcKeys.Add(k);
 
             foreach (var key in allArcKeys)
             {
-                var entryKey = $"ArcFlash:{key.Item1}|{key.Item2}";
+                // Build entryKey string from Components
+                var entryKey = $"ArcFlash:{string.Join("|", key.Components)}";
+                
                 if (!oldArc.ContainsKey(key))
                 {
                     diff.EntryDiffs.Add(new EntryDiff
@@ -526,14 +545,16 @@ namespace EasyAF.Data.Models
 
         private void DiffShortCircuitEntries(DataSetDiff diff, DataSet? newer)
         {
-            var oldSc = this.ShortCircuitEntries ?? new Dictionary<(string, string, string), ShortCircuit>();
-            var newSc = newer?.ShortCircuitEntries ?? new Dictionary<(string, string, string), ShortCircuit>();
-            var allScKeys = new HashSet<(string, string, string)>(oldSc.Keys);
+            var oldSc = this.ShortCircuitEntries ?? new Dictionary<CompositeKey, ShortCircuit>();
+            var newSc = newer?.ShortCircuitEntries ?? new Dictionary<CompositeKey, ShortCircuit>();
+            var allScKeys = new HashSet<CompositeKey>(oldSc.Keys);
             foreach (var k in newSc.Keys) allScKeys.Add(k);
 
             foreach (var key in allScKeys)
             {
-                var entryKey = $"ShortCircuit:{key.Item1}|{key.Item2}|{key.Item3}";
+                // Build entryKey string from Components
+                var entryKey = $"ShortCircuit:{string.Join("|", key.Components)}";
+                
                 if (!oldSc.ContainsKey(key))
                 {
                     diff.EntryDiffs.Add(new EntryDiff
@@ -575,9 +596,9 @@ namespace EasyAF.Data.Models
 
         private void DiffLVBreakerEntries(DataSetDiff diff, DataSet? newer)
         {
-            var oldLv = this.LVBreakerEntries ?? new Dictionary<string, LVBreaker>();
-            var newLv = newer?.LVBreakerEntries ?? new Dictionary<string, LVBreaker>();
-            var allLvKeys = new HashSet<string>(oldLv.Keys);
+            var oldLv = this.LVBreakerEntries ?? new Dictionary<CompositeKey, LVBreaker>();
+            var newLv = newer?.LVBreakerEntries ?? new Dictionary<CompositeKey, LVBreaker>();
+            var allLvKeys = new HashSet<CompositeKey>(oldLv.Keys);
             foreach (var k in newLv.Keys) allLvKeys.Add(k);
 
             foreach (var key in allLvKeys)
@@ -624,9 +645,9 @@ namespace EasyAF.Data.Models
 
         private void DiffFuseEntries(DataSetDiff diff, DataSet? newer)
         {
-            var oldFuse = this.FuseEntries ?? new Dictionary<string, Fuse>();
-            var newFuse = newer?.FuseEntries ?? new Dictionary<string, Fuse>();
-            var allFuseKeys = new HashSet<string>(oldFuse.Keys);
+            var oldFuse = this.FuseEntries ?? new Dictionary<CompositeKey, Fuse>();
+            var newFuse = newer?.FuseEntries ?? new Dictionary<CompositeKey, Fuse>();
+            var allFuseKeys = new HashSet<CompositeKey>(oldFuse.Keys);
             foreach (var k in newFuse.Keys) allFuseKeys.Add(k);
             
             foreach (var key in allFuseKeys)
@@ -671,9 +692,9 @@ namespace EasyAF.Data.Models
 
         private void DiffCableEntries(DataSetDiff diff, DataSet? newer)
         {
-            var oldC = this.CableEntries ?? new Dictionary<string, Cable>();
-            var newC = newer?.CableEntries ?? new Dictionary<string, Cable>();
-            var allCKeys = new HashSet<string>(oldC.Keys);
+            var oldC = this.CableEntries ?? new Dictionary<CompositeKey, Cable>();
+            var newC = newer?.CableEntries ?? new Dictionary<CompositeKey, Cable>();
+            var allCKeys = new HashSet<CompositeKey>(oldC.Keys);
             foreach (var k in newC.Keys) allCKeys.Add(k);
             
             foreach (var key in allCKeys)
@@ -718,9 +739,9 @@ namespace EasyAF.Data.Models
 
         private void DiffBusEntries(DataSetDiff diff, DataSet? newer)
         {
-            var oldB = this.BusEntries ?? new Dictionary<string, Bus>();
-            var newB = newer?.BusEntries ?? new Dictionary<string, Bus>();
-            var allBKeys = new HashSet<string>(oldB.Keys);
+            var oldB = this.BusEntries ?? new Dictionary<CompositeKey, Bus>();
+            var newB = newer?.BusEntries ?? new Dictionary<CompositeKey, Bus>();
+            var allBKeys = new HashSet<CompositeKey>(oldB.Keys);
             foreach (var k in newB.Keys) allBKeys.Add(k);
             
             foreach (var key in allBKeys)

@@ -8,10 +8,10 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyAF.Shell.Models.Backstage;
+using EasyAF.Shell.Helpers;
+using EasyAF.Shell.Services;
 using EasyAF.Core.Contracts;
 using Microsoft.Win32;
-using EasyAF.Shell.Services;
-using EasyAF.Shell.Helpers;
 
 namespace EasyAF.Shell.ViewModels.Backstage;
 
@@ -21,23 +21,28 @@ public enum RecentTab { Files, Folders }
 /// <summary>
 /// ViewModel for Open Backstage with Quick Access folder support and comprehensive search.
 /// </summary>
-public partial class OpenBackstageViewModel : BindableBase, IDisposable
+public class OpenBackstageViewModel : BindableBase
 {
-    private bool _disposed; // added for Dispose pattern
-
     private readonly IModuleLoader? _moduleLoader;
     private readonly ISettingsService _settingsService;
     private readonly IBackstageService? _backstageService;
     private readonly IRecentFilesService _recentFilesService;
-
-    // Simplified search debounce
-    private CancellationTokenSource? _searchCts;
+    private CancellationTokenSource? _searchCancellation;
+    private Timer? _searchDebounceTimer;
 
     private OpenBackstageMode _mode = OpenBackstageMode.Recent;
-    public OpenBackstageMode Mode { get => _mode; set => SetProperty(ref _mode, value); }
+    public OpenBackstageMode Mode
+    {
+        get => _mode;
+        set => SetProperty(ref _mode, value);
+    }
 
     private RecentTab _recentTab = RecentTab.Files;
-    public RecentTab RecentTab { get => _recentTab; set => SetProperty(ref _recentTab, value); }
+    public RecentTab RecentTab
+    {
+        get => _recentTab;
+        set => SetProperty(ref _recentTab, value);
+    }
 
     private string _searchText = string.Empty;
     public string SearchText
@@ -47,37 +52,98 @@ public partial class OpenBackstageViewModel : BindableBase, IDisposable
         {
             if (SetProperty(ref _searchText, value))
             {
-                ScheduleSearch();
+                DebounceSearch();
             }
         }
     }
 
     private QuickAccessFolder? _selectedQuickAccessFolder;
-    public QuickAccessFolder? SelectedQuickAccessFolder { get => _selectedQuickAccessFolder; set => SetProperty(ref _selectedQuickAccessFolder, value); }
+    public QuickAccessFolder? SelectedQuickAccessFolder
+    {
+        get => _selectedQuickAccessFolder;
+        set => SetProperty(ref _selectedQuickAccessFolder, value);
+    }
 
+    /// <summary>
+    /// Collection of pinned Quick Access folders.
+    /// </summary>
     public ObservableCollection<QuickAccessFolder> QuickAccessFolders { get; }
+
+    /// <summary>
+    /// Master collection of all recent files (unfiltered).
+    /// </summary>
     private readonly ObservableCollection<RecentFileEntry> _allRecentFiles;
+
+    /// <summary>
+    /// Master collection of all recent folders (unfiltered).
+    /// </summary>
     private readonly ObservableCollection<RecentFolderEntry> _allRecentFolders;
+
+    /// <summary>
+    /// Master collection of files in the selected Quick Access folder (unfiltered).
+    /// </summary>
     private readonly ObservableCollection<FolderFileEntry> _allFolderFiles;
+
+    /// <summary>
+    /// Master collection of browser entries (files + folders) in the current path (unfiltered).
+    /// </summary>
     private readonly ObservableCollection<FolderBrowserEntry> _allBrowserEntries;
+
+    /// <summary>
+    /// Filtered collection of recent files displayed in the Files tab.
+    /// </summary>
     public ObservableCollection<RecentFileEntry> RecentFiles { get; }
+
+    /// <summary>
+    /// Filtered collection of recent folders displayed in the Folders tab.
+    /// </summary>
     public ObservableCollection<RecentFolderEntry> RecentFolders { get; }
+
+    /// <summary>
+    /// Filtered collection of files in the selected Quick Access folder.
+    /// </summary>
     public ObservableCollection<FolderFileEntry> FolderFiles { get; }
+
+    /// <summary>
+    /// Filtered collection of browser entries (files + folders) displayed in the browser.
+    /// </summary>
     public ObservableCollection<FolderBrowserEntry> BrowserEntries { get; }
 
     private string _currentBrowsePath = string.Empty;
+    /// <summary>
+    /// Gets or sets the current directory being browsed.
+    /// </summary>
     public string CurrentBrowsePath
     {
         get => _currentBrowsePath;
-        set { if (SetProperty(ref _currentBrowsePath, value)) RaisePropertyChanged(nameof(CanNavigateUp)); }
+        set
+        {
+            if (SetProperty(ref _currentBrowsePath, value))
+            {
+                RaisePropertyChanged(nameof(CanNavigateUp));
+            }
+        }
     }
 
+    /// <summary>
+    /// Gets whether the user can navigate up to the parent directory.
+    /// </summary>
     public bool CanNavigateUp
     {
         get
         {
-            if (string.IsNullOrEmpty(CurrentBrowsePath)) return false;
-            try { return new DirectoryInfo(CurrentBrowsePath).Parent != null; } catch { return false; }
+            if (string.IsNullOrEmpty(CurrentBrowsePath))
+                return false;
+
+            try
+            {
+                var dirInfo = new DirectoryInfo(CurrentBrowsePath);
+                return dirInfo.Parent != null;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 
@@ -100,9 +166,28 @@ public partial class OpenBackstageViewModel : BindableBase, IDisposable
     public DelegateCommand<object> AddToQuickAccessCommand { get; }
     public DelegateCommand<QuickAccessFolder> RemoveFromQuickAccessCommand { get; }
 
+    /// <summary>
+    /// Event raised when a file is selected (via Browse, double-click, etc.)
+    /// The string parameter is the selected file path.
+    /// </summary>
     public event Action<string>? FileSelected;
+
+    /// <summary>
+    /// Event raised when a folder is selected for opening (via double-click).
+    /// The string parameter is the selected folder path.
+    /// </summary>
     public event Action<string>? FolderSelected;
+    
+    /// <summary>
+    /// Event raised when Ctrl+F is pressed to focus the search box.
+    /// The view will handle this to actually move focus.
+    /// </summary>
     public event EventHandler? FocusSearchRequested;
+    
+    /// <summary>
+    /// Event raised when the data source changes (mode switch or folder navigation).
+    /// The view should reset the scroll position to the top.
+    /// </summary>
     public event EventHandler? ScrollToTopRequested;
 
     public OpenBackstageViewModel(IModuleLoader? moduleLoader, ISettingsService settingsService, IRecentFilesService recentFilesService, IBackstageService? backstageService = null)
@@ -141,79 +226,138 @@ public partial class OpenBackstageViewModel : BindableBase, IDisposable
         AddToQuickAccessCommand = new DelegateCommand<object>(ExecuteAddToQuickAccess);
         RemoveFromQuickAccessCommand = new DelegateCommand<QuickAccessFolder>(ExecuteRemoveFromQuickAccess);
 
+        // Initialize Quick Access folders and load data
         LoadSampleQuickAccessFolders();
+        
+        // Subscribe to RecentFiles changes to keep our list in sync
         _recentFilesService.RecentFiles.CollectionChanged += OnRecentFilesChanged;
+        
+        // Initial load from service
         LoadRecentFilesFromService();
-        LoadSampleRecentFolders();
+        LoadSampleRecentFolders(); // TODO: Replace with real folder tracking service
+
+        // Initial filter (shows all)
         ApplySearchFilter();
     }
 
-    // Command methods retained here; heavy logic for Quick Access, Browser & Search moved to partial files.
+    #region Command Execution Methods
 
     private void ExecuteSelectRecent()
     {
         Mode = OpenBackstageMode.Recent;
         SelectedQuickAccessFolder = null;
-        System.Windows.Application.Current?.Dispatcher.InvokeAsync(() => ScrollToTopRequested?.Invoke(this, EventArgs.Empty), System.Windows.Threading.DispatcherPriority.Loaded);
+        
+        // Delay scroll reset until ContentControl finishes switching content
+        System.Windows.Application.Current?.Dispatcher.InvokeAsync(() =>
+        {
+            ScrollToTopRequested?.Invoke(this, EventArgs.Empty);
+        }, System.Windows.Threading.DispatcherPriority.Loaded);
     }
 
     private void ExecuteSelectQuickAccessFolder(QuickAccessFolder folder)
     {
         if (folder == null) return;
-        if (SelectedQuickAccessFolder != null) SelectedQuickAccessFolder.IsSelected = false;
+        
+        // Clear previous selection
+        if (SelectedQuickAccessFolder != null)
+        {
+            SelectedQuickAccessFolder.IsSelected = false;
+        }
+        
         Mode = OpenBackstageMode.QuickAccessFolder;
         SelectedQuickAccessFolder = folder;
+        
+        // Set new selection
         folder.IsSelected = true;
+        
+        // Set the current browse path and load browser entries
         CurrentBrowsePath = folder.FolderPath;
         LoadBrowserEntries(CurrentBrowsePath);
         NavigateUpCommand.RaiseCanExecuteChanged();
-        System.Windows.Application.Current?.Dispatcher.InvokeAsync(() => ScrollToTopRequested?.Invoke(this, EventArgs.Empty), System.Windows.Threading.DispatcherPriority.Loaded);
+        
+        // Delay scroll reset until ContentControl finishes switching content
+        System.Windows.Application.Current?.Dispatcher.InvokeAsync(() =>
+        {
+            ScrollToTopRequested?.Invoke(this, EventArgs.Empty);
+        }, System.Windows.Threading.DispatcherPriority.Loaded);
     }
 
     private void ExecuteTogglePin(RecentFileEntry file)
     {
         if (file == null) return;
         file.IsPinned = !file.IsPinned;
-        // Refresh default view so grouping/regrouping occurs without collection mutation hack
-        var view = System.Windows.Data.CollectionViewSource.GetDefaultView(RecentFiles);
-        view?.Refresh();
+        
+        // Force the CollectionViewSource to refresh its grouping
+        System.Windows.Application.Current?.Dispatcher.Invoke(() =>
+        {
+            // Trigger a refresh by removing and re-adding the item
+            var index = RecentFiles.IndexOf(file);
+            if (index >= 0)
+            {
+                RecentFiles.RemoveAt(index);
+                RecentFiles.Insert(index, file);
+            }
+        });
+        
         SavePinnedFiles();
     }
 
     private void ExecuteOpenFile(RecentFileEntry file)
     {
         if (file == null) return;
+        
+        // Fire the event for parent integration
         FileSelected?.Invoke(file.FilePath);
+        
+        // Request backstage close
         _backstageService?.RequestClose();
     }
 
     private void ExecuteOpenFolder(RecentFolderEntry folder)
     {
         if (folder == null) return;
+        
+        // Fire the event for parent integration
         FolderSelected?.Invoke(folder.FolderPath);
+        
+        // Request backstage close
         _backstageService?.RequestClose();
     }
 
     private void ExecuteOpenFolderFile(FolderFileEntry file)
     {
         if (file == null) return;
+        
+        // Fire the event for parent integration
         FileSelected?.Invoke(file.FilePath);
+        
+        // Request backstage close
         _backstageService?.RequestClose();
     }
 
     private void ExecuteOpenBrowserEntry(FolderBrowserEntry entry)
     {
         if (entry == null) return;
+
         if (entry.IsFolder)
         {
+            // Navigate into the folder
             CurrentBrowsePath = entry.FullPath;
             LoadBrowserEntries(CurrentBrowsePath);
             NavigateUpCommand.RaiseCanExecuteChanged();
-            System.Windows.Application.Current?.Dispatcher.InvokeAsync(() => ScrollToTopRequested?.Invoke(this, EventArgs.Empty), System.Windows.Threading.DispatcherPriority.Loaded);
+            
+            // Delay scroll reset until new content is loaded and rendered
+            System.Windows.Application.Current?.Dispatcher.InvokeAsync(() =>
+            {
+                ScrollToTopRequested?.Invoke(this, EventArgs.Empty);
+            }, System.Windows.Threading.DispatcherPriority.Loaded);
         }
         else
         {
+            // Open the file
             FileSelected?.Invoke(entry.FullPath);
+            
+            // Request backstage close
             _backstageService?.RequestClose();
         }
     }
@@ -222,21 +366,30 @@ public partial class OpenBackstageViewModel : BindableBase, IDisposable
     {
         try
         {
-            var dir = new DirectoryInfo(CurrentBrowsePath);
-            if (dir.Parent != null)
+            var currentDir = new DirectoryInfo(CurrentBrowsePath);
+            if (currentDir.Parent != null)
             {
-                CurrentBrowsePath = dir.Parent.FullName;
+                CurrentBrowsePath = currentDir.Parent.FullName;
                 LoadBrowserEntries(CurrentBrowsePath);
                 NavigateUpCommand.RaiseCanExecuteChanged();
-                System.Windows.Application.Current?.Dispatcher.InvokeAsync(() => ScrollToTopRequested?.Invoke(this, EventArgs.Empty), System.Windows.Threading.DispatcherPriority.Loaded);
+                
+                // Delay scroll reset until new content is loaded and rendered
+                System.Windows.Application.Current?.Dispatcher.InvokeAsync(() =>
+                {
+                    ScrollToTopRequested?.Invoke(this, EventArgs.Empty);
+                }, System.Windows.Threading.DispatcherPriority.Loaded);
             }
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"NavigateUp error: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"Error navigating up: {ex.Message}");
         }
     }
-    private bool CanExecuteNavigateUp() => CanNavigateUp;
+
+    private bool CanExecuteNavigateUp()
+    {
+        return CanNavigateUp;
+    }
 
     private void ExecuteBrowse()
     {
@@ -249,12 +402,23 @@ public partial class OpenBackstageViewModel : BindableBase, IDisposable
             CheckFileExists = true,
             CheckPathExists = true
         };
+
+        // Set initial directory to most recent folder if available
         var mostRecentFolder = _allRecentFolders.OrderByDescending(f => f.LastAccessed).FirstOrDefault();
-        if (mostRecentFolder != null && Directory.Exists(mostRecentFolder.FolderPath)) dialog.InitialDirectory = mostRecentFolder.FolderPath;
+        if (mostRecentFolder != null && System.IO.Directory.Exists(mostRecentFolder.FolderPath))
+        {
+            dialog.InitialDirectory = mostRecentFolder.FolderPath;
+        }
+
         if (dialog.ShowDialog() == true)
         {
+            // Save user's filter selection as preference
             SaveDefaultFilterIndex(dialog.FilterIndex);
+
+            // Raise event for parent to handle (close backstage, open file)
             FileSelected?.Invoke(dialog.FileName);
+            
+            // Request backstage close
             _backstageService?.RequestClose();
         }
     }
@@ -262,160 +426,819 @@ public partial class OpenBackstageViewModel : BindableBase, IDisposable
     private void ExecuteCopyPath(RecentFileEntry file)
     {
         if (file == null) return;
-        TryClipboard(() => System.Windows.Clipboard.SetText(file.FilePath), "copy file path", file.FilePath);
-    }
-    private void ExecuteCopyFolderPath(RecentFolderEntry folder)
-    {
-        if (folder == null) return;
-        TryClipboard(() => System.Windows.Clipboard.SetText(folder.FolderPath), "copy folder path", folder.FolderPath);
-    }
-    private void ExecuteCopyBrowserPath(FolderBrowserEntry entry)
-    {
-        if (entry == null) return;
-        TryClipboard(() => System.Windows.Clipboard.SetText(entry.FullPath), "copy browser path", entry.FullPath);
-    }
 
-    private static void TryClipboard(Action action, string context, string value)
-    {
         try
         {
-            action();
-            System.Windows.MessageBox.Show($"Path copied to clipboard:\n\n{value}", "Path Copied", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+            // Copy the file path to clipboard
+            System.Windows.Clipboard.SetText(file.FilePath);
+
+            // Show a messagebox indicating the path has been copied
+            System.Windows.MessageBox.Show(
+                $"File path copied to clipboard:\n\n{file.FilePath}",
+                "Path Copied",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Information);
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Clipboard error ({context}): {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"Error copying file path: {ex.Message}");
+        }
+    }
+
+    private void ExecuteCopyFolderPath(RecentFolderEntry folder)
+    {
+        if (folder == null) return;
+
+        try
+        {
+            // Copy the folder path to clipboard
+            System.Windows.Clipboard.SetText(folder.FolderPath);
+
+            // Show a messagebox indicating the path has been copied
+            System.Windows.MessageBox.Show(
+                $"Folder path copied to clipboard:\n\n{folder.FolderPath}",
+                "Path Copied",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Information);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error copying folder path: {ex.Message}");
+        }
+    }
+
+    private void ExecuteCopyBrowserPath(FolderBrowserEntry entry)
+    {
+        if (entry == null) return;
+
+        try
+        {
+            // Copy the browser entry path to clipboard
+            System.Windows.Clipboard.SetText(entry.FullPath);
+
+            // Show a messagebox indicating the path has been copied
+            System.Windows.MessageBox.Show(
+                $"Path copied to clipboard:\n\n{entry.FullPath}",
+                "Path Copied",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Information);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error copying browser entry path: {ex.Message}");
         }
     }
 
     private void ExecuteRemoveFromList(RecentFileEntry file)
     {
         if (file == null) return;
+
+        // Remove from recent files collection
         _allRecentFiles.Remove(file);
         RecentFiles.Remove(file);
+
         _recentFilesService.RemoveRecentFile(file.FilePath);
-        if (file.IsPinned) SavePinnedFiles();
+        
+        // Also remove from pinned files if it was pinned
+        if (file.IsPinned)
+        {
+            SavePinnedFiles();
+        }
     }
 
     private void ExecuteRemoveFolderFromListCommand(RecentFolderEntry folder)
     {
         if (folder == null) return;
+
+        // Remove from recent folders collection
         _allRecentFolders.Remove(folder);
         RecentFolders.Remove(folder);
+
+        // TODO: Persist removal to settings via ISettingsService
     }
 
     private void ExecuteOpenFileLocation(RecentFileEntry file)
     {
         if (file == null) return;
+
         try
         {
-            var full = Path.GetFullPath(file.FilePath);
-            if (File.Exists(full))
+            var fullPath = Path.GetFullPath(file.FilePath);
+            if (File.Exists(fullPath))
             {
-                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo { FileName = "explorer.exe", Arguments = $"/select,\"{full}\"", UseShellExecute = true });
+                // Open Explorer and select the file
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = "explorer.exe",
+                    Arguments = $"/select,\"{fullPath}\"",
+                    UseShellExecute = true
+                });
             }
             else
             {
-                var dir = Path.GetDirectoryName(full);
-                if (!string.IsNullOrWhiteSpace(dir) && Directory.Exists(dir))
-                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo { FileName = dir, UseShellExecute = true });
+                // File doesn't exist, just open the directory
+                var directory = Path.GetDirectoryName(fullPath);
+                if (!string.IsNullOrWhiteSpace(directory) && Directory.Exists(directory))
+                {
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = directory,
+                        UseShellExecute = true
+                    });
+                }
             }
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"OpenFileLocation error: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"Error opening file location: {ex.Message}");
         }
     }
 
-    private void ExecuteFocusSearch() => FocusSearchRequested?.Invoke(this, EventArgs.Empty);
-
-    // Quick Access add/remove methods now in partial QuickAccess file.
-
-    // Search + filtering now in partial Search file.
-
-    // Browser loading/filtering now in partial Browser file.
-
-    // File type filter + recent files integration retained.
-
-    private string BuildFileTypeFilter()
+    private void ExecuteFocusSearch()
     {
-        var sb = new StringBuilder();
-        var types = GetAvailableFileTypes();
-        if (types.Count > 0)
-        {
-            var all = string.Join(";", types.Select(t => $"*.{t.Extension}"));
-            sb.Append($"All Supported Files ({all})|{all}|");
-            foreach (var t in types.OrderBy(t => t.Description))
-                sb.Append($"{t.Description} (*.{t.Extension})|*.{t.Extension}|");
-        }
-        sb.Append("All Files (*.*)|*.*");
-        return sb.ToString();
+        // Raise the FocusSearchRequested event
+        FocusSearchRequested?.Invoke(this, EventArgs.Empty);
     }
-
-    private System.Collections.Generic.List<FileTypeDefinition> GetAvailableFileTypes()
+    
+    private void ExecuteAddToQuickAccess(object? parameter)
     {
-        var list = new System.Collections.Generic.List<FileTypeDefinition>();
-        if (_moduleLoader != null && _moduleLoader.LoadedModules.Any())
+        string? folderPath = null;
+        int insertionIndex = -1; // -1 means append to end
+        
+        // Handle both string (from context menu) and tuple (from drag & drop)
+        if (parameter is string str)
         {
-            foreach (var m in _moduleLoader.LoadedModules)
+            folderPath = str;
+        }
+        else if (parameter is ValueTuple<string, int> tuple)
+        {
+            (folderPath, insertionIndex) = tuple;
+        }
+        else
+        {
+            System.Diagnostics.Debug.WriteLine($"Invalid parameter type for AddToQuickAccess: {parameter?.GetType()}");
+            return;
+        }
+        
+        if (string.IsNullOrWhiteSpace(folderPath)) return;
+        
+        try
+        {
+            // Normalize the path
+            var fullPath = Path.GetFullPath(folderPath);
+            
+            // If it's a file, get its directory
+            if (File.Exists(fullPath))
             {
-                if (m.SupportedFileTypes?.Count > 0) list.AddRange(m.SupportedFileTypes);
-                else if (m.SupportedFileExtensions?.Length > 0)
-                    foreach (var ext in m.SupportedFileExtensions)
-                        list.Add(new FileTypeDefinition(ext, $"{ext.ToUpper()} Files"));
+                var dir = Path.GetDirectoryName(fullPath);
+                if (string.IsNullOrWhiteSpace(dir))
+                {
+                    System.Diagnostics.Debug.WriteLine($"Cannot extract directory from file path: {fullPath}");
+                    return;
+                }
+                fullPath = dir;
+            }
+            
+            // Verify it's a directory
+            if (!Directory.Exists(fullPath))
+            {
+                System.Diagnostics.Debug.WriteLine($"Directory does not exist: {fullPath}");
+                return;
+            }
+            
+            // Check if already in Quick Access
+            if (QuickAccessFolders.Any(f => string.Equals(f.FolderPath, fullPath, StringComparison.OrdinalIgnoreCase)))
+            {
+                System.Diagnostics.Debug.WriteLine($"Folder already in Quick Access: {fullPath}");
+                return;
+            }
+            
+            // Create the folder entry
+            var folderName = Path.GetFileName(fullPath);
+            if (string.IsNullOrEmpty(folderName))
+            {
+                folderName = fullPath; // Use full path for root drives
+            }
+            
+            var newFolder = new QuickAccessFolder
+            {
+                FolderName = folderName,
+                FolderPath = fullPath,
+                IconGlyph = "\uE8B7" // Folder icon
+            };
+            
+            // Insert at specified index or append to end
+            if (insertionIndex >= 0 && insertionIndex < QuickAccessFolders.Count)
+            {
+                QuickAccessFolders.Insert(insertionIndex, newFolder);
+                System.Diagnostics.Debug.WriteLine($"Inserted to Quick Access at index {insertionIndex}: {fullPath}");
+            }
+            else
+            {
+                QuickAccessFolders.Add(newFolder);
+                System.Diagnostics.Debug.WriteLine($"Added to Quick Access (end of list): {fullPath}");
+            }
+            
+            SaveQuickAccessFolders();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error adding to Quick Access: {ex.Message}");
+        }
+    }
+    
+    private void ExecuteRemoveFromQuickAccess(QuickAccessFolder? folder)
+    {
+        if (folder == null) return;
+        
+        try
+        {
+            // Remember the index and selection state before removal
+            var currentIndex = QuickAccessFolders.IndexOf(folder);
+            var wasCurrentlySelected = folder == SelectedQuickAccessFolder;
+            
+            // Clear the IsSelected state on the folder being removed
+            // This ensures RadioButton bindings don't hold stale state
+            folder.IsSelected = false;
+            
+            // Remove the folder
+            QuickAccessFolders.Remove(folder);
+            SaveQuickAccessFolders();
+            
+            System.Diagnostics.Debug.WriteLine($"Removed from Quick Access: {folder.FolderPath}");
+            
+            // If we removed the currently selected folder, auto-select next/previous
+            if (wasCurrentlySelected)
+            {
+                if (QuickAccessFolders.Count > 0)
+                {
+                    // Select next item (same index), or previous if we removed the last item
+                    var newIndex = Math.Min(currentIndex, QuickAccessFolders.Count - 1);
+                    ExecuteSelectQuickAccessFolder(QuickAccessFolders[newIndex]);
+                    System.Diagnostics.Debug.WriteLine($"Auto-selected Quick Access folder at index {newIndex}: {QuickAccessFolders[newIndex].FolderPath}");
+                }
+                else
+                {
+                    // No Quick Access folders left - switch to Recent Files
+                    ExecuteSelectRecent();
+                    System.Diagnostics.Debug.WriteLine("No Quick Access folders remaining - switched to Recent Files");
+                }
             }
         }
-        if (list.Count == 0)
+        catch (Exception ex)
         {
-            list.Add(new FileTypeDefinition("ezmap", "EasyAF Map Files (PLACEHOLDER)"));
-            list.Add(new FileTypeDefinition("ezproj", "EasyAF Project Files (PLACEHOLDER)"));
-            list.Add(new FileTypeDefinition("ezspec", "EasyAF Spec Files (PLACEHOLDER)"));
+            System.Diagnostics.Debug.WriteLine($"Error removing from Quick Access: {ex.Message}");
         }
-        return list;
     }
 
-    private int GetDefaultFilterIndex() => _settingsService.GetSetting("OpenDialog.DefaultFilterIndex", 1);
-    private void SaveDefaultFilterIndex(int idx) => _settingsService.SetSetting("OpenDialog.DefaultFilterIndex", idx);
+    #endregion
 
+    #region Search Implementation
+
+    /// <summary>
+    /// Debounces the search to avoid filtering on every keystroke.
+    /// Waits for user to stop typing for the configured delay.
+    /// </summary>
+    private void DebounceSearch()
+    {
+        // Cancel any pending search
+        _searchCancellation?.Cancel();
+        _searchDebounceTimer?.Dispose();
+
+        // Get debounce delay from settings (default 250ms)
+        int delayMs = _settingsService.GetSetting("Search.DebounceDelayMs", 250);
+
+        // Create new cancellation token
+        _searchCancellation = new CancellationTokenSource();
+        var token = _searchCancellation.Token;
+
+        // Start debounce timer
+        _searchDebounceTimer = new Timer(_ =>
+        {
+            if (!token.IsCancellationRequested)
+            {
+                // Execute search on UI thread
+                System.Windows.Application.Current?.Dispatcher.Invoke(() =>
+                {
+                    ApplySearchFilter();
+                });
+            }
+        }, null, delayMs, Timeout.Infinite);
+    }
+
+    /// <summary>
+    /// Applies the search filter to RecentFiles, RecentFolders, and FolderFiles collections.
+    /// </summary>
+    private void ApplySearchFilter()
+    {
+        var searchTerm = SearchText?.Trim() ?? string.Empty;
+        var fuzzyThreshold = _settingsService.GetSetting("Search.FuzzyThreshold", 0.7);
+        var fuzzyEnabled = _settingsService.GetSetting("Search.FuzzyEnabled", true);
+
+        // Use threshold of 0 if fuzzy is disabled (forces exact/wildcard only)
+        var threshold = fuzzyEnabled ? fuzzyThreshold : 0.0;
+
+        // Filter files
+        RecentFiles.Clear();
+        foreach (var file in _allRecentFiles)
+        {
+            if (MatchesFileSearch(file, searchTerm, threshold))
+            {
+                RecentFiles.Add(file);
+            }
+        }
+
+        // Filter folders
+        RecentFolders.Clear();
+        foreach (var folder in _allRecentFolders)
+        {
+            if (MatchesFolderSearch(folder, searchTerm, threshold))
+            {
+                RecentFolders.Add(folder);
+            }
+        }
+
+        // Filter Quick Access folder files (if in that mode)
+        if (Mode == OpenBackstageMode.QuickAccessFolder)
+        {
+            ApplyBrowserEntryFilter();
+        }
+    }
+
+    /// <summary>
+    /// Checks if a file entry matches the search criteria.
+    /// Searches: FileName and DirectoryPath.
+    /// </summary>
+    private bool MatchesFileSearch(RecentFileEntry file, string searchTerm, double fuzzyThreshold)
+    {
+        return SearchHelper.IsMatchAny(
+            searchTerm,
+            fuzzyThreshold,
+            file.FileName,
+            file.DirectoryPath,
+            file.FilePath  // Also search full path
+        );
+    }
+
+    /// <summary>
+    /// Checks if a folder entry matches the search criteria.
+    /// Searches: FolderName and ParentPath.
+    /// </summary>
+    private bool MatchesFolderSearch(RecentFolderEntry folder, string searchTerm, double fuzzyThreshold)
+    {
+        return SearchHelper.IsMatchAny(
+            searchTerm,
+            fuzzyThreshold,
+            folder.FolderName,
+            folder.ParentPath,
+            folder.FolderPath  // Also search full path
+        );
+    }
+
+    #endregion
+
+    #region Quick Access Folder File Loading
+
+    /// <summary>
+    /// Loads files from the specified folder path.
+    /// </summary>
+    private void LoadFolderFiles(string folderPath)
+    {
+        _allFolderFiles.Clear();
+        FolderFiles.Clear();
+
+        if (string.IsNullOrWhiteSpace(folderPath))
+        {
+            System.Diagnostics.Debug.WriteLine("LoadFolderFiles: folderPath is null or empty");
+            return;
+        }
+
+        if (!System.IO.Directory.Exists(folderPath))
+        {
+            System.Diagnostics.Debug.WriteLine($"LoadFolderFiles: Directory does not exist: {folderPath}");
+            return;
+        }
+
+        try
+        {
+            var directory = new System.IO.DirectoryInfo(folderPath);
+            var files = directory.GetFiles();
+
+            System.Diagnostics.Debug.WriteLine($"LoadFolderFiles: Found {files.Length} files in {folderPath}");
+
+            foreach (var fileInfo in files)
+            {
+                _allFolderFiles.Add(new FolderFileEntry
+                {
+                    FilePath = fileInfo.FullName,
+                    FileSize = fileInfo.Length,
+                    LastModified = fileInfo.LastWriteTime
+                });
+            }
+
+            System.Diagnostics.Debug.WriteLine($"LoadFolderFiles: Added {_allFolderFiles.Count} files to _allFolderFiles");
+
+            // Apply initial filter
+            ApplyFolderFileFilter();
+
+            System.Diagnostics.Debug.WriteLine($"LoadFolderFiles: After filter, FolderFiles.Count = {FolderFiles.Count}");
+        }
+        catch (Exception ex)
+        {
+            // Log error or show message to user
+            System.Diagnostics.Debug.WriteLine($"Error loading folder files: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Loads files and folders from the specified directory into BrowserEntries.
+    /// </summary>
+    private void LoadBrowserEntries(string path)
+    {
+        _allBrowserEntries.Clear();
+        BrowserEntries.Clear();
+
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            System.Diagnostics.Debug.WriteLine("LoadBrowserEntries: path is null or empty");
+            return;
+        }
+
+        if (!Directory.Exists(path))
+        {
+            System.Diagnostics.Debug.WriteLine($"LoadBrowserEntries: Directory does not exist: {path}");
+            return;
+        }
+
+        try
+        {
+            var directory = new DirectoryInfo(path);
+            
+            // Load subdirectories first
+            var directories = directory.GetDirectories();
+            System.Diagnostics.Debug.WriteLine($"LoadBrowserEntries: Found {directories.Length} folders in {path}");
+            
+            foreach (var dirInfo in directories)
+            {
+                _allBrowserEntries.Add(new FolderBrowserEntry
+                {
+                    FullPath = dirInfo.FullName,
+                    IsFolder = true,
+                    LastModified = dirInfo.LastWriteTime
+                });
+            }
+
+            // Then load files
+            var files = directory.GetFiles();
+            System.Diagnostics.Debug.WriteLine($"LoadBrowserEntries: Found {files.Length} files in {path}");
+            
+            foreach (var fileInfo in files)
+            {
+                _allBrowserEntries.Add(new FolderBrowserEntry
+                {
+                    FullPath = fileInfo.FullName,
+                    IsFolder = false,
+                    FileSize = fileInfo.Length,
+                    LastModified = fileInfo.LastWriteTime
+                });
+            }
+
+            // Apply filter
+            ApplyBrowserEntryFilter();
+
+            System.Diagnostics.Debug.WriteLine($"LoadBrowserEntries: After filter, BrowserEntries.Count = {BrowserEntries.Count}");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error loading browser entries: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Applies search filter to browser entries.
+    /// </summary>
+    private void ApplyBrowserEntryFilter()
+    {
+        var searchTerm = SearchText?.Trim() ?? string.Empty;
+        var fuzzyThreshold = _settingsService.GetSetting("Search.FuzzyThreshold", 0.7);
+        var fuzzyEnabled = _settingsService.GetSetting("Search.FuzzyEnabled", true);
+        var threshold = fuzzyEnabled ? fuzzyThreshold : 0.0;
+
+        BrowserEntries.Clear();
+        foreach (var entry in _allBrowserEntries)
+        {
+            if (MatchesBrowserEntrySearch(entry, searchTerm, threshold))
+            {
+                BrowserEntries.Add(entry);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Checks if a browser entry matches the search criteria.
+    /// </summary>
+    private bool MatchesBrowserEntrySearch(FolderBrowserEntry entry, string searchTerm, double fuzzyThreshold)
+    {
+        return SearchHelper.IsMatchAny(
+            searchTerm,
+            fuzzyThreshold,
+            entry.Name,
+            entry.Extension,
+            entry.FullPath
+        );
+    }
+
+    /// <summary>
+    /// Applies search filter to folder files.
+    /// </summary>
+    private void ApplyFolderFileFilter()
+    {
+        var searchTerm = SearchText?.Trim() ?? string.Empty;
+        var fuzzyThreshold = _settingsService.GetSetting("Search.FuzzyThreshold", 0.7);
+        var fuzzyEnabled = _settingsService.GetSetting("Search.FuzzyEnabled", true);
+        var threshold = fuzzyEnabled ? fuzzyThreshold : 0.0;
+
+        FolderFiles.Clear();
+        foreach (var file in _allFolderFiles)
+        {
+            if (MatchesFolderFileSearch(file, searchTerm, threshold))
+            {
+                FolderFiles.Add(file);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Checks if a folder file entry matches the search criteria.
+    /// </summary>
+    private bool MatchesFolderFileSearch(FolderFileEntry file, string searchTerm, double fuzzyThreshold)
+    {
+        return SearchHelper.IsMatchAny(
+            searchTerm,
+            fuzzyThreshold,
+            file.FileName,
+            file.Extension,
+            file.FilePath
+        );
+    }
+
+    #endregion
+
+    #region File Type Filter Building
+
+    /// <summary>
+    /// Builds the file type filter string for OpenFileDialog.
+    /// Uses loaded modules if available, otherwise uses placeholder file types.
+    /// Format: "Description (*.ext)|*.ext|All Files (*.*)|*.*"
+    /// </summary>
+    private string BuildFileTypeFilter()
+    {
+        var filterBuilder = new StringBuilder();
+        var fileTypes = GetAvailableFileTypes();
+
+        if (fileTypes.Count > 0)
+        {
+            // Add "All Supported Files" filter if we have any file types
+            var allExtensions = string.Join(";", fileTypes.Select(ft => $"*.{ft.Extension}"));
+            filterBuilder.Append($"All Supported Files ({allExtensions})|{allExtensions}|");
+
+            // Add individual file type filters
+            foreach (var fileType in fileTypes.OrderBy(ft => ft.Description))
+            {
+                filterBuilder.Append($"{fileType.Description} (*.{fileType.Extension})|*.{fileType.Extension}|");
+            }
+        }
+
+        // Always append "All Files" as the last option
+        filterBuilder.Append("All Files (*.*)|*.*");
+
+        return filterBuilder.ToString();
+    }
+
+    /// <summary>
+    /// Gets available file types from loaded modules, or placeholder types if no modules loaded.
+    /// </summary>
+    private List<FileTypeDefinition> GetAvailableFileTypes()
+    {
+        var fileTypes = new List<FileTypeDefinition>();
+
+        // Try to get file types from loaded modules first
+        if (_moduleLoader != null && _moduleLoader.LoadedModules.Any())
+        {
+            foreach (var module in _moduleLoader.LoadedModules)
+            {
+                if (module.SupportedFileTypes != null && module.SupportedFileTypes.Count > 0)
+                {
+                    fileTypes.AddRange(module.SupportedFileTypes);
+                }
+                else if (module.SupportedFileExtensions != null && module.SupportedFileExtensions.Length > 0)
+                {
+                    // Fallback to SupportedFileExtensions with generic description
+                    foreach (var ext in module.SupportedFileExtensions)
+                    {
+                        fileTypes.Add(new FileTypeDefinition(ext, $"{ext.ToUpper()} Files"));
+                    }
+                }
+            }
+        }
+
+        // If no modules loaded, use placeholder file types for demonstration
+        // TODO: Remove these placeholders once real modules are implemented
+        if (fileTypes.Count == 0)
+        {
+            fileTypes.Add(new FileTypeDefinition("ezmap", "EasyAF Map Files (PLACEHOLDER)"));
+            fileTypes.Add(new FileTypeDefinition("ezproj", "EasyAF Project Files (PLACEHOLDER)"));
+            fileTypes.Add(new FileTypeDefinition("ezspec", "EasyAF Spec Files (PLACEHOLDER)"));
+        }
+
+        return fileTypes;
+    }
+
+    /// <summary>
+    /// Gets the user's preferred default filter index from settings.
+    /// Returns 1 (first filter) if not set.
+    /// </summary>
+    private int GetDefaultFilterIndex()
+    {
+        return _settingsService.GetSetting("OpenDialog.DefaultFilterIndex", 1);
+    }
+
+    /// <summary>
+    /// Saves the user's filter selection as the default for next time.
+    /// </summary>
+    private void SaveDefaultFilterIndex(int filterIndex)
+    {
+        _settingsService.SetSetting("OpenDialog.DefaultFilterIndex", filterIndex);
+    }
+
+    #endregion
+
+    #region Recent Files Service Integration
+
+    /// <summary>
+    /// Loads recent files from IRecentFilesService and converts them to RecentFileEntry objects.
+    /// </summary>
+    /// <remarks>
+    /// Takes only MaxDisplayCount items from the service's full list to respect the user's display limit setting.
+    /// </remarks>
     private void LoadRecentFilesFromService()
     {
         _allRecentFiles.Clear();
-        foreach (var fp in _recentFilesService.RecentFiles.Take(_recentFilesService.MaxDisplayCount))
+        
+        // Take only the number of items the user wants to display
+        var itemsToLoad = _recentFilesService.RecentFiles
+            .Take(_recentFilesService.MaxDisplayCount);
+        
+        foreach (var filePath in itemsToLoad)
         {
-            if (File.Exists(fp))
+            if (File.Exists(filePath))
             {
-                var info = new FileInfo(fp);
-                _allRecentFiles.Add(new RecentFileEntry { FilePath = fp, LastModified = info.LastWriteTime, IsPinned = IsPinnedFile(fp) });
+                var fileInfo = new FileInfo(filePath);
+                var entry = new RecentFileEntry
+                {
+                    FilePath = filePath,
+                    LastModified = fileInfo.LastWriteTime,
+                    IsPinned = IsPinnedFile(filePath) // Check if pinned in settings
+                };
+                _allRecentFiles.Add(entry);
             }
         }
+        
         ApplySearchFilter();
     }
 
-    private void OnRecentFilesChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) => LoadRecentFilesFromService();
-    private bool IsPinnedFile(string path) => _settingsService.GetSetting<System.Collections.Generic.List<string>>("OpenBackstage.PinnedFiles", new System.Collections.Generic.List<string>()).Contains(path, StringComparer.OrdinalIgnoreCase);
-    private void SavePinnedFiles() => _settingsService.SetSetting("OpenBackstage.PinnedFiles", _allRecentFiles.Where(f => f.IsPinned).Select(f => f.FilePath).ToList());
-
-    // Quick Access persistence in partial.
-
-    private void LoadSampleRecentFolders() { /* placeholder */ }
-
-    #region IDisposable
-    public void Dispose()
+    /// <summary>
+    /// Handles changes to the RecentFiles collection from IRecentFilesService.
+    /// </summary>
+    private void OnRecentFilesChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
     {
-        Dispose(true);
-        GC.SuppressFinalize(this);
+        // Reload when the service's list changes
+        LoadRecentFilesFromService();
     }
-    protected virtual void Dispose(bool disposing)
+
+    /// <summary>
+    /// Checks if a file path is pinned (stored in settings).
+    /// </summary>
+    private bool IsPinnedFile(string filePath)
     {
-        if (_disposed) return;
-        _disposed = true;
-        if (disposing)
+        var pinnedFiles = _settingsService.GetSetting<List<string>>("OpenBackstage.PinnedFiles", new List<string>());
+        return pinnedFiles.Contains(filePath, StringComparer.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Saves pinned file paths to settings.
+    /// </summary>
+    private void SavePinnedFiles()
+    {
+        var pinnedFiles = _allRecentFiles
+            .Where(f => f.IsPinned)
+            .Select(f => f.FilePath)
+            .ToList();
+        
+        _settingsService.SetSetting("OpenBackstage.PinnedFiles", pinnedFiles);
+    }
+    
+    /// <summary>
+    /// Saves Quick Access folders to settings.
+    /// </summary>
+    public void SaveQuickAccessFolders()
+    {
+        var folders = QuickAccessFolders
+            .Select(f => f.FolderPath)
+            .ToList();
+        
+        _settingsService.SetSetting("OpenBackstage.QuickAccessFolders", folders);
+    }
+    
+    /// <summary>
+    /// Loads Quick Access folders from settings.
+    /// </summary>
+    private void LoadQuickAccessFolders()
+    {
+        var savedFolders = _settingsService.GetSetting<List<string>>("OpenBackstage.QuickAccessFolders", new List<string>());
+        
+        QuickAccessFolders.Clear();
+        
+        // If no saved folders, use defaults
+        if (savedFolders.Count == 0)
         {
-            _searchCts?.Cancel();
-            _searchCts?.Dispose();
-            _recentFilesService.RecentFiles.CollectionChanged -= OnRecentFilesChanged;
+            LoadDefaultQuickAccessFolders();
+            return;
+        }
+        
+        // Load saved folders
+        foreach (var folderPath in savedFolders)
+        {
+            if (Directory.Exists(folderPath))
+            {
+                var folderName = Path.GetFileName(folderPath);
+                if (string.IsNullOrEmpty(folderName))
+                {
+                    folderName = folderPath; // Use full path for root drives
+                }
+                
+                QuickAccessFolders.Add(new QuickAccessFolder
+                {
+                    FolderName = folderName,
+                    FolderPath = folderPath,
+                    IconGlyph = "\uE8B7"
+                });
+            }
         }
     }
-    ~OpenBackstageViewModel() => Dispose(false);
+    
+    /// <summary>
+    /// Loads default Quick Access folders (Documents, Desktop, Downloads).
+    /// </summary>
+    private void LoadDefaultQuickAccessFolders()
+    {
+        // Use real paths that exist on the system
+        var documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+        var downloadsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
+
+        QuickAccessFolders.Add(new QuickAccessFolder
+        {
+            FolderName = "Documents",
+            FolderPath = documentsPath,
+            IconGlyph = "\uE8B7"
+        });
+
+        QuickAccessFolders.Add(new QuickAccessFolder
+        {
+            FolderName = "Desktop",
+            FolderPath = desktopPath,
+            IconGlyph = "\uE8B7"
+        });
+
+        if (Directory.Exists(downloadsPath))
+        {
+            QuickAccessFolders.Add(new QuickAccessFolder
+            {
+                FolderName = "Downloads",
+                FolderPath = downloadsPath,
+                IconGlyph = "\uE8B7"
+            });
+        }
+        
+        // Save defaults to settings
+        SaveQuickAccessFolders();
+    }
+
+    #endregion
+
+    #region Sample Data Loading
+
+    private void LoadSampleQuickAccessFolders()
+    {
+        LoadQuickAccessFolders();
+    }
+
+    private void LoadSampleRecentFolders()
+    {
+        // TODO: Replace with real IRecentFoldersService when implemented
+        // For now, Recent Folders tab will be empty until service exists
+    }
+
     #endregion
 }

@@ -109,8 +109,13 @@ public class FileCommandsViewModel : BindableBase
             }
         };
 
-        // Default selected module (first available) for convenience
-        _selectedModule = AvailableDocumentModules.FirstOrDefault();
+        // CROSS-MODULE EDIT: 2025-01-20 Task 20 - Project Module Default
+        // Modified for: Set Project Editor as default document type via internal config setting
+        // Related modules: Project (ProjectModule)
+        // Rollback instructions: Remove GetDefaultDocumentModule call, use first available module
+        
+        // Select default module (configurable via settings, defaults to Project Editor)
+        _selectedModule = GetDefaultDocumentModule() ?? AvailableDocumentModules.FirstOrDefault();
     }
 
     /// <summary>
@@ -448,7 +453,27 @@ public class FileCommandsViewModel : BindableBase
     /// <returns>A valid filename (without extension).</returns>
     private string SuggestFileName(IDocument doc)
     {
-        // Use existing title or filename, ensure no invalid characters
+        // CROSS-MODULE EDIT: 2025-01-20 Default Filename Convention
+        // Modified for: Use module's suggested filename if available (e.g., "[LB Project Number] - [Site Name]")
+        // Related modules: Core (IDocumentModule.GetSuggestedFileName), Project (ProjectModule impl)
+        // Rollback instructions: Remove module.GetSuggestedFileName call, restore Title-only logic
+        
+        // Try to get module-specific suggested filename
+        if (doc.OwnerModule is IDocumentModule module)
+        {
+            var suggested = module.GetSuggestedFileName(doc);
+            if (!string.IsNullOrWhiteSpace(suggested))
+            {
+                // Module provided a valid suggestion, sanitize and return
+                foreach (var c in Path.GetInvalidFileNameChars())
+                {
+                    suggested = suggested.Replace(c, '_');
+                }
+                return suggested;
+            }
+        }
+
+        // Fallback to Title-based naming
         var baseName = doc.Title;
         foreach (var c in Path.GetInvalidFileNameChars())
         {
@@ -577,5 +602,59 @@ public class FileCommandsViewModel : BindableBase
 
         // Fallback to first supported extension
         return module.SupportedFileExtensions.FirstOrDefault() ?? "dat";
+    }
+
+    /// <summary>
+    /// Gets the default document module to use for New command.
+    /// </summary>
+    /// <returns>The configured default module, or null if not configured.</returns>
+    /// <remarks>
+    /// <para>
+    /// This is an internal configuration setting not exposed in the Options UI.
+    /// It allows changing the default document type (e.g., from Map to Project)
+    /// without user intervention.
+    /// </para>
+    /// <para>
+    /// <strong>Configuration:</strong>
+    /// Setting key: "FileCommands.DefaultDocumentModule"
+    /// Value: Module name (e.g., "Project Editor", "Map Editor")
+    /// Default: null (uses first available module)
+    /// </para>
+    /// <para>
+    /// <strong>Usage:</strong>
+    /// Set via appsettings.json or programmatically during startup.
+    /// </para>
+    /// </remarks>
+    private IDocumentModule? GetDefaultDocumentModule()
+    {
+        try
+        {
+            // Get configured default module name from settings
+            var defaultModuleName = _settingsService.GetSetting("FileCommands.DefaultDocumentModule", string.Empty);
+            
+            if (string.IsNullOrWhiteSpace(defaultModuleName))
+            {
+                Log.Debug("No default document module configured, will use first available");
+                return null;
+            }
+
+            // Find module by name
+            var defaultModule = AvailableDocumentModules.FirstOrDefault(m => 
+                string.Equals(m.ModuleName, defaultModuleName, StringComparison.OrdinalIgnoreCase));
+
+            if (defaultModule != null)
+            {
+                Log.Information("Default document module set to: {ModuleName}", defaultModuleName);
+                return defaultModule;
+            }
+
+            Log.Warning("Configured default module '{ModuleName}' not found, using first available", defaultModuleName);
+            return null;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to get default document module from settings");
+            return null;
+        }
     }
 }

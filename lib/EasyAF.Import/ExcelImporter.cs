@@ -21,12 +21,12 @@ namespace EasyAF.Import
             var missingRequired = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             _logger.Verbose(nameof(Import), $"--- Excel import started for file: {filePath} ---");
             targetDataSet.SoftwareVersion = mappingConfig.SoftwareVersion;
-            targetDataSet.ArcFlashEntries ??= new Dictionary<(string, string), ArcFlash>();
-            targetDataSet.ShortCircuitEntries ??= new Dictionary<(string, string, string), ShortCircuit>();
-            targetDataSet.LVBreakerEntries ??= new Dictionary<string, LVBreaker>();
-            targetDataSet.FuseEntries ??= new Dictionary<string, Fuse>();
-            targetDataSet.CableEntries ??= new Dictionary<string, Cable>();
-            targetDataSet.BusEntries ??= new Dictionary<string, Bus>();
+            targetDataSet.ArcFlashEntries ??= new Dictionary<CompositeKey, ArcFlash>();
+            targetDataSet.ShortCircuitEntries ??= new Dictionary<CompositeKey, ShortCircuit>();
+            targetDataSet.LVBreakerEntries ??= new Dictionary<CompositeKey, LVBreaker>();
+            targetDataSet.FuseEntries ??= new Dictionary<CompositeKey, Fuse>();
+            targetDataSet.CableEntries ??= new Dictionary<CompositeKey, Cable>();
+            targetDataSet.BusEntries ??= new Dictionary<CompositeKey, Bus>();
             var groupsByType = mappingConfig.ImportMap.GroupBy(m => m.TargetType).ToDictionary(g => g.Key, g => g.ToList());
             var knownHeaders = new HashSet<string>(mappingConfig.ImportMap.Select(m => m.ColumnHeader.Trim()), StringComparer.OrdinalIgnoreCase);
             bool IsHeaderRow(IEnumerable<string> cells) { var arr = cells as string[] ?? cells.ToArray(); return arr.Count(f => knownHeaders.Contains((f ?? string.Empty).Trim())) >= 2; }
@@ -50,23 +50,120 @@ namespace EasyAF.Import
                             for (int i = 0; i < currentHeader.Length; i++)
                             { var h = currentHeader[i]; if (!currentHeaderIndex.ContainsKey(h)) currentHeaderIndex[h] = i + 1; }
                             activeTargetTypes.Clear();
+                            
+                            // SIGNATURE MATCHING: Score each datatype by how many of its expected headers are present
+                            var typeScores = new Dictionary<string, (int matchCount, int totalExpected, double percentage)>();
+                            
                             foreach (var kvp in groupsByType)
                             {
-                                if (kvp.Key.Contains('.')) continue; // skip nested groups here
+                                if (kvp.Key.Contains('.')) continue; // skip nested groups
+
+                                var dataType = kvp.Key;
                                 var mapEntries = kvp.Value;
-                                var idEntry = mapEntries.FirstOrDefault(e => e.PropertyName == "Id");
-                                bool hasIdHeader = idEntry != null && currentHeaderIndex.ContainsKey(idEntry.ColumnHeader.Trim());
-                                if (hasIdHeader) activeTargetTypes.Add(kvp.Key);
-                                else
+                                
+                                // Count how many mapped headers are present in this worksheet
+                                int matchCount = 0;
+                                int keyMatchCount = 0;
+                                int totalExpected = mapEntries.Count;
+                                
+                                // Get key properties for this type
+                                Type? instanceType = dataType switch
                                 {
-                                    // Heuristic: if multiple headers for this type are present but Id is missing, warn for diagnostics
-                                    int presentCount = mapEntries.Count(e => currentHeaderIndex.ContainsKey(e.ColumnHeader.Trim()));
-                                    if (presentCount >= 2)
+                                    "ArcFlash" => typeof(ArcFlash),
+                                    "ShortCircuit" => typeof(ShortCircuit),
+                                    "LVBreaker" => typeof(LVBreaker),
+                                    "Fuse" => typeof(Fuse),
+                                    "Cable" => typeof(Cable),
+                                    "Bus" => typeof(Bus),
+                                    _ => null
+                                };
+
+                                if (instanceType == null) continue;
+                                
+                                var keyProps = CompositeKeyHelper.GetCompositeKeyProperties(instanceType);
+                                
+                                // Count all matching headers and key header matches
+                                foreach (var entry in mapEntries)
+                                {
+                                    if (currentHeaderIndex.ContainsKey(entry.ColumnHeader.Trim()))
                                     {
-                                        _logger.Info(nameof(Import), $"Warning: Detected headers for '{kvp.Key}' but missing Id header '{idEntry?.ColumnHeader}'. Cannot import without Id.");
+                                        matchCount++;
+                                        
+                                        // Check if this is a key property
+                                        if (keyProps.Contains(entry.PropertyName))
+                                        {
+                                            keyMatchCount++;
+                                        }
                                     }
                                 }
+                                
+                                // Calculate match percentage
+                                double percentage = totalExpected > 0 ? (double)matchCount / totalExpected * 100.0 : 0.0;
+                                
+                                typeScores[dataType] = (matchCount, totalExpected, percentage);
+                                
+                                _logger.Verbose(nameof(Import), $"Signature match for '{dataType}': {matchCount}/{totalExpected} headers ({percentage:F1}%), {keyMatchCount}/{keyProps.Length} key headers");
                             }
+                            
+                            // Find the best match (highest match count, with percentage as tiebreaker)
+                            // Require at least one key property match AND at least 30% header overlap
+                            const double MIN_MATCH_THRESHOLD = 30.0;
+                            
+                            var bestMatches = typeScores
+                                .Where(kvp => kvp.Value.percentage >= MIN_MATCH_THRESHOLD)
+                                .OrderByDescending(kvp => kvp.Value.matchCount)
+                                .ThenByDescending(kvp => kvp.Value.percentage)
+                                .ToList();
+                            
+                            if (bestMatches.Any())
+                            {
+                                var bestMatch = bestMatches.First();
+                                var dataType = bestMatch.Key;
+                                var score = bestMatch.Value;
+                                
+                                // Verify the best match has at least one key property
+                                var instanceType = dataType switch
+                                {
+                                    "ArcFlash" => typeof(ArcFlash),
+                                    "ShortCircuit" => typeof(ShortCircuit),
+                                    "LVBreaker" => typeof(LVBreaker),
+                                    "Fuse" => typeof(Fuse),
+                                    "Cable" => typeof(Cable),
+                                    "Bus" => typeof(Bus),
+                                    _ => null
+                                };
+                                
+                                if (instanceType != null)
+                                {
+                                    var keyProps = CompositeKeyHelper.GetCompositeKeyProperties(instanceType);
+                                    var mapEntries = groupsByType[dataType];
+                                    bool hasKeyHeader = keyProps.Any(kp => 
+                                        mapEntries.Any(e => e.PropertyName == kp && 
+                                        currentHeaderIndex.ContainsKey(e.ColumnHeader.Trim())));
+                                    
+                                    if (hasKeyHeader)
+                                    {
+                                        activeTargetTypes.Add(dataType);
+                                        _logger.Info(nameof(Import), $"Best match: '{dataType}' with {score.matchCount}/{score.totalExpected} headers ({score.percentage:F1}%)");
+                                    }
+                                    else
+                                    {
+                                        var keyNames = string.Join(", ", keyProps);
+                                        _logger.Info(nameof(Import), $"Rejected best match '{dataType}' - missing key headers ({keyNames})");
+                                    }
+                                }
+                                
+                                // Log other strong candidates that were not selected
+                                foreach (var candidate in bestMatches.Skip(1).Take(2))
+                                {
+                                    _logger.Verbose(nameof(Import), $"  Candidate: '{candidate.Key}' with {candidate.Value.matchCount}/{candidate.Value.totalExpected} headers ({candidate.Value.percentage:F1}%)");
+                                }
+                            }
+                            else
+                            {
+                                _logger.Info(nameof(Import), $"No datatype matched threshold ({MIN_MATCH_THRESHOLD}%) for worksheet '{ws.Name}'");
+                            }
+                            
                             inKnownSection = activeTargetTypes.Count > 0;
                             _logger.Verbose(nameof(Import), (inKnownSection ? "Activated mapped" : "Skipped unknown") + $" section in worksheet '{ws.Name}' at row {row.RowNumber()} for types: [{string.Join(", ", activeTargetTypes)}]");
                             continue;
@@ -74,7 +171,116 @@ namespace EasyAF.Import
                         if (!inKnownSection) continue;
                         foreach (var targetType in activeTargetTypes.ToList())
                         {
-                            if (!groupsByType.TryGetValue(targetType, out var mapEntries)) continue; var idEntry = mapEntries.FirstOrDefault(e => e.PropertyName == "Id"); if (idEntry == null) continue; if (!currentHeaderIndex.TryGetValue(idEntry.ColumnHeader.Trim(), out int idCol)) continue; var idValue = row.Cell(idCol).GetString()?.Trim(); if (string.IsNullOrWhiteSpace(idValue)) continue; try { switch (targetType) { case "ArcFlash": var af = new ArcFlash(); PopulateObject(af, mapEntries, row, currentHeaderIndex, worksheetMissing, missingRequired, strict); if (!string.IsNullOrWhiteSpace(af.Id) && !string.IsNullOrWhiteSpace(af.Scenario)) { var key = (af.Id, af.Scenario); if (!targetDataSet.ArcFlashEntries.ContainsKey(key)) targetDataSet.ArcFlashEntries[key] = af; else LogDuplicate("ArcFlash"); } break; case "ShortCircuit": var sc = new ShortCircuit(); PopulateObject(sc, mapEntries, row, currentHeaderIndex, worksheetMissing, missingRequired, strict); var bus = sc.GetType().GetProperty("Bus")?.GetValue(sc) as string; var scen = sc.GetType().GetProperty("Scenario")?.GetValue(sc) as string; if (!string.IsNullOrWhiteSpace(sc.Id) && !string.IsNullOrWhiteSpace(bus) && !string.IsNullOrWhiteSpace(scen)) { var key = (sc.Id!, bus!, scen!); if (!targetDataSet.ShortCircuitEntries.ContainsKey(key)) targetDataSet.ShortCircuitEntries[key] = sc; else LogDuplicate("ShortCircuit"); } break; case "LVBreaker": var LVBreaker = new LVBreaker(); PopulateObject(LVBreaker, mapEntries, row, currentHeaderIndex, worksheetMissing, missingRequired, strict); if (!string.IsNullOrWhiteSpace(LVBreaker.Id)) { if (!targetDataSet.LVBreakerEntries.ContainsKey(LVBreaker.Id)) targetDataSet.LVBreakerEntries[LVBreaker.Id] = LVBreaker; else LogDuplicate("LVBreaker"); } break; case "Fuse": var fuse = new Fuse(); PopulateObject(fuse, mapEntries, row, currentHeaderIndex, worksheetMissing, missingRequired, strict); if (!string.IsNullOrWhiteSpace(fuse.Id)) { if (!targetDataSet.FuseEntries.ContainsKey(fuse.Id)) targetDataSet.FuseEntries[fuse.Id] = fuse; else LogDuplicate("Fuse"); } break; case "Cable": var cable = new Cable(); PopulateObject(cable, mapEntries, row, currentHeaderIndex, worksheetMissing, missingRequired, strict); if (!string.IsNullOrWhiteSpace(cable.Id)) { if (!targetDataSet.CableEntries.ContainsKey(cable.Id)) targetDataSet.CableEntries[cable.Id] = cable; else LogDuplicate("Cable"); } break; case "Bus": var busObj = new Bus(); PopulateObject(busObj, mapEntries, row, currentHeaderIndex, worksheetMissing, missingRequired, strict); if (!string.IsNullOrWhiteSpace(busObj.Id)) { if (!targetDataSet.BusEntries.ContainsKey(busObj.Id)) targetDataSet.BusEntries[busObj.Id] = busObj; else LogDuplicate("Bus"); } break; } } catch (Exception ex) { _logger.Error(nameof(Import), $"Exception processing {targetType} in worksheet '{ws.Name}' at row {row.RowNumber()}: {ex.Message}"); } }
+                            if (!groupsByType.TryGetValue(targetType, out var mapEntries)) continue;
+                            
+                            // Get the type for this target
+                            Type? instanceType = targetType switch
+                            {
+                                "ArcFlash" => typeof(ArcFlash),
+                                "ShortCircuit" => typeof(ShortCircuit),
+                                "LVBreaker" => typeof(LVBreaker),
+                                "Fuse" => typeof(Fuse),
+                                "Cable" => typeof(Cable),
+                                "Bus" => typeof(Bus),
+                                _ => null
+                            };
+
+                            if (instanceType == null) continue;
+
+                            // Discover composite key properties for this type
+                            var keyProps = CompositeKeyHelper.GetCompositeKeyProperties(instanceType);
+                            if (keyProps.Length == 0)
+                            {
+                                _logger.Error(nameof(Import), $"No composite key properties found for {targetType} - skipping type");
+                                continue;
+                            }
+
+                            // Check if at least one key property is mapped and has a value in this row
+                            bool hasKeyValue = false;
+                            foreach (var keyProp in keyProps)
+                            {
+                                var keyMapping = mapEntries.FirstOrDefault(e => e.PropertyName == keyProp);
+                                if (keyMapping != null && currentHeaderIndex.TryGetValue(keyMapping.ColumnHeader.Trim(), out int keyCol))
+                                {
+                                    var keyValue = row.Cell(keyCol).GetString()?.Trim();
+                                    if (!string.IsNullOrWhiteSpace(keyValue))
+                                    {
+                                        hasKeyValue = true;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if (!hasKeyValue) continue; // Skip this row if no key values present
+                            
+                            try
+                            {
+                                // Dynamically create instance based on target type
+                                object? instance = Activator.CreateInstance(instanceType);
+                                if (instance == null) continue;
+
+                                // Populate object from Excel using mapping
+                                PopulateObject(instance, mapEntries, row, currentHeaderIndex, worksheetMissing, missingRequired, strict);
+
+                                // Build composite key dynamically using reflection
+                                var key = CompositeKeyHelper.BuildCompositeKey(instance, instanceType);
+                                if (key == null)
+                                {
+                                    _logger.Error(nameof(Import), $"Incomplete composite key for {targetType} at row {row.RowNumber()} - skipped");
+                                    continue;
+                                }
+
+                                // Add to appropriate dictionary based on target type
+                                switch (targetType)
+                                {
+                                    case "ArcFlash":
+                                        if (!targetDataSet.ArcFlashEntries.ContainsKey(key))
+                                            targetDataSet.ArcFlashEntries[key] = (ArcFlash)instance;
+                                        else
+                                            LogDuplicate("ArcFlash");
+                                        break;
+
+                                    case "ShortCircuit":
+                                        if (!targetDataSet.ShortCircuitEntries.ContainsKey(key))
+                                            targetDataSet.ShortCircuitEntries[key] = (ShortCircuit)instance;
+                                        else
+                                            LogDuplicate("ShortCircuit");
+                                        break;
+
+                                    case "LVBreaker":
+                                        if (!targetDataSet.LVBreakerEntries.ContainsKey(key))
+                                            targetDataSet.LVBreakerEntries[key] = (LVBreaker)instance;
+                                        else
+                                            LogDuplicate("LVBreaker");
+                                        break;
+
+                                    case "Fuse":
+                                        if (!targetDataSet.FuseEntries.ContainsKey(key))
+                                            targetDataSet.FuseEntries[key] = (Fuse)instance;
+                                        else
+                                            LogDuplicate("Fuse");
+                                        break;
+
+                                    case "Cable":
+                                        if (!targetDataSet.CableEntries.ContainsKey(key))
+                                            targetDataSet.CableEntries[key] = (Cable)instance;
+                                        else
+                                            LogDuplicate("Cable");
+                                        break;
+
+                                    case "Bus":
+                                        if (!targetDataSet.BusEntries.ContainsKey(key))
+                                            targetDataSet.BusEntries[key] = (Bus)instance;
+                                        else
+                                            LogDuplicate("Bus");
+                                        break;
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.Error(nameof(Import), $"Exception processing {targetType} in worksheet '{ws.Name}' at row {row.RowNumber()}: {ex.Message}");
+                            }
+                        }
                     }
                     if (worksheetMissing.Count > 0) { foreach (var m in worksheetMissing) globalMissing.Add(m); _logger.Error(nameof(Import), $"Missing headers in worksheet '{ws.Name}'", string.Join(", ", worksheetMissing)); }
                 }

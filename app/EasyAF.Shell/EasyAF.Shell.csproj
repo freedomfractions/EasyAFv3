@@ -21,6 +21,9 @@
     <ProjectReference Include="..\..\modules\EasyAF.Modules.Map\EasyAF.Modules.Map.csproj">
       <Private>true</Private> <!-- Ensures DLL is copied to output -->
     </ProjectReference>
+    <ProjectReference Include="..\..\modules\EasyAF.Modules.Project\EasyAF.Modules.Project.csproj">
+      <Private>true</Private> <!-- Ensures DLL is copied to output -->
+    </ProjectReference>
   </ItemGroup>
 
   <ItemGroup>
