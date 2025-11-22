@@ -2,21 +2,28 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using EasyAF.Shell.ViewModels;
+using EasyAF.Core.Contracts;
+using Serilog;
 
 namespace EasyAF.Shell.Styles;
 
 /// <summary>
-/// Code-behind for FileTabStyles.xaml event handlers.
+/// Code-behind for FileTabStyles.xaml.
 /// </summary>
-/// <remarks>
-/// Handles mouse events for file tab items (hover states and group expand/collapse).
-/// </remarks>
-public partial class FileTabStylesEvents
+public partial class FileTabStylesCode : ResourceDictionary
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="FileTabStylesCode"/> class.
+    /// </summary>
+    public FileTabStylesCode()
+    {
+        InitializeComponent();
+    }
+    
     /// <summary>
     /// Handles mouse enter on a file tab item to set hover state.
     /// </summary>
-    public static void FileTabItem_MouseEnter(object sender, MouseEventArgs e)
+    private void FileTabItem_MouseEnter(object sender, MouseEventArgs e)
     {
         if (sender is FrameworkElement element && element.DataContext is FileTabItemViewModel vm)
         {
@@ -27,7 +34,7 @@ public partial class FileTabStylesEvents
     /// <summary>
     /// Handles mouse leave on a file tab item to clear hover state.
     /// </summary>
-    public static void FileTabItem_MouseLeave(object sender, MouseEventArgs e)
+    private void FileTabItem_MouseLeave(object sender, MouseEventArgs e)
     {
         if (sender is FrameworkElement element && element.DataContext is FileTabItemViewModel vm)
         {
@@ -36,14 +43,20 @@ public partial class FileTabStylesEvents
     }
     
     /// <summary>
-    /// Handles click on a file tab group header to toggle expand/collapse.
+    /// Handles click on a file tab item to activate the document.
     /// </summary>
-    public static void FileTabGroup_Click(object sender, MouseButtonEventArgs e)
+    private void FileTabItem_Click(object sender, MouseButtonEventArgs e)
     {
-        if (sender is FrameworkElement element && element.DataContext is FileTabGroupViewModel vm)
+        if (sender is FrameworkElement element && element.DataContext is FileTabItemViewModel vm)
         {
-            vm.IsExpanded = !vm.IsExpanded;
-            e.Handled = true;
+            // Find the MainWindowViewModel by walking up the visual tree
+            var window = Window.GetWindow(element);
+            if (window?.DataContext is MainWindowViewModel mainVm)
+            {
+                mainVm.DocumentManager.ActiveDocument = vm.Document;
+                Log.Debug("File tab clicked: {FileName}", vm.FileName);
+                e.Handled = true;
+            }
         }
     }
 }

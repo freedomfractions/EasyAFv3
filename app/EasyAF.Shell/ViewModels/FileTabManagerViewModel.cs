@@ -102,6 +102,13 @@ public class FileTabManagerViewModel : BindableBase, IDisposable
     {
         FileTabItems.Clear();
         
+        // Don't add anything if there are no documents
+        if (_documentManager.OpenDocuments.Count == 0)
+        {
+            Log.Debug("No documents open, file tab list is empty");
+            return;
+        }
+        
         // Group documents by module
         var groups = _documentManager.OpenDocuments
             .GroupBy(doc => doc.OwnerModule)
@@ -116,7 +123,7 @@ public class FileTabManagerViewModel : BindableBase, IDisposable
             {
                 var tabItem = new FileTabItemViewModel(doc, new DelegateCommand<IDocument>(CloseDocument));
                 
-                // Subscribe to save notifications from document manager
+                // Set active state
                 if (doc == _documentManager.ActiveDocument)
                 {
                     tabItem.IsActive = true;
@@ -126,7 +133,11 @@ public class FileTabManagerViewModel : BindableBase, IDisposable
                 groupVm.Items.Add(tabItem);
             }
             
-            FileTabItems.Add(groupVm);
+            // Only add group if it has items
+            if (groupVm.Items.Count > 0)
+            {
+                FileTabItems.Add(groupVm);
+            }
         }
         
         Log.Debug("Rebuilt file tab list: {GroupCount} groups, {DocCount} documents", 

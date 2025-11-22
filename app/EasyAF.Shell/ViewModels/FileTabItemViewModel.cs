@@ -219,6 +219,18 @@ public class FileTabItemViewModel : BindableBase
     }
     
     /// <summary>
+    /// Gets the status bar brush for WPF binding.
+    /// </summary>
+    public System.Windows.Media.Brush StatusBarBrush
+    {
+        get
+        {
+            var colorString = StatusBarColor;
+            return (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFrom(colorString)!;
+        }
+    }
+    
+    /// <summary>
     /// Gets or sets the internal status color (for green->blue fade).
     /// </summary>
     private string StatusColor
@@ -229,6 +241,7 @@ public class FileTabItemViewModel : BindableBase
             if (SetProperty(ref _statusColor, value))
             {
                 RaisePropertyChanged(nameof(StatusBarColor));
+                RaisePropertyChanged(nameof(StatusBarBrush));
             }
         }
     }
@@ -254,6 +267,7 @@ public class FileTabItemViewModel : BindableBase
         _lastSaved = DateTime.Now;
         StatusColor = "#107C10"; // Green
         RaisePropertyChanged(nameof(LastSavedText));
+        RaisePropertyChanged(nameof(StatusBarBrush));
         
         // Start fade timer
         _savedIndicatorTimer.Stop();
@@ -283,5 +297,7 @@ public class FileTabItemViewModel : BindableBase
                 StatusColor = "#0078D4"; // Blue
             }
         }
+        
+        RaisePropertyChanged(nameof(StatusBarBrush));
     }
 }
