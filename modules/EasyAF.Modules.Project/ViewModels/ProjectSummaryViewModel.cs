@@ -51,6 +51,9 @@ namespace EasyAF.Modules.Project.ViewModels
             ImportNewDataCommand = new DelegateCommand(ExecuteImportNewData);
             ImportOldDataCommand = new DelegateCommand(ExecuteImportOldData);
 
+            // Build initial tree nodes (will be empty if no data loaded)
+            RefreshStatistics();
+
             Log.Debug("ProjectSummaryViewModel initialized");
         }
 
