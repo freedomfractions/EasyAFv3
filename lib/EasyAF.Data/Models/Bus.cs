@@ -22,7 +22,7 @@ public class Bus
     [Category("Identity")]
     [Description("Buses")]
     [Required]
-    public string? Buss { get; set; }
+    public string? Buses { get; set; }
 
     /// <summary>AC/DC (Column: AC/DC)</summary>
     [Category("General")]
@@ -351,13 +351,13 @@ public class Bus
     [Description("Comment")]
     public string? Comment { get; set; }
 
-    /// <summary>Alias for Bus (convenience property for dictionary indexing - not serialized).</summary>
+    /// <summary>Alias for Buses (convenience property for dictionary indexing - not serialized).</summary>
     [System.Text.Json.Serialization.JsonIgnore]
     [Newtonsoft.Json.JsonIgnore]
     public string? Id
     {
-        get => Buss;
-        set => Buss = value;
+        get => Buses;
+        set => Buses = value;
     }
 
     /// <summary>
@@ -370,7 +370,7 @@ public class Bus
     /// </summary>
     public override string ToString()
     {
-        return $"Bus: {Buss}";
+        return $"Bus: {Buses}";
     }
 }
 
