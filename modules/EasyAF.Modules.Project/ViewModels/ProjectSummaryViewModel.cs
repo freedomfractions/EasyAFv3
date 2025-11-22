@@ -468,6 +468,16 @@ namespace EasyAF.Modules.Project.ViewModels
         #region Statistics
 
         /// <summary>
+        /// Gets the tree nodes for New data.
+        /// </summary>
+        public ObservableCollection<DataTypeNodeViewModel> NewDataTreeNodes { get; } = new();
+
+        /// <summary>
+        /// Gets the tree nodes for Old data.
+        /// </summary>
+        public ObservableCollection<DataTypeNodeViewModel> OldDataTreeNodes { get; } = new();
+
+        /// <summary>
         /// Gets the count of buses in New data.
         /// </summary>
         public int NewBusCount => _document.Project.NewData?.BusEntries?.Count ?? 0;
@@ -761,6 +771,17 @@ namespace EasyAF.Modules.Project.ViewModels
         /// </remarks>
         public void RefreshStatistics()
         {
+            // Rebuild tree nodes
+            NewDataTreeNodes.Clear();
+            OldDataTreeNodes.Clear();
+
+            foreach (var node in BuildTreeNodes(_document.Project.NewData))
+                NewDataTreeNodes.Add(node);
+
+            foreach (var node in BuildTreeNodes(_document.Project.OldData))
+                OldDataTreeNodes.Add(node);
+
+            // Legacy flat properties (kept for backward compatibility)
             RaisePropertyChanged(nameof(NewBusCount));
             RaisePropertyChanged(nameof(NewBreakerCount));
             RaisePropertyChanged(nameof(NewFuseCount));
@@ -886,6 +907,95 @@ namespace EasyAF.Modules.Project.ViewModels
             {
                 Log.Debug("{Target} Data: No scenarios discovered (non-scenario data types only)", target);
             }
+        }
+
+        #endregion
+
+        #region Tree Building
+
+        /// <summary>
+        /// Builds tree nodes from DataSet statistics.
+        /// </summary>
+        /// <param name="dataSet">The DataSet to analyze.</param>
+        /// <returns>Observable collection of root-level tree nodes.</returns>
+        private ObservableCollection<DataTypeNodeViewModel> BuildTreeNodes(DataSet? dataSet)
+        {
+            var nodes = new ObservableCollection<DataTypeNodeViewModel>();
+
+            if (dataSet == null)
+                return nodes;
+
+            var stats = dataSet.GetStatisticsByScenario();
+
+            // Sort data types: scenario-based types first, then simple types
+            var scenarioTypes = stats.Where(kvp => !kvp.Value.ContainsKey("(All)")).OrderBy(kvp => kvp.Key);
+            var simpleTypes = stats.Where(kvp => kvp.Value.ContainsKey("(All)")).OrderBy(kvp => kvp.Key);
+
+            // Add scenario-based types (Arc Flash, Short Circuit)
+            foreach (var kvp in scenarioTypes)
+            {
+                var dataTypeName = kvp.Key;
+                var scenarioCounts = kvp.Value;
+                var totalCount = scenarioCounts.Values.Sum();
+
+                var node = new DataTypeNodeViewModel
+                {
+                    DataTypeName = dataTypeName,
+                    DisplayName = $"{GetFriendlyName(dataTypeName)} ({totalCount})",
+                    Count = totalCount,
+                    IsScenariosUniform = dataSet.IsScenariosUniform(dataTypeName)
+                };
+
+                // Add child nodes for each scenario
+                foreach (var scenario in scenarioCounts.OrderBy(s => s.Key))
+                {
+                    node.Children.Add(new DataTypeNodeViewModel
+                    {
+                        DataTypeName = dataTypeName,
+                        ScenarioName = scenario.Key,
+                        DisplayName = $"{scenario.Key} ({scenario.Value})",
+                        Count = scenario.Value
+                    });
+                }
+
+                nodes.Add(node);
+            }
+
+            // Add simple types (Bus, LVCB, Fuse, etc.)
+            foreach (var kvp in simpleTypes)
+            {
+                var dataTypeName = kvp.Key;
+                var count = kvp.Value["(All)"];
+
+                nodes.Add(new DataTypeNodeViewModel
+                {
+                    DataTypeName = dataTypeName,
+                    DisplayName = $"{GetFriendlyName(dataTypeName)} ({count})",
+                    Count = count
+                });
+            }
+
+            return nodes;
+        }
+
+        /// <summary>
+        /// Converts internal data type names to user-friendly display names.
+        /// </summary>
+        private string GetFriendlyName(string dataTypeName)
+        {
+            return dataTypeName switch
+            {
+                "ArcFlash" => "Arc Flash",
+                "ShortCircuit" => "Short Circuit",
+                "LVCB" => "Breakers",
+                "HVBreaker" => "HV Breakers",
+                "Transformer2W" => "2-Winding Transformers",
+                "Transformer3W" => "3-Winding Transformers",
+                "TransmissionLine" => "Transmission Lines",
+                "CLReactor" => "Current Limiting Reactors",
+                "ZigzagTransformer" => "Zigzag Transformers",
+                _ => dataTypeName // Use as-is for others (Bus, Fuse, Cable, etc.)
+            };
         }
 
         #endregion
