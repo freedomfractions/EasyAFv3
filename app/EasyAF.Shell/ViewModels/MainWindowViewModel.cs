@@ -44,6 +44,7 @@ public class MainWindowViewModel : BindableBase
     private readonly IUserDialogService _dialogService;
     private readonly ISettingsService _settingsService;
     private readonly IContainerProvider _container;
+    private bool _isFileTabStripVisible = true;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MainWindowViewModel"/> class.
@@ -89,6 +90,9 @@ public class MainWindowViewModel : BindableBase
         OpenSettingsCommand = new DelegateCommand(OpenSettings);
         OpenHelpCommand = new DelegateCommand(OpenHelp);
         OpenAboutCommand = new DelegateCommand(OpenAbout);
+        
+        // File tab strip toggle command
+        ToggleFileTabStripCommand = new DelegateCommand(ToggleFileTabStrip);
 
         // Shell-level document commands
         CloseActiveCommand = new DelegateCommand(() => CloseDocument(SelectedDocument), () => SelectedDocument != null)
@@ -683,4 +687,44 @@ public class MainWindowViewModel : BindableBase
     /// This property is bound to the Backstage "New" tab and provides file operation commands.
     /// </remarks>
     public FileCommandsViewModel FileCommands { get; }
+    
+    /// <summary>
+    /// Gets or sets whether the file tab strip is visible.
+    /// </summary>
+    public bool IsFileTabStripVisible
+    {
+        get => _isFileTabStripVisible;
+        set
+        {
+            if (SetProperty(ref _isFileTabStripVisible, value))
+            {
+                RaisePropertyChanged(nameof(FileTabStripChevronGlyph));
+                RaisePropertyChanged(nameof(FileTabStripToggleTooltip));
+            }
+        }
+    }
+    
+    /// <summary>
+    /// Gets the chevron glyph for the file tab strip toggle button.
+    /// </summary>
+    public string FileTabStripChevronGlyph => IsFileTabStripVisible ? "\uE76C" : "\uE76B"; // ChevronRight : ChevronLeft
+    
+    /// <summary>
+    /// Gets the tooltip text for the file tab strip toggle button.
+    /// </summary>
+    public string FileTabStripToggleTooltip => IsFileTabStripVisible ? "Hide file list" : "Show file list";
+    
+    /// <summary>
+    /// Gets the command to toggle the file tab strip visibility.
+    /// </summary>
+    public ICommand ToggleFileTabStripCommand { get; }
+    
+    /// <summary>
+    /// Toggles the file tab strip visibility.
+    /// </summary>
+    private void ToggleFileTabStrip()
+    {
+        IsFileTabStripVisible = !IsFileTabStripVisible;
+        Log.Debug("File tab strip visibility toggled: {Visible}", IsFileTabStripVisible);
+    }
 }
