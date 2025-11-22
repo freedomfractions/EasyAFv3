@@ -342,7 +342,7 @@
                                 <Setter Property="FontSize" Value="13"/>
                                 <Setter Property="Padding" Value="12,12,12,8"/>
                                 <Setter Property="BorderThickness" Value="0"/>
-                                <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                                <Setter Property="HorizontalContentAlignment" Value="Center"/>
                             </Style>
                             
                             <!-- Row Style - transparent, child rows handled by cell templates -->
@@ -388,9 +388,30 @@
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Grid>
-                                            <!-- Shaded background for child rows only (no border) -->
-                                            <Border Background="{DynamicResource SecondaryBackgroundBrush}"
-                                                    Visibility="{Binding IsRootRow, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
+                                            <!-- Custom drawn border container with shaded backgrounds for children -->
+                                            <Grid Margin="0">
+                                                <!-- First child: top border with rounded top corners + shaded background -->
+                                                <Border Visibility="{Binding IsFirstChild, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                        Background="{DynamicResource SecondaryBackgroundBrush}"
+                                                        BorderBrush="{DynamicResource ControlBorderBrush}"
+                                                        BorderThickness="1,1,1,0"
+                                                        CornerRadius="4,4,0,0"
+                                                        Margin="0,3,0,0"/>
+                                                
+                                                <!-- Middle child: left/right borders only + shaded background -->
+                                                <Border Visibility="{Binding IsMiddleChild, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                        Background="{DynamicResource SecondaryBackgroundBrush}"
+                                                        BorderBrush="{DynamicResource ControlBorderBrush}"
+                                                        BorderThickness="1,0,1,0"/>
+                                                
+                                                <!-- Last child: bottom border with rounded bottom corners + shaded background -->
+                                                <Border Visibility="{Binding IsLastChild, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                        Background="{DynamicResource SecondaryBackgroundBrush}"
+                                                        BorderBrush="{DynamicResource ControlBorderBrush}"
+                                                        BorderThickness="1,0,1,1"
+                                                        CornerRadius="0,0,4,4"
+                                                        Margin="0,0,0,3"/>
+                                            </Grid>
                                             
                                             <StackPanel Orientation="Horizontal" Margin="12,6">
                                                 <!-- Indentation for child rows -->
