@@ -118,9 +118,12 @@ namespace EasyAF.Data.Extensions
             if (dataSet == null)
                 return result;
 
-            // Scenario-based types
-            AddScenarioBasedStatistics(result, "ArcFlash", dataSet.ArcFlashEntries?.Keys, scenarioComponentIndex: 1);
-            AddScenarioBasedStatistics(result, "ShortCircuit", dataSet.ShortCircuitEntries?.Keys, scenarioComponentIndex: 2);
+            // Scenario-based types - check if dictionaries exist and have entries
+            if (dataSet.ArcFlashEntries != null && dataSet.ArcFlashEntries.Count > 0)
+                AddScenarioBasedStatistics(result, "ArcFlash", dataSet.ArcFlashEntries?.Keys, scenarioComponentIndex: 1);
+            
+            if (dataSet.ShortCircuitEntries != null && dataSet.ShortCircuitEntries.Count > 0)
+                AddScenarioBasedStatistics(result, "ShortCircuit", dataSet.ShortCircuitEntries?.Keys, scenarioComponentIndex: 2);
 
             // Non-scenario types (simple dictionaries)
             AddSimpleStatistics(result, "Bus", dataSet.BusEntries?.Count);
