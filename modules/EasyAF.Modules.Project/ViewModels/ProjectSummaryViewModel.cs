@@ -784,6 +784,21 @@ namespace EasyAF.Modules.Project.ViewModels
         /// </remarks>
         public void RefreshStatistics()
         {
+            // Debug logging to diagnose load issues
+            Log.Debug("RefreshStatistics called. NewData null: {NewDataNull}, OldData null: {OldDataNull}", 
+                _document.Project.NewData == null, 
+                _document.Project.OldData == null);
+            
+            if (_document.Project.NewData != null)
+            {
+                Log.Debug("NewData stats - Arc Flash: {AF}, Short Circuit: {SC}, Buses: {Bus}, Breakers: {BR}, Fuses: {F}",
+                    _document.Project.NewData.ArcFlashEntries?.Count ?? 0,
+                    _document.Project.NewData.ShortCircuitEntries?.Count ?? 0,
+                    _document.Project.NewData.BusEntries?.Count ?? 0,
+                    _document.Project.NewData.LVBreakerEntries?.Count ?? 0,
+                    _document.Project.NewData.FuseEntries?.Count ?? 0);
+            }
+
             // Rebuild table rows (new unified view)
             DataStatisticsRows.Clear();
             foreach (var row in BuildStatisticsRows(_document.Project.NewData, _document.Project.OldData))

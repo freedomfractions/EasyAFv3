@@ -78,6 +78,30 @@ namespace EasyAF.Modules.Project.ViewModels
         }
 
         /// <summary>
+        /// Gets the foreground brush for Delta based on value.
+        /// </summary>
+        public string DeltaForeground
+        {
+            get
+            {
+                if (Delta > 0) return "SuccessBrush";
+                if (Delta < 0) return "ErrorBrush";
+                return "TextSecondaryBrush";
+            }
+        }
+
+        /// <summary>
+        /// Gets the font weight for Delta (SemiBold if changed, Normal if unchanged).
+        /// </summary>
+        public string DeltaFontWeight
+        {
+            get
+            {
+                return Delta != 0 ? "SemiBold" : "Normal";
+            }
+        }
+
+        /// <summary>
         /// Gets whether this row has child scenarios.
         /// </summary>
         public bool HasChildren => Children.Count > 0;

@@ -48,4 +48,31 @@ namespace EasyAF.Modules.Project.Converters
             throw new NotImplementedException();
         }
     }
+
+    /// <summary>
+    /// Compares a numeric value against zero using the specified operator.
+    /// Parameter: '>' for greater than, '<' for less than
+    /// </summary>
+    public class ComparisonConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is int intValue && parameter is string op)
+            {
+                return op switch
+                {
+                    ">" => intValue > 0,
+                    "<" => intValue < 0,
+                    "=" => intValue == 0,
+                    _ => false
+                };
+            }
+            return false;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }
