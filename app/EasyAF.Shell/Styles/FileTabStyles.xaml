@@ -1,8 +1,7 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:vm="clr-namespace:EasyAF.Shell.ViewModels"
-                    xmlns:local="clr-namespace:EasyAF.Shell.Styles"
-                    x:Class="EasyAF.Shell.Styles.FileTabStylesCode">
+                    xmlns:behaviors="clr-namespace:EasyAF.Shell.Behaviors">
     
     <!-- CROSS-MODULE EDIT: 2025-01-20 Vertical File Tab System -->
     <!-- Modified for: Add styles and templates for vertical file tab strip -->
@@ -84,9 +83,7 @@
     <!-- File Tab Item DataTemplate -->
     <DataTemplate x:Key="FileTabItemTemplate" DataType="{x:Type vm:FileTabItemViewModel}">
         <Border Style="{StaticResource FileTabItemStyle}"
-                MouseEnter="FileTabItem_MouseEnter"
-                MouseLeave="FileTabItem_MouseLeave"
-                MouseLeftButtonDown="FileTabItem_Click">
+                behaviors:FileTabBehavior.EnableFileTabBehavior="True">
             
             <Grid Height="72">
                 <Grid.ColumnDefinitions>

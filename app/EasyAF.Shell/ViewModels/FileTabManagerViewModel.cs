@@ -102,6 +102,8 @@ public class FileTabManagerViewModel : BindableBase, IDisposable
     {
         FileTabItems.Clear();
         
+        Log.Debug("RebuildFileTabList called. Document count: {Count}", _documentManager.OpenDocuments.Count);
+        
         // Don't add anything if there are no documents
         if (_documentManager.OpenDocuments.Count == 0)
         {
@@ -114,6 +116,8 @@ public class FileTabManagerViewModel : BindableBase, IDisposable
             .GroupBy(doc => doc.OwnerModule)
             .OrderBy(g => g.Key.ModuleName)
             .ToList();
+        
+        Log.Debug("Grouped documents into {GroupCount} groups", groups.Count);
         
         foreach (var group in groups)
         {
@@ -131,12 +135,14 @@ public class FileTabManagerViewModel : BindableBase, IDisposable
                 }
                 
                 groupVm.Items.Add(tabItem);
+                Log.Debug("Added tab item: {FileName}", tabItem.FileName);
             }
             
             // Only add group if it has items
             if (groupVm.Items.Count > 0)
             {
                 FileTabItems.Add(groupVm);
+                Log.Debug("Added group: {GroupName} with {ItemCount} items", groupVm.Header, groupVm.Items.Count);
             }
         }
         
