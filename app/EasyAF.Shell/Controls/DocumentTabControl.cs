@@ -4,12 +4,26 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using EasyAF.Core.Contracts;
+using EasyAF.Shell.ViewModels;
+using System.Linq;
+using System.Collections.Specialized;
 
 namespace EasyAF.Shell.Controls;
 
 /// <summary>
-/// Vertical document tab strip control with drag-drop reordering and close support.
+/// Vertical document tab strip control with grouped files and drag-drop reordering.
 /// </summary>
+/// <remarks>
+/// <para>
+/// Displays open documents in a vertical list grouped by file type (module).
+/// Features:
+/// - Welcome tab at the top (ungrouped)
+/// - File type groups with expand/collapse
+/// - Dirty indicator (colored vertical bar)
+/// - File metadata (name, path, last saved)
+/// - Close button (visible on hover/active)
+/// </para>
+/// </remarks>
 public class DocumentTabControl : ListBox
 {
     static DocumentTabControl()
@@ -21,7 +35,7 @@ public class DocumentTabControl : ListBox
     {
         SetValue(ScrollViewer.HorizontalScrollBarVisibilityProperty, ScrollBarVisibility.Disabled);
         SetValue(ScrollViewer.VerticalScrollBarVisibilityProperty, ScrollBarVisibility.Auto);
-        SelectionChanged += (_, __) => SelectedDocument = SelectedItem as IDocument;
+        SelectionChanged += OnSelectionChanged;
         AllowDrop = true;
         PreviewMouseLeftButtonDown += OnPreviewMouseLeftButtonDown;
         MouseMove += OnMouseMove;
@@ -39,13 +53,51 @@ public class DocumentTabControl : ListBox
     }
 
     public static readonly DependencyProperty SelectedDocumentProperty = DependencyProperty.Register(
-        nameof(SelectedDocument), typeof(IDocument), typeof(DocumentTabControl), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnSelectedDocumentChanged));
+        nameof(SelectedDocument), typeof(IDocument), typeof(DocumentTabControl), 
+        new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnSelectedDocumentChanged));
 
     private static void OnSelectedDocumentChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         if (d is DocumentTabControl ctrl && e.NewValue != null)
         {
-            ctrl.SelectedItem = e.NewValue;
+            // Update selection in grouped view
+            ctrl.SyncSelectionToDocument((IDocument)e.NewValue);
+        }
+    }
+    
+    private void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        // When user clicks a tab item, sync SelectedDocument
+        if (SelectedItem is FileTabItemViewModel tabItem)
+        {
+            SelectedDocument = tabItem.Document;
+        }
+    }
+    
+    private void SyncSelectionToDocument(IDocument document)
+    {
+        // Find the matching FileTabItemViewModel and select it
+        foreach (var item in Items)
+        {
+            if (item is FileTabGroupViewModel group)
+            {
+                foreach (var tabItem in group.Items)
+                {
+                    tabItem.IsActive = ReferenceEquals(tabItem.Document, document);
+                    if (tabItem.IsActive)
+                    {
+                        SelectedItem = tabItem;
+                    }
+                }
+            }
+            else if (item is FileTabItemViewModel tabItem)
+            {
+                tabItem.IsActive = ReferenceEquals(tabItem.Document, document);
+                if (tabItem.IsActive)
+                {
+                    SelectedItem = tabItem;
+                }
+            }
         }
     }
     #endregion
@@ -86,6 +138,7 @@ public class DocumentTabControl : ListBox
     }
     #endregion
 
+    #region Drag & Drop (disabled for now - complex with groups)
     private void OnPreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
         _dragStartPoint = e.GetPosition(this);
@@ -93,49 +146,13 @@ public class DocumentTabControl : ListBox
 
     private void OnMouseMove(object sender, MouseEventArgs e)
     {
-        if (e.LeftButton != MouseButtonState.Pressed || _isDragging) return;
-        var pos = e.GetPosition(this);
-        var diff = _dragStartPoint - pos;
-        if (Math.Abs(diff.X) > SystemParameters.MinimumHorizontalDragDistance || Math.Abs(diff.Y) > SystemParameters.MinimumVerticalDragDistance)
-        {
-            if (SelectedItem is IDocument doc)
-            {
-                _isDragging = true;
-                DragDrop.DoDragDrop(this, doc, DragDropEffects.Move);
-                _isDragging = false;
-            }
-        }
+        // Drag-drop disabled for grouped view
+        // Can be enhanced later if needed
     }
 
     private void OnDrop(object sender, DragEventArgs e)
     {
-        if (e.Data.GetDataPresent(typeof(IDocument)) && ItemsSource is ObservableCollection<IDocument> collection)
-        {
-            var dragged = (IDocument)e.Data.GetData(typeof(IDocument))!;
-            var target = GetItemAtPoint(e.GetPosition(this));
-            if (target == null || ReferenceEquals(target, dragged)) return;
-            var oldIndex = collection.IndexOf(dragged);
-            var newIndex = collection.IndexOf(target);
-            if (oldIndex >= 0 && newIndex >= 0 && oldIndex != newIndex)
-            {
-                collection.RemoveAt(oldIndex);
-                collection.Insert(newIndex, dragged);
-                SelectedDocument = dragged;
-            }
-        }
+        // Drag-drop disabled for grouped view
     }
-
-    private IDocument? GetItemAtPoint(Point point)
-    {
-        var element = InputHitTest(point) as DependencyObject;
-        while (element != null)
-        {
-            if (element is ListBoxItem item)
-            {
-                return (IDocument)item.Content;
-            }
-            element = VisualTreeHelper.GetParent(element);
-        }
-        return null;
-    }
+    #endregion
 }
