@@ -616,7 +616,7 @@ namespace EasyAF.Engine
         private static readonly System.Collections.Concurrent.ConcurrentDictionary<Type, Dictionary<string, Func<object, object?>>> _accessorCache = new();
         private static Dictionary<string, Func<object, object?>> BuildAccessors(Type t)
         {
-            var dict = new Dictionary<string, Func<object, object?>(StringComparer.OrdinalIgnoreCase);
+            var dict = new Dictionary<string, Func<object, object?>>(StringComparer.OrdinalIgnoreCase);
             foreach (var pi in t.GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
                 if (!pi.CanRead) continue;

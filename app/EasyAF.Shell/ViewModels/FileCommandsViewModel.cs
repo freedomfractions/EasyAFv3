@@ -453,7 +453,27 @@ public class FileCommandsViewModel : BindableBase
     /// <returns>A valid filename (without extension).</returns>
     private string SuggestFileName(IDocument doc)
     {
-        // Use existing title or filename, ensure no invalid characters
+        // CROSS-MODULE EDIT: 2025-01-20 Default Filename Convention
+        // Modified for: Use module's suggested filename if available (e.g., "[LB Project Number] - [Site Name]")
+        // Related modules: Core (IDocumentModule.GetSuggestedFileName), Project (ProjectModule impl)
+        // Rollback instructions: Remove module.GetSuggestedFileName call, restore Title-only logic
+        
+        // Try to get module-specific suggested filename
+        if (doc.OwnerModule is IDocumentModule module)
+        {
+            var suggested = module.GetSuggestedFileName(doc);
+            if (!string.IsNullOrWhiteSpace(suggested))
+            {
+                // Module provided a valid suggestion, sanitize and return
+                foreach (var c in Path.GetInvalidFileNameChars())
+                {
+                    suggested = suggested.Replace(c, '_');
+                }
+                return suggested;
+            }
+        }
+
+        // Fallback to Title-based naming
         var baseName = doc.Title;
         foreach (var c in Path.GetInvalidFileNameChars())
         {

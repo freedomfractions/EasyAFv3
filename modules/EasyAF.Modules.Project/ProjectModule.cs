@@ -208,6 +208,52 @@ namespace EasyAF.Modules.Project
         }
 
         /// <summary>
+        /// Gets a suggested filename for the document based on its content.
+        /// </summary>
+        /// <param name="document">The document to suggest a filename for.</param>
+        /// <returns>
+        /// Filename in format "[LB Project Number] - [Site Name]" if both are present,
+        /// otherwise returns null to use default Title-based naming.
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// This implements the Project module's default naming convention:
+        /// <strong>[LB Project Number] - [Site Name]</strong>
+        /// </para>
+        /// <para>
+        /// Examples:
+        /// - "12345 - Acme Manufacturing Plant"
+        /// - "LB-2024-001 - Downtown Distribution Center"
+        /// </para>
+        /// <para>
+        /// If either field is missing, returns null so the shell falls back to document.Title.
+        /// </para>
+        /// </remarks>
+        public string? GetSuggestedFileName(IDocument document)
+        {
+            if (document is not ProjectDocument projectDoc)
+                return null;
+
+            var projectNumber = projectDoc.Project?.LBProjectNumber?.Trim();
+            var siteName = projectDoc.Project?.SiteName?.Trim();
+
+            // Both fields must be present for the naming convention
+            if (string.IsNullOrWhiteSpace(projectNumber) || string.IsNullOrWhiteSpace(siteName))
+                return null;
+
+            // Combine with hyphen separator
+            var suggested = $"{projectNumber} - {siteName}";
+
+            // Sanitize for filesystem (remove invalid characters)
+            foreach (var c in System.IO.Path.GetInvalidFileNameChars())
+            {
+                suggested = suggested.Replace(c, '_');
+            }
+
+            return suggested;
+        }
+
+        /// <summary>
         /// Shuts down the module and releases resources.
         /// </summary>
         public void Shutdown()
