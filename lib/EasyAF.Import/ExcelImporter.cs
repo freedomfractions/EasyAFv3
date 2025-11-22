@@ -21,12 +21,12 @@ namespace EasyAF.Import
             var missingRequired = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             _logger.Verbose(nameof(Import), $"--- Excel import started for file: {filePath} ---");
             targetDataSet.SoftwareVersion = mappingConfig.SoftwareVersion;
-            targetDataSet.ArcFlashEntries ??= new Dictionary<(string, string), ArcFlash>();
-            targetDataSet.ShortCircuitEntries ??= new Dictionary<(string, string, string), ShortCircuit>();
-            targetDataSet.LVBreakerEntries ??= new Dictionary<string, LVBreaker>();
-            targetDataSet.FuseEntries ??= new Dictionary<string, Fuse>();
-            targetDataSet.CableEntries ??= new Dictionary<string, Cable>();
-            targetDataSet.BusEntries ??= new Dictionary<string, Bus>();
+            targetDataSet.ArcFlashEntries ??= new Dictionary<CompositeKey, ArcFlash>();
+            targetDataSet.ShortCircuitEntries ??= new Dictionary<CompositeKey, ShortCircuit>();
+            targetDataSet.LVBreakerEntries ??= new Dictionary<CompositeKey, LVBreaker>();
+            targetDataSet.FuseEntries ??= new Dictionary<CompositeKey, Fuse>();
+            targetDataSet.CableEntries ??= new Dictionary<CompositeKey, Cable>();
+            targetDataSet.BusEntries ??= new Dictionary<CompositeKey, Bus>();
             var groupsByType = mappingConfig.ImportMap.GroupBy(m => m.TargetType).ToDictionary(g => g.Key, g => g.ToList());
             var knownHeaders = new HashSet<string>(mappingConfig.ImportMap.Select(m => m.ColumnHeader.Trim()), StringComparer.OrdinalIgnoreCase);
             bool IsHeaderRow(IEnumerable<string> cells) { var arr = cells as string[] ?? cells.ToArray(); return arr.Count(f => knownHeaders.Contains((f ?? string.Empty).Trim())) >= 2; }

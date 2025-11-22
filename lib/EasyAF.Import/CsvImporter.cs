@@ -39,11 +39,11 @@ namespace EasyAF.Import
                 _logger.Error(nameof(Import), $"VersionMismatch: Dataset SoftwareVersion '{targetDataSet.SoftwareVersion}' differs from Mapping SoftwareVersion '{mappingConfig.SoftwareVersion}'");
 
             // Ensure dataset dictionaries are initialized
-            targetDataSet.ArcFlashEntries ??= new Dictionary<(string, string), ArcFlash>();
-            targetDataSet.ShortCircuitEntries ??= new Dictionary<(string, string, string), ShortCircuit>();
-            targetDataSet.LVBreakerEntries ??= new Dictionary<string, LVBreaker>();
-            targetDataSet.FuseEntries ??= new Dictionary<string, Fuse>();
-            targetDataSet.CableEntries ??= new Dictionary<string, Cable>();
+            targetDataSet.ArcFlashEntries ??= new Dictionary<CompositeKey, ArcFlash>();
+            targetDataSet.ShortCircuitEntries ??= new Dictionary<CompositeKey, ShortCircuit>();
+            targetDataSet.LVBreakerEntries ??= new Dictionary<CompositeKey, LVBreaker>();
+            targetDataSet.FuseEntries ??= new Dictionary<CompositeKey, Fuse>();
+            targetDataSet.CableEntries ??= new Dictionary<CompositeKey, Cable>();
 
             using var reader = new StreamReader(filePath);
             using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);

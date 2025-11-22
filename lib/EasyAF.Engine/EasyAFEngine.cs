@@ -350,15 +350,11 @@ namespace EasyAF.Engine
             if (td.Id.StartsWith("Bus", StringComparison.OrdinalIgnoreCase))
                 return BuildDiffFor(td, ctx, ctx.NewData.BusEntries, ctx.OldData.BusEntries);
             
-            // Composite key types
+            // Composite key types - convert CompositeKey to string for dictionary
             if (td.Id.StartsWith("ShortCircuit", StringComparison.OrdinalIgnoreCase)) 
-                return BuildDiffForComposite(td, ctx,
-                    ctx.NewData.ShortCircuitEntries == null ? null : ctx.NewData.ShortCircuitEntries.ToDictionary(k => CompositeKey(k.Key), v => v.Value, StringComparer.OrdinalIgnoreCase),
-                    ctx.OldData?.ShortCircuitEntries == null ? null : ctx.OldData.ShortCircuitEntries.ToDictionary(k => CompositeKey(k.Key), v => v.Value, StringComparer.OrdinalIgnoreCase));
+                return BuildDiffFor(td, ctx, ctx.NewData.ShortCircuitEntries, ctx.OldData?.ShortCircuitEntries);
             if (td.Id.StartsWith("ArcFlash", StringComparison.OrdinalIgnoreCase)) 
-                return BuildDiffForComposite(td, ctx,
-                    ctx.NewData.ArcFlashEntries == null ? null : ctx.NewData.ArcFlashEntries.ToDictionary(k => CompositeKey(k.Key), v => v.Value, StringComparer.OrdinalIgnoreCase),
-                    ctx.OldData?.ArcFlashEntries == null ? null : ctx.OldData.ArcFlashEntries.ToDictionary(k => CompositeKey(k.Key), v => v.Value, StringComparer.OrdinalIgnoreCase));
+                return BuildDiffFor(td, ctx, ctx.NewData.ArcFlashEntries, ctx.OldData?.ArcFlashEntries);
             
             // === Extended Equipment Types (Alphabetically) ===
             if (td.Id.StartsWith("AFD", StringComparison.OrdinalIgnoreCase))
@@ -421,17 +417,16 @@ namespace EasyAF.Engine
             return new List<string[]>();
         }
 
-        private static string CompositeKey(object keyTuple) => keyTuple.ToString() ?? string.Empty;
+        private static string CompositeKeyToString(CompositeKey key) => key.ToString() ?? string.Empty;
 
-        private List<string[]> BuildDiffForComposite<T>(TableDefinition td, ProjectContext ctx, IDictionary<string, T>? newMapRaw, IDictionary<string, T>? oldMapRaw)
-            => BuildDiffFor(td, ctx, newMapRaw, oldMapRaw);
-
-        private List<string[]> BuildDiffFor<T>(TableDefinition td, ProjectContext ctx, IDictionary<string, T>? newMapRaw, IDictionary<string, T>? oldMapRaw)
+        private List<string[]> BuildDiffFor<T>(TableDefinition td, ProjectContext ctx, IDictionary<CompositeKey, T>? newMapRaw, IDictionary<CompositeKey, T>? oldMapRaw)
         {
             var rows = new List<string[]>();
-            var newMap = newMapRaw ?? new Dictionary<string, T>();
-            var oldMap = oldMapRaw ?? new Dictionary<string, T>();
-            var keys = new HashSet<string>(newMap.Keys, StringComparer.OrdinalIgnoreCase); foreach (var k in oldMap.Keys) keys.Add(k);
+            var newMap = newMapRaw ?? new Dictionary<CompositeKey, T>();
+            var oldMap = oldMapRaw ?? new Dictionary<CompositeKey, T>();
+            var keys = new HashSet<CompositeKey>(newMap.Keys);
+            foreach (var k in oldMap.Keys) keys.Add(k);
+            
             foreach (var key in keys)
             {
                 newMap.TryGetValue(key, out var newObj); oldMap.TryGetValue(key, out var oldObj);
@@ -621,7 +616,7 @@ namespace EasyAF.Engine
         private static readonly System.Collections.Concurrent.ConcurrentDictionary<Type, Dictionary<string, Func<object, object?>>> _accessorCache = new();
         private static Dictionary<string, Func<object, object?>> BuildAccessors(Type t)
         {
-            var dict = new Dictionary<string, Func<object, object?>>(StringComparer.OrdinalIgnoreCase);
+            var dict = new Dictionary<string, Func<object, object?>(StringComparer.OrdinalIgnoreCase);
             foreach (var pi in t.GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
                 if (!pi.CanRead) continue;
@@ -1067,54 +1062,16 @@ namespace EasyAF.Engine
                                 }
                             }
                         }
-                        var colDef = def.Columns[ci];
-                        if (colDef.Conditions!=null)
-                        {
-                            foreach (var c in colDef.Conditions)
-                            {
-                                if (EasyAFEngine.EvalCellCondition(c, cellText, source))
-                                {
-                                    if (c.ApplyToRow)
-                                    {
-                                        if (c.Target.Equals("Fill", System.StringComparison.OrdinalIgnoreCase) || c.Target.Equals("Both", System.StringComparison.OrdinalIgnoreCase)) { rowFill = fill = c.Fill; }
-                                        if (!string.IsNullOrWhiteSpace(c.TextColor) && (c.Target.Equals("Text", System.StringComparison.OrdinalIgnoreCase) || c.Target.Equals("Both", System.StringComparison.OrdinalIgnoreCase))) { rowColor = tcolor = c.TextColor; }
-                                    }
-                                    else
-                                    {
-                                        if (c.Target.Equals("Fill", System.StringComparison.OrdinalIgnoreCase) || c.Target.Equals("Both", System.StringComparison.OrdinalIgnoreCase)) fill = c.Fill;
-                                        if (!string.IsNullOrWhiteSpace(c.TextColor) && (c.Target.Equals("Text", System.StringComparison.OrdinalIgnoreCase) || c.Target.Equals("Both", System.StringComparison.OrdinalIgnoreCase))) tcolor = c.TextColor;
-                                    }
-                                    break;
-                                }
-                            }
-                        }
-                        try {
-                            fillRow.Add(rowFill ?? fill);
-                            colorRow.Add(rowColor ?? tcolor);
-                        } catch (Exception ex) { throw new TemplatePopulationException("Cell processing failed", ex, def.Id, ci); }
+                        fillRow.Add(fill);
+                        colorRow.Add(tcolor);
                     }
-                    fills.Add(fillRow); eval.CellTextColors = colors;
+                    fills.Add(fillRow); colors.Add(colorRow);
                 }
-                eval.CellFills = fills; eval.CellTextColors = colors;
+                eval.CellFills = fills;
+                eval.CellTextColors = colors;
             }
             return eval;
         }
-    }
-
-    internal sealed class DocxTableRenderer : IDocTableRenderer
-    {
-        public void Render(DocxTemplate tpl, TableDefinition def, TableEvalResult eval)
-        {
-            var opts = def.Formatting ?? new TableFormattingOptions { LightWeight = true };
-            if (eval.CellFills!=null && eval.CellFills.Count>0) opts.CellFills = eval.CellFills;
-            if (eval.CellTextColors!=null && eval.CellTextColors.Count>0) opts.CellTextColors = eval.CellTextColors;
-            tpl.ReplaceTableByAltText(def.AltText, eval.Rows, mergeColumnIndexes: eval.MergeVerticalColumnIndexes ?? Array.Empty<int>(), options: opts);
-        }
-    }
-
-    public static class DiffDefaults
-    {
-        public const string DiffMarker = "\nWas\n";
     }
 }
 
