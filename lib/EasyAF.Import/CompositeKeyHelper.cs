@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 using EasyAF.Data.Models;
+using EasyAF.Data.Attributes;  // Use custom Required attribute
 
 namespace EasyAF.Import
 {

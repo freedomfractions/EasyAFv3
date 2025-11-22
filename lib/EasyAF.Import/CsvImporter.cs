@@ -106,14 +106,113 @@ namespace EasyAF.Import
                         if (!currentHeaderIndex.ContainsKey(trimmed)) currentHeaderIndex[trimmed] = i;
                     }
                     activeTargetTypes.Clear();
+                    
+                    // SIGNATURE MATCHING: Score each datatype by how many of its expected headers are present
+                    var typeScores = new Dictionary<string, (int matchCount, int totalExpected, double percentage)>();
+                    
                     foreach (var kvp in groupsByType)
                     {
-                        // Skip nested / child pseudo-types (e.g., LVBreaker.TripUnit) for section activation
-                        if (kvp.Key.Contains('.')) continue;
-                        var idEntry = kvp.Value.FirstOrDefault(e => e.PropertyName == "Id");
-                        if (idEntry == null) continue;
-                        if (currentHeaderSet.Contains(idEntry.ColumnHeader.Trim())) activeTargetTypes.Add(kvp.Key);
+                        if (kvp.Key.Contains('.')) continue; // skip nested groups
+
+                        var dataType = kvp.Key;
+                        var mapEntries = kvp.Value;
+                        
+                        // Count how many mapped headers are present
+                        int matchCount = 0;
+                        int totalExpected = mapEntries.Count;
+                        
+                        // Get key properties for this type
+                        Type? instanceType = dataType switch
+                        {
+                            "ArcFlash" => typeof(ArcFlash),
+                            "ShortCircuit" => typeof(ShortCircuit),
+                            "LVBreaker" => typeof(LVBreaker),
+                            "Fuse" => typeof(Fuse),
+                            "Cable" => typeof(Cable),
+                            "Bus" => typeof(Bus),
+                            _ => null
+                        };
+
+                        if (instanceType == null) continue;
+                        
+                        var keyProps = CompositeKeyHelper.GetCompositeKeyProperties(instanceType);
+                        
+                        // Count all matching headers
+                        foreach (var entry in mapEntries)
+                        {
+                            if (currentHeaderSet.Contains(entry.ColumnHeader.Trim()))
+                            {
+                                matchCount++;
+                            }
+                        }
+                        
+                        // Calculate match percentage
+                        double percentage = totalExpected > 0 ? (double)matchCount / totalExpected * 100.0 : 0.0;
+                        
+                        typeScores[dataType] = (matchCount, totalExpected, percentage);
+                        
+                        _logger.Verbose(nameof(Import), $"Signature match for '{dataType}': {matchCount}/{totalExpected} headers ({percentage:F1}%), {keyProps.Length} key properties defined");
                     }
+                    
+                    // Find the best match (highest match count, with percentage as tiebreaker)
+                    // Require at least 30% header overlap
+                    const double MIN_MATCH_THRESHOLD = 30.0;
+                    
+                    var bestMatches = typeScores
+                        .Where(kvp => kvp.Value.percentage >= MIN_MATCH_THRESHOLD)
+                        .OrderByDescending(kvp => kvp.Value.matchCount)
+                        .ThenByDescending(kvp => kvp.Value.percentage)
+                        .ToList();
+                    
+                    if (bestMatches.Any())
+                    {
+                        var bestMatch = bestMatches.First();
+                        var dataType = bestMatch.Key;
+                        var score = bestMatch.Value;
+                        
+                        // Verify the best match has at least one key property
+                        var instanceType = dataType switch
+                        {
+                            "ArcFlash" => typeof(ArcFlash),
+                            "ShortCircuit" => typeof(ShortCircuit),
+                            "LVBreaker" => typeof(LVBreaker),
+                            "Fuse" => typeof(Fuse),
+                            "Cable" => typeof(Cable),
+                            "Bus" => typeof(Bus),
+                            _ => null
+                        };
+                        
+                        if (instanceType != null)
+                        {
+                            var keyProps = CompositeKeyHelper.GetCompositeKeyProperties(instanceType);
+                            var mapEntries = groupsByType[dataType];
+                            bool hasKeyHeader = keyProps.Any(kp => 
+                                mapEntries.Any(e => e.PropertyName == kp && 
+                                currentHeaderSet.Contains(e.ColumnHeader.Trim())));
+                        
+                            if (hasKeyHeader)
+                            {
+                                activeTargetTypes.Add(dataType);
+                                _logger.Info(nameof(Import), $"Best match: '{dataType}' with {score.matchCount}/{score.totalExpected} headers ({score.percentage:F1}%)");
+                            }
+                            else
+                            {
+                                var keyNames = string.Join(", ", keyProps);
+                                _logger.Info(nameof(Import), $"Rejected best match '{dataType}' - missing key headers ({keyNames})");
+                            }
+                        }
+                        
+                        // Log other strong candidates that were not selected
+                        foreach (var candidate in bestMatches.Skip(1).Take(2))
+                        {
+                            _logger.Verbose(nameof(Import), $"  Candidate: '{candidate.Key}' with {candidate.Value.matchCount}/{candidate.Value.totalExpected} headers ({candidate.Value.percentage:F1}%)");
+                        }
+                    }
+                    else
+                    {
+                        _logger.Info(nameof(Import), $"No datatype matched threshold ({MIN_MATCH_THRESHOLD}%) for CSV at row {physicalRow}");
+                    }
+                    
                     inKnownSection = activeTargetTypes.Count > 0;
                     _logger.Verbose(nameof(Import), (inKnownSection ? "Activated mapped" : "Scanned header (no active mapped type)") +
                         $" section at file row {physicalRow}: headers = [{string.Join(", ", currentHeader)}]" +
