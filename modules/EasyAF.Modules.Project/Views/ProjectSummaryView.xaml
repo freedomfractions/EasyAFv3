@@ -297,7 +297,7 @@
                                 BorderBrush="{DynamicResource ControlBorderBrush}"
                                 BorderThickness="1"
                                 CornerRadius="8"
-                                Margin="6,4,3,8"
+                                Margin="6,4,3,0"
                                 VerticalAlignment="Stretch"/>
                         
                         <!-- Old Data Column Background - dynamically sized to match DataGrid height -->
@@ -307,7 +307,7 @@
                                 BorderBrush="{DynamicResource ControlBorderBrush}"
                                 BorderThickness="1"
                                 CornerRadius="8"
-                                Margin="3,4,6,8"
+                                Margin="3,4,6,0"
                                 VerticalAlignment="Stretch"/>
                         
                         <!-- DataGrid on top of backgrounds - DISABLE ALL SCROLLING -->
