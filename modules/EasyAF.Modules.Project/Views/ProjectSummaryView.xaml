@@ -290,25 +290,23 @@
                             <ColumnDefinition Width="0.8*"/> <!-- Delta column (smaller) -->
                         </Grid.ColumnDefinitions>
                         
-                        <!-- New Data Column Background - thinner border, taller height -->
+                        <!-- New Data Column Background - same color as cell borders, no opacity -->
                         <Border Grid.Column="1"
                                 Background="Transparent"
                                 BorderBrush="{DynamicResource ControlBorderBrush}"
                                 BorderThickness="1"
                                 CornerRadius="8"
-                                Margin="6,4,3,12"
-                                Opacity="0.5"/>
+                                Margin="6,4,3,20"/>
                         
-                        <!-- Old Data Column Background - thinner border, taller height -->
+                        <!-- Old Data Column Background - same color as cell borders, no opacity -->
                         <Border Grid.Column="2"
                                 Background="Transparent"
                                 BorderBrush="{DynamicResource ControlBorderBrush}"
                                 BorderThickness="1"
                                 CornerRadius="8"
-                                Margin="3,4,6,12"
-                                Opacity="0.5"/>
+                                Margin="3,4,6,20"/>
                         
-                        <!-- DataGrid on top of backgrounds -->
+                        <!-- DataGrid on top of backgrounds - DISABLE SCROLLING -->
                         <DataGrid Grid.Column="0" Grid.ColumnSpan="4"
                                   ItemsSource="{Binding VisibleStatisticsRows}"
                                   AutoGenerateColumns="False"
@@ -329,7 +327,9 @@
                                   SelectionMode="Single"
                                   SelectionUnit="FullRow"
                                   HorizontalGridLinesBrush="Transparent"
-                                  VerticalGridLinesBrush="Transparent">
+                                  VerticalGridLinesBrush="Transparent"
+                                  ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                         
                         <!-- DataGrid Style -->
                         <DataGrid.Resources>
@@ -341,7 +341,7 @@
                                 <Setter Property="FontSize" Value="13"/>
                                 <Setter Property="Padding" Value="12,12,12,8"/>
                                 <Setter Property="BorderThickness" Value="0"/>
-                                <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                                <Setter Property="HorizontalContentAlignment" Value="Center"/>
                             </Style>
                             
                             <!-- Row Style - transparent, child rows handled by cell templates -->
