@@ -380,10 +380,6 @@
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Grid>
-                                            <!-- Full-width child row background -->
-                                            <Border Background="{DynamicResource SecondaryBackgroundBrush}"
-                                                    Visibility="{Binding IsRootRow, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
-                                            
                                             <StackPanel Orientation="Horizontal" Margin="12,6">
                                                 <!-- Indentation for child rows -->
                                                 <Border Width="{Binding IndentLevel, Converter={StaticResource MultiplyConverter}, ConverterParameter=20}"/>
@@ -463,7 +459,7 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
                             
-                            <!-- New Data Column - CUSTOM DRAWN BORDERS for perfect connected bubble -->
+                            <!-- New Data Column - CUSTOM DRAWN BORDERS with shaded cells for children -->
                             <DataGridTemplateColumn Width="*">
                                 <DataGridTemplateColumn.HeaderTemplate>
                                     <DataTemplate>
@@ -476,10 +472,6 @@
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Grid>
-                                            <!-- Full-width child row background -->
-                                            <Border Background="{DynamicResource SecondaryBackgroundBrush}"
-                                                    Visibility="{Binding IsRootRow, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
-                                            
                                             <!-- Custom drawn border container -->
                                             <Grid Margin="10,0">
                                                 <!-- Root row: standalone rounded box -->
@@ -498,9 +490,9 @@
                                                                FontWeight="SemiBold"/>
                                                 </Border>
                                                 
-                                                <!-- First child: top border with rounded top corners -->
+                                                <!-- First child: top border with rounded top corners + shaded background -->
                                                 <Border Visibility="{Binding IsFirstChild, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                                        Background="Transparent"
+                                                        Background="{DynamicResource SecondaryBackgroundBrush}"
                                                         BorderBrush="{DynamicResource ControlBorderBrush}"
                                                         BorderThickness="1,1,1,0"
                                                         CornerRadius="4,4,0,0"
@@ -513,9 +505,9 @@
                                                                HorizontalAlignment="Center"/>
                                                 </Border>
                                                 
-                                                <!-- Middle child: left/right borders only -->
+                                                <!-- Middle child: left/right borders only + shaded background -->
                                                 <Border Visibility="{Binding IsMiddleChild, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                                        Background="Transparent"
+                                                        Background="{DynamicResource SecondaryBackgroundBrush}"
                                                         BorderBrush="{DynamicResource ControlBorderBrush}"
                                                         BorderThickness="1,0,1,0"
                                                         Padding="10,6">
@@ -526,9 +518,9 @@
                                                                HorizontalAlignment="Center"/>
                                                 </Border>
                                                 
-                                                <!-- Last child: bottom border with rounded bottom corners -->
+                                                <!-- Last child: bottom border with rounded bottom corners + shaded background -->
                                                 <Border Visibility="{Binding IsLastChild, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                                        Background="Transparent"
+                                                        Background="{DynamicResource SecondaryBackgroundBrush}"
                                                         BorderBrush="{DynamicResource ControlBorderBrush}"
                                                         BorderThickness="1,0,1,1"
                                                         CornerRadius="0,0,4,4"
@@ -546,7 +538,7 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
                             
-                            <!-- Old Data Column - CUSTOM DRAWN BORDERS for perfect connected bubble -->
+                            <!-- Old Data Column - CUSTOM DRAWN BORDERS with shaded cells for children -->
                             <DataGridTemplateColumn Width="*">
                                 <DataGridTemplateColumn.HeaderTemplate>
                                     <DataTemplate>
@@ -559,10 +551,6 @@
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Grid>
-                                            <!-- Full-width child row?? -->
-                                            <Border Background="{DynamicResource SecondaryBackgroundBrush}"
-                                                    Visibility="{Binding IsRootRow, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
-                                            
                                             <!-- Custom drawn border container -->
                                             <Grid Margin="10,0">
                                                 <!-- Root row: standalone rounded box -->
@@ -581,9 +569,9 @@
                                                                FontWeight="SemiBold"/>
                                                 </Border>
                                                 
-                                                <!-- First child: top border with rounded top corners -->
+                                                <!-- First child: top border with rounded top corners + shaded background -->
                                                 <Border Visibility="{Binding IsFirstChild, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                                        Background="Transparent"
+                                                        Background="{DynamicResource SecondaryBackgroundBrush}"
                                                         BorderBrush="{DynamicResource ControlBorderBrush}"
                                                         BorderThickness="1,1,1,0"
                                                         CornerRadius="4,4,0,0"
@@ -596,9 +584,9 @@
                                                                HorizontalAlignment="Center"/>
                                                 </Border>
                                                 
-                                                <!-- Middle child: left/right borders only -->
+                                                <!-- Middle child: left/right borders only + shaded background -->
                                                 <Border Visibility="{Binding IsMiddleChild, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                                        Background="Transparent"
+                                                        Background="{DynamicResource SecondaryBackgroundBrush}"
                                                         BorderBrush="{DynamicResource ControlBorderBrush}"
                                                         BorderThickness="1,0,1,0"
                                                         Padding="10,6">
@@ -609,9 +597,9 @@
                                                                HorizontalAlignment="Center"/>
                                                 </Border>
                                                 
-                                                <!-- Last child: bottom border with rounded bottom corners -->
+                                                <!-- Last child: bottom border with rounded bottom corners + shaded background -->
                                                 <Border Visibility="{Binding IsLastChild, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                                        Background="Transparent"
+                                                        Background="{DynamicResource SecondaryBackgroundBrush}"
                                                         BorderBrush="{DynamicResource ControlBorderBrush}"
                                                         BorderThickness="1,0,1,1"
                                                         CornerRadius="0,0,4,4"
@@ -629,7 +617,7 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
                             
-                            <!-- Delta Column (placeholder for now) -->
+                            <!-- Delta Column -->
                             <DataGridTemplateColumn Width="0.8*">
                                 <DataGridTemplateColumn.HeaderTemplate>
                                     <DataTemplate>
@@ -642,10 +630,6 @@
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Grid>
-                                            <!-- Full-width child row background -->
-                                            <Border Background="{DynamicResource SecondaryBackgroundBrush}"
-                                                    Visibility="{Binding IsRootRow, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
-                                            
                                             <TextBlock Text="{Binding DeltaDisplay}"
                                                        TextAlignment="Center"
                                                        Margin="12,6"
