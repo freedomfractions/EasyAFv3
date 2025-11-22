@@ -472,23 +472,34 @@ namespace EasyAF.Modules.Map.ViewModels
         /// <summary>
         /// Checks for missing referenced files and shows a resolution dialog if any are found.
         /// </summary>
+        /// <param name="isInitialLoad">If true, prevents marking document dirty during validation (default: false).</param>
         /// <remarks>
         /// This method should be called after loading a document to ensure all referenced files are accessible.
         /// If missing files are detected, a dialog is shown allowing the user to browse for relocated files,
         /// remove missing references, or continue anyway.
+        /// When called during initial document load, the document won't be marked dirty unless the user
+        /// actually makes changes (relocates/removes files).
         /// </remarks>
-        public void ValidateMissingFiles()
+        public void ValidateMissingFiles(bool isInitialLoad = false)
         {
             // CROSS-MODULE EDIT: 2025-01-16 Missing File Detection
             // Modified for: Add file validation on document load with resolution dialog
             // Related modules: Map (MapDocument, MissingFilesDialogViewModel, MissingFilesDialog)
             // Rollback instructions: Remove this method and related dialog files
             
+            // Track dirty state before validation so we can restore it if nothing changed
+            var wasClean = !_document.IsDirty;
+            
             var missingFiles = _document.ValidateReferencedFiles();
             
             if (missingFiles.Count == 0)
             {
                 Log.Debug("All referenced files are valid");
+                // Restore clean state if this was initial load and nothing changed
+                if (isInitialLoad && wasClean)
+                {
+                    _document.IsDirty = false;
+                }
                 // Don't return yet - continue to check for invalid mappings
             }
             else
@@ -510,11 +521,18 @@ namespace EasyAF.Modules.Map.ViewModels
                     if (result != true)
                     {
                         Log.Information("User cancelled missing files resolution");
+                        // Restore clean state if this was initial load and user cancelled
+                        if (isInitialLoad && wasClean)
+                        {
+                            _document.IsDirty = false;
+                        }
                         // Continue to check invalid mappings anyway
                     }
                     else
                     {
-                        // Process user actions
+                        // Process user actions (these WILL mark dirty if changes are made)
+                        var userMadeChanges = false;
+                        
                         foreach (var entry in dialogVm.MissingFiles)
                         {
                             switch (entry.Status)
@@ -524,6 +542,7 @@ namespace EasyAF.Modules.Map.ViewModels
                                     if (!string.IsNullOrEmpty(entry.NewPath))
                                     {
                                         _document.UpdateReferencedFilePath(entry.OriginalPath, entry.NewPath);
+                                        userMadeChanges = true;
                                         Log.Information("Updated file reference: {Old} -> {New}", entry.OriginalPath, entry.NewPath);
                                     }
                                     break;
@@ -531,6 +550,7 @@ namespace EasyAF.Modules.Map.ViewModels
                                 case "Removed":
                                     // User wants to remove this file reference
                                     _document.RemoveReferencedFile(entry.OriginalPath);
+                                    userMadeChanges = true;
                                     Log.Information("Removed missing file reference: {Path}", entry.OriginalPath);
                                     break;
 
@@ -540,11 +560,22 @@ namespace EasyAF.Modules.Map.ViewModels
                                     break;
                             }
                         }
+                        
+                        // Restore clean state if this was initial load and user made no changes
+                        if (isInitialLoad && wasClean && !userMadeChanges)
+                        {
+                            _document.IsDirty = false;
+                        }
                     }
                 }
                 catch (Exception ex)
                 {
                     Log.Error(ex, "Error showing missing files dialog");
+                    // Restore clean state if this was initial load and error occurred
+                    if (isInitialLoad && wasClean)
+                    {
+                        _document.IsDirty = false;
+                    }
                 }
             }
 
@@ -576,11 +607,22 @@ namespace EasyAF.Modules.Map.ViewModels
                 {
                     var removedCount = invalidDetector.RemoveInvalidMappings(_document, invalidMappings);
                     Log.Information("Removed {Count} invalid mappings on document load", removedCount);
+                    // Document is now dirty - user made a change
                 }
                 else
                 {
                     Log.Information("User chose to keep {Count} invalid mappings (properties remain hidden)", totalInvalid);
+                    // Restore clean state if this was initial load and user declined cleanup
+                    if (isInitialLoad && wasClean)
+                    {
+                        _document.IsDirty = false;
+                    }
                 }
+            }
+            else if (isInitialLoad && wasClean)
+            {
+                // No invalid mappings found - restore clean state
+                _document.IsDirty = false;
             }
 
             // Refresh the UI after any changes

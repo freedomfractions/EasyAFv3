@@ -357,7 +357,8 @@ namespace EasyAF.Modules.Map
                     // Rollback instructions: Remove ValidateMissingFiles call below
                     
                     // Check for missing referenced files and show resolution dialog if needed
-                    viewModel.ValidateMissingFiles();
+                    // Pass isInitialLoad: true to prevent marking document dirty unless user makes changes
+                    viewModel.ValidateMissingFiles(isInitialLoad: true);
                 }
                 
                 Log.Information("Successfully opened map document: {MapName} ({MappingCount} mappings)", 
