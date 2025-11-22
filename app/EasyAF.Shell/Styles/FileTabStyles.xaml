@@ -53,12 +53,12 @@
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
         <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="Width" Value="16"/>
-        <Setter Property="Height" Value="16"/>
+        <Setter Property="Width" Value="24"/> <!-- Increased from 16 for better touch -->
+        <Setter Property="Height" Value="24"/> <!-- Increased from 16 for better touch -->
         <Setter Property="Padding" Value="0"/>
         <Setter Property="Margin" Value="0"/>
         <Setter Property="FontFamily" Value="Segoe MDL2 Assets"/>
-        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="FontSize" Value="12"/> <!-- Increased from 10 for better visibility -->
         <Setter Property="Content" Value="&#xE711;"/> <!-- Cancel icon -->
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Template">
@@ -66,7 +66,8 @@
                 <ControlTemplate TargetType="Button">
                     <Border Background="{TemplateBinding Background}"
                             BorderThickness="0"
-                            Padding="{TemplateBinding Padding}">
+                            Padding="{TemplateBinding Padding}"
+                            CornerRadius="2">
                         <TextBlock Text="{TemplateBinding Content}"
                                    FontFamily="{TemplateBinding FontFamily}"
                                    FontSize="{TemplateBinding FontSize}"
@@ -80,6 +81,7 @@
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Foreground" Value="#E81123"/> <!-- Red on hover -->
+                <Setter Property="Background" Value="#22E81123"/> <!-- Subtle red background on hover -->
             </Trigger>
         </Style.Triggers>
     </Style>
@@ -94,7 +96,7 @@
                     <ColumnDefinition Width="4"/> <!-- Status bar -->
                     <ColumnDefinition Width="32"/> <!-- Icon -->
                     <ColumnDefinition Width="*"/> <!-- Content -->
-                    <ColumnDefinition Width="24"/> <!-- Close button -->
+                    <ColumnDefinition Width="32"/> <!-- Close button (increased from 24) -->
                 </Grid.ColumnDefinitions>
                 
                 <!-- Status Indicator Bar (vertical colored bar) -->
@@ -143,6 +145,7 @@
                         Command="{Binding CloseCommand}"
                         CommandParameter="{Binding Document}"
                         VerticalAlignment="Center"
+                        HorizontalAlignment="Center"
                         Margin="4,0">
                     <Button.Visibility>
                         <MultiBinding Converter="{StaticResource BooleanOrToVisibilityConverter}">
@@ -203,6 +206,80 @@
                 </ItemsControl.Style>
             </ItemsControl>
         </StackPanel>
+    </DataTemplate>
+    
+    <!-- Welcome Tab DataTemplate (implicit) -->
+    <DataTemplate DataType="{x:Type vm:WelcomeTabViewModel}">
+        <Border Background="Transparent"
+                BorderBrush="Transparent"
+                BorderThickness="0,0,0,1"
+                Cursor="Hand"
+                behaviors:FileTabBehavior.EnableFileTabBehavior="True">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="{DynamicResource HoverBackgroundBrush}"/>
+                        </Trigger>
+                        <DataTrigger Binding="{Binding IsActive}" Value="True">
+                            <Setter Property="Background" Value="{DynamicResource AccentBackgroundBrush}"/>
+                            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                            <Setter Property="BorderThickness" Value="0,0,3,0"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            
+            <Grid Height="64">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="40"/> <!-- Icon (centered) -->
+                    <ColumnDefinition Width="*"/> <!-- Content -->
+                    <ColumnDefinition Width="32"/> <!-- Close button (larger) -->
+                </Grid.ColumnDefinitions>
+                
+                <!-- Welcome Icon (Home glyph) -->
+                <TextBlock Grid.Column="0"
+                           Text="{Binding IconGlyph}"
+                           FontFamily="Segoe MDL2 Assets"
+                           FontSize="20"
+                           Foreground="{DynamicResource AccentBrush}"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
+                
+                <!-- Welcome Text -->
+                <StackPanel Grid.Column="1"
+                            Margin="4,8,4,8"
+                            VerticalAlignment="Center">
+                    <!-- Display Name -->
+                    <TextBlock Text="{Binding DisplayName}"
+                               Foreground="{DynamicResource TextPrimaryBrush}"
+                               FontWeight="SemiBold"
+                               FontSize="13"
+                               TextTrimming="CharacterEllipsis"/>
+                    
+                    <!-- Description -->
+                    <TextBlock Text="{Binding Description}"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               FontSize="10"
+                               TextTrimming="CharacterEllipsis"
+                               Margin="0,2,0,0"/>
+                </StackPanel>
+                
+                <!-- Close Button (X) -->
+                <Button Grid.Column="2"
+                        Style="{StaticResource FileTabCloseButtonStyle}"
+                        Command="{Binding CloseCommand}"
+                        VerticalAlignment="Center"
+                        Margin="4,0">
+                    <Button.Visibility>
+                        <MultiBinding Converter="{StaticResource BooleanOrToVisibilityConverter}">
+                            <Binding Path="IsHovered"/>
+                            <Binding Path="IsActive"/>
+                        </MultiBinding>
+                    </Button.Visibility>
+                </Button>
+            </Grid>
+        </Border>
     </DataTemplate>
 
 </ResourceDictionary>

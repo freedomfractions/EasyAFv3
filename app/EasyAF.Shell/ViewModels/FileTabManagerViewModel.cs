@@ -104,10 +104,15 @@ public class FileTabManagerViewModel : BindableBase, IDisposable
         
         Log.Debug("RebuildFileTabList called. Document count: {Count}", _documentManager.OpenDocuments.Count);
         
-        // Don't add anything if there are no documents
+        // Add Welcome tab first (always at top, ungrouped)
+        var welcomeTab = new WelcomeTabViewModel(new DelegateCommand(CloseWelcomeTab));
+        FileTabItems.Add(welcomeTab);
+        Log.Debug("Added Welcome tab");
+        
+        // Don't add file groups if there are no documents
         if (_documentManager.OpenDocuments.Count == 0)
         {
-            Log.Debug("No documents open, file tab list is empty");
+            Log.Debug("No documents open, only Welcome tab visible");
             return;
         }
         
@@ -132,6 +137,9 @@ public class FileTabManagerViewModel : BindableBase, IDisposable
                 {
                     tabItem.IsActive = true;
                     SelectedTab = tabItem;
+                    
+                    // Deactivate Welcome tab when a document is active
+                    welcomeTab.IsActive = false;
                 }
                 
                 groupVm.Items.Add(tabItem);
@@ -146,8 +154,34 @@ public class FileTabManagerViewModel : BindableBase, IDisposable
             }
         }
         
+        // If no document is active, activate Welcome tab
+        if (_documentManager.ActiveDocument == null)
+        {
+            welcomeTab.IsActive = true;
+        }
+        
         Log.Debug("Rebuilt file tab list: {GroupCount} groups, {DocCount} documents", 
             groups.Count, _documentManager.OpenDocuments.Count);
+    }
+    
+    /// <summary>
+    /// Closes the Welcome tab.
+    /// </summary>
+    /// <remarks>
+    /// TODO: Save user preference to not show Welcome tab on startup.
+    /// </remarks>
+    private void CloseWelcomeTab()
+    {
+        // Find and remove Welcome tab
+        var welcomeTab = FileTabItems.OfType<WelcomeTabViewModel>().FirstOrDefault();
+        if (welcomeTab != null)
+        {
+            FileTabItems.Remove(welcomeTab);
+            Log.Information("Welcome tab closed (will not show on next startup)");
+            
+            // TODO: Save preference to settings
+            // _settingsService.SetSetting("Shell.ShowWelcomeTab", false);
+        }
     }
     
     /// <summary>

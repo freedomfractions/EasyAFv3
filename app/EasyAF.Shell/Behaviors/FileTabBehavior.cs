@@ -54,31 +54,63 @@ public static class FileTabBehavior
 
     private static void OnMouseEnter(object sender, MouseEventArgs e)
     {
-        if (sender is FrameworkElement element && element.DataContext is FileTabItemViewModel vm)
+        if (sender is FrameworkElement element)
         {
-            vm.IsHovered = true;
+            if (element.DataContext is FileTabItemViewModel fileTabVm)
+            {
+                fileTabVm.IsHovered = true;
+            }
+            else if (element.DataContext is WelcomeTabViewModel welcomeVm)
+            {
+                welcomeVm.IsHovered = true;
+            }
         }
     }
 
     private static void OnMouseLeave(object sender, MouseEventArgs e)
     {
-        if (sender is FrameworkElement element && element.DataContext is FileTabItemViewModel vm)
+        if (sender is FrameworkElement element)
         {
-            vm.IsHovered = false;
+            if (element.DataContext is FileTabItemViewModel fileTabVm)
+            {
+                fileTabVm.IsHovered = false;
+            }
+            else if (element.DataContext is WelcomeTabViewModel welcomeVm)
+            {
+                welcomeVm.IsHovered = false;
+            }
         }
     }
 
     private static void OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        if (sender is FrameworkElement element && element.DataContext is FileTabItemViewModel vm)
+        if (sender is FrameworkElement element)
         {
-            // Find the MainWindowViewModel by walking up the visual tree
-            var window = Window.GetWindow(element);
-            if (window?.DataContext is MainWindowViewModel mainVm)
+            // Handle file tab click
+            if (element.DataContext is FileTabItemViewModel fileTabVm)
             {
-                mainVm.DocumentManager.ActiveDocument = vm.Document;
-                Log.Debug("File tab clicked: {FileName}", vm.FileName);
-                e.Handled = true;
+                // Find the MainWindowViewModel by walking up the visual tree
+                var window = Window.GetWindow(element);
+                if (window?.DataContext is MainWindowViewModel mainVm)
+                {
+                    mainVm.DocumentManager.ActiveDocument = fileTabVm.Document;
+                    Log.Debug("File tab clicked: {FileName}", fileTabVm.FileName);
+                    e.Handled = true;
+                }
+            }
+            // Handle Welcome tab click
+            else if (element.DataContext is WelcomeTabViewModel welcomeVm)
+            {
+                // Find the MainWindowViewModel by walking up the visual tree
+                var window = Window.GetWindow(element);
+                if (window?.DataContext is MainWindowViewModel mainVm)
+                {
+                    // Clear active document to show Welcome screen
+                    mainVm.DocumentManager.ActiveDocument = null;
+                    welcomeVm.IsActive = true;
+                    Log.Debug("Welcome tab clicked");
+                    e.Handled = true;
+                }
             }
         }
     }
