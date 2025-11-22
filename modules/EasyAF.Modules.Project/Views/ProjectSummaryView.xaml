@@ -306,7 +306,7 @@
                                 CornerRadius="8"
                                 Margin="3,4,6,20"/>
                         
-                        <!-- DataGrid on top of backgrounds - DISABLE SCROLLING -->
+                        <!-- DataGrid on top of backgrounds - DISABLE ALL SCROLLING -->
                         <DataGrid Grid.Column="0" Grid.ColumnSpan="4"
                                   ItemsSource="{Binding VisibleStatisticsRows}"
                                   AutoGenerateColumns="False"
@@ -329,7 +329,8 @@
                                   HorizontalGridLinesBrush="Transparent"
                                   VerticalGridLinesBrush="Transparent"
                                   ScrollViewer.VerticalScrollBarVisibility="Disabled"
-                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                  ScrollViewer.CanContentScroll="False">
                         
                         <!-- DataGrid Style -->
                         <DataGrid.Resources>
