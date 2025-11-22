@@ -32,7 +32,7 @@ public class FileTabManagerViewModel : BindableBase, IDisposable
     private readonly IDocumentManager _documentManager;
     private readonly DispatcherTimer _timestampUpdateTimer;
     private bool _disposed;
-    private FileTabItemViewModel? _selectedTab;
+    private object? _selectedTab;
     
     /// <summary>
     /// Initializes a new instance of the <see cref="FileTabManagerViewModel"/> class.
@@ -68,26 +68,30 @@ public class FileTabManagerViewModel : BindableBase, IDisposable
     /// </summary>
     /// <remarks>
     /// This collection contains:
-    /// - FileTabItemViewModel (for Welcome tab)
+    /// - WelcomeTabViewModel (for Welcome tab)
     /// - FileTabGroupViewModel (for each module type with files)
     /// </remarks>
     public ObservableCollection<object> FileTabItems { get; }
     
     /// <summary>
-    /// Gets or sets the selected file tab.
+    /// Gets or sets the selected tab (can be FileTabItemViewModel or WelcomeTabViewModel).
     /// </summary>
-    public FileTabItemViewModel? SelectedTab
+    public object? SelectedTab
     {
         get => _selectedTab;
         set
         {
-            if (SetProperty(ref _selectedTab, value) && value != null)
+            if (SetProperty(ref _selectedTab, value))
             {
-                // Notify document manager of selection change
-                if (value.Document != _documentManager.ActiveDocument)
+                // Handle FileTabItemViewModel selection
+                if (value is FileTabItemViewModel fileTab)
                 {
-                    _documentManager.ActiveDocument = value.Document;
+                    if (fileTab.Document != _documentManager.ActiveDocument)
+                    {
+                        _documentManager.ActiveDocument = fileTab.Document;
+                    }
                 }
+                // Welcome tab is handled by its click behavior (sets ActiveDocument to null)
             }
         }
     }
@@ -195,27 +199,44 @@ public class FileTabManagerViewModel : BindableBase, IDisposable
     }
     
     /// <summary>
-    /// Handles active document changes to update selection.
+    /// Handles changes to the active document.
     /// </summary>
-    private void OnActiveDocumentChanged(object? sender, IDocument? newActiveDocument)
+    private void OnActiveDocumentChanged(object? sender, IDocument? activeDocument)
     {
-        if (newActiveDocument == null) return;
-        
-        // Find and select the matching tab
+        // Update IsActive state for all file tabs
         foreach (var item in FileTabItems)
         {
-            if (item is FileTabGroupViewModel group)
+            if (item is FileTabItemViewModel fileTab)
             {
-                foreach (var tabItem in group.Items)
+                fileTab.IsActive = fileTab.Document == activeDocument;
+                if (fileTab.IsActive)
                 {
-                    tabItem.IsActive = ReferenceEquals(tabItem.Document, newActiveDocument);
-                    if (tabItem.IsActive)
+                    SelectedTab = fileTab;
+                }
+            }
+            else if (item is FileTabGroupViewModel group)
+            {
+                foreach (var groupTab in group.Items)
+                {
+                    groupTab.IsActive = groupTab.Document == activeDocument;
+                    if (groupTab.IsActive)
                     {
-                        SelectedTab = tabItem;
+                        SelectedTab = groupTab;
                     }
                 }
             }
+            else if (item is WelcomeTabViewModel welcomeTab)
+            {
+                // Welcome tab is active when no document is active
+                welcomeTab.IsActive = activeDocument == null;
+                if (welcomeTab.IsActive)
+                {
+                    SelectedTab = welcomeTab;
+                }
+            }
         }
+        
+        Log.Debug("Active document changed: {Title}", activeDocument?.Title ?? "None (Welcome)");
     }
     
     /// <summary>

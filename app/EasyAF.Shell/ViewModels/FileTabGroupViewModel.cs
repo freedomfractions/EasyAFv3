@@ -66,9 +66,11 @@ public class FileTabGroupViewModel : BindableBase
     /// Gets the triangle icon for expand/collapse.
     /// </summary>
     /// <remarks>
-    /// "?" when collapsed, "?" when expanded.
+    /// Uses Segoe MDL2 Assets glyphs:
+    /// - ChevronRight (&#xE76C;) when collapsed
+    /// - ChevronDown (&#xE70D;) when expanded
     /// </remarks>
-    public string ExpanderIcon => IsExpanded ? "?" : "?";
+    public string ExpanderIcon => IsExpanded ? "\uE70D" : "\uE76C"; // ChevronDown : ChevronRight
     
     /// <summary>
     /// Gets the command to toggle expand/collapse.

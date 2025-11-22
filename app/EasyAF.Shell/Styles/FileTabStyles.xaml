@@ -177,6 +177,7 @@
                     <!-- Expander Triangle -->
                     <TextBlock Grid.Column="0"
                                Text="{Binding ExpanderIcon}"
+                               FontFamily="Segoe MDL2 Assets"
                                FontSize="10"
                                Foreground="{DynamicResource TextPrimaryBrush}"
                                Margin="0,0,6,0"
