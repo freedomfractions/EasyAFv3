@@ -102,10 +102,10 @@ public class FileCommandsViewModel : BindableBase
             // When a new module is loaded, notify that AvailableDocumentModules changed
             RaisePropertyChanged(nameof(AvailableDocumentModules));
             
-            // If no module is selected yet, select the first available one
+            // If no module is selected yet, try to select the configured default
             if (SelectedModule == null)
             {
-                SelectedModule = AvailableDocumentModules.FirstOrDefault();
+                SelectedModule = GetDefaultDocumentModule() ?? AvailableDocumentModules.FirstOrDefault();
             }
         };
 
@@ -114,8 +114,9 @@ public class FileCommandsViewModel : BindableBase
         // Related modules: Project (ProjectModule)
         // Rollback instructions: Remove GetDefaultDocumentModule call, use first available module
         
-        // Select default module (configurable via settings, defaults to Project Editor)
-        _selectedModule = GetDefaultDocumentModule() ?? AvailableDocumentModules.FirstOrDefault();
+        // Select default module (delay until modules are loaded to avoid warning)
+        // GetDefaultDocumentModule() will be called after first module loads
+        _selectedModule = null; // Will be set by ModuleLoaded event
     }
 
     /// <summary>
@@ -648,7 +649,7 @@ public class FileCommandsViewModel : BindableBase
                 return defaultModule;
             }
 
-            Log.Warning("Configured default module '{ModuleName}' not found, using first available", defaultModuleName);
+            Log.Debug("Configured default module '{ModuleName}' not found yet, will retry when modules load", defaultModuleName);
             return null;
         }
         catch (Exception ex)

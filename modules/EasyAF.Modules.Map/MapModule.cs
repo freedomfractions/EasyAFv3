@@ -495,7 +495,8 @@ namespace EasyAF.Modules.Map
             
             if (activeDocument is not MapDocument mapDoc)
             {
-                Log.Warning("Active document is not a MapDocument");
+                Log.Debug("No active MapDocument (document is {Type}), skipping ribbon tab generation", 
+                    activeDocument?.GetType().Name ?? "null");
                 return Array.Empty<RibbonTabItem>();
             }
 
