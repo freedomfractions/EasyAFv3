@@ -290,37 +290,23 @@
                             <ColumnDefinition Width="0.8*"/> <!-- Delta column (smaller) -->
                         </Grid.ColumnDefinitions>
                         
-                        <!-- New Data Column Background - BOLDER with drop shadow -->
+                        <!-- New Data Column Background - thinner border, taller height -->
                         <Border Grid.Column="1"
-                                Background="{DynamicResource SecondaryBackgroundBrush}"
+                                Background="Transparent"
                                 BorderBrush="{DynamicResource ControlBorderBrush}"
-                                BorderThickness="3"
-                                CornerRadius="10"
-                                Margin="6,4,3,4"
-                                Opacity="0.4">
-                            <Border.Effect>
-                                <DropShadowEffect Color="{DynamicResource ControlBorderColor}" 
-                                                  BlurRadius="8" 
-                                                  ShadowDepth="2" 
-                                                  Opacity="0.3"/>
-                            </Border.Effect>
-                        </Border>
+                                BorderThickness="1"
+                                CornerRadius="8"
+                                Margin="6,4,3,12"
+                                Opacity="0.5"/>
                         
-                        <!-- Old Data Column Background - BOLDER with drop shadow -->
+                        <!-- Old Data Column Background - thinner border, taller height -->
                         <Border Grid.Column="2"
-                                Background="{DynamicResource SecondaryBackgroundBrush}"
+                                Background="Transparent"
                                 BorderBrush="{DynamicResource ControlBorderBrush}"
-                                BorderThickness="3"
-                                CornerRadius="10"
-                                Margin="3,4,6,4"
-                                Opacity="0.4">
-                            <Border.Effect>
-                                <DropShadowEffect Color="{DynamicResource ControlBorderColor}" 
-                                                  BlurRadius="8" 
-                                                  ShadowDepth="2" 
-                                                  Opacity="0.3"/>
-                            </Border.Effect>
-                        </Border>
+                                BorderThickness="1"
+                                CornerRadius="8"
+                                Margin="3,4,6,12"
+                                Opacity="0.5"/>
                         
                         <!-- DataGrid on top of backgrounds -->
                         <DataGrid Grid.Column="0" Grid.ColumnSpan="4"
@@ -477,7 +463,7 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
                             
-                            <!-- New Data Column - CONNECTED BUBBLE for children -->
+                            <!-- New Data Column - CUSTOM DRAWN BORDERS for perfect connected bubble -->
                             <DataGridTemplateColumn Width="*">
                                 <DataGridTemplateColumn.HeaderTemplate>
                                     <DataTemplate>
@@ -494,51 +480,73 @@
                                             <Border Background="{DynamicResource SecondaryBackgroundBrush}"
                                                     Visibility="{Binding IsRootRow, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
                                             
-                                            <!-- Individual cell border with conditional styling -->
-                                            <Border Background="Transparent"
-                                                    BorderBrush="{DynamicResource ControlBorderBrush}"
-                                                    Margin="10,3"
-                                                    Padding="10,6">
-                                                <Border.Style>
-                                                    <Style TargetType="Border">
-                                                        <!-- Default: rounded corners for root rows -->
-                                                        <Setter Property="CornerRadius" Value="4"/>
-                                                        <Setter Property="BorderThickness" Value="1"/>
-                                                        <Style.Triggers>
-                                                            <!-- First child: rounded top, square bottom, full border -->
-                                                            <DataTrigger Binding="{Binding IsFirstChild}" Value="True">
-                                                                <Setter Property="CornerRadius" Value="4,4,0,0"/>
-                                                                <Setter Property="BorderThickness" Value="1"/>
-                                                                <Setter Property="Margin" Value="10,3,10,0"/>
-                                                            </DataTrigger>
-                                                            <!-- Middle child: no rounding, no top border -->
-                                                            <DataTrigger Binding="{Binding IsMiddleChild}" Value="True">
-                                                                <Setter Property="CornerRadius" Value="0"/>
-                                                                <Setter Property="BorderThickness" Value="1,0,1,1"/>
-                                                                <Setter Property="Margin" Value="10,0"/>
-                                                            </DataTrigger>
-                                                            <!-- Last child: square top, rounded bottom, no top border -->
-                                                            <DataTrigger Binding="{Binding IsLastChild}" Value="True">
-                                                                <Setter Property="CornerRadius" Value="0,0,4,4"/>
-                                                                <Setter Property="BorderThickness" Value="1,0,1,1"/>
-                                                                <Setter Property="Margin" Value="10,0,10,3"/>
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </Border.Style>
-                                                <TextBlock Text="{Binding NewCountDisplay}" 
-                                                           TextAlignment="Center"
-                                                           Foreground="{DynamicResource TextPrimaryBrush}"
-                                                           VerticalAlignment="Center"
-                                                           HorizontalAlignment="Center"
-                                                           FontWeight="{Binding IsRootRow, Converter={StaticResource BooleanToFontWeightConverter}}"/>
-                                            </Border>
+                                            <!-- Custom drawn border container -->
+                                            <Grid Margin="10,0">
+                                                <!-- Root row: standalone rounded box -->
+                                                <Border Visibility="{Binding IsRootRow, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                        Background="Transparent"
+                                                        BorderBrush="{DynamicResource ControlBorderBrush}"
+                                                        BorderThickness="1"
+                                                        CornerRadius="4"
+                                                        Margin="0,3"
+                                                        Padding="10,6">
+                                                    <TextBlock Text="{Binding NewCountDisplay}" 
+                                                               TextAlignment="Center"
+                                                               Foreground="{DynamicResource TextPrimaryBrush}"
+                                                               VerticalAlignment="Center"
+                                                               HorizontalAlignment="Center"
+                                                               FontWeight="SemiBold"/>
+                                                </Border>
+                                                
+                                                <!-- First child: top border with rounded top corners -->
+                                                <Border Visibility="{Binding IsFirstChild, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                        Background="Transparent"
+                                                        BorderBrush="{DynamicResource ControlBorderBrush}"
+                                                        BorderThickness="1,1,1,0"
+                                                        CornerRadius="4,4,0,0"
+                                                        Margin="0,3,0,0"
+                                                        Padding="10,6">
+                                                    <TextBlock Text="{Binding NewCountDisplay}" 
+                                                               TextAlignment="Center"
+                                                               Foreground="{DynamicResource TextPrimaryBrush}"
+                                                               VerticalAlignment="Center"
+                                                               HorizontalAlignment="Center"/>
+                                                </Border>
+                                                
+                                                <!-- Middle child: left/right borders only -->
+                                                <Border Visibility="{Binding IsMiddleChild, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                        Background="Transparent"
+                                                        BorderBrush="{DynamicResource ControlBorderBrush}"
+                                                        BorderThickness="1,0,1,0"
+                                                        Padding="10,6">
+                                                    <TextBlock Text="{Binding NewCountDisplay}" 
+                                                               TextAlignment="Center"
+                                                               Foreground="{DynamicResource TextPrimaryBrush}"
+                                                               VerticalAlignment="Center"
+                                                               HorizontalAlignment="Center"/>
+                                                </Border>
+                                                
+                                                <!-- Last child: bottom border with rounded bottom corners -->
+                                                <Border Visibility="{Binding IsLastChild, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                        Background="Transparent"
+                                                        BorderBrush="{DynamicResource ControlBorderBrush}"
+                                                        BorderThickness="1,0,1,1"
+                                                        CornerRadius="0,0,4,4"
+                                                        Margin="0,0,0,3"
+                                                        Padding="10,6">
+                                                    <TextBlock Text="{Binding NewCountDisplay}" 
+                                                               TextAlignment="Center"
+                                                               Foreground="{DynamicResource TextPrimaryBrush}"
+                                                               VerticalAlignment="Center"
+                                                               HorizontalAlignment="Center"/>
+                                                </Border>
+                                            </Grid>
                                         </Grid>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
                             
-                            <!-- Old Data Column - CONNECTED BUBBLE for children -->
+                            <!-- Old Data Column - CUSTOM DRAWN BORDERS for perfect connected bubble -->
                             <DataGridTemplateColumn Width="*">
                                 <DataGridTemplateColumn.HeaderTemplate>
                                     <DataTemplate>
@@ -551,49 +559,71 @@
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Grid>
-                                            <!-- Full-width child row background -->
+                                            <!-- Full-width child row?? -->
                                             <Border Background="{DynamicResource SecondaryBackgroundBrush}"
                                                     Visibility="{Binding IsRootRow, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
                                             
-                                            <!-- Individual cell border with conditional styling -->
-                                            <Border Background="Transparent"
-                                                    BorderBrush="{DynamicResource ControlBorderBrush}"
-                                                    Margin="10,3"
-                                                    Padding="10,6">
-                                                <Border.Style>
-                                                    <Style TargetType="Border">
-                                                        <!-- Default: rounded corners for root rows -->
-                                                        <Setter Property="CornerRadius" Value="4"/>
-                                                        <Setter Property="BorderThickness" Value="1"/>
-                                                        <Style.Triggers>
-                                                            <!-- First child: rounded top, square bottom, full border -->
-                                                            <DataTrigger Binding="{Binding IsFirstChild}" Value="True">
-                                                                <Setter Property="CornerRadius" Value="4,4,0,0"/>
-                                                                <Setter Property="BorderThickness" Value="1"/>
-                                                                <Setter Property="Margin" Value="10,3,10,0"/>
-                                                            </DataTrigger>
-                                                            <!-- Middle child: no rounding, no top border -->
-                                                            <DataTrigger Binding="{Binding IsMiddleChild}" Value="True">
-                                                                <Setter Property="CornerRadius" Value="0"/>
-                                                                <Setter Property="BorderThickness" Value="1,0,1,1"/>
-                                                                <Setter Property="Margin" Value="10,0"/>
-                                                            </DataTrigger>
-                                                            <!-- Last child: square top, rounded bottom, no top border -->
-                                                            <DataTrigger Binding="{Binding IsLastChild}" Value="True">
-                                                                <Setter Property="CornerRadius" Value="0,0,4,4"/>
-                                                                <Setter Property="BorderThickness" Value="1,0,1,1"/>
-                                                                <Setter Property="Margin" Value="10,0,10,3"/>
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </Border.Style>
-                                                <TextBlock Text="{Binding OldCountDisplay}" 
-                                                           TextAlignment="Center"
-                                                           Foreground="{DynamicResource TextSecondaryBrush}"
-                                                           VerticalAlignment="Center"
-                                                           HorizontalAlignment="Center"
-                                                           FontWeight="{Binding IsRootRow, Converter={StaticResource BooleanToFontWeightConverter}}"/>
-                                            </Border>
+                                            <!-- Custom drawn border container -->
+                                            <Grid Margin="10,0">
+                                                <!-- Root row: standalone rounded box -->
+                                                <Border Visibility="{Binding IsRootRow, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                        Background="Transparent"
+                                                        BorderBrush="{DynamicResource ControlBorderBrush}"
+                                                        BorderThickness="1"
+                                                        CornerRadius="4"
+                                                        Margin="0,3"
+                                                        Padding="10,6">
+                                                    <TextBlock Text="{Binding OldCountDisplay}" 
+                                                               TextAlignment="Center"
+                                                               Foreground="{DynamicResource TextSecondaryBrush}"
+                                                               VerticalAlignment="Center"
+                                                               HorizontalAlignment="Center"
+                                                               FontWeight="SemiBold"/>
+                                                </Border>
+                                                
+                                                <!-- First child: top border with rounded top corners -->
+                                                <Border Visibility="{Binding IsFirstChild, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                        Background="Transparent"
+                                                        BorderBrush="{DynamicResource ControlBorderBrush}"
+                                                        BorderThickness="1,1,1,0"
+                                                        CornerRadius="4,4,0,0"
+                                                        Margin="0,3,0,0"
+                                                        Padding="10,6">
+                                                    <TextBlock Text="{Binding OldCountDisplay}" 
+                                                               TextAlignment="Center"
+                                                               Foreground="{DynamicResource TextSecondaryBrush}"
+                                                               VerticalAlignment="Center"
+                                                               HorizontalAlignment="Center"/>
+                                                </Border>
+                                                
+                                                <!-- Middle child: left/right borders only -->
+                                                <Border Visibility="{Binding IsMiddleChild, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                        Background="Transparent"
+                                                        BorderBrush="{DynamicResource ControlBorderBrush}"
+                                                        BorderThickness="1,0,1,0"
+                                                        Padding="10,6">
+                                                    <TextBlock Text="{Binding OldCountDisplay}" 
+                                                               TextAlignment="Center"
+                                                               Foreground="{DynamicResource TextSecondaryBrush}"
+                                                               VerticalAlignment="Center"
+                                                               HorizontalAlignment="Center"/>
+                                                </Border>
+                                                
+                                                <!-- Last child: bottom border with rounded bottom corners -->
+                                                <Border Visibility="{Binding IsLastChild, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                        Background="Transparent"
+                                                        BorderBrush="{DynamicResource ControlBorderBrush}"
+                                                        BorderThickness="1,0,1,1"
+                                                        CornerRadius="0,0,4,4"
+                                                        Margin="0,0,0,3"
+                                                        Padding="10,6">
+                                                    <TextBlock Text="{Binding OldCountDisplay}" 
+                                                               TextAlignment="Center"
+                                                               Foreground="{DynamicResource TextSecondaryBrush}"
+                                                               VerticalAlignment="Center"
+                                                               HorizontalAlignment="Center"/>
+                                                </Border>
+                                            </Grid>
                                         </Grid>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
