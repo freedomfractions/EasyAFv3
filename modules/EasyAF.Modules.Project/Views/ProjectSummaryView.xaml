@@ -281,27 +281,55 @@
                     </StackPanel>
                     
                     <!-- Data Statistics Table -->
-                    <DataGrid Grid.Row="2"
-                              ItemsSource="{Binding VisibleStatisticsRows}"
-                              AutoGenerateColumns="False"
-                              IsReadOnly="True"
-                              HeadersVisibility="Column"
-                              GridLinesVisibility="None"
-                              BorderThickness="0"
-                              BorderBrush="Transparent"
-                              Background="Transparent"
-                              RowBackground="Transparent"
-                              AlternatingRowBackground="Transparent"
-                              Foreground="{DynamicResource TextPrimaryBrush}"
-                              CanUserAddRows="False"
-                              CanUserDeleteRows="False"
-                              CanUserReorderColumns="False"
-                              CanUserResizeRows="False"
-                              CanUserSortColumns="False"
-                              SelectionMode="Single"
-                              SelectionUnit="FullRow"
-                              HorizontalGridLinesBrush="Transparent"
-                              VerticalGridLinesBrush="Transparent">
+                    <Grid Grid.Row="2">
+                        <!-- Background rounded rectangles for New Data and Old Data columns -->
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="2*"/> <!-- Data Type column -->
+                            <ColumnDefinition Width="*"/>  <!-- New Data column -->
+                            <ColumnDefinition Width="*"/>  <!-- Old Data column -->
+                            <ColumnDefinition Width="*"/>  <!-- Delta column -->
+                        </Grid.ColumnDefinitions>
+                        
+                        <!-- New Data Column Background -->
+                        <Border Grid.Column="1"
+                                Background="{DynamicResource SecondaryBackgroundBrush}"
+                                BorderBrush="{DynamicResource ControlBorderBrush}"
+                                BorderThickness="2"
+                                CornerRadius="8"
+                                Margin="4,0,2,0"
+                                Opacity="0.3"/>
+                        
+                        <!-- Old Data Column Background -->
+                        <Border Grid.Column="2"
+                                Background="{DynamicResource SecondaryBackgroundBrush}"
+                                BorderBrush="{DynamicResource ControlBorderBrush}"
+                                BorderThickness="2"
+                                CornerRadius="8"
+                                Margin="2,0,4,0"
+                                Opacity="0.3"/>
+                        
+                        <!-- DataGrid on top of backgrounds -->
+                        <DataGrid Grid.Column="0" Grid.ColumnSpan="4"
+                                  ItemsSource="{Binding VisibleStatisticsRows}"
+                                  AutoGenerateColumns="False"
+                                  IsReadOnly="True"
+                                  HeadersVisibility="Column"
+                                  GridLinesVisibility="None"
+                                  BorderThickness="0"
+                                  BorderBrush="Transparent"
+                                  Background="Transparent"
+                                  RowBackground="Transparent"
+                                  AlternatingRowBackground="Transparent"
+                                  Foreground="{DynamicResource TextPrimaryBrush}"
+                                  CanUserAddRows="False"
+                                  CanUserDeleteRows="False"
+                                  CanUserReorderColumns="False"
+                                  CanUserResizeRows="False"
+                                  CanUserSortColumns="False"
+                                  SelectionMode="Single"
+                                  SelectionUnit="FullRow"
+                                  HorizontalGridLinesBrush="Transparent"
+                                  VerticalGridLinesBrush="Transparent">
                         
                         <!-- DataGrid Style -->
                         <DataGrid.Resources>
@@ -311,7 +339,7 @@
                                 <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
                                 <Setter Property="FontWeight" Value="SemiBold"/>
                                 <Setter Property="FontSize" Value="13"/>
-                                <Setter Property="Padding" Value="12,8"/>
+                                <Setter Property="Padding" Value="12,12,12,8"/>
                                 <Setter Property="BorderThickness" Value="0"/>
                                 <Setter Property="HorizontalContentAlignment" Value="Left"/>
                             </Style>
@@ -321,10 +349,6 @@
                                 <Setter Property="Background" Value="Transparent"/>
                                 <Setter Property="BorderThickness" Value="0"/>
                                 <Style.Triggers>
-                                    <!-- Child rows get subtle background -->
-                                    <DataTrigger Binding="{Binding IsRootRow}" Value="False">
-                                        <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
-                                    </DataTrigger>
                                     <Trigger Property="IsMouseOver" Value="True">
                                         <Setter Property="Background" Value="{DynamicResource HoverBackgroundBrush}"/>
                                     </Trigger>
@@ -357,16 +381,59 @@
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal" Margin="12,6">
                                             <!-- Indentation for child rows -->
-                                            <Border Width="{Binding IndentLevel, Converter={StaticResource MultiplyConverter}, ConverterParameter=24}"/>
+                                            <Border Width="{Binding IndentLevel, Converter={StaticResource MultiplyConverter}, ConverterParameter=20}"/>
                                             
-                                            <!-- Expander button (visible only for parent rows with children) -->
+                                            <!-- Triangle Expander (visible only for parent rows with children) -->
                                             <ToggleButton IsChecked="{Binding IsExpanded, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                           Visibility="{Binding ShowExpander, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                                          Width="16"
-                                                          Height="16"
-                                                          Margin="0,0,6,0"
-                                                          VerticalAlignment="Center"
-                                                          Style="{StaticResource ExpanderToggleButtonStyle}"/>
+                                                          Width="14"
+                                                          Height="14"
+                                                          Margin="0,0,8,0"
+                                                          VerticalAlignment="Center">
+                                                <ToggleButton.Template>
+                                                    <ControlTemplate TargetType="ToggleButton">
+                                                        <Border Background="Transparent">
+                                                            <Path x:Name="ExpanderTriangle"
+                                                                  Data="M 0,0 L 5,5 L 0,10 Z"
+                                                                  Fill="{DynamicResource TextPrimaryBrush}"
+                                                                  Stretch="Uniform"
+                                                                  Width="8"
+                                                                  Height="8"
+                                                                  HorizontalAlignment="Center"
+                                                                  VerticalAlignment="Center"
+                                                                  RenderTransformOrigin="0.5,0.5">
+                                                                <Path.RenderTransform>
+                                                                    <RotateTransform Angle="0"/>
+                                                                </Path.RenderTransform>
+                                                            </Path>
+                                                        </Border>
+                                                        <ControlTemplate.Triggers>
+                                                            <Trigger Property="IsChecked" Value="True">
+                                                                <Trigger.EnterActions>
+                                                                    <BeginStoryboard>
+                                                                        <Storyboard>
+                                                                            <DoubleAnimation Storyboard.TargetName="ExpanderTriangle"
+                                                                                           Storyboard.TargetProperty="(Path.RenderTransform).(RotateTransform.Angle)"
+                                                                                           To="90"
+                                                                                           Duration="0:0:0.15"/>
+                                                                        </Storyboard>
+                                                                    </BeginStoryboard>
+                                                                </Trigger.EnterActions>
+                                                                <Trigger.ExitActions>
+                                                                    <BeginStoryboard>
+                                                                        <Storyboard>
+                                                                            <DoubleAnimation Storyboard.TargetName="ExpanderTriangle"
+                                                                                           Storyboard.TargetProperty="(Path.RenderTransform).(RotateTransform.Angle)"
+                                                                                           To="0"
+                                                                                           Duration="0:0:0.15"/>
+                                                                        </Storyboard>
+                                                                    </BeginStoryboard>
+                                                                </Trigger.ExitActions>
+                                                            </Trigger>
+                                                        </ControlTemplate.Triggers>
+                                                    </ControlTemplate>
+                                                </ToggleButton.Template>
+                                            </ToggleButton>
                                             
                                             <!-- Spacer for non-expandable rows -->
                                             <Border Width="22" 
@@ -390,56 +457,74 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
                             
-                            <!-- New Data Column with rounded border -->
+                            <!-- New Data Column with individual cell borders -->
                             <DataGridTemplateColumn Width="*">
                                 <DataGridTemplateColumn.HeaderTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="New Data" 
                                                    HorizontalAlignment="Center"
-                                                   FontWeight="SemiBold"/>
+                                                   FontWeight="SemiBold"
+                                                   Margin="0,0,0,4"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.HeaderTemplate>
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Border Background="Transparent"
-                                                BorderBrush="{DynamicResource ControlBorderBrush}"
-                                                BorderThickness="1"
-                                                CornerRadius="4"
-                                                Margin="4,2"
-                                                Padding="8,4">
-                                            <TextBlock Text="{Binding NewCountDisplay}" 
-                                                       TextAlignment="Center"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       VerticalAlignment="Center"
-                                                       HorizontalAlignment="Center"/>
-                                        </Border>
+                                        <Grid>
+                                            <!-- Child row background (banding color) -->
+                                            <Border Background="{DynamicResource SecondaryBackgroundBrush}"
+                                                    Visibility="{Binding IsRootRow, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
+                                            
+                                            <!-- Individual cell border -->
+                                            <Border Background="Transparent"
+                                                    BorderBrush="{DynamicResource ControlBorderBrush}"
+                                                    BorderThickness="1"
+                                                    CornerRadius="4"
+                                                    Margin="8,3"
+                                                    Padding="8,6">
+                                                <TextBlock Text="{Binding NewCountDisplay}" 
+                                                           TextAlignment="Center"
+                                                           Foreground="{DynamicResource TextPrimaryBrush}"
+                                                           VerticalAlignment="Center"
+                                                           HorizontalAlignment="Center"
+                                                           FontWeight="{Binding IsRootRow, Converter={StaticResource BooleanToFontWeightConverter}}"/>
+                                            </Border>
+                                        </Grid>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
                             
-                            <!-- Old Data Column with rounded border -->
+                            <!-- Old Data Column with individual cell borders -->
                             <DataGridTemplateColumn Width="*">
                                 <DataGridTemplateColumn.HeaderTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="Old Data" 
                                                    HorizontalAlignment="Center"
-                                                   FontWeight="SemiBold"/>
+                                                   FontWeight="SemiBold"
+                                                   Margin="0,0,0,4"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.HeaderTemplate>
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Border Background="Transparent"
-                                                BorderBrush="{DynamicResource ControlBorderBrush}"
-                                                BorderThickness="1"
-                                                CornerRadius="4"
-                                                Margin="4,2"
-                                                Padding="8,4">
-                                            <TextBlock Text="{Binding OldCountDisplay}" 
-                                                       TextAlignment="Center"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}"
-                                                       VerticalAlignment="Center"
-                                                       HorizontalAlignment="Center"/>
-                                        </Border>
+                                        <Grid>
+                                            <!-- Child row background (banding color) -->
+                                            <Border Background="{DynamicResource SecondaryBackgroundBrush}"
+                                                    Visibility="{Binding IsRootRow, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
+                                            
+                                            <!-- Individual cell border -->
+                                            <Border Background="Transparent"
+                                                    BorderBrush="{DynamicResource ControlBorderBrush}"
+                                                    BorderThickness="1"
+                                                    CornerRadius="4"
+                                                    Margin="8,3"
+                                                    Padding="8,6">
+                                                <TextBlock Text="{Binding OldCountDisplay}" 
+                                                           TextAlignment="Center"
+                                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                                           VerticalAlignment="Center"
+                                                           HorizontalAlignment="Center"
+                                                           FontWeight="{Binding IsRootRow, Converter={StaticResource BooleanToFontWeightConverter}}"/>
+                                            </Border>
+                                        </Grid>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
@@ -450,7 +535,8 @@
                                     <DataTemplate>
                                         <TextBlock Text="? Change" 
                                                    HorizontalAlignment="Center"
-                                                   FontWeight="SemiBold"/>
+                                                   FontWeight="SemiBold"
+                                                   Margin="0,0,0,4"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.HeaderTemplate>
                                 <DataGridTemplateColumn.CellTemplate>
@@ -467,8 +553,9 @@
                             </DataGridTemplateColumn>
                         </DataGrid.Columns>
                     </DataGrid>
-                </Grid>
-            </GroupBox>
+                </Grid>  <!-- Close inner Grid that contains column backgrounds -->
+            </Grid>  <!-- Close outer Grid in GroupBox content -->
+        </GroupBox>
             
             <!-- Report GroupBox -->
             <GroupBox Grid.Row="2"
