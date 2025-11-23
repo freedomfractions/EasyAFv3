@@ -167,7 +167,7 @@ namespace EasyAF.Modules.Project.Behaviors
             // Gate: Don't trigger if highlights are disabled
             if (!AllowHighlight)
             {
-                Log.Verbose("Ignoring highlight request - AllowHighlight is false");
+                Log.Verbose("CellHighlight: Ignoring highlight request - AllowHighlight is false (IsNewData={IsNewData})", IsNewData);
                 return;
             }
 
@@ -175,8 +175,8 @@ namespace EasyAF.Modules.Project.Behaviors
             var now = DateTime.UtcNow;
             if ((now - _lastHighlightTime) < DebounceThreshold)
             {
-                Log.Verbose("Ignoring highlight request - debounced (last trigger {Ms}ms ago)", 
-                    (now - _lastHighlightTime).TotalMilliseconds);
+                Log.Verbose("CellHighlight: Ignoring highlight request - debounced (last trigger {Ms}ms ago, IsNewData={IsNewData})", 
+                    (now - _lastHighlightTime).TotalMilliseconds, IsNewData);
                 return;
             }
             _lastHighlightTime = now;
@@ -184,16 +184,11 @@ namespace EasyAF.Modules.Project.Behaviors
             // Guard: Don't start if we're already in the middle of an animation
             if (_isHighlighting)
             {
-                Log.Verbose("Ignoring highlight request - animation already in progress");
+                Log.Verbose("CellHighlight: Ignoring highlight request - animation already in progress (IsNewData={IsNewData})", IsNewData);
                 return; // Don't restart, let current animation finish
             }
 
-            // Guard: Only allow highlighting if explicitly enabled
-            if (!AllowHighlight)
-            {
-                Log.Verbose("Ignoring highlight request - highlighting is currently disabled");
-                return;
-            }
+            Log.Debug("CellHighlight: STARTING highlight animation (IsNewData={IsNewData}, AllowHighlight={Allow})", IsNewData, AllowHighlight);
 
             _isHighlighting = true;
 
