@@ -211,17 +211,19 @@
     
     <!-- Welcome Tab DataTemplate (implicit) -->
     <DataTemplate DataType="{x:Type vm:WelcomeTabViewModel}">
-        <Border Background="Transparent"
-                BorderBrush="Transparent"
-                BorderThickness="0,0,0,1"
-                Cursor="Hand"
+        <Border Cursor="Hand"
                 behaviors:FileTabBehavior.EnableFileTabBehavior="True">
             <Border.Style>
                 <Style TargetType="Border">
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="BorderBrush" Value="Transparent"/>
+                    <Setter Property="BorderThickness" Value="0,0,0,1"/>
                     <Style.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
+                        <!-- Hover state (from behavior setting IsHovered) -->
+                        <DataTrigger Binding="{Binding IsHovered}" Value="True">
                             <Setter Property="Background" Value="{DynamicResource HoverBackgroundBrush}"/>
-                        </Trigger>
+                        </DataTrigger>
+                        <!-- Active state (from FileTabManager setting IsActive) -->
                         <DataTrigger Binding="{Binding IsActive}" Value="True">
                             <Setter Property="Background" Value="{DynamicResource AccentBackgroundBrush}"/>
                             <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
@@ -235,7 +237,6 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="40"/> <!-- Icon (centered) -->
                     <ColumnDefinition Width="*"/> <!-- Content -->
-                    <ColumnDefinition Width="32"/> <!-- Close button (larger) -->
                 </Grid.ColumnDefinitions>
                 
                 <!-- Welcome Icon (Home glyph) -->
@@ -265,8 +266,6 @@
                                TextTrimming="CharacterEllipsis"
                                Margin="0,2,0,0"/>
                 </StackPanel>
-                
-                <!-- No close button for Welcome tab (permanently hidden) -->
             </Grid>
         </Border>
     </DataTemplate>
