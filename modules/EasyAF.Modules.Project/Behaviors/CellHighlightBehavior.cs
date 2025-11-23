@@ -27,6 +27,11 @@ namespace EasyAF.Modules.Project.Behaviors
     /// Bind the `IsHighlighted` property to a ViewModel bool property.
     /// When it becomes true, the highlight animation plays automatically.
     /// </para>
+    /// <para>
+    /// <strong>Trigger Control:</strong>
+    /// Set `AllowHighlight` to true when you want highlights to trigger (e.g., on import).
+    /// Set it to false during UI-only state changes (e.g., expand/collapse).
+    /// </para>
     /// </remarks>
     public class CellHighlightBehavior : Behavior<Border>
     {
@@ -36,7 +41,7 @@ namespace EasyAF.Modules.Project.Behaviors
         private System.Windows.Threading.DispatcherTimer? _holdTimer;
         private SolidColorBrush? _currentAnimatedBrush; // Track the brush being animated
         private DateTime _lastHighlightTime = DateTime.MinValue; // Debounce rapid triggers
-        private static readonly TimeSpan DebounceThreshold = TimeSpan.FromMilliseconds(100); // Ignore triggers within 100ms
+        private static readonly TimeSpan DebounceThreshold = TimeSpan.FromMilliseconds(500); // Ignore triggers within 500ms
 
         /// <summary>
         /// Identifies the IsHighlighted dependency property.
@@ -47,6 +52,16 @@ namespace EasyAF.Modules.Project.Behaviors
                 typeof(bool),
                 typeof(CellHighlightBehavior),
                 new PropertyMetadata(false, OnIsHighlightedChanged));
+
+        /// <summary>
+        /// Identifies the AllowHighlight dependency property.
+        /// </summary>
+        public static readonly DependencyProperty AllowHighlightProperty =
+            DependencyProperty.Register(
+                nameof(AllowHighlight),
+                typeof(bool),
+                typeof(CellHighlightBehavior),
+                new PropertyMetadata(true)); // Default to true for backward compatibility
 
         /// <summary>
         /// Identifies the IsNewData dependency property.
@@ -75,6 +90,17 @@ namespace EasyAF.Modules.Project.Behaviors
         {
             get => (bool)GetValue(IsHighlightedProperty);
             set => SetValue(IsHighlightedProperty, value);
+        }
+
+        /// <summary>
+        /// Gets or sets whether highlighting is allowed.
+        /// Set to false during UI state changes (expand/collapse) to prevent animation.
+        /// Set to true during data import to allow highlights.
+        /// </summary>
+        public bool AllowHighlight
+        {
+            get => (bool)GetValue(AllowHighlightProperty);
+            set => SetValue(AllowHighlightProperty, value);
         }
 
         /// <summary>
@@ -138,7 +164,14 @@ namespace EasyAF.Modules.Project.Behaviors
         /// </summary>
         private void StartHighlight()
         {
-            // Debounce: Ignore if we just triggered recently (within 100ms)
+            // Gate: Don't trigger if highlights are disabled
+            if (!AllowHighlight)
+            {
+                Log.Verbose("Ignoring highlight request - AllowHighlight is false");
+                return;
+            }
+
+            // Debounce: Ignore if we just triggered recently (within 500ms)
             var now = DateTime.UtcNow;
             if ((now - _lastHighlightTime) < DebounceThreshold)
             {
@@ -153,6 +186,13 @@ namespace EasyAF.Modules.Project.Behaviors
             {
                 Log.Verbose("Ignoring highlight request - animation already in progress");
                 return; // Don't restart, let current animation finish
+            }
+
+            // Guard: Only allow highlighting if explicitly enabled
+            if (!AllowHighlight)
+            {
+                Log.Verbose("Ignoring highlight request - highlighting is currently disabled");
+                return;
             }
 
             _isHighlighting = true;
