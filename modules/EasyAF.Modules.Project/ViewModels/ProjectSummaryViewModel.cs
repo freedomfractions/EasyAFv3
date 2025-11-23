@@ -492,6 +492,19 @@ namespace EasyAF.Modules.Project.ViewModels
         /// </summary>
         public ObservableCollection<DataTypeNodeViewModel> OldDataTreeNodes { get; } = new();
 
+        private bool _allowCellHighlights = true;
+        
+        /// <summary>
+        /// Gets or sets whether cell highlights are allowed to trigger.
+        /// Set to false during UI state changes (expand/collapse) to prevent animation.
+        /// Set to true during data import to allow highlights.
+        /// </summary>
+        public bool AllowCellHighlights
+        {
+            get => _allowCellHighlights;
+            set => SetProperty(ref _allowCellHighlights, value);
+        }
+
         /// <summary>
         /// Gets the count of buses in New data.
         /// </summary>
@@ -1070,6 +1083,9 @@ namespace EasyAF.Modules.Project.ViewModels
         /// <param name="triggerHighlights">If true, highlights changed cells after refresh.</param>
         private void RefreshStatistics(bool triggerHighlights)
         {
+            // Disable highlights during row rebuild to prevent expand/collapse from triggering animations
+            AllowCellHighlights = false;
+
             // Capture old counts before refreshing (for change detection)
             var oldCounts = new System.Collections.Generic.Dictionary<string, (int newCount, int oldCount)>();
             
@@ -1167,6 +1183,12 @@ namespace EasyAF.Modules.Project.ViewModels
             RaisePropertyChanged(nameof(OldFuseCount));
             RaisePropertyChanged(nameof(OldShortCircuitCount));
             RaisePropertyChanged(nameof(OldArcFlashCount));
+
+            // Re-enable highlights if we were triggering them for this refresh
+            if (triggerHighlights)
+            {
+                AllowCellHighlights = true;
+            }
         }
 
         private void StatisticsRow_PropertyChanged(object? sender, PropertyChangedEventArgs e)
