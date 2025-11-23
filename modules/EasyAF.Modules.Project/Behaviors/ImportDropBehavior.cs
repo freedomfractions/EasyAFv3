@@ -35,6 +35,8 @@ namespace EasyAF.Modules.Project.Behaviors
         private Brush? _originalBorderBrush;
         private Thickness _originalBorderThickness;
         private Border? _targetBorder; // The actual background border to glow
+        private bool _isGlowing; // Track if we're currently showing glow
+        private System.Windows.Threading.DispatcherTimer? _hideGlowTimer; // Debounce timer
 
         /// <summary>
         /// Identifies whether this drop zone is for New Data (true) or Old Data (false).
@@ -105,6 +107,10 @@ namespace EasyAF.Modules.Project.Behaviors
             AssociatedObject.DragOver -= OnDragOver;
             AssociatedObject.DragLeave -= OnDragLeave;
             AssociatedObject.Drop -= OnDrop;
+            
+            // Clean up timer
+            _hideGlowTimer?.Stop();
+            _hideGlowTimer = null;
         }
 
         /// <summary>
@@ -164,6 +170,9 @@ namespace EasyAF.Modules.Project.Behaviors
         /// </summary>
         private void OnDragEnter(object sender, DragEventArgs e)
         {
+            // Cancel any pending hide
+            _hideGlowTimer?.Stop();
+            
             if (CanImportFile(e.Data))
             {
                 ShowGlow();
@@ -186,6 +195,9 @@ namespace EasyAF.Modules.Project.Behaviors
         /// </summary>
         private void OnDragOver(object sender, DragEventArgs e)
         {
+            // Cancel any pending hide (we're still dragging over)
+            _hideGlowTimer?.Stop();
+            
             if (CanImportFile(e.Data))
             {
                 e.Effects = DragDropEffects.Copy;
@@ -198,14 +210,29 @@ namespace EasyAF.Modules.Project.Behaviors
         }
 
         /// <summary>
-        /// Handles drag leave - hides glow.
+        /// Handles drag leave - hides glow after a short delay.
         /// </summary>
         private void OnDragLeave(object sender, DragEventArgs e)
         {
-            HideGlow();
+            // Don't hide immediately - use a timer to debounce
+            // This prevents flickering when mouse moves between child elements
+            if (_hideGlowTimer == null)
+            {
+                _hideGlowTimer = new System.Windows.Threading.DispatcherTimer
+                {
+                    Interval = TimeSpan.FromMilliseconds(100)
+                };
+                _hideGlowTimer.Tick += (s, args) =>
+                {
+                    _hideGlowTimer?.Stop();
+                    HideGlow();
+                };
+            }
+            
+            _hideGlowTimer.Start();
             e.Handled = true;
 
-            Log.Verbose("Drag leave on {Zone} drop zone", IsNewData ? "New Data" : "Old Data");
+            Log.Verbose("Drag leave on {Zone} drop zone (debounced)", IsNewData ? "New Data" : "Old Data");
         }
 
         /// <summary>
@@ -213,6 +240,8 @@ namespace EasyAF.Modules.Project.Behaviors
         /// </summary>
         private void OnDrop(object sender, DragEventArgs e)
         {
+            // Cancel timer and hide immediately
+            _hideGlowTimer?.Stop();
             HideGlow();
 
             if (!CanImportFile(e.Data))
@@ -297,6 +326,12 @@ namespace EasyAF.Modules.Project.Behaviors
                 return;
             }
 
+            // If already glowing, don't restart animation
+            if (_isGlowing)
+                return;
+
+            _isGlowing = true;
+
             // Save original state (only if not already saved)
             if (_originalBorderBrush == null)
             {
@@ -339,8 +374,10 @@ namespace EasyAF.Modules.Project.Behaviors
         /// </summary>
         private void HideGlow()
         {
-            if (_targetBorder == null || _originalBorderBrush == null)
+            if (_targetBorder == null || _originalBorderBrush == null || !_isGlowing)
                 return; // Never showed glow or no target
+
+            _isGlowing = false;
 
             // Stop any running animations
             _targetBorder.BeginAnimation(Border.OpacityProperty, null);
