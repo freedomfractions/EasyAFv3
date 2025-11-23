@@ -15,6 +15,9 @@
                 <!-- Document Tabs Styles -->
                 <ResourceDictionary Source="/EasyAF.Shell;component/Styles/DocumentTabs.xaml" />
 
+                <!-- File Tab Styles (vertical file tab strip) -->
+                <ResourceDictionary Source="/EasyAF.Shell;component/Styles/FileTabStyles.xaml" />
+
                 <!-- Common Control Styles (ScrollBar, Thumb, future shared styles) -->
                 <ResourceDictionary Source="/EasyAF.Shell;component/Styles/CommonControls.xaml" />
                 
