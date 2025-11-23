@@ -262,26 +262,11 @@
                       Foreground="{DynamicResource TextPrimaryBrush}">
                 <Grid Margin="8">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                     
-                    <!-- Import Buttons Row -->
-                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
-                        <Button Content="Import New Data..."
-                                Command="{Binding ImportNewDataCommand}"
-                                Style="{StaticResource BaseButtonStyle}"
-                                Padding="12,6"
-                                Margin="0,0,10,0"/>
-                        <Button Content="Import Old Data..."
-                                Command="{Binding ImportOldDataCommand}"
-                                Style="{StaticResource BaseButtonStyle}"
-                                Padding="12,6"/>
-                    </StackPanel>
-                    
                     <!-- Data Statistics Table -->
-                    <Grid Grid.Row="2" x:Name="StatisticsTableContainer">
+                    <Grid Grid.Row="0" x:Name="StatisticsTableContainer">
                         <!-- Background rounded rectangles for New Data and Old Data columns -->
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="1.5*"/> <!-- Data Type column (proportional) -->
@@ -734,6 +719,12 @@
         </Grid>
     </ScrollViewer>
 </UserControl>
+
+
+
+
+
+
 
 
 
