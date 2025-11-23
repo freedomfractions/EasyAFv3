@@ -25,8 +25,6 @@ namespace EasyAF.Modules.Project.ViewModels
         private bool _isSelected;
         private bool _isNewCountHighlighted;
         private bool _isOldCountHighlighted;
-        private bool _newCountHighlightConsumed;
-        private bool _oldCountHighlightConsumed;
 
         /// <summary>
         /// Gets or sets the display name of the data type or scenario.
@@ -136,75 +134,19 @@ namespace EasyAF.Modules.Project.ViewModels
         /// <summary>
         /// Gets or sets whether the New Count cell should be highlighted (after import).
         /// </summary>
-        /// <remarks>
-        /// This is a one-shot property - it will return true once, then automatically reset to false.
-        /// This prevents highlights from re-triggering when rows are re-bound during expand/collapse.
-        /// </remarks>
         public bool IsNewCountHighlighted
         {
-            get
-            {
-                if (_isNewCountHighlighted && !_newCountHighlightConsumed)
-                {
-                    // First read - return true and mark as consumed
-                    _newCountHighlightConsumed = true;
-                    return true;
-                }
-                return false; // Already consumed or never set
-            }
-            set
-            {
-                if (value)
-                {
-                    // Setting to true - allow it to be read once
-                    _isNewCountHighlighted = true;
-                    _newCountHighlightConsumed = false;
-                    RaisePropertyChanged(nameof(IsNewCountHighlighted));
-                }
-                else
-                {
-                    // Resetting - clear everything
-                    _isNewCountHighlighted = false;
-                    _newCountHighlightConsumed = false;
-                }
-            }
+            get => _isNewCountHighlighted;
+            set => SetProperty(ref _isNewCountHighlighted, value);
         }
 
         /// <summary>
         /// Gets or sets whether the Old Count cell should be highlighted (after import).
         /// </summary>
-        /// <remarks>
-        /// This is a one-shot property - it will return true once, then automatically reset to false.
-        /// This prevents highlights from re-triggering when rows are re-bound during expand/collapse.
-        /// </remarks>
         public bool IsOldCountHighlighted
         {
-            get
-            {
-                if (_isOldCountHighlighted && !_oldCountHighlightConsumed)
-                {
-                    // First read - return true and mark as consumed
-                    _oldCountHighlightConsumed = true;
-                    return true;
-                }
-                return false; // Already consumed or never set
-            }
-            set
-            {
-                if (value)
-                {
-                    // Setting to true - allow it to be read once
-                    _isOldCountHighlighted = true;
-                    _oldCountHighlightConsumed = false;
-                    RaisePropertyChanged(nameof(IsOldCountHighlighted));
-                }
-                else
-                {
-                    // Resetting - clear everything
-                    _isOldCountHighlighted = false;
-                    _oldCountHighlightConsumed = false;
-                }
-            }
+            get => _isOldCountHighlighted;
+            set => SetProperty(ref _isOldCountHighlighted, value);
         }
 
         /// <summary>

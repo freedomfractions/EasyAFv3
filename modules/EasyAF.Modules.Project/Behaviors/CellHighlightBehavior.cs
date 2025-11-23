@@ -34,6 +34,7 @@ namespace EasyAF.Modules.Project.Behaviors
         private Thickness _originalBorderThickness;
         private bool _isHighlighting;
         private System.Windows.Threading.DispatcherTimer? _holdTimer;
+        private SolidColorBrush? _currentAnimatedBrush; // Track the brush being animated
 
         /// <summary>
         /// Identifies the IsHighlighted dependency property.
@@ -115,12 +116,8 @@ namespace EasyAF.Modules.Project.Behaviors
         {
             base.OnDetaching();
 
-            // Clean up timer
-            _holdTimer?.Stop();
-            _holdTimer = null;
-
-            // Restore original border properties
-            ResetHighlight();
+            // Force cancel any running animations
+            CancelAllAnimations();
         }
 
         /// <summary>
@@ -139,8 +136,12 @@ namespace EasyAF.Modules.Project.Behaviors
         /// </summary>
         private void StartHighlight()
         {
+            // Guard: Don't start if we're already in the middle of an animation
             if (_isHighlighting)
-                return; // Already highlighting
+            {
+                Log.Verbose("Ignoring highlight request - animation already in progress");
+                return; // Don't restart, let current animation finish
+            }
 
             _isHighlighting = true;
 
@@ -158,8 +159,8 @@ namespace EasyAF.Modules.Project.Behaviors
             if (glowBrush != null && _originalBorderBrush is SolidColorBrush originalSolid)
             {
                 // Create animated brush for the BORDER (not background)
-                var animatedBrush = new SolidColorBrush(originalSolid.Color);
-                AssociatedObject.BorderBrush = animatedBrush;
+                _currentAnimatedBrush = new SolidColorBrush(originalSolid.Color);
+                AssociatedObject.BorderBrush = _currentAnimatedBrush;
                 
                 // Increase border thickness for emphasis
                 AssociatedObject.BorderThickness = new Thickness(2);
@@ -173,22 +174,8 @@ namespace EasyAF.Modules.Project.Behaviors
                     EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
                 };
 
-                fadeIn.Completed += (s, e) =>
-                {
-                    // Phase 2: Hold at glow color
-                    _holdTimer = new System.Windows.Threading.DispatcherTimer
-                    {
-                        Interval = HoldDuration
-                    };
-                    _holdTimer.Tick += (ts, te) =>
-                    {
-                        _holdTimer?.Stop();
-                        FadeBackToNormal();
-                    };
-                    _holdTimer.Start();
-                };
-
-                animatedBrush.BeginAnimation(SolidColorBrush.ColorProperty, fadeIn);
+                fadeIn.Completed += OnFadeInCompleted;
+                _currentAnimatedBrush.BeginAnimation(SolidColorBrush.ColorProperty, fadeIn);
 
                 Log.Verbose("Started border highlight animation for {Zone} cell", IsNewData ? "New Data" : "Old Data");
             }
@@ -200,54 +187,108 @@ namespace EasyAF.Modules.Project.Behaviors
         }
 
         /// <summary>
+        /// Called when fade-in animation completes.
+        /// </summary>
+        private void OnFadeInCompleted(object? sender, EventArgs e)
+        {
+            if (!_isHighlighting || _currentAnimatedBrush == null)
+                return; // Animation was cancelled
+
+            // Phase 2: Hold at glow color
+            _holdTimer = new System.Windows.Threading.DispatcherTimer
+            {
+                Interval = HoldDuration
+            };
+            _holdTimer.Tick += OnHoldTimerElapsed;
+            _holdTimer.Start();
+        }
+
+        /// <summary>
+        /// Called when hold timer elapses.
+        /// </summary>
+        private void OnHoldTimerElapsed(object? sender, EventArgs e)
+        {
+            _holdTimer?.Stop();
+            _holdTimer = null;
+
+            if (_isHighlighting)
+            {
+                FadeBackToNormal();
+            }
+        }
+
+        /// <summary>
         /// Fades the border from glow color back to normal.
         /// </summary>
         private void FadeBackToNormal()
         {
-            if (AssociatedObject.BorderBrush is SolidColorBrush animatedBrush && _originalBorderBrush is SolidColorBrush originalSolid)
+            if (_currentAnimatedBrush == null || _originalBorderBrush == null)
+            {
+                ResetHighlight();
+                return;
+            }
+
+            if (_originalBorderBrush is SolidColorBrush originalSolid)
             {
                 // Phase 3: Fade border back to original color (1000ms)
                 var fadeOut = new ColorAnimation
                 {
-                    From = animatedBrush.Color,
+                    From = _currentAnimatedBrush.Color,
                     To = originalSolid.Color,
                     Duration = TimeSpan.FromMilliseconds(1000),
                     EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseInOut }
                 };
 
-                fadeOut.Completed += (s, e) =>
-                {
-                    // Restore original border properties
-                    if (_originalBorderBrush != null)
-                    {
-                        AssociatedObject.BorderBrush = _originalBorderBrush;
-                        AssociatedObject.BorderThickness = _originalBorderThickness;
-                    }
-
-                    _isHighlighting = false;
-
-                    // Reset the IsHighlighted property
-                    IsHighlighted = false;
-
-                    Log.Verbose("Completed border highlight animation for {Zone} cell", IsNewData ? "New Data" : "Old Data");
-                };
-
-                animatedBrush.BeginAnimation(SolidColorBrush.ColorProperty, fadeOut);
+                fadeOut.Completed += OnFadeOutCompleted;
+                _currentAnimatedBrush.BeginAnimation(SolidColorBrush.ColorProperty, fadeOut);
             }
             else
             {
-                // Fallback: just restore
                 ResetHighlight();
             }
         }
 
         /// <summary>
-        /// Immediately resets the highlight to normal state.
+        /// Called when fade-out animation completes.
         /// </summary>
-        private void ResetHighlight()
+        private void OnFadeOutCompleted(object? sender, EventArgs e)
         {
-            _holdTimer?.Stop();
+            if (!_isHighlighting)
+                return; // Already cancelled
 
+            // Restore original border properties
+            if (_originalBorderBrush != null)
+            {
+                AssociatedObject.BorderBrush = _originalBorderBrush;
+                AssociatedObject.BorderThickness = _originalBorderThickness;
+            }
+
+            _currentAnimatedBrush = null;
+            _isHighlighting = false;
+
+            // Auto-reset the property to false (don't trigger change notification to avoid re-animation)
+            SetCurrentValue(IsHighlightedProperty, false);
+
+            Log.Verbose("Completed border highlight animation for {Zone} cell", IsNewData ? "New Data" : "Old Data");
+        }
+
+        /// <summary>
+        /// Cancels all running animations and timers.
+        /// </summary>
+        private void CancelAllAnimations()
+        {
+            // Stop timer
+            _holdTimer?.Stop();
+            _holdTimer = null;
+
+            // Stop any animations on the current brush
+            if (_currentAnimatedBrush != null)
+            {
+                _currentAnimatedBrush.BeginAnimation(SolidColorBrush.ColorProperty, null);
+                _currentAnimatedBrush = null;
+            }
+
+            // Restore original state immediately
             if (_originalBorderBrush != null)
             {
                 AssociatedObject.BorderBrush = _originalBorderBrush;
@@ -255,6 +296,14 @@ namespace EasyAF.Modules.Project.Behaviors
             }
 
             _isHighlighting = false;
+        }
+
+        /// <summary>
+        /// Immediately resets the highlight to normal state.
+        /// </summary>
+        private void ResetHighlight()
+        {
+            CancelAllAnimations();
         }
     }
 }
