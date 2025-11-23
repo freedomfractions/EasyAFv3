@@ -23,6 +23,8 @@ namespace EasyAF.Modules.Project.ViewModels
     {
         private bool _isExpanded;
         private bool _isSelected;
+        private bool _isNewCountHighlighted;
+        private bool _isOldCountHighlighted;
 
         /// <summary>
         /// Gets or sets the display name of the data type or scenario.
@@ -127,6 +129,24 @@ namespace EasyAF.Modules.Project.ViewModels
         {
             get => _isSelected;
             set => SetProperty(ref _isSelected, value);
+        }
+
+        /// <summary>
+        /// Gets or sets whether the New Count cell should be highlighted (after import).
+        /// </summary>
+        public bool IsNewCountHighlighted
+        {
+            get => _isNewCountHighlighted;
+            set => SetProperty(ref _isNewCountHighlighted, value);
+        }
+
+        /// <summary>
+        /// Gets or sets whether the Old Count cell should be highlighted (after import).
+        /// </summary>
+        public bool IsOldCountHighlighted
+        {
+            get => _isOldCountHighlighted;
+            set => SetProperty(ref _isOldCountHighlighted, value);
         }
 
         /// <summary>
