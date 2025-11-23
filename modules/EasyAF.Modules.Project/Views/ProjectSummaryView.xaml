@@ -3,6 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:conv="clr-namespace:EasyAF.Modules.Project.Converters"
              xmlns:local="clr-namespace:EasyAF.Modules.Project.ViewModels"
+             xmlns:behaviors="clr-namespace:EasyAF.Modules.Project.Behaviors"
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              HorizontalAlignment="Stretch"
              VerticalAlignment="Stretch">
     <UserControl.Resources>
@@ -283,7 +285,11 @@
                                 BorderThickness="1"
                                 CornerRadius="8"
                                 Margin="6,4,3,-2"
-                                VerticalAlignment="Stretch"/>
+                                VerticalAlignment="Stretch">
+                            <i:Interaction.Behaviors>
+                                <behaviors:ImportDropBehavior IsNewData="True" ViewModel="{Binding}"/>
+                            </i:Interaction.Behaviors>
+                        </Border>
                         
                         <!-- Old Data Column Background - dynamically sized to match DataGrid height -->
                         <Border Grid.Column="2"
@@ -293,7 +299,11 @@
                                 BorderThickness="1"
                                 CornerRadius="8"
                                 Margin="3,4,6,-2"
-                                VerticalAlignment="Stretch"/>
+                                VerticalAlignment="Stretch">
+                            <i:Interaction.Behaviors>
+                                <behaviors:ImportDropBehavior IsNewData="False" ViewModel="{Binding}"/>
+                            </i:Interaction.Behaviors>
+                        </Border>
                         
                         <!-- DataGrid on top of backgrounds - DISABLE ALL SCROLLING -->
                         <DataGrid Grid.Column="0" Grid.ColumnSpan="4"
@@ -719,6 +729,42 @@
         </Grid>
     </ScrollViewer>
 </UserControl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
