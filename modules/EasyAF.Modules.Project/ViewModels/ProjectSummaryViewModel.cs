@@ -786,7 +786,45 @@ namespace EasyAF.Modules.Project.ViewModels
                     Log.Warning("Mapping validation warnings: {Warnings}", warnings);
                 }
 
-                // Step 3: Ensure target dataset exists
+                // Step 2.5: Smart conflict detection - check if files will actually overwrite existing data
+                targetDataSet = isNewData ? _document.Project.NewData : _document.Project.OldData;
+                if (targetDataSet != null && HasDatasetEntriesInternal(targetDataSet))
+                {
+                    var dataTypeName = isNewData ? "New" : "Old";
+                    var (willOverwrite, affectedTypes) = WillImportOverwriteData(fileNames, mappingConfig, targetDataSet);
+                    
+                    if (willOverwrite)
+                    {
+                        var fileCount = fileNames.Length;
+                        var fileWord = fileCount == 1 ? "file" : "files";
+                        var affectedList = string.Join("\n  • ", affectedTypes);
+                        
+                        var confirmed = _dialogService.Confirm(
+                            $"The {dataTypeName} Data dataset already contains data that will be affected:\n\n" +
+                            $"  • {affectedList}\n\n" +
+                            $"Importing {fileCount} {fileWord} will ADD to the existing data (duplicates may occur).\n\n" +
+                            $"To replace the data instead:\n" +
+                            $"1. Click 'Cancel'\n" +
+                            $"2. Right-click the {dataTypeName} Data column header\n" +
+                            $"3. Select 'Clear Data'\n" +
+                            $"4. Then import your files\n\n" +
+                            $"Continue with import (add to existing data)?",
+                            $"Confirm Import - {dataTypeName} Data Conflict");
+
+                        if (!confirmed)
+                        {
+                            Log.Information("User cancelled import due to {DataType} data conflict with {Count} type(s)", 
+                                dataTypeName, affectedTypes.Count);
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        Log.Information("Smart detection: Import will not affect existing {DataType} data - proceeding without warning", dataTypeName);
+                    }
+                }
+
+                // Step 4: Ensure target dataset exists
                 targetDataSet = isNewData ? _document.Project.NewData : _document.Project.OldData;
                 if (targetDataSet == null)
                 {
@@ -901,12 +939,9 @@ namespace EasyAF.Modules.Project.ViewModels
                 if (targetDataSet != null && HasDatasetEntriesInternal(targetDataSet))
                 {
                     var dataTypeName = isNewData ? "New" : "Old";
-                    var fileCount = filePaths.Length;
-                    var fileWord = fileCount == 1 ? "file" : "files";
-                    
                     var confirmed = _dialogService.Confirm(
                         $"The {dataTypeName} Data dataset already contains imported data.\n\n" +
-                        $"Importing {fileCount} {fileWord} will ADD to the existing data (duplicates may occur).\n\n" +
+                        $"Importing {filePaths.Length} file(s) will ADD to the existing data (duplicates may occur).\n\n" +
                         $"To replace the data instead:\n" +
                         $"1. Click 'Cancel'\n" +
                         $"2. Right-click the {dataTypeName} Data column header\n" +
@@ -941,7 +976,45 @@ namespace EasyAF.Modules.Project.ViewModels
                     Log.Warning("Mapping validation warnings: {Warnings}", warnings);
                 }
 
-                // Step 3: Ensure target dataset exists (reuse targetDataSet from Step 1.5)
+                // Step 2.5: Smart conflict detection - check if files will actually overwrite existing data
+                targetDataSet = isNewData ? _document.Project.NewData : _document.Project.OldData;
+                if (targetDataSet != null && HasDatasetEntriesInternal(targetDataSet))
+                {
+                    var dataTypeName = isNewData ? "New" : "Old";
+                    var (willOverwrite, affectedTypes) = WillImportOverwriteData(filePaths, mappingConfig, targetDataSet);
+                    
+                    if (willOverwrite)
+                    {
+                        var fileCount = filePaths.Length;
+                        var fileWord = fileCount == 1 ? "file" : "files";
+                        var affectedList = string.Join("\n  • ", affectedTypes);
+                        
+                        var confirmed = _dialogService.Confirm(
+                            $"The {dataTypeName} Data dataset already contains data that will be affected:\n\n" +
+                            $"  • {affectedList}\n\n" +
+                            $"Importing {fileCount} {fileWord} will ADD to the existing data (duplicates may occur).\n\n" +
+                            $"To replace the data instead:\n" +
+                            $"1. Click 'Cancel'\n" +
+                            $"2. Right-click the {dataTypeName} Data column header\n" +
+                            $"3. Select 'Clear Data'\n" +
+                            $"4. Then drag and drop your files again\n\n" +
+                            $"Continue with import (add to existing data)?",
+                            $"Confirm Drop Import - {dataTypeName} Data Conflict");
+
+                        if (!confirmed)
+                        {
+                            Log.Information("User cancelled drop import due to {DataType} data conflict with {Count} type(s)", 
+                                dataTypeName, affectedTypes.Count);
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        Log.Information("Smart detection: Drop import will not affect existing {DataType} data - proceeding without warning", dataTypeName);
+                    }
+                }
+
+                // Step 3: Ensure target dataset exists
                 targetDataSet = isNewData ? _document.Project.NewData : _document.Project.OldData;
                 if (targetDataSet == null)
                 {
@@ -1464,6 +1537,127 @@ namespace EasyAF.Modules.Project.ViewModels
             }
 
             return rows;
+        }
+
+        #endregion
+
+        #region Helper Methods
+
+        /// <summary>
+        /// Checks if importing the specified files will overwrite existing data.
+        /// Pre-scans files to detect which data types they contain.
+        /// </summary>
+        /// <param name="filePaths">Files to be imported.</param>
+        /// <param name="mappingConfig">Mapping configuration to use.</param>
+        /// <param name="targetDataSet">Target dataset to check.</param>
+        /// <returns>Tuple of (willOverwrite, affectedDataTypes)</returns>
+        private (bool willOverwrite, System.Collections.Generic.List<string> affectedTypes) 
+            WillImportOverwriteData(string[] filePaths, EasyAF.Import.MappingConfig mappingConfig, DataSet? targetDataSet)
+        {
+            var affectedTypes = new System.Collections.Generic.List<string>();
+            
+            if (targetDataSet == null || !HasDatasetEntriesInternal(targetDataSet))
+                return (false, affectedTypes); // No existing data - no conflict
+
+            try
+            {
+                // Create temporary dataset to see what data types the files contain
+                var tempDataSet = new DataSet();
+                var importManager = new EasyAF.Import.ImportManager();
+
+                foreach (var filePath in filePaths)
+                {
+                    try
+                    {
+                        importManager.Import(filePath, mappingConfig, tempDataSet);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Warning(ex, "Error pre-scanning file {File} for conflict detection", System.IO.Path.GetFileName(filePath));
+                        // Continue with other files - we'll catch import errors later
+                    }
+                }
+
+                // Check which data types in tempDataSet already have data in targetDataSet
+                if ((tempDataSet.BusEntries?.Count ?? 0) > 0 && (targetDataSet.BusEntries?.Count ?? 0) > 0)
+                    affectedTypes.Add($"Buses ({targetDataSet.BusEntries!.Count} existing)");
+                if ((tempDataSet.LVBreakerEntries?.Count ?? 0) > 0 && (targetDataSet.LVBreakerEntries?.Count ?? 0) > 0)
+                    affectedTypes.Add($"Breakers ({targetDataSet.LVBreakerEntries!.Count} existing)");
+                if ((tempDataSet.FuseEntries?.Count ?? 0) > 0 && (targetDataSet.FuseEntries?.Count ?? 0) > 0)
+                    affectedTypes.Add($"Fuses ({targetDataSet.FuseEntries!.Count} existing)");
+                if ((tempDataSet.CableEntries?.Count ?? 0) > 0 && (targetDataSet.CableEntries?.Count ?? 0) > 0)
+                    affectedTypes.Add($"Cables ({targetDataSet.CableEntries!.Count} existing)");
+                if ((tempDataSet.ArcFlashEntries?.Count ?? 0) > 0 && (targetDataSet.ArcFlashEntries?.Count ?? 0) > 0)
+                    affectedTypes.Add($"Arc Flash ({targetDataSet.ArcFlashEntries!.Count} existing)");
+                if ((tempDataSet.ShortCircuitEntries?.Count ?? 0) > 0 && (targetDataSet.ShortCircuitEntries?.Count ?? 0) > 0)
+                    affectedTypes.Add($"Short Circuit ({targetDataSet.ShortCircuitEntries!.Count} existing)");
+                
+                // Extended equipment types
+                if ((tempDataSet.AFDEntries?.Count ?? 0) > 0 && (targetDataSet.AFDEntries?.Count ?? 0) > 0)
+                    affectedTypes.Add($"AFD ({targetDataSet.AFDEntries!.Count} existing)");
+                if ((tempDataSet.ATSEntries?.Count ?? 0) > 0 && (targetDataSet.ATSEntries?.Count ?? 0) > 0)
+                    affectedTypes.Add($"ATS ({targetDataSet.ATSEntries!.Count} existing)");
+                if ((tempDataSet.BatteryEntries?.Count ?? 0) > 0 && (targetDataSet.BatteryEntries?.Count ?? 0) > 0)
+                    affectedTypes.Add($"Batteries ({targetDataSet.BatteryEntries!.Count} existing)");
+                if ((tempDataSet.BuswayEntries?.Count ?? 0) > 0 && (targetDataSet.BuswayEntries?.Count ?? 0) > 0)
+                    affectedTypes.Add($"Busways ({targetDataSet.BuswayEntries!.Count} existing)");
+                if ((tempDataSet.CapacitorEntries?.Count ?? 0) > 0 && (targetDataSet.CapacitorEntries?.Count ?? 0) > 0)
+                    affectedTypes.Add($"Capacitors ({targetDataSet.CapacitorEntries!.Count} existing)");
+                if ((tempDataSet.CLReactorEntries?.Count ?? 0) > 0 && (targetDataSet.CLReactorEntries?.Count ?? 0) > 0)
+                    affectedTypes.Add($"CL Reactors ({targetDataSet.CLReactorEntries!.Count} existing)");
+                if ((tempDataSet.CTEntries?.Count ?? 0) > 0 && (targetDataSet.CTEntries?.Count ?? 0) > 0)
+                    affectedTypes.Add($"CTs ({targetDataSet.CTEntries!.Count} existing)");
+                if ((tempDataSet.FilterEntries?.Count ?? 0) > 0 && (targetDataSet.FilterEntries?.Count ?? 0) > 0)
+                    affectedTypes.Add($"Filters ({targetDataSet.FilterEntries!.Count} existing)");
+                if ((tempDataSet.GeneratorEntries?.Count ?? 0) > 0 && (targetDataSet.GeneratorEntries?.Count ?? 0) > 0)
+                    affectedTypes.Add($"Generators ({targetDataSet.GeneratorEntries!.Count} existing)");
+                if ((tempDataSet.HVBreakerEntries?.Count ?? 0) > 0 && (targetDataSet.HVBreakerEntries?.Count ?? 0) > 0)
+                    affectedTypes.Add($"HV Breakers ({targetDataSet.HVBreakerEntries!.Count} existing)");
+                if ((tempDataSet.InverterEntries?.Count ?? 0) > 0 && (targetDataSet.InverterEntries?.Count ?? 0) > 0)
+                    affectedTypes.Add($"Inverters ({targetDataSet.InverterEntries!.Count} existing)");
+                if ((tempDataSet.LoadEntries?.Count ?? 0) > 0 && (targetDataSet.LoadEntries?.Count ?? 0) > 0)
+                    affectedTypes.Add($"Loads ({targetDataSet.LoadEntries!.Count} existing)");
+                if ((tempDataSet.MCCEntries?.Count ?? 0) > 0 && (targetDataSet.MCCEntries?.Count ?? 0) > 0)
+                    affectedTypes.Add($"MCCs ({targetDataSet.MCCEntries!.Count} existing)");
+                if ((tempDataSet.MeterEntries?.Count ?? 0) > 0 && (targetDataSet.MeterEntries?.Count ?? 0) > 0)
+                    affectedTypes.Add($"Meters ({targetDataSet.MeterEntries!.Count} existing)");
+                if ((tempDataSet.MotorEntries?.Count ?? 0) > 0 && (targetDataSet.MotorEntries?.Count ?? 0) > 0)
+                    affectedTypes.Add($"Motors ({targetDataSet.MotorEntries!.Count} existing)");
+                if ((tempDataSet.PanelEntries?.Count ?? 0) > 0 && (targetDataSet.PanelEntries?.Count ?? 0) > 0)
+                    affectedTypes.Add($"Panels ({targetDataSet.PanelEntries!.Count} existing)");
+                if ((tempDataSet.PhotovoltaicEntries?.Count ?? 0) > 0 && (targetDataSet.PhotovoltaicEntries?.Count ?? 0) > 0)
+                    affectedTypes.Add($"Photovoltaics ({targetDataSet.PhotovoltaicEntries!.Count} existing)");
+                if ((tempDataSet.POCEntries?.Count ?? 0) > 0 && (targetDataSet.POCEntries?.Count ?? 0) > 0)
+                    affectedTypes.Add($"POCs ({targetDataSet.POCEntries!.Count} existing)");
+                if ((tempDataSet.RectifierEntries?.Count ?? 0) > 0 && (targetDataSet.RectifierEntries?.Count ?? 0) > 0)
+                    affectedTypes.Add($"Rectifiers ({targetDataSet.RectifierEntries!.Count} existing)");
+                if ((tempDataSet.RelayEntries?.Count ?? 0) > 0 && (targetDataSet.RelayEntries?.Count ?? 0) > 0)
+                    affectedTypes.Add($"Relays ({targetDataSet.RelayEntries!.Count} existing)");
+                if ((tempDataSet.ShuntEntries?.Count ?? 0) > 0 && (targetDataSet.ShuntEntries?.Count ?? 0) > 0)
+                    affectedTypes.Add($"Shunts ({targetDataSet.ShuntEntries!.Count} existing)");
+                if ((tempDataSet.SwitchEntries?.Count ?? 0) > 0 && (targetDataSet.SwitchEntries?.Count ?? 0) > 0)
+                    affectedTypes.Add($"Switches ({targetDataSet.SwitchEntries!.Count} existing)");
+                if ((tempDataSet.Transformer2WEntries?.Count ?? 0) > 0 && (targetDataSet.Transformer2WEntries?.Count ?? 0) > 0)
+                    affectedTypes.Add($"2W Transformers ({targetDataSet.Transformer2WEntries!.Count} existing)");
+                if ((tempDataSet.Transformer3WEntries?.Count ?? 0) > 0 && (targetDataSet.Transformer3WEntries?.Count ?? 0) > 0)
+                    affectedTypes.Add($"3W Transformers ({targetDataSet.Transformer3WEntries!.Count} existing)");
+                if ((tempDataSet.TransmissionLineEntries?.Count ?? 0) > 0 && (targetDataSet.TransmissionLineEntries?.Count ?? 0) > 0)
+                    affectedTypes.Add($"Transmission Lines ({targetDataSet.TransmissionLineEntries!.Count} existing)");
+                if ((tempDataSet.UPSEntries?.Count ?? 0) > 0 && (targetDataSet.UPSEntries?.Count ?? 0) > 0)
+                    affectedTypes.Add($"UPS ({targetDataSet.UPSEntries!.Count} existing)");
+                if ((tempDataSet.UtilityEntries?.Count ?? 0) > 0 && (targetDataSet.UtilityEntries?.Count ?? 0) > 0)
+                    affectedTypes.Add($"Utilities ({targetDataSet.UtilityEntries!.Count} existing)");
+                if ((tempDataSet.ZigzagTransformerEntries?.Count ?? 0) > 0 && (targetDataSet.ZigzagTransformerEntries?.Count ?? 0) > 0)
+                    affectedTypes.Add($"Zigzag Transformers ({targetDataSet.ZigzagTransformerEntries!.Count} existing)");
+
+                return (affectedTypes.Count > 0, affectedTypes);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error during smart conflict detection - falling back to conservative warning");
+                // Fall back to conservative behavior: warn if ANY data exists
+                return (true, new System.Collections.Generic.List<string> { "Unknown (error during detection)" });
+            }
         }
 
         #endregion
