@@ -770,6 +770,131 @@ namespace EasyAF.Modules.Project.ViewModels
             }
         }
 
+        /// <summary>
+        /// Executes import operation triggered by drag-and-drop.
+        /// </summary>
+        /// <param name="filePaths">Array of file paths dropped on the zone.</param>
+        /// <param name="isNewData">True to import into New Data, false for Old Data.</param>
+        /// <remarks>
+        /// This method is called by the ImportDropBehavior when files are dropped.
+        /// It reuses the same import logic as the button-triggered import but skips
+        /// the file picker dialog since files are already provided.
+        /// </remarks>
+        public void ExecuteDropImport(string[] filePaths, bool isNewData)
+        {
+            try
+            {
+                if (filePaths == null || filePaths.Length == 0)
+                {
+                    Log.Warning("ExecuteDropImport called with no files");
+                    return;
+                }
+
+                // Step 1: Validate mapping file exists
+                if (string.IsNullOrWhiteSpace(MapPath) || !System.IO.File.Exists(MapPath))
+                {
+                    _dialogService.ShowError(
+                        "Please select a mapping file first using the 'Map' field in the Report section below.",
+                        "No Mapping File");
+                    return;
+                }
+
+                Log.Information("Drop import: {Count} file(s) into {Target} data", filePaths.Length, isNewData ? "New" : "Old");
+
+                // Step 2: Load mapping config once (reuse for all files)
+                var mappingConfig = EasyAF.Import.MappingConfig.Load(MapPath);
+                var validation = mappingConfig.Validate();
+                
+                if (validation.HasErrors)
+                {
+                    var validationErrors = string.Join("\n", validation.Errors);
+                    _dialogService.ShowError($"Mapping configuration has errors:\n\n{validationErrors}", "Invalid Mapping");
+                    return;
+                }
+
+                if (validation.Warnings.Any())
+                {
+                    var warnings = string.Join("\n", validation.Warnings);
+                    Log.Warning("Mapping validation warnings: {Warnings}", warnings);
+                }
+
+                // Step 3: Ensure target dataset exists
+                var targetDataSet = isNewData ? _document.Project.NewData : _document.Project.OldData;
+                if (targetDataSet == null)
+                {
+                    targetDataSet = new DataSet();
+                    if (isNewData)
+                        _document.Project.NewData = targetDataSet;
+                    else
+                        _document.Project.OldData = targetDataSet;
+                }
+
+                // Step 4: Import each file
+                var importManager = new EasyAF.Import.ImportManager();
+                int successCount = 0;
+                var errors = new System.Collections.Generic.List<string>();
+
+                foreach (var filePath in filePaths)
+                {
+                    try
+                    {
+                        Log.Information("Importing dropped file: {File}", System.IO.Path.GetFileName(filePath));
+                        importManager.Import(filePath, mappingConfig, targetDataSet);
+                        successCount++;
+                    }
+                    catch (Exception fileEx)
+                    {
+                        var fileName = System.IO.Path.GetFileName(filePath);
+                        errors.Add($"{fileName}: {fileEx.Message}");
+                        Log.Error(fileEx, "Error importing dropped file: {File}", filePath);
+                    }
+                }
+
+                // Step 5: Report results
+                _document.MarkDirty();
+                RefreshStatistics();
+
+                // Log scenario discovery for verification
+                LogScenarioDiscovery(targetDataSet, isNewData);
+
+                if (successCount == filePaths.Length)
+                {
+                    // All files imported successfully
+                    _dialogService.ShowMessage(
+                        $"Import completed successfully!\n\n{successCount} file(s) imported into {(isNewData ? "New" : "Old")} Data.",
+                        "Import Successful");
+                }
+                else if (successCount > 0)
+                {
+                    // Some files failed
+                    var errorSummary = string.Join("\n", errors);
+                    _dialogService.ShowWarning(
+                        $"{successCount} of {filePaths.Length} file(s) imported successfully.\n\nErrors:\n{errorSummary}",
+                        "Partial Import");
+                }
+                else
+                {
+                    // All files failed
+                    var errorSummary = string.Join("\n", errors);
+                    _dialogService.ShowError($"All imports failed:\n\n{errorSummary}", "Import Failed");
+                }
+
+                Log.Information("Drop import completed: {Success} of {Total} files imported successfully", successCount, filePaths.Length);
+            }
+            catch (System.IO.IOException ioEx)
+            {
+                Log.Error(ioEx, "I/O error during drop import");
+                _dialogService.ShowError(
+                    $"File error: {ioEx.Message}\n\nMake sure the file is not open in another program.",
+                    "Import Failed");
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error during drop import");
+                _dialogService.ShowError($"Import failed: {ex.Message}", "Import Failed");
+            }
+        }
+
         #endregion
 
         #region Event Handlers
