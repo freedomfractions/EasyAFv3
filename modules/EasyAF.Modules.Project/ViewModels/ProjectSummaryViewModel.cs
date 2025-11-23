@@ -727,7 +727,7 @@ namespace EasyAF.Modules.Project.ViewModels
 
                 // Step 6: Report results
                 _document.MarkDirty();
-                RefreshStatistics();
+                RefreshStatistics(triggerHighlights: true); // Trigger highlights on import
 
                 // Log scenario discovery for verification
                 LogScenarioDiscovery(targetDataSet, isNewData);
@@ -852,7 +852,7 @@ namespace EasyAF.Modules.Project.ViewModels
 
                 // Step 5: Report results
                 _document.MarkDirty();
-                RefreshStatistics();
+                RefreshStatistics(triggerHighlights: true); // Trigger highlights on drop import
 
                 // Log scenario discovery for verification
                 LogScenarioDiscovery(targetDataSet, isNewData);
@@ -909,14 +909,27 @@ namespace EasyAF.Modules.Project.ViewModels
         /// </remarks>
         public void RefreshStatistics()
         {
+            RefreshStatistics(triggerHighlights: false); // Don't trigger highlights by default
+        }
+
+        /// <summary>
+        /// Refreshes statistics display with optional highlighting.
+        /// </summary>
+        /// <param name="triggerHighlights">If true, highlights changed cells after refresh.</param>
+        private void RefreshStatistics(bool triggerHighlights)
+        {
             // Capture old counts before refreshing (for change detection)
             var oldCounts = new System.Collections.Generic.Dictionary<string, (int newCount, int oldCount)>();
-            foreach (var row in DataStatisticsRows)
+            
+            if (triggerHighlights)
             {
-                var key = row.ScenarioName != null 
-                    ? $"{row.DataTypeName}:{row.ScenarioName}" 
-                    : row.DataTypeName;
-                oldCounts[key] = (row.NewCount, row.OldCount);
+                foreach (var row in DataStatisticsRows)
+                {
+                    var key = row.ScenarioName != null 
+                        ? $"{row.DataTypeName}:{row.ScenarioName}" 
+                        : row.DataTypeName;
+                    oldCounts[key] = (row.NewCount, row.OldCount);
+                }
             }
 
             // Debug logging to diagnose load issues
@@ -942,36 +955,39 @@ namespace EasyAF.Modules.Project.ViewModels
                 // Subscribe to IsExpanded changes
                 row.PropertyChanged += StatisticsRow_PropertyChanged;
 
-                // Detect changes and trigger highlights
-                var key = row.ScenarioName != null 
-                    ? $"{row.DataTypeName}:{row.ScenarioName}" 
-                    : row.DataTypeName;
-
-                if (oldCounts.TryGetValue(key, out var oldValues))
+                // Only detect changes and trigger highlights if explicitly requested
+                if (triggerHighlights)
                 {
-                    // Check if New count changed
-                    if (row.NewCount != oldValues.newCount && row.NewCount > 0)
-                    {
-                        row.IsNewCountHighlighted = true;
-                        Log.Debug("Highlighting New count change for {Key}: {Old} ? {New}", 
-                            key, oldValues.newCount, row.NewCount);
-                    }
+                    var key = row.ScenarioName != null 
+                        ? $"{row.DataTypeName}:{row.ScenarioName}" 
+                        : row.DataTypeName;
 
-                    // Check if Old count changed
-                    if (row.OldCount != oldValues.oldCount && row.OldCount > 0)
+                    if (oldCounts.TryGetValue(key, out var oldValues))
                     {
-                        row.IsOldCountHighlighted = true;
-                        Log.Debug("Highlighting Old count change for {Key}: {Old} ? {New}", 
-                            key, oldValues.oldCount, row.OldCount);
+                        // Check if New count changed
+                        if (row.NewCount != oldValues.newCount && row.NewCount > 0)
+                        {
+                            row.IsNewCountHighlighted = true;
+                            Log.Debug("Highlighting New count change for {Key}: {Old} ? {New}", 
+                                key, oldValues.newCount, row.NewCount);
+                        }
+
+                        // Check if Old count changed
+                        if (row.OldCount != oldValues.oldCount && row.OldCount > 0)
+                        {
+                            row.IsOldCountHighlighted = true;
+                            Log.Debug("Highlighting Old count change for {Key}: {Old} ? {New}", 
+                                key, oldValues.oldCount, row.OldCount);
+                        }
                     }
-                }
-                else if (row.NewCount > 0 || row.OldCount > 0)
-                {
-                    // New row appeared - highlight whichever has data
-                    if (row.NewCount > 0) row.IsNewCountHighlighted = true;
-                    if (row.OldCount > 0) row.IsOldCountHighlighted = true;
-                    Log.Debug("Highlighting new row {Key}: New={New}, Old={Old}", 
-                        key, row.NewCount, row.OldCount);
+                    else if (row.NewCount > 0 || row.OldCount > 0)
+                    {
+                        // New row appeared - highlight whichever has data
+                        if (row.NewCount > 0) row.IsNewCountHighlighted = true;
+                        if (row.OldCount > 0) row.IsOldCountHighlighted = true;
+                        Log.Debug("Highlighting new row {Key}: New={New}, Old={Old}", 
+                            key, row.NewCount, row.OldCount);
+                    }
                 }
             }
 

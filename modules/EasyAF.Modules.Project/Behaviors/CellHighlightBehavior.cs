@@ -30,7 +30,8 @@ namespace EasyAF.Modules.Project.Behaviors
     /// </remarks>
     public class CellHighlightBehavior : Behavior<Border>
     {
-        private Brush? _originalBackground;
+        private Brush? _originalBorderBrush;
+        private Thickness _originalBorderThickness;
         private bool _isHighlighting;
         private System.Windows.Threading.DispatcherTimer? _holdTimer;
 
@@ -99,8 +100,9 @@ namespace EasyAF.Modules.Project.Behaviors
         {
             base.OnAttached();
 
-            // Save original background
-            _originalBackground = AssociatedObject.Background;
+            // Save original border properties (not background)
+            _originalBorderBrush = AssociatedObject.BorderBrush;
+            _originalBorderThickness = AssociatedObject.BorderThickness;
 
             Log.Debug("CellHighlightBehavior attached to {ElementName} (IsNewData={IsNewData})",
                 AssociatedObject.Name ?? "unnamed Border", IsNewData);
@@ -117,7 +119,7 @@ namespace EasyAF.Modules.Project.Behaviors
             _holdTimer?.Stop();
             _holdTimer = null;
 
-            // Restore original background
+            // Restore original border properties
             ResetHighlight();
         }
 
@@ -142,23 +144,27 @@ namespace EasyAF.Modules.Project.Behaviors
 
             _isHighlighting = true;
 
-            // Save original background if not already saved
-            if (_originalBackground == null)
+            // Save original border properties if not already saved
+            if (_originalBorderBrush == null)
             {
-                _originalBackground = AssociatedObject.Background;
+                _originalBorderBrush = AssociatedObject.BorderBrush;
+                _originalBorderThickness = AssociatedObject.BorderThickness;
             }
 
             // Get glow brush from theme
             var glowBrushKey = IsNewData ? "NewDataGlowBrush" : "OldDataGlowBrush";
             var glowBrush = Application.Current.TryFindResource(glowBrushKey) as SolidColorBrush;
 
-            if (glowBrush != null && _originalBackground is SolidColorBrush originalSolid)
+            if (glowBrush != null && _originalBorderBrush is SolidColorBrush originalSolid)
             {
-                // Create animated brush
+                // Create animated brush for the BORDER (not background)
                 var animatedBrush = new SolidColorBrush(originalSolid.Color);
-                AssociatedObject.Background = animatedBrush;
+                AssociatedObject.BorderBrush = animatedBrush;
+                
+                // Increase border thickness for emphasis
+                AssociatedObject.BorderThickness = new Thickness(2);
 
-                // Phase 1: Fade in to glow color (500ms)
+                // Phase 1: Fade border color to glow color (500ms)
                 var fadeIn = new ColorAnimation
                 {
                     From = originalSolid.Color,
@@ -184,7 +190,7 @@ namespace EasyAF.Modules.Project.Behaviors
 
                 animatedBrush.BeginAnimation(SolidColorBrush.ColorProperty, fadeIn);
 
-                Log.Verbose("Started highlight animation for {Zone} cell", IsNewData ? "New Data" : "Old Data");
+                Log.Verbose("Started border highlight animation for {Zone} cell", IsNewData ? "New Data" : "Old Data");
             }
             else
             {
@@ -194,13 +200,13 @@ namespace EasyAF.Modules.Project.Behaviors
         }
 
         /// <summary>
-        /// Fades the background from glow color back to normal.
+        /// Fades the border from glow color back to normal.
         /// </summary>
         private void FadeBackToNormal()
         {
-            if (AssociatedObject.Background is SolidColorBrush animatedBrush && _originalBackground is SolidColorBrush originalSolid)
+            if (AssociatedObject.BorderBrush is SolidColorBrush animatedBrush && _originalBorderBrush is SolidColorBrush originalSolid)
             {
-                // Phase 3: Fade back to original color (1000ms)
+                // Phase 3: Fade border back to original color (1000ms)
                 var fadeOut = new ColorAnimation
                 {
                     From = animatedBrush.Color,
@@ -211,18 +217,19 @@ namespace EasyAF.Modules.Project.Behaviors
 
                 fadeOut.Completed += (s, e) =>
                 {
-                    // Restore original brush reference
-                    if (_originalBackground != null)
+                    // Restore original border properties
+                    if (_originalBorderBrush != null)
                     {
-                        AssociatedObject.Background = _originalBackground;
+                        AssociatedObject.BorderBrush = _originalBorderBrush;
+                        AssociatedObject.BorderThickness = _originalBorderThickness;
                     }
 
                     _isHighlighting = false;
 
-                    // Reset the IsHighlighted property (will be detected by ViewModel)
+                    // Reset the IsHighlighted property
                     IsHighlighted = false;
 
-                    Log.Verbose("Completed highlight animation for {Zone} cell", IsNewData ? "New Data" : "Old Data");
+                    Log.Verbose("Completed border highlight animation for {Zone} cell", IsNewData ? "New Data" : "Old Data");
                 };
 
                 animatedBrush.BeginAnimation(SolidColorBrush.ColorProperty, fadeOut);
@@ -241,9 +248,10 @@ namespace EasyAF.Modules.Project.Behaviors
         {
             _holdTimer?.Stop();
 
-            if (_originalBackground != null)
+            if (_originalBorderBrush != null)
             {
-                AssociatedObject.Background = _originalBackground;
+                AssociatedObject.BorderBrush = _originalBorderBrush;
+                AssociatedObject.BorderThickness = _originalBorderThickness;
             }
 
             _isHighlighting = false;
