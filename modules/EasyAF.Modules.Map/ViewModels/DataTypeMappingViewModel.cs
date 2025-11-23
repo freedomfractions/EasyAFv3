@@ -43,6 +43,7 @@ namespace EasyAF.Modules.Map.ViewModels
         private ColumnInfo? _selectedSourceColumn;
         private MapPropertyInfo? _selectedTargetProperty;
         private TableReference _selectedTable;
+        private bool _isInitializing = true; // Flag to suppress dirty marking during load
 
         /// <summary>
         /// Initializes a new instance of the DataTypeMappingViewModel.
@@ -90,6 +91,9 @@ namespace EasyAF.Modules.Map.ViewModels
             // Load initial data
             LoadTargetProperties();
             LoadAvailableTables();
+            
+            // Initialization complete - allow dirty marking from now on
+            _isInitializing = false;
 
             Log.Debug("DataTypeMappingViewModel initialized for {DataType} (display: {DisplayName})", 
                 _dataType, _propertyDiscovery.GetDataTypeDescription(_dataType));
@@ -240,7 +244,14 @@ namespace EasyAF.Modules.Map.ViewModels
                     if (value != null && !string.IsNullOrEmpty(value.DisplayName))
                     {
                         _document.TableReferencesByDataType[_dataType] = value.DisplayName;
-                        _document.MarkDirty();
+                        
+                        // ONLY mark dirty if we're NOT in initialization mode
+                        // During load, restoring saved table selections should not mark document dirty
+                        if (!_isInitializing)
+                        {
+                            _document.MarkDirty();
+                        }
+                        
                         Log.Debug("Saved table reference for {DataType}: {TableRef}", _dataType, value.DisplayName);
                     }
                     
