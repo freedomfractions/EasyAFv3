@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using EasyAF.Core.Contracts;
@@ -325,6 +326,46 @@ namespace EasyAF.Modules.Project
             
             document.ViewModel = viewModel;
             Log.Debug("ViewModel attached to document");
+        }
+
+        /// <summary>
+        /// Determines whether this module can handle the specified file based on extension.
+        /// </summary>
+        public bool CanHandleFile(string filePath)
+        {
+            var extension = System.IO.Path.GetExtension(filePath);
+            return SupportedFileExtensions.Any(ext => ext.Equals(extension.TrimStart('.'), StringComparison.OrdinalIgnoreCase));
+        }
+
+        /// <summary>
+        /// Gets a suggested filename based on project metadata.
+        /// </summary>
+        /// <param name="document">The project document.</param>
+        /// <returns>Suggested filename in format "[LB Project Number] - [Site Name]" or null.</returns>
+        public string? GetSuggestedFileName(IDocument document)
+        {
+            if (document is not ProjectDocument projectDoc)
+                return null;
+
+            var lbNumber = projectDoc.Project.LBProjectNumber;
+            var siteName = projectDoc.Project.SiteName;
+
+            // Build filename from available metadata
+            if (!string.IsNullOrWhiteSpace(lbNumber) && !string.IsNullOrWhiteSpace(siteName))
+            {
+                return $"{lbNumber.Trim()} - {siteName.Trim()}";
+            }
+            else if (!string.IsNullOrWhiteSpace(lbNumber))
+            {
+                return lbNumber.Trim();
+            }
+            else if (!string.IsNullOrWhiteSpace(siteName))
+            {
+                return siteName.Trim();
+            }
+
+            // Fall back to default Title-based naming
+            return null;
         }
     }
 }
