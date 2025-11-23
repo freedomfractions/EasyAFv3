@@ -50,6 +50,8 @@ namespace EasyAF.Modules.Project.ViewModels
             BrowseOutputCommand = new DelegateCommand(ExecuteBrowseOutput);
             ImportNewDataCommand = new DelegateCommand(ExecuteImportNewData);
             ImportOldDataCommand = new DelegateCommand(ExecuteImportOldData);
+            ClearNewDataCommand = new DelegateCommand(ExecuteClearNewData, CanExecuteClearNewData);
+            ClearOldDataCommand = new DelegateCommand(ExecuteClearOldData, CanExecuteClearOldData);
 
             // Build initial tree nodes (will be empty if no data loaded)
             RefreshStatistics();
@@ -552,6 +554,8 @@ namespace EasyAF.Modules.Project.ViewModels
         public ICommand BrowseOutputCommand { get; }
         public ICommand ImportNewDataCommand { get; }
         public ICommand ImportOldDataCommand { get; }
+        public ICommand ClearNewDataCommand { get; }
+        public ICommand ClearOldDataCommand { get; }
 
         private void ExecuteAddFile()
         {
@@ -645,6 +649,72 @@ namespace EasyAF.Modules.Project.ViewModels
             ExecuteImport(isNewData: false);
         }
 
+        private bool CanExecuteClearNewData()
+        {
+            return _document.Project.NewData != null && 
+                   HasDatasetEntriesInternal(_document.Project.NewData);
+        }
+
+        private void ExecuteClearNewData()
+        {
+            var confirmed = _dialogService.Confirm(
+                "This will permanently delete all imported New Data.\n\n" +
+                "All equipment entries and calculation results will be lost.\n\n" +
+                "Project metadata (LB Project Number, Site Name, etc.) will be preserved.\n\n" +
+                "Are you sure you want to continue?",
+                "Confirm Clear New Data");
+
+            if (!confirmed)
+            {
+                Log.Information("User cancelled clear New Data operation");
+                return;
+            }
+
+            // Create fresh empty dataset
+            _document.Project.NewData = new DataSet();
+            _document.MarkDirty();
+            RefreshStatistics(triggerHighlights: false);
+
+            Log.Information("New Data cleared by user");
+            _dialogService.ShowMessage("New Data has been cleared.", "Data Cleared");
+
+            // Raise CanExecute changed for commands
+            (ClearNewDataCommand as DelegateCommand)?.RaiseCanExecuteChanged();
+        }
+
+        private bool CanExecuteClearOldData()
+        {
+            return _document.Project.OldData != null && 
+                   HasDatasetEntriesInternal(_document.Project.OldData);
+        }
+
+        private void ExecuteClearOldData()
+        {
+            var confirmed = _dialogService.Confirm(
+                "This will permanently delete all imported Old Data.\n\n" +
+                "All equipment entries and calculation results will be lost.\n\n" +
+                "Project metadata (LB Project Number, Site Name, etc.) will be preserved.\n\n" +
+                "Are you sure you want to continue?",
+                "Confirm Clear Old Data");
+
+            if (!confirmed)
+            {
+                Log.Information("User cancelled clear Old Data operation");
+                return;
+            }
+
+            // Create fresh empty dataset
+            _document.Project.OldData = new DataSet();
+            _document.MarkDirty();
+            RefreshStatistics(triggerHighlights: false);
+
+            Log.Information("Old Data cleared by user");
+            _dialogService.ShowMessage("Old Data has been cleared.", "Data Cleared");
+
+            // Raise CanExecute changed for commands
+            (ClearOldDataCommand as DelegateCommand)?.RaiseCanExecuteChanged();
+        }
+
         private void ExecuteImport(bool isNewData)
         {
             try
@@ -656,6 +726,29 @@ namespace EasyAF.Modules.Project.ViewModels
                         "Please select a mapping file first using the 'Map' field in the Report section below.",
                         "No Mapping File");
                     return;
+                }
+
+                // Step 1.5: Check if target dataset already has data - warn user
+                var targetDataSet = isNewData ? _document.Project.NewData : _document.Project.OldData;
+                if (targetDataSet != null && HasDatasetEntriesInternal(targetDataSet))
+                {
+                    var dataTypeName = isNewData ? "New" : "Old";
+                    var confirmed = _dialogService.Confirm(
+                        $"The {dataTypeName} Data dataset already contains imported data.\n\n" +
+                        $"Importing will ADD to the existing data (duplicates may occur).\n\n" +
+                        $"To replace the data instead:\n" +
+                        $"1. Click 'Cancel'\n" +
+                        $"2. Right-click the {dataTypeName} Data column header\n" +
+                        $"3. Select 'Clear Data'\n" +
+                        $"4. Then import your files\n\n" +
+                        $"Continue with import (add to existing data)?",
+                        $"Confirm Import - {dataTypeName} Data Already Exists");
+
+                    if (!confirmed)
+                    {
+                        Log.Information("User cancelled import - {DataType} data already exists", dataTypeName);
+                        return;
+                    }
                 }
 
                 // Step 2: Select data file(s) to import (MULTI-SELECT enabled)
@@ -693,8 +786,8 @@ namespace EasyAF.Modules.Project.ViewModels
                     Log.Warning("Mapping validation warnings: {Warnings}", warnings);
                 }
 
-                // Step 4: Ensure target dataset exists
-                var targetDataSet = isNewData ? _document.Project.NewData : _document.Project.OldData;
+                // Step 3: Ensure target dataset exists
+                targetDataSet = isNewData ? _document.Project.NewData : _document.Project.OldData;
                 if (targetDataSet == null)
                 {
                     targetDataSet = new DataSet();
@@ -704,7 +797,7 @@ namespace EasyAF.Modules.Project.ViewModels
                         _document.Project.OldData = targetDataSet;
                 }
 
-                // Step 5: Import each file
+                // Step 4: Import each file
                 var importManager = new EasyAF.Import.ImportManager();
                 int successCount = 0;
                 var errors = new System.Collections.Generic.List<string>();
@@ -728,6 +821,10 @@ namespace EasyAF.Modules.Project.ViewModels
                 // Step 6: Report results
                 _document.MarkDirty();
                 RefreshStatistics(triggerHighlights: true); // Trigger highlights on import
+
+                // Update command states
+                (ClearNewDataCommand as DelegateCommand)?.RaiseCanExecuteChanged();
+                (ClearOldDataCommand as DelegateCommand)?.RaiseCanExecuteChanged();
 
                 // Log scenario discovery for verification
                 LogScenarioDiscovery(targetDataSet, isNewData);
@@ -799,6 +896,32 @@ namespace EasyAF.Modules.Project.ViewModels
                     return;
                 }
 
+                // Step 1.5: Check if target dataset already has data - warn user
+                var targetDataSet = isNewData ? _document.Project.NewData : _document.Project.OldData;
+                if (targetDataSet != null && HasDatasetEntriesInternal(targetDataSet))
+                {
+                    var dataTypeName = isNewData ? "New" : "Old";
+                    var fileCount = filePaths.Length;
+                    var fileWord = fileCount == 1 ? "file" : "files";
+                    
+                    var confirmed = _dialogService.Confirm(
+                        $"The {dataTypeName} Data dataset already contains imported data.\n\n" +
+                        $"Importing {fileCount} {fileWord} will ADD to the existing data (duplicates may occur).\n\n" +
+                        $"To replace the data instead:\n" +
+                        $"1. Click 'Cancel'\n" +
+                        $"2. Right-click the {dataTypeName} Data column header\n" +
+                        $"3. Select 'Clear Data'\n" +
+                        $"4. Then drag and drop your files again\n\n" +
+                        $"Continue with import (add to existing data)?",
+                        $"Confirm Drop Import - {dataTypeName} Data Already Exists");
+
+                    if (!confirmed)
+                    {
+                        Log.Information("User cancelled drop import - {DataType} data already exists", dataTypeName);
+                        return;
+                    }
+                }
+
                 Log.Information("Drop import: {Count} file(s) into {Target} data", filePaths.Length, isNewData ? "New" : "Old");
 
                 // Step 2: Load mapping config once (reuse for all files)
@@ -818,8 +941,8 @@ namespace EasyAF.Modules.Project.ViewModels
                     Log.Warning("Mapping validation warnings: {Warnings}", warnings);
                 }
 
-                // Step 3: Ensure target dataset exists
-                var targetDataSet = isNewData ? _document.Project.NewData : _document.Project.OldData;
+                // Step 3: Ensure target dataset exists (reuse targetDataSet from Step 1.5)
+                targetDataSet = isNewData ? _document.Project.NewData : _document.Project.OldData;
                 if (targetDataSet == null)
                 {
                     targetDataSet = new DataSet();
@@ -853,6 +976,10 @@ namespace EasyAF.Modules.Project.ViewModels
                 // Step 5: Report results
                 _document.MarkDirty();
                 RefreshStatistics(triggerHighlights: true); // Trigger highlights on drop import
+
+                // Update command states
+                (ClearNewDataCommand as DelegateCommand)?.RaiseCanExecuteChanged();
+                (ClearOldDataCommand as DelegateCommand)?.RaiseCanExecuteChanged();
 
                 // Log scenario discovery for verification
                 LogScenarioDiscovery(targetDataSet, isNewData);
