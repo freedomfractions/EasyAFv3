@@ -58,10 +58,10 @@ public class DocumentTabControl : ListBox
 
     private static void OnSelectedDocumentChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-        if (d is DocumentTabControl ctrl && e.NewValue != null)
+        if (d is DocumentTabControl ctrl)
         {
-            // Update selection in grouped view
-            ctrl.SyncSelectionToDocument((IDocument)e.NewValue);
+            // Always sync, even when new value is null (Welcome/null state)
+            ctrl.SyncSelectionToDocument(e.NewValue as IDocument);
         }
     }
     
@@ -72,18 +72,23 @@ public class DocumentTabControl : ListBox
         {
             SelectedDocument = tabItem.Document;
         }
+        else if (SelectedItem is WelcomeTabViewModel)
+        {
+            // Null state selection
+            SelectedDocument = null;
+            SyncSelectionToDocument(null);
+        }
     }
     
-    private void SyncSelectionToDocument(IDocument document)
+    private void SyncSelectionToDocument(IDocument? document)
     {
-        // Find the matching FileTabItemViewModel and select it
         foreach (var item in Items)
         {
             if (item is FileTabGroupViewModel group)
             {
                 foreach (var tabItem in group.Items)
                 {
-                    tabItem.IsActive = ReferenceEquals(tabItem.Document, document);
+                    tabItem.IsActive = ReferenceEquals(tabItem.Document, document) && document != null;
                     if (tabItem.IsActive)
                     {
                         SelectedItem = tabItem;
@@ -92,7 +97,7 @@ public class DocumentTabControl : ListBox
             }
             else if (item is FileTabItemViewModel tabItem)
             {
-                tabItem.IsActive = ReferenceEquals(tabItem.Document, document);
+                tabItem.IsActive = ReferenceEquals(tabItem.Document, document) && document != null;
                 if (tabItem.IsActive)
                 {
                     SelectedItem = tabItem;
