@@ -511,6 +511,11 @@
                                                         CornerRadius="4"
                                                         Margin="0,3"
                                                         Padding="10,6">
+                                                    <i:Interaction.Behaviors>
+                                                        <behaviors:CellHighlightBehavior IsHighlighted="{Binding IsNewCountHighlighted, Mode=OneWay}" 
+                                                                                         IsNewData="True"
+                                                                                         HoldDuration="0:0:2"/>
+                                                    </i:Interaction.Behaviors>
                                                     <TextBlock Text="{Binding NewCountDisplay}" 
                                                                TextAlignment="Center"
                                                                Foreground="{DynamicResource TextPrimaryBrush}"
@@ -527,6 +532,11 @@
                                                         CornerRadius="4,4,0,0"
                                                         Margin="0,3,0,0"
                                                         Padding="10,6">
+                                                    <i:Interaction.Behaviors>
+                                                        <behaviors:CellHighlightBehavior IsHighlighted="{Binding IsNewCountHighlighted, Mode=OneWay}" 
+                                                                                         IsNewData="True"
+                                                                                         HoldDuration="0:0:2"/>
+                                                    </i:Interaction.Behaviors>
                                                     <TextBlock Text="{Binding NewCountDisplay}" 
                                                                TextAlignment="Center"
                                                                Foreground="{DynamicResource TextPrimaryBrush}"
@@ -540,6 +550,11 @@
                                                         BorderBrush="{DynamicResource ControlBorderBrush}"
                                                         BorderThickness="1,0,1,0"
                                                         Padding="10,6">
+                                                    <i:Interaction.Behaviors>
+                                                        <behaviors:CellHighlightBehavior IsHighlighted="{Binding IsNewCountHighlighted, Mode=OneWay}" 
+                                                                                         IsNewData="True"
+                                                                                         HoldDuration="0:0:2"/>
+                                                    </i:Interaction.Behaviors>
                                                     <TextBlock Text="{Binding NewCountDisplay}" 
                                                                TextAlignment="Center"
                                                                Foreground="{DynamicResource TextPrimaryBrush}"
@@ -555,6 +570,11 @@
                                                         CornerRadius="0,0,4,4"
                                                         Margin="0,0,0,3"
                                                         Padding="10,6">
+                                                    <i:Interaction.Behaviors>
+                                                        <behaviors:CellHighlightBehavior IsHighlighted="{Binding IsNewCountHighlighted, Mode=OneWay}" 
+                                                                                         IsNewData="True"
+                                                                                         HoldDuration="0:0:2"/>
+                                                    </i:Interaction.Behaviors>
                                                     <TextBlock Text="{Binding NewCountDisplay}" 
                                                                TextAlignment="Center"
                                                                Foreground="{DynamicResource TextPrimaryBrush}"
@@ -590,6 +610,11 @@
                                                         CornerRadius="4"
                                                         Margin="0,3"
                                                         Padding="10,6">
+                                                    <i:Interaction.Behaviors>
+                                                        <behaviors:CellHighlightBehavior IsHighlighted="{Binding IsOldCountHighlighted, Mode=OneWay}" 
+                                                                                         IsNewData="False"
+                                                                                         HoldDuration="0:0:2"/>
+                                                    </i:Interaction.Behaviors>
                                                     <TextBlock Text="{Binding OldCountDisplay}" 
                                                                TextAlignment="Center"
                                                                Foreground="{DynamicResource TextSecondaryBrush}"
@@ -606,6 +631,11 @@
                                                         CornerRadius="4,4,0,0"
                                                         Margin="0,3,0,0"
                                                         Padding="10,6">
+                                                    <i:Interaction.Behaviors>
+                                                        <behaviors:CellHighlightBehavior IsHighlighted="{Binding IsOldCountHighlighted, Mode=OneWay}" 
+                                                                                         IsNewData="False"
+                                                                                         HoldDuration="0:0:2"/>
+                                                    </i:Interaction.Behaviors>
                                                     <TextBlock Text="{Binding OldCountDisplay}" 
                                                                TextAlignment="Center"
                                                                Foreground="{DynamicResource TextSecondaryBrush}"
@@ -619,6 +649,11 @@
                                                         BorderBrush="{DynamicResource ControlBorderBrush}"
                                                         BorderThickness="1,0,1,0"
                                                         Padding="10,6">
+                                                    <i:Interaction.Behaviors>
+                                                        <behaviors:CellHighlightBehavior IsHighlighted="{Binding IsOldCountHighlighted, Mode=OneWay}" 
+                                                                                         IsNewData="False"
+                                                                                         HoldDuration="0:0:2"/>
+                                                    </i:Interaction.Behaviors>
                                                     <TextBlock Text="{Binding OldCountDisplay}" 
                                                                TextAlignment="Center"
                                                                Foreground="{DynamicResource TextSecondaryBrush}"
@@ -634,6 +669,11 @@
                                                         CornerRadius="0,0,4,4"
                                                         Margin="0,0,0,3"
                                                         Padding="10,6">
+                                                    <i:Interaction.Behaviors>
+                                                        <behaviors:CellHighlightBehavior IsHighlighted="{Binding IsOldCountHighlighted, Mode=OneWay}" 
+                                                                                         IsNewData="False"
+                                                                                         HoldDuration="0:0:2"/>
+                                                    </i:Interaction.Behaviors>
                                                     <TextBlock Text="{Binding OldCountDisplay}" 
                                                                TextAlignment="Center"
                                                                Foreground="{DynamicResource TextSecondaryBrush}"
@@ -744,6 +784,582 @@
         </Grid>
     </ScrollViewer>
 </UserControl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
