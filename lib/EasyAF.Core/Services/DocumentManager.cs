@@ -1,6 +1,8 @@
 using System.Collections.ObjectModel;
+using System.IO;
 using EasyAF.Core.Contracts;
 using Serilog;
+using System.Linq;
 
 namespace EasyAF.Core.Services;
 
@@ -40,6 +42,24 @@ public class DocumentManager : IDocumentManager
     public IDocument OpenDocument(string path)
     {
         if (string.IsNullOrWhiteSpace(path)) throw new ArgumentException("Path required", nameof(path));
+        
+        // Normalize the path for comparison
+        var normalizedPath = Path.GetFullPath(path);
+        
+        // Check if document is already open
+        var existingDoc = OpenDocuments.FirstOrDefault(d => 
+            !string.IsNullOrEmpty(d.FilePath) && 
+            string.Equals(Path.GetFullPath(d.FilePath), normalizedPath, StringComparison.OrdinalIgnoreCase));
+        
+        if (existingDoc != null)
+        {
+            // Document already open - just activate it
+            ActiveDocument = existingDoc;
+            Log.Information("Document already open, activated existing instance: {Path}", path);
+            return existingDoc;
+        }
+        
+        // Not open yet - proceed with opening
         var module = _catalog.FindModuleForFile(path);
         if (module is not IDocumentModule docModule)
             throw new InvalidOperationException($"No document module found for file: {path}");
