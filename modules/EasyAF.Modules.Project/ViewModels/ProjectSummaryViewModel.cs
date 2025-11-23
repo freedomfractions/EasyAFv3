@@ -1021,6 +1021,7 @@ namespace EasyAF.Modules.Project.ViewModels
         {
             if (e.PropertyName == nameof(DataStatisticsRowViewModel.IsExpanded))
             {
+                // Don't rebuild rows - just rebuild the flattened visible list
                 RebuildVisibleRows();
             }
         }
