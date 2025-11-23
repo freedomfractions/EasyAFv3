@@ -728,29 +728,6 @@ namespace EasyAF.Modules.Project.ViewModels
                     return;
                 }
 
-                // Step 1.5: Check if target dataset already has data - warn user
-                var targetDataSet = isNewData ? _document.Project.NewData : _document.Project.OldData;
-                if (targetDataSet != null && HasDatasetEntriesInternal(targetDataSet))
-                {
-                    var dataTypeName = isNewData ? "New" : "Old";
-                    var confirmed = _dialogService.Confirm(
-                        $"The {dataTypeName} Data dataset already contains imported data.\n\n" +
-                        $"Importing will ADD to the existing data (duplicates may occur).\n\n" +
-                        $"To replace the data instead:\n" +
-                        $"1. Click 'Cancel'\n" +
-                        $"2. Right-click the {dataTypeName} Data column header\n" +
-                        $"3. Select 'Clear Data'\n" +
-                        $"4. Then import your files\n\n" +
-                        $"Continue with import (add to existing data)?",
-                        $"Confirm Import - {dataTypeName} Data Already Exists");
-
-                    if (!confirmed)
-                    {
-                        Log.Information("User cancelled import - {DataType} data already exists", dataTypeName);
-                        return;
-                    }
-                }
-
                 // Step 2: Select data file(s) to import (MULTI-SELECT enabled)
                 var dialog = new OpenFileDialog
                 {
@@ -787,7 +764,7 @@ namespace EasyAF.Modules.Project.ViewModels
                 }
 
                 // Step 2.5: Smart conflict detection - check if files will actually overwrite existing data
-                targetDataSet = isNewData ? _document.Project.NewData : _document.Project.OldData;
+                var targetDataSet = isNewData ? _document.Project.NewData : _document.Project.OldData;
                 if (targetDataSet != null && HasDatasetEntriesInternal(targetDataSet))
                 {
                     var dataTypeName = isNewData ? "New" : "Old";
@@ -869,10 +846,9 @@ namespace EasyAF.Modules.Project.ViewModels
 
                 if (successCount == fileNames.Length)
                 {
-                    // All files imported successfully
-                    _dialogService.ShowMessage(
-                        $"Import completed successfully!\n\n{successCount} file(s) imported into {(isNewData ? "New" : "Old")} Data.",
-                        "Import Successful");
+                    // All files imported successfully - UI feedback via cell highlighting is enough
+                    Log.Information("Import completed successfully: {Count} file(s) imported into {Target} data", 
+                        successCount, isNewData ? "New" : "Old");
                 }
                 else if (successCount > 0)
                 {
@@ -934,29 +910,6 @@ namespace EasyAF.Modules.Project.ViewModels
                     return;
                 }
 
-                // Step 1.5: Check if target dataset already has data - warn user
-                var targetDataSet = isNewData ? _document.Project.NewData : _document.Project.OldData;
-                if (targetDataSet != null && HasDatasetEntriesInternal(targetDataSet))
-                {
-                    var dataTypeName = isNewData ? "New" : "Old";
-                    var confirmed = _dialogService.Confirm(
-                        $"The {dataTypeName} Data dataset already contains imported data.\n\n" +
-                        $"Importing {filePaths.Length} file(s) will ADD to the existing data (duplicates may occur).\n\n" +
-                        $"To replace the data instead:\n" +
-                        $"1. Click 'Cancel'\n" +
-                        $"2. Right-click the {dataTypeName} Data column header\n" +
-                        $"3. Select 'Clear Data'\n" +
-                        $"4. Then drag and drop your files again\n\n" +
-                        $"Continue with import (add to existing data)?",
-                        $"Confirm Drop Import - {dataTypeName} Data Already Exists");
-
-                    if (!confirmed)
-                    {
-                        Log.Information("User cancelled drop import - {DataType} data already exists", dataTypeName);
-                        return;
-                    }
-                }
-
                 Log.Information("Drop import: {Count} file(s) into {Target} data", filePaths.Length, isNewData ? "New" : "Old");
 
                 // Step 2: Load mapping config once (reuse for all files)
@@ -977,7 +930,7 @@ namespace EasyAF.Modules.Project.ViewModels
                 }
 
                 // Step 2.5: Smart conflict detection - check if files will actually overwrite existing data
-                targetDataSet = isNewData ? _document.Project.NewData : _document.Project.OldData;
+                var targetDataSet = isNewData ? _document.Project.NewData : _document.Project.OldData;
                 if (targetDataSet != null && HasDatasetEntriesInternal(targetDataSet))
                 {
                     var dataTypeName = isNewData ? "New" : "Old";
@@ -1059,10 +1012,9 @@ namespace EasyAF.Modules.Project.ViewModels
 
                 if (successCount == filePaths.Length)
                 {
-                    // All files imported successfully
-                    _dialogService.ShowMessage(
-                        $"Import completed successfully!\n\n{successCount} file(s) imported into {(isNewData ? "New" : "Old")} Data.",
-                        "Import Successful");
+                    // All files imported successfully - UI feedback via cell highlighting is enough
+                    Log.Information("Import completed successfully: {Count} file(s) imported into {Target} data", 
+                        successCount, isNewData ? "New" : "Old");
                 }
                 else if (successCount > 0)
                 {
