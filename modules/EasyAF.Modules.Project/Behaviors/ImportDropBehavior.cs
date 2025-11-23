@@ -317,9 +317,11 @@ namespace EasyAF.Modules.Project.Behaviors
                 _targetBorder.BorderBrush = glowBrush;
                 _targetBorder.BorderThickness = new Thickness(3);
                 
-                // Gradual fade in over 500ms
+                // Start from 0 opacity and fade in to 1.0 over 500ms
+                _targetBorder.Opacity = 0.0;
                 var fadeIn = new DoubleAnimation
                 {
+                    From = 0.0,
                     To = 1.0,
                     Duration = TimeSpan.FromMilliseconds(500),
                     EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
@@ -343,10 +345,14 @@ namespace EasyAF.Modules.Project.Behaviors
             // Stop any running animations
             _targetBorder.BeginAnimation(Border.OpacityProperty, null);
 
-            // Gradual fade out over 1 second, then restore original appearance
+            // Get current opacity (in case animation was interrupted)
+            var currentOpacity = _targetBorder.Opacity;
+
+            // Gradual fade out from current opacity to 0 over 1 second, then restore original appearance
             var fadeOut = new DoubleAnimation
             {
-                To = 1.0, // Fade back to normal opacity
+                From = currentOpacity,
+                To = 0.0,
                 Duration = TimeSpan.FromMilliseconds(1000),
                 EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseIn }
             };
@@ -358,6 +364,7 @@ namespace EasyAF.Modules.Project.Behaviors
                 {
                     _targetBorder.BorderBrush = _originalBorderBrush;
                     _targetBorder.BorderThickness = _originalBorderThickness;
+                    _targetBorder.Opacity = 1.0; // Reset to full opacity
                     _originalBorderBrush = null;
                 }
             };
