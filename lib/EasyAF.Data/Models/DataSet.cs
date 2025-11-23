@@ -147,6 +147,21 @@ namespace EasyAF.Data.Models
         public string? SoftwareVersion { get; set; }
 
         /// <summary>
+        /// Gets or sets the history of import sessions for this dataset.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Provides an audit trail of all imports, including timestamps, source files,
+        /// and counts of imported entries. Useful for debugging and understanding data provenance.
+        /// </para>
+        /// <para>
+        /// Note: This property is not included in diff operations as it's metadata about
+        /// the import process rather than the actual data.
+        /// </para>
+        /// </remarks>
+        public List<object>? ImportHistory { get; set; } = new(); // Using object to avoid circular dependency
+
+        /// <summary>
         /// Gets or sets the dictionary of arc flash study results, keyed by CompositeKey.
         /// </summary>
         /// <remarks>
