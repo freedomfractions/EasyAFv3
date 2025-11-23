@@ -108,9 +108,8 @@ namespace EasyAF.Modules.Project.Behaviors
             AssociatedObject.DragLeave -= OnDragLeave;
             AssociatedObject.Drop -= OnDrop;
             
-            // Clean up timer
-            _hideGlowTimer?.Stop();
-            _hideGlowTimer = null;
+            // Force reset to clean state
+            ResetGlowState();
         }
 
         /// <summary>
@@ -326,17 +325,22 @@ namespace EasyAF.Modules.Project.Behaviors
                 return;
             }
 
+            // Cancel any pending hide timer
+            _hideGlowTimer?.Stop();
+
             // If already glowing, don't restart animation
             if (_isGlowing)
                 return;
 
             _isGlowing = true;
 
-            // Save original state (only if not already saved)
+            // Save original state ONLY on the very first glow
             if (_originalBorderBrush == null)
             {
                 _originalBorderBrush = _targetBorder.BorderBrush;
                 _originalBorderThickness = _targetBorder.BorderThickness;
+                Log.Verbose("Saved original border state: Brush={Brush}, Thickness={Thickness}", 
+                    _originalBorderBrush, _originalBorderThickness);
             }
 
             // Get glow brush from theme
@@ -374,8 +378,8 @@ namespace EasyAF.Modules.Project.Behaviors
         /// </summary>
         private void HideGlow()
         {
-            if (_targetBorder == null || _originalBorderBrush == null || !_isGlowing)
-                return; // Never showed glow or no target
+            if (_targetBorder == null || !_isGlowing)
+                return; // Not currently glowing
 
             _isGlowing = false;
 
@@ -394,19 +398,46 @@ namespace EasyAF.Modules.Project.Behaviors
                 EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseIn }
             };
 
-            fadeOut.Completed += (s, e) =>
-            {
-                // Restore original appearance after animation
-                if (_targetBorder != null && _originalBorderBrush != null)
-                {
-                    _targetBorder.BorderBrush = _originalBorderBrush;
-                    _targetBorder.BorderThickness = _originalBorderThickness;
-                    _targetBorder.Opacity = 1.0; // Reset to full opacity
-                    _originalBorderBrush = null;
-                }
-            };
-
+            fadeOut.Completed += OnFadeOutCompleted;
             _targetBorder.BeginAnimation(Border.OpacityProperty, fadeOut);
+        }
+
+        /// <summary>
+        /// Called when the fade-out animation completes.
+        /// </summary>
+        private void OnFadeOutCompleted(object? sender, EventArgs e)
+        {
+            if (_targetBorder == null)
+                return;
+
+            // Only restore if we're not glowing again (user might have re-entered during fade)
+            if (!_isGlowing && _originalBorderBrush != null)
+            {
+                _targetBorder.BorderBrush = _originalBorderBrush;
+                _targetBorder.BorderThickness = _originalBorderThickness;
+                _targetBorder.Opacity = 1.0; // Reset to full opacity
+                
+                Log.Verbose("Restored original border state after fade-out");
+            }
+        }
+
+        /// <summary>
+        /// Forces a reset of the glow state (for cleanup or error recovery).
+        /// </summary>
+        private void ResetGlowState()
+        {
+            _hideGlowTimer?.Stop();
+            
+            if (_targetBorder != null && _originalBorderBrush != null)
+            {
+                _targetBorder.BeginAnimation(Border.OpacityProperty, null);
+                _targetBorder.BorderBrush = _originalBorderBrush;
+                _targetBorder.BorderThickness = _originalBorderThickness;
+                _targetBorder.Opacity = 1.0;
+            }
+            
+            _isGlowing = false;
+            // DON'T clear _originalBorderBrush - keep it for the lifetime of the behavior
         }
     }
 }
