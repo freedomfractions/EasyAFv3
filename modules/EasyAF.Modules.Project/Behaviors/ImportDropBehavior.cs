@@ -34,8 +34,6 @@ namespace EasyAF.Modules.Project.Behaviors
     {
         private Brush? _originalBorderBrush;
         private Thickness _originalBorderThickness;
-        private Storyboard? _glowInAnimation;
-        private Storyboard? _glowOutAnimation;
         private Border? _targetBorder; // The actual background border to glow
 
         /// <summary>
@@ -91,9 +89,6 @@ namespace EasyAF.Modules.Project.Behaviors
 
             // Find the target background border to glow
             FindTargetBorder();
-
-            // Create animations for glow effect
-            CreateGlowAnimations();
 
             Log.Debug("ImportDropBehavior attached to {ElementName} (IsNewData={IsNewData})", 
                 AssociatedObject.Name ?? "unnamed Border", IsNewData);
@@ -162,34 +157,6 @@ namespace EasyAF.Modules.Project.Behaviors
             }
 
             return null;
-        }
-
-        /// <summary>
-        /// Creates glow-in and glow-out animations for drag feedback.
-        /// </summary>
-        private void CreateGlowAnimations()
-        {
-            // Glow-in animation (fade in border + increase thickness)
-            _glowInAnimation = new Storyboard();
-            var opacityIn = new DoubleAnimation
-            {
-                To = 1.0,
-                Duration = TimeSpan.FromMilliseconds(200),
-                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
-            };
-            Storyboard.SetTargetProperty(opacityIn, new PropertyPath("Opacity"));
-            _glowInAnimation.Children.Add(opacityIn);
-
-            // Glow-out animation (fade out border + restore thickness)
-            _glowOutAnimation = new Storyboard();
-            var opacityOut = new DoubleAnimation
-            {
-                To = 0.0,
-                Duration = TimeSpan.FromMilliseconds(300),
-                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseIn }
-            };
-            Storyboard.SetTargetProperty(opacityOut, new PropertyPath("Opacity"));
-            _glowOutAnimation.Children.Add(opacityOut);
         }
 
         /// <summary>
@@ -330,9 +297,12 @@ namespace EasyAF.Modules.Project.Behaviors
                 return;
             }
 
-            // Save original state
-            _originalBorderBrush = _targetBorder.BorderBrush;
-            _originalBorderThickness = _targetBorder.BorderThickness;
+            // Save original state (only if not already saved)
+            if (_originalBorderBrush == null)
+            {
+                _originalBorderBrush = _targetBorder.BorderBrush;
+                _originalBorderThickness = _targetBorder.BorderThickness;
+            }
 
             // Get glow brush from theme
             var glowBrushKey = IsNewData ? "NewDataGlowBrush" : "OldDataGlowBrush";
@@ -340,14 +310,21 @@ namespace EasyAF.Modules.Project.Behaviors
 
             if (glowBrush != null)
             {
+                // Stop any running animations
+                _targetBorder.BeginAnimation(Border.OpacityProperty, null);
+
+                // Apply glow brush and thicker border
                 _targetBorder.BorderBrush = glowBrush;
                 _targetBorder.BorderThickness = new Thickness(3);
                 
-                // Animate glow in
-                if (_glowInAnimation != null)
+                // Animate opacity from current to 1.0
+                var fadeIn = new DoubleAnimation
                 {
-                    _glowInAnimation.Begin(_targetBorder);
-                }
+                    To = 1.0,
+                    Duration = TimeSpan.FromMilliseconds(200),
+                    EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
+                };
+                _targetBorder.BeginAnimation(Border.OpacityProperty, fadeIn);
             }
             else
             {
@@ -363,28 +340,29 @@ namespace EasyAF.Modules.Project.Behaviors
             if (_targetBorder == null || _originalBorderBrush == null)
                 return; // Never showed glow or no target
 
-            // Animate glow out
-            if (_glowOutAnimation != null)
+            // Stop any running animations
+            _targetBorder.BeginAnimation(Border.OpacityProperty, null);
+
+            // Animate fade out, then restore original appearance
+            var fadeOut = new DoubleAnimation
             {
-                _glowOutAnimation.Completed += (s, e) =>
+                To = 1.0, // Fade back to normal opacity
+                Duration = TimeSpan.FromMilliseconds(300),
+                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseIn }
+            };
+
+            fadeOut.Completed += (s, e) =>
+            {
+                // Restore original appearance after animation
+                if (_targetBorder != null && _originalBorderBrush != null)
                 {
-                    // Restore original appearance after animation
-                    if (_targetBorder != null)
-                    {
-                        _targetBorder.BorderBrush = _originalBorderBrush;
-                        _targetBorder.BorderThickness = _originalBorderThickness;
-                    }
+                    _targetBorder.BorderBrush = _originalBorderBrush;
+                    _targetBorder.BorderThickness = _originalBorderThickness;
                     _originalBorderBrush = null;
-                };
-                _glowOutAnimation.Begin(_targetBorder);
-            }
-            else
-            {
-                // No animation - restore immediately
-                _targetBorder.BorderBrush = _originalBorderBrush;
-                _targetBorder.BorderThickness = _originalBorderThickness;
-                _originalBorderBrush = null;
-            }
+                }
+            };
+
+            _targetBorder.BeginAnimation(Border.OpacityProperty, fadeOut);
         }
     }
 }
