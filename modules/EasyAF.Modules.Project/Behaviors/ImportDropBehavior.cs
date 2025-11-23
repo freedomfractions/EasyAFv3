@@ -357,7 +357,6 @@ namespace EasyAF.Modules.Project.Behaviors
                 _targetBorder.BorderThickness = new Thickness(3);
                 
                 // Start from 0 opacity and fade in to 1.0 over 500ms
-                _targetBorder.Opacity = 0.0;
                 var fadeIn = new DoubleAnimation
                 {
                     From = 0.0,
@@ -383,23 +382,61 @@ namespace EasyAF.Modules.Project.Behaviors
 
             _isGlowing = false;
 
-            // Stop any running animations
+            // Stop any running animations on opacity
             _targetBorder.BeginAnimation(Border.OpacityProperty, null);
+            
+            // Ensure we're at full opacity
+            _targetBorder.Opacity = 1.0;
 
-            // Get current opacity (in case animation was interrupted)
-            var currentOpacity = _targetBorder.Opacity;
+            // Restore original thickness immediately
+            _targetBorder.BorderThickness = _originalBorderThickness;
 
-            // Gradual fade out from current opacity to 0 over 1 second, then restore original appearance
-            var fadeOut = new DoubleAnimation
+            // Animate the border color from glow back to original over 1 second
+            if (_originalBorderBrush is SolidColorBrush originalSolid)
             {
-                From = currentOpacity,
-                To = 0.0,
-                Duration = TimeSpan.FromMilliseconds(1000),
-                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseIn }
-            };
+                var glowBrushKey = IsNewData ? "NewDataGlowBrush" : "OldDataGlowBrush";
+                var glowBrush = Application.Current.TryFindResource(glowBrushKey) as SolidColorBrush;
 
-            fadeOut.Completed += OnFadeOutCompleted;
-            _targetBorder.BeginAnimation(Border.OpacityProperty, fadeOut);
+                if (glowBrush != null && _targetBorder.BorderBrush is SolidColorBrush)
+                {
+                    // Create a new SolidColorBrush for animation
+                    var animatedBrush = new SolidColorBrush(glowBrush.Color);
+                    _targetBorder.BorderBrush = animatedBrush;
+
+                    // Animate color from glow to original
+                    var colorAnimation = new ColorAnimation
+                    {
+                        From = glowBrush.Color,
+                        To = originalSolid.Color,
+                        Duration = TimeSpan.FromMilliseconds(1000),
+                        EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseInOut }
+                    };
+
+                    colorAnimation.Completed += (s, e) =>
+                    {
+                        // Set back to the original brush reference after animation
+                        if (_targetBorder != null && _originalBorderBrush != null)
+                        {
+                            _targetBorder.BorderBrush = _originalBorderBrush;
+                        }
+                    };
+
+                    animatedBrush.BeginAnimation(SolidColorBrush.ColorProperty, colorAnimation);
+                }
+                else
+                {
+                    // Fallback: just restore immediately
+                    _targetBorder.BorderBrush = _originalBorderBrush;
+                }
+            }
+            else
+            {
+                // Not a solid color brush - just restore immediately
+                if (_originalBorderBrush != null)
+                {
+                    _targetBorder.BorderBrush = _originalBorderBrush;
+                }
+            }
         }
 
         /// <summary>
@@ -407,18 +444,7 @@ namespace EasyAF.Modules.Project.Behaviors
         /// </summary>
         private void OnFadeOutCompleted(object? sender, EventArgs e)
         {
-            if (_targetBorder == null)
-                return;
-
-            // Only restore if we're not glowing again (user might have re-entered during fade)
-            if (!_isGlowing && _originalBorderBrush != null)
-            {
-                _targetBorder.BorderBrush = _originalBorderBrush;
-                _targetBorder.BorderThickness = _originalBorderThickness;
-                _targetBorder.Opacity = 1.0; // Reset to full opacity
-                
-                Log.Verbose("Restored original border state after fade-out");
-            }
+            // No longer needed - keeping for compatibility
         }
 
         /// <summary>
