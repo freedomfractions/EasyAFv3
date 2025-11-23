@@ -53,6 +53,19 @@
     <Color x:Key="HoverBackgroundColor">#FFF8F9FA</Color>
     <Color x:Key="AccentBackgroundColor">#FFEFF6FF</Color>
 
+    <!-- Data Import Colors (New vs Old Data visual differentiation) -->
+    <!-- New Data: Red theme for foreground, orange-red for backgrounds -->
+    <Color x:Key="NewDataForegroundColor">#FFDC2626</Color> <!-- Red -->
+    <Color x:Key="NewDataBackgroundColor">#FFFEF2F2</Color> <!-- Very light red/pink -->
+    <Color x:Key="NewDataBorderColor">#FFF87171</Color> <!-- Light red border -->
+    <Color x:Key="NewDataGlowColor">#FFEF4444</Color> <!-- Bright red for glow effects -->
+    
+    <!-- Old Data: Green theme for foreground, light green for backgrounds -->
+    <Color x:Key="OldDataForegroundColor">#FF059669</Color> <!-- Green -->
+    <Color x:Key="OldDataBackgroundColor">#FFF0FDF4</Color> <!-- Very light green -->
+    <Color x:Key="OldDataBorderColor">#FF6EE7B7</Color> <!-- Light green border -->
+    <Color x:Key="OldDataGlowColor">#FF10B981</Color> <!-- Bright green for glow effects -->
+
     <!-- Log Level Colors (Light Theme - optimized for contrast on light backgrounds) -->
     <Color x:Key="LogVerboseColor">#FF6B7280</Color>
     <Color x:Key="LogDebugColor">#FF4B5563</Color>
@@ -104,6 +117,17 @@
     <SolidColorBrush x:Key="ReadonlyBackgroundBrush" Color="{StaticResource ReadonlyBackgroundColor}"/>
     <SolidColorBrush x:Key="HoverBackgroundBrush" Color="{StaticResource HoverBackgroundColor}"/>
     <SolidColorBrush x:Key="AccentBackgroundBrush" Color="{StaticResource AccentBackgroundColor}"/>
+
+    <!-- Data Import Brushes -->
+    <SolidColorBrush x:Key="NewDataForegroundBrush" Color="{StaticResource NewDataForegroundColor}"/>
+    <SolidColorBrush x:Key="NewDataBackgroundBrush" Color="{StaticResource NewDataBackgroundColor}"/>
+    <SolidColorBrush x:Key="NewDataBorderBrush" Color="{StaticResource NewDataBorderColor}"/>
+    <SolidColorBrush x:Key="NewDataGlowBrush" Color="{StaticResource NewDataGlowColor}"/>
+    
+    <SolidColorBrush x:Key="OldDataForegroundBrush" Color="{StaticResource OldDataForegroundColor}"/>
+    <SolidColorBrush x:Key="OldDataBackgroundBrush" Color="{StaticResource OldDataBackgroundColor}"/>
+    <SolidColorBrush x:Key="OldDataBorderBrush" Color="{StaticResource OldDataBorderColor}"/>
+    <SolidColorBrush x:Key="OldDataGlowBrush" Color="{StaticResource OldDataGlowColor}"/>
 
     <!-- Log Level Brushes -->
     <SolidColorBrush x:Key="LogVerboseBrush" Color="{StaticResource LogVerboseColor}"/>
