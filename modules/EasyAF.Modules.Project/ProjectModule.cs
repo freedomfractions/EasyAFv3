@@ -176,19 +176,61 @@ namespace EasyAF.Modules.Project
         }
 
         /// <summary>
-        /// Gets the ribbon tabs to display when this document type is active.
+        /// Gets the ribbon tabs to display when a project document is active.
         /// </summary>
         /// <param name="activeDocument">The currently active document.</param>
         /// <returns>Array of ribbon tabs specific to project documents.</returns>
         public Fluent.RibbonTabItem[] GetRibbonTabs(IDocument activeDocument)
         {
-            // TODO Task 22: Implement ribbon tabs
-            // - Data Management tab (Import, Clear, Refresh)
-            // - Output Generation tab (Generate Report, Export)
-            // - Analysis Tools tab (Statistics, Validation)
+            Log.Debug("Generating ribbon tabs for Project module");
             
-            Log.Debug("GetRibbonTabs called for project document");
-            return Array.Empty<Fluent.RibbonTabItem>();
+            if (activeDocument is not ProjectDocument projectDoc)
+            {
+                Log.Debug("No active ProjectDocument (document is {Type}), skipping ribbon tab generation", 
+                    activeDocument?.GetType().Name ?? "null");
+                return Array.Empty<Fluent.RibbonTabItem>();
+            }
+
+            var viewModel = projectDoc.ViewModel as ViewModels.ProjectDocumentViewModel;
+            if (viewModel == null)
+            {
+                Log.Warning("ProjectDocument has no ViewModel");
+                return Array.Empty<Fluent.RibbonTabItem>();
+            }
+
+            // Create Project tab with placeholder groups
+            var projectTab = CreateProjectTab(viewModel);
+
+            Log.Debug("Created {Count} ribbon tabs for Project module", 1);
+            return new[] { projectTab };
+        }
+
+        /// <summary>
+        /// Creates the Project ribbon tab with data management and output tools.
+        /// </summary>
+        private Fluent.RibbonTabItem CreateProjectTab(ViewModels.ProjectDocumentViewModel viewModel)
+        {
+            var tab = new Fluent.RibbonTabItem
+            {
+                Header = "Project",
+                DataContext = viewModel
+            };
+
+            // Create placeholder ribbon groups (will be populated in Task 22)
+            var dataGroup = new Fluent.RibbonGroupBox
+            {
+                Header = "Data Management"
+            };
+            
+            var outputGroup = new Fluent.RibbonGroupBox
+            {
+                Header = "Output"
+            };
+
+            tab.Groups.Add(dataGroup);
+            tab.Groups.Add(outputGroup);
+
+            return tab;
         }
 
         /// <summary>
