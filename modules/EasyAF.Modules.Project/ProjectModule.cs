@@ -252,8 +252,8 @@ namespace EasyAF.Modules.Project
             var importNewButton = new Fluent.Button
             {
                 Header = "Import New Data",
-                Icon = CreateGlyphIcon("\uE8B5"), // Download icon
-                LargeIcon = CreateGlyphIcon("\uE8B5", 32),
+                Icon = CreateGlyphIcon("\uE896"), // Import/Download to tray icon
+                LargeIcon = CreateGlyphIcon("\uE896", 32),
                 SizeDefinition = "Large",
                 ToolTip = "Import data files into New Data dataset (multi-select supported)"
             };
@@ -264,8 +264,8 @@ namespace EasyAF.Modules.Project
             var importOldButton = new Fluent.Button
             {
                 Header = "Import Old Data",
-                Icon = CreateGlyphIcon("\uE8B5"), // Download icon
-                LargeIcon = CreateGlyphIcon("\uE8B5", 32),
+                Icon = CreateGlyphIcon("\uE896"), // Import/Download to tray icon
+                LargeIcon = CreateGlyphIcon("\uE896", 32),
                 SizeDefinition = "Large",
                 ToolTip = "Import data files into Old Data dataset (multi-select supported)"
             };
