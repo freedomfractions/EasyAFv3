@@ -513,7 +513,7 @@
                                                         Padding="10,6">
                                                     <i:Interaction.Behaviors>
                                                         <behaviors:CellHighlightBehavior IsHighlighted="{Binding IsNewCountHighlighted, Mode=OneWay}" 
-                                                                                         IsNewData="True"
+                                                                                         AllowHighlight="{Binding DataContext.AllowCellHighlights, RelativeSource={RelativeSource AncestorType=UserControl}}" IsNewData="True"
                                                                                          HoldDuration="0:0:2"/>
                                                     </i:Interaction.Behaviors>
                                                     <TextBlock Text="{Binding NewCountDisplay}" 
@@ -534,7 +534,7 @@
                                                         Padding="10,6">
                                                     <i:Interaction.Behaviors>
                                                         <behaviors:CellHighlightBehavior IsHighlighted="{Binding IsNewCountHighlighted, Mode=OneWay}" 
-                                                                                         IsNewData="True"
+                                                                                         AllowHighlight="{Binding DataContext.AllowCellHighlights, RelativeSource={RelativeSource AncestorType=UserControl}}" IsNewData="True"
                                                                                          HoldDuration="0:0:2"/>
                                                     </i:Interaction.Behaviors>
                                                     <TextBlock Text="{Binding NewCountDisplay}" 
@@ -552,7 +552,7 @@
                                                         Padding="10,6">
                                                     <i:Interaction.Behaviors>
                                                         <behaviors:CellHighlightBehavior IsHighlighted="{Binding IsNewCountHighlighted, Mode=OneWay}" 
-                                                                                         IsNewData="True"
+                                                                                         AllowHighlight="{Binding DataContext.AllowCellHighlights, RelativeSource={RelativeSource AncestorType=UserControl}}" IsNewData="True"
                                                                                          HoldDuration="0:0:2"/>
                                                     </i:Interaction.Behaviors>
                                                     <TextBlock Text="{Binding NewCountDisplay}" 
@@ -572,7 +572,7 @@
                                                         Padding="10,6">
                                                     <i:Interaction.Behaviors>
                                                         <behaviors:CellHighlightBehavior IsHighlighted="{Binding IsNewCountHighlighted, Mode=OneWay}" 
-                                                                                         IsNewData="True"
+                                                                                         AllowHighlight="{Binding DataContext.AllowCellHighlights, RelativeSource={RelativeSource AncestorType=UserControl}}" IsNewData="True"
                                                                                          HoldDuration="0:0:2"/>
                                                     </i:Interaction.Behaviors>
                                                     <TextBlock Text="{Binding NewCountDisplay}" 
@@ -612,7 +612,7 @@
                                                         Padding="10,6">
                                                     <i:Interaction.Behaviors>
                                                         <behaviors:CellHighlightBehavior IsHighlighted="{Binding IsOldCountHighlighted, Mode=OneWay}" 
-                                                                                         IsNewData="False"
+                                                                                         AllowHighlight="{Binding DataContext.AllowCellHighlights, RelativeSource={RelativeSource AncestorType=UserControl}}" IsNewData="False"
                                                                                          HoldDuration="0:0:2"/>
                                                     </i:Interaction.Behaviors>
                                                     <TextBlock Text="{Binding OldCountDisplay}" 
@@ -633,7 +633,7 @@
                                                         Padding="10,6">
                                                     <i:Interaction.Behaviors>
                                                         <behaviors:CellHighlightBehavior IsHighlighted="{Binding IsOldCountHighlighted, Mode=OneWay}" 
-                                                                                         IsNewData="False"
+                                                                                         AllowHighlight="{Binding DataContext.AllowCellHighlights, RelativeSource={RelativeSource AncestorType=UserControl}}" IsNewData="False"
                                                                                          HoldDuration="0:0:2"/>
                                                     </i:Interaction.Behaviors>
                                                     <TextBlock Text="{Binding OldCountDisplay}" 
@@ -651,7 +651,7 @@
                                                         Padding="10,6">
                                                     <i:Interaction.Behaviors>
                                                         <behaviors:CellHighlightBehavior IsHighlighted="{Binding IsOldCountHighlighted, Mode=OneWay}" 
-                                                                                         IsNewData="False"
+                                                                                         AllowHighlight="{Binding DataContext.AllowCellHighlights, RelativeSource={RelativeSource AncestorType=UserControl}}" IsNewData="False"
                                                                                          HoldDuration="0:0:2"/>
                                                     </i:Interaction.Behaviors>
                                                     <TextBlock Text="{Binding OldCountDisplay}" 
@@ -671,7 +671,7 @@
                                                         Padding="10,6">
                                                     <i:Interaction.Behaviors>
                                                         <behaviors:CellHighlightBehavior IsHighlighted="{Binding IsOldCountHighlighted, Mode=OneWay}" 
-                                                                                         IsNewData="False"
+                                                                                         AllowHighlight="{Binding DataContext.AllowCellHighlights, RelativeSource={RelativeSource AncestorType=UserControl}}" IsNewData="False"
                                                                                          HoldDuration="0:0:2"/>
                                                     </i:Interaction.Behaviors>
                                                     <TextBlock Text="{Binding OldCountDisplay}" 
@@ -784,6 +784,7 @@
         </Grid>
     </ScrollViewer>
 </UserControl>
+
 
 
 
