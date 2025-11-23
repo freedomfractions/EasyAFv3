@@ -285,11 +285,7 @@
                                 BorderThickness="1"
                                 CornerRadius="8"
                                 Margin="6,4,3,-2"
-                                VerticalAlignment="Stretch">
-                            <i:Interaction.Behaviors>
-                                <behaviors:ImportDropBehavior IsNewData="True" ViewModel="{Binding}"/>
-                            </i:Interaction.Behaviors>
-                        </Border>
+                                VerticalAlignment="Stretch"/>
                         
                         <!-- Old Data Column Background - dynamically sized to match DataGrid height -->
                         <Border Grid.Column="2"
@@ -299,11 +295,7 @@
                                 BorderThickness="1"
                                 CornerRadius="8"
                                 Margin="3,4,6,-2"
-                                VerticalAlignment="Stretch">
-                            <i:Interaction.Behaviors>
-                                <behaviors:ImportDropBehavior IsNewData="False" ViewModel="{Binding}"/>
-                            </i:Interaction.Behaviors>
-                        </Border>
+                                VerticalAlignment="Stretch"/>
                         
                         <!-- DataGrid on top of backgrounds - DISABLE ALL SCROLLING -->
                         <DataGrid Grid.Column="0" Grid.ColumnSpan="4"
@@ -680,6 +672,29 @@
                             </DataGridTemplateColumn>
                         </DataGrid.Columns>
                     </DataGrid>
+                    
+                    <!-- Transparent drop zone overlays - sit on top of DataGrid in Z-order -->
+                    <!-- New Data Drop Zone - covers entire column -->
+                    <Border Grid.Column="1"
+                            x:Name="NewDataDropZone"
+                            Background="Transparent"
+                            IsHitTestVisible="True"
+                            Margin="6,0,3,0">
+                        <i:Interaction.Behaviors>
+                            <behaviors:ImportDropBehavior IsNewData="True" ViewModel="{Binding}"/>
+                        </i:Interaction.Behaviors>
+                    </Border>
+                    
+                    <!-- Old Data Drop Zone - covers entire column -->
+                    <Border Grid.Column="2"
+                            x:Name="OldDataDropZone"
+                            Background="Transparent"
+                            IsHitTestVisible="True"
+                            Margin="3,0,6,0">
+                        <i:Interaction.Behaviors>
+                            <behaviors:ImportDropBehavior IsNewData="False" ViewModel="{Binding}"/>
+                        </i:Interaction.Behaviors>
+                    </Border>
                 </Grid>  <!-- Close inner Grid that contains column backgrounds -->
             </Grid>  <!-- Close outer Grid in GroupBox content -->
         </GroupBox>
@@ -729,6 +744,150 @@
         </Grid>
     </ScrollViewer>
 </UserControl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
