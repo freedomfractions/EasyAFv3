@@ -1195,17 +1195,19 @@ namespace EasyAF.Modules.Project.ViewModels
         {
             if (e.PropertyName == nameof(DataStatisticsRowViewModel.IsExpanded))
             {
-                // Temporarily disable highlights during visual tree rebuild to prevent re-triggering
-                var previousState = AllowCellHighlights;
-                AllowCellHighlights = false;
+                // Clear highlight flags on child rows before they become visible
+                // This prevents their CellHighlightBehavior from triggering when attached
+                if (sender is DataStatisticsRowViewModel row && row.IsExpanded)
+                {
+                    foreach (var child in row.Children)
+                    {
+                        child.IsNewCountHighlighted = false;
+                        child.IsOldCountHighlighted = false;
+                    }
+                }
                 
-                // Rebuild the flattened visible list (no data changes, just UI visibility)
+                // Rebuild the flattened visible list
                 RebuildVisibleRows();
-                
-                // Restore the previous state after a brief delay (let WPF finish rendering)
-                System.Windows.Threading.Dispatcher.CurrentDispatcher.BeginInvoke(
-                    new Action(() => AllowCellHighlights = previousState),
-                    System.Windows.Threading.DispatcherPriority.Loaded);
             }
         }
 
