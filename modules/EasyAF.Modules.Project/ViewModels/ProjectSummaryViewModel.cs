@@ -789,20 +789,16 @@ namespace EasyAF.Modules.Project.ViewModels
                         var fileWord = fileCount == 1 ? "file" : "files";
                         var affectedList = string.Join("\n  • ", affectedTypes);
                         
-                        var projectType = ProjectType == ProjectType.Standard ? "Standard" : "Composite";
                         var behaviorNote = ProjectType == ProjectType.Standard
-                            ? "  • ALL existing data for these types will be DELETED\n" +
-                              "  • Only data from your import files will remain"
-                            : "  • New scenarios will be ADDED to existing data\n" +
-                              "  • Entries with duplicate (ID + Scenario) will be SKIPPED";
+                            ? "Existing data for these types will be REPLACED."
+                            : "New scenarios will be added to existing data.";
                         
                         var confirmed = _dialogService.Confirm(
-                            $"The {dataTypeName} Data dataset already contains data ({projectType} Project):\n\n" +
-                            $"  • {affectedList}\n\n" +
-                            $"Import Behavior:\n{behaviorNote}\n\n" +
-                            $"?? WARNING: This will PERMANENTLY DELETE existing data for the affected types!\n\n" +
+                            $"?? WARNING: {dataTypeName} Data Conflict\n\n" +
+                            $"Affected data types:\n  • {affectedList}\n\n" +
+                            $"{behaviorNote}\n\n" +
                             $"Continue with import?",
-                            $"Confirm Data Replacement - {dataTypeName} Data");
+                            $"Confirm Import");
 
                         if (!confirmed)
                         {
@@ -965,20 +961,16 @@ namespace EasyAF.Modules.Project.ViewModels
                         var fileWord = fileCount == 1 ? "file" : "files";
                         var affectedList = string.Join("\n  • ", affectedTypes);
                         
-                        var projectType = ProjectType == ProjectType.Standard ? "Standard" : "Composite";
                         var behaviorNote = ProjectType == ProjectType.Standard
-                            ? "  • ALL existing data for these types will be DELETED\n" +
-                              "  • Only data from your import files will remain"
-                            : "  • New scenarios will be ADDED to existing data\n" +
-                              "  • Entries with duplicate (ID + Scenario) will be SKIPPED";
+                            ? "Existing data for these types will be REPLACED."
+                            : "New scenarios will be added to existing data.";
                         
                         var confirmed = _dialogService.Confirm(
-                            $"The {dataTypeName} Data dataset already contains data ({projectType} Project):\n\n" +
-                            $"  • {affectedList}\n\n" +
-                            $"Import Behavior:\n{behaviorNote}\n\n" +
-                            $"?? WARNING: This will PERMANENTLY DELETE existing data for the affected types!\n\n" +
+                            $"?? WARNING: {dataTypeName} Data Conflict\n\n" +
+                            $"Affected data types:\n  • {affectedList}\n\n" +
+                            $"{behaviorNote}\n\n" +
                             $"Continue with import?",
-                            $"Confirm Data Replacement - {dataTypeName} Data");
+                            $"Confirm Import");
 
                         if (!confirmed)
                         {
