@@ -909,6 +909,16 @@ namespace EasyAF.Modules.Project.ViewModels
         /// </remarks>
         public void RefreshStatistics()
         {
+            // Capture old counts before refreshing (for change detection)
+            var oldCounts = new System.Collections.Generic.Dictionary<string, (int newCount, int oldCount)>();
+            foreach (var row in DataStatisticsRows)
+            {
+                var key = row.ScenarioName != null 
+                    ? $"{row.DataTypeName}:{row.ScenarioName}" 
+                    : row.DataTypeName;
+                oldCounts[key] = (row.NewCount, row.OldCount);
+            }
+
             // Debug logging to diagnose load issues
             Log.Debug("RefreshStatistics called. NewData null: {NewDataNull}, OldData null: {OldDataNull}", 
                 _document.Project.NewData == null, 
@@ -931,6 +941,38 @@ namespace EasyAF.Modules.Project.ViewModels
                 DataStatisticsRows.Add(row);
                 // Subscribe to IsExpanded changes
                 row.PropertyChanged += StatisticsRow_PropertyChanged;
+
+                // Detect changes and trigger highlights
+                var key = row.ScenarioName != null 
+                    ? $"{row.DataTypeName}:{row.ScenarioName}" 
+                    : row.DataTypeName;
+
+                if (oldCounts.TryGetValue(key, out var oldValues))
+                {
+                    // Check if New count changed
+                    if (row.NewCount != oldValues.newCount && row.NewCount > 0)
+                    {
+                        row.IsNewCountHighlighted = true;
+                        Log.Debug("Highlighting New count change for {Key}: {Old} ? {New}", 
+                            key, oldValues.newCount, row.NewCount);
+                    }
+
+                    // Check if Old count changed
+                    if (row.OldCount != oldValues.oldCount && row.OldCount > 0)
+                    {
+                        row.IsOldCountHighlighted = true;
+                        Log.Debug("Highlighting Old count change for {Key}: {Old} ? {New}", 
+                            key, oldValues.oldCount, row.OldCount);
+                    }
+                }
+                else if (row.NewCount > 0 || row.OldCount > 0)
+                {
+                    // New row appeared - highlight whichever has data
+                    if (row.NewCount > 0) row.IsNewCountHighlighted = true;
+                    if (row.OldCount > 0) row.IsOldCountHighlighted = true;
+                    Log.Debug("Highlighting new row {Key}: New={New}, Old={Old}", 
+                        key, row.NewCount, row.OldCount);
+                }
             }
 
             // Build flattened visible list
