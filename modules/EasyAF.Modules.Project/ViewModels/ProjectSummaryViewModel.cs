@@ -789,17 +789,24 @@ namespace EasyAF.Modules.Project.ViewModels
                         var fileWord = fileCount == 1 ? "file" : "files";
                         var affectedList = string.Join("\n  • ", affectedTypes);
                         
+                        var projectType = ProjectType == ProjectType.Standard ? "Standard" : "Composite";
+                        var behaviorNote = ProjectType == ProjectType.Standard
+                            ? "  • Entries with duplicate IDs will be SKIPPED (existing data preserved)\n" +
+                              "  • Only NEW entries (not in existing dataset) will be added"
+                            : "  • New scenarios will be ADDED to existing data\n" +
+                              "  • Entries with duplicate (ID + Scenario) will be SKIPPED";
+                        
                         var confirmed = _dialogService.Confirm(
-                            $"The {dataTypeName} Data dataset already contains data that will be affected:\n\n" +
+                            $"The {dataTypeName} Data dataset already contains data ({projectType} Project):\n\n" +
                             $"  • {affectedList}\n\n" +
-                            $"Importing {fileCount} {fileWord} will ADD to the existing data (duplicates may occur).\n\n" +
-                            $"To replace the data instead:\n" +
+                            $"Import Behavior:\n{behaviorNote}\n\n" +
+                            $"To REPLACE all data instead:\n" +
                             $"1. Click 'Cancel'\n" +
                             $"2. Right-click the {dataTypeName} Data column header\n" +
                             $"3. Select 'Clear Data'\n" +
-                            $"4. Then import your files\n\n" +
-                            $"Continue with import (add to existing data)?",
-                            $"Confirm Import - {dataTypeName} Data Conflict");
+                            $"4. Then import your {fileWord}\n\n" +
+                            $"Continue with import?",
+                            $"Confirm Import - {dataTypeName} Data Exists");
 
                         if (!confirmed)
                         {
@@ -955,17 +962,24 @@ namespace EasyAF.Modules.Project.ViewModels
                         var fileWord = fileCount == 1 ? "file" : "files";
                         var affectedList = string.Join("\n  • ", affectedTypes);
                         
+                        var projectType = ProjectType == ProjectType.Standard ? "Standard" : "Composite";
+                        var behaviorNote = ProjectType == ProjectType.Standard
+                            ? "  • Entries with duplicate IDs will be SKIPPED (existing data preserved)\n" +
+                              "  • Only NEW entries (not in existing dataset) will be added"
+                            : "  • New scenarios will be ADDED to existing data\n" +
+                              "  • Entries with duplicate (ID + Scenario) will be SKIPPED";
+                        
                         var confirmed = _dialogService.Confirm(
-                            $"The {dataTypeName} Data dataset already contains data that will be affected:\n\n" +
+                            $"The {dataTypeName} Data dataset already contains data ({projectType} Project):\n\n" +
                             $"  • {affectedList}\n\n" +
-                            $"Importing {fileCount} {fileWord} will ADD to the existing data (duplicates may occur).\n\n" +
-                            $"To replace the data instead:\n" +
+                            $"Import Behavior:\n{behaviorNote}\n\n" +
+                            $"To REPLACE all data instead:\n" +
                             $"1. Click 'Cancel'\n" +
                             $"2. Right-click the {dataTypeName} Data column header\n" +
                             $"3. Select 'Clear Data'\n" +
-                            $"4. Then drag and drop your files again\n\n" +
-                            $"Continue with import (add to existing data)?",
-                            $"Confirm Drop Import - {dataTypeName} Data Conflict");
+                            $"4. Then drag and drop your {fileWord} again\n\n" +
+                            $"Continue with import?",
+                            $"Confirm Drop Import - {dataTypeName} Data Exists");
 
                         if (!confirmed)
                         {
