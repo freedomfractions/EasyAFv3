@@ -315,7 +315,11 @@
                         <ScrollViewer Grid.Row="1"
                                       VerticalScrollBarVisibility="Auto"
                                       HorizontalScrollBarVisibility="Disabled">
-                            <ItemsControl ItemsSource="{Binding FileTabManager.FileTabItems}"/>
+                            <controls:DocumentTabControl ItemsSource="{Binding FileTabManager.FileTabItems}"
+                                                         SelectedDocument="{Binding SelectedDocument, Mode=TwoWay}"
+                                                         CloseDocumentCommand="{Binding CloseDocumentCommand}"
+                                                         Background="Transparent"
+                                                         BorderThickness="0"/>
                         </ScrollViewer>
                     </Grid>
                 </Border>
