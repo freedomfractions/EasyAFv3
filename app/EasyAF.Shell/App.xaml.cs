@@ -74,7 +74,9 @@ public partial class App : PrismApplication
         
         loader.ModuleLoaded += (object? sender, EasyAF.Core.Contracts.IModule module) => 
         {
-            ribbonService.AddModuleTabs(module, null);
+            // Don't add tabs here - they'll be added when documents are opened
+            // ribbonService.AddModuleTabs(module, null);
+            
             // Register help pages if provided
             var helpCatalog = Container.Resolve<IHelpCatalog>();
             helpCatalog.RegisterModule(module);
@@ -117,6 +119,7 @@ public partial class App : PrismApplication
         // Related modules: Shell (ModuleRibbonService, MainWindow), Core (IDocumentModule)
         // Rollback instructions: Remove SyncTabsToRibbon logic and TabsChanged subscription; rely on static XAML only
         var ribbonService = Container.Resolve<IModuleRibbonService>();
+        var documentManager = Container.Resolve<IDocumentManager>();
 
         void SyncTabsToRibbon()
         {
@@ -140,10 +143,35 @@ public partial class App : PrismApplication
                 ribbon.Tabs.Add(helpTab);
             }
         }
+        
+        void UpdateModuleTabs()
+        {
+            var activeDocument = documentManager.ActiveDocument;
+            
+            // Clear existing module tabs (keep only static tabs like Home/Help)
+            ribbonService.Tabs.Clear();
+            
+            // If there's an active document, add its module's tabs
+            if (activeDocument?.OwnerModule is IDocumentModule docModule)
+            {
+                ribbonService.AddModuleTabs(docModule, activeDocument);
+                Log.Debug("Updated ribbon tabs for {ModuleName}", docModule.ModuleName);
+            }
+            else
+            {
+                Log.Debug("No active document, cleared module ribbon tabs");
+            }
+        }
 
         // Initial sync and subscribe for future changes
         SyncTabsToRibbon();
         ribbonService.TabsChanged += (_, __) => SyncTabsToRibbon();
+        
+        // Subscribe to active document changes to update ribbon tabs
+        documentManager.ActiveDocumentChanged += (_, __) => UpdateModuleTabs();
+        
+        // Initial tab update (in case a document is already active)
+        UpdateModuleTabs();
 
         return mainWindow;
     }
