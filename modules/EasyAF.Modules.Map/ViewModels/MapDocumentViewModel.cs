@@ -625,8 +625,13 @@ namespace EasyAF.Modules.Map.ViewModels
                 _document.IsDirty = false;
             }
 
-            // Refresh the UI after any changes
-            RefreshAllTabStatuses();
+            // Refresh the UI after any changes - BUT NOT during initial load!
+            // During initial load, tabs were just initialized and table selections restored
+            // Calling RefreshAllTabStatuses here would re-trigger table selection which marks dirty
+            if (!isInitialLoad)
+            {
+                RefreshAllTabStatuses();
+            }
         }
 
         #endregion
