@@ -434,19 +434,12 @@
                                 <ItemsControl ItemsSource="{Binding FileCommands.RecentFiles}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                </Grid.ColumnDefinitions>
-                                                
-                                                <!-- File Button -->
-                                                <Button Grid.Column="0"
-                                                        Command="{Binding DataContext.FileCommands.OpenRecentCommand, RelativeSource={RelativeSource AncestorType=fluent:RibbonWindow}}"
+                                            <Grid Margin="0,2,0,0">
+                                                <!-- File Button (full width) -->
+                                                <Button Command="{Binding DataContext.FileCommands.OpenRecentCommand, RelativeSource={RelativeSource AncestorType=fluent:RibbonWindow}}"
                                                         CommandParameter="{Binding}"
                                                         HorizontalContentAlignment="Left"
-                                                        Padding="8"
-                                                        Margin="0,2,0,0">
+                                                        Padding="8,8,32,8">
                                                     <Grid>
                                                         <Grid.ColumnDefinitions>
                                                             <ColumnDefinition Width="Auto"/>
@@ -469,14 +462,14 @@
                                                     </Grid>
                                                 </Button>
                                                 
-                                                <!-- Remove Button (X) - appears on hover -->
-                                                <Button Grid.Column="1"
-                                                        Command="{Binding DataContext.FileCommands.RemoveRecentCommand, RelativeSource={RelativeSource AncestorType=fluent:RibbonWindow}}"
+                                                <!-- Remove Button (X) - overlaid on right side, appears on hover -->
+                                                <Button Command="{Binding DataContext.FileCommands.RemoveRecentCommand, RelativeSource={RelativeSource AncestorType=fluent:RibbonWindow}}"
                                                         CommandParameter="{Binding}"
                                                         Width="24"
                                                         Height="24"
                                                         Padding="0"
-                                                        Margin="4,2,0,0"
+                                                        Margin="0,0,4,0"
+                                                        HorizontalAlignment="Right"
                                                         VerticalAlignment="Center"
                                                         Background="Transparent"
                                                         BorderThickness="0"
@@ -494,7 +487,7 @@
                                                     </Button.Visibility>
                                                     <Button.Style>
                                                         <Style TargetType="Button">
-                                                            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                                                            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
                                                             <Setter Property="Template">
                                                                 <Setter.Value>
                                                                     <ControlTemplate TargetType="Button">
