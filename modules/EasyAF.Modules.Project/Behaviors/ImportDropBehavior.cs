@@ -36,6 +36,7 @@ namespace EasyAF.Modules.Project.Behaviors
         private Thickness _originalBorderThickness;
         private Storyboard? _glowInAnimation;
         private Storyboard? _glowOutAnimation;
+        private Border? _targetBorder; // The actual background border to glow
 
         /// <summary>
         /// Identifies whether this drop zone is for New Data (true) or Old Data (false).
@@ -88,6 +89,9 @@ namespace EasyAF.Modules.Project.Behaviors
             AssociatedObject.DragLeave += OnDragLeave;
             AssociatedObject.Drop += OnDrop;
 
+            // Find the target background border to glow
+            FindTargetBorder();
+
             // Create animations for glow effect
             CreateGlowAnimations();
 
@@ -106,6 +110,58 @@ namespace EasyAF.Modules.Project.Behaviors
             AssociatedObject.DragOver -= OnDragOver;
             AssociatedObject.DragLeave -= OnDragLeave;
             AssociatedObject.Drop -= OnDrop;
+        }
+
+        /// <summary>
+        /// Finds the background border element to apply glow effects to.
+        /// </summary>
+        private void FindTargetBorder()
+        {
+            // Walk up the visual tree to find the parent Grid (StatisticsTableContainer)
+            var parent = VisualTreeHelper.GetParent(AssociatedObject);
+            while (parent != null && !(parent is Grid grid && grid.Name == "StatisticsTableContainer"))
+            {
+                parent = VisualTreeHelper.GetParent(parent);
+            }
+
+            if (parent is Grid container)
+            {
+                // Find the background border by name
+                var targetName = IsNewData ? "NewDataBackground" : "OldDataBackground";
+                _targetBorder = FindChildByName<Border>(container, targetName);
+
+                if (_targetBorder == null)
+                {
+                    Log.Warning("Could not find target border: {Name}", targetName);
+                }
+                else
+                {
+                    Log.Debug("Found target border: {Name}", targetName);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Finds a child element by name in the visual tree.
+        /// </summary>
+        private T? FindChildByName<T>(DependencyObject parent, string name) where T : FrameworkElement
+        {
+            if (parent == null) return null;
+
+            int childCount = VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < childCount; i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                
+                if (child is T element && element.Name == name)
+                    return element;
+
+                var result = FindChildByName<T>(child, name);
+                if (result != null)
+                    return result;
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -268,9 +324,15 @@ namespace EasyAF.Modules.Project.Behaviors
         /// </summary>
         private void ShowGlow()
         {
+            if (_targetBorder == null)
+            {
+                Log.Warning("Cannot show glow - target border not found");
+                return;
+            }
+
             // Save original state
-            _originalBorderBrush = AssociatedObject.BorderBrush;
-            _originalBorderThickness = AssociatedObject.BorderThickness;
+            _originalBorderBrush = _targetBorder.BorderBrush;
+            _originalBorderThickness = _targetBorder.BorderThickness;
 
             // Get glow brush from theme
             var glowBrushKey = IsNewData ? "NewDataGlowBrush" : "OldDataGlowBrush";
@@ -278,12 +340,14 @@ namespace EasyAF.Modules.Project.Behaviors
 
             if (glowBrush != null)
             {
-                AssociatedObject.BorderBrush = glowBrush;
-                AssociatedObject.BorderThickness = new Thickness(3);
-                AssociatedObject.Opacity = 0;
-
+                _targetBorder.BorderBrush = glowBrush;
+                _targetBorder.BorderThickness = new Thickness(3);
+                
                 // Animate glow in
-                _glowInAnimation?.Begin(AssociatedObject);
+                if (_glowInAnimation != null)
+                {
+                    _glowInAnimation.Begin(_targetBorder);
+                }
             }
             else
             {
@@ -296,8 +360,8 @@ namespace EasyAF.Modules.Project.Behaviors
         /// </summary>
         private void HideGlow()
         {
-            if (_originalBorderBrush == null)
-                return; // Never showed glow
+            if (_targetBorder == null || _originalBorderBrush == null)
+                return; // Never showed glow or no target
 
             // Animate glow out
             if (_glowOutAnimation != null)
@@ -305,17 +369,20 @@ namespace EasyAF.Modules.Project.Behaviors
                 _glowOutAnimation.Completed += (s, e) =>
                 {
                     // Restore original appearance after animation
-                    AssociatedObject.BorderBrush = _originalBorderBrush;
-                    AssociatedObject.BorderThickness = _originalBorderThickness;
+                    if (_targetBorder != null)
+                    {
+                        _targetBorder.BorderBrush = _originalBorderBrush;
+                        _targetBorder.BorderThickness = _originalBorderThickness;
+                    }
                     _originalBorderBrush = null;
                 };
-                _glowOutAnimation.Begin(AssociatedObject);
+                _glowOutAnimation.Begin(_targetBorder);
             }
             else
             {
                 // No animation - restore immediately
-                AssociatedObject.BorderBrush = _originalBorderBrush;
-                AssociatedObject.BorderThickness = _originalBorderThickness;
+                _targetBorder.BorderBrush = _originalBorderBrush;
+                _targetBorder.BorderThickness = _originalBorderThickness;
                 _originalBorderBrush = null;
             }
         }
