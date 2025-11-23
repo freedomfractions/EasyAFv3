@@ -94,6 +94,12 @@ namespace EasyAF.Modules.Project.ViewModels
         /// </summary>
         public string DocumentTitle => _document.Title + (_document.IsDirty ? "*" : "");
 
+        /// <summary>
+        /// Gets the Summary ViewModel for ribbon command binding.
+        /// </summary>
+        public ProjectSummaryViewModel? Summary =>
+            TabHeaders.FirstOrDefault(t => t.Header == "Summary")?.ViewModel as ProjectSummaryViewModel;
+
         #endregion
 
         #region Tab Management

@@ -216,6 +216,9 @@ namespace EasyAF.Modules.Project
                 DataContext = viewModel
             };
 
+            // Create Import group with Import New/Old Data buttons
+            var importGroup = CreateImportGroup();
+            
             // Create placeholder ribbon groups (will be populated in Task 22)
             var dataGroup = new Fluent.RibbonGroupBox
             {
@@ -227,6 +230,7 @@ namespace EasyAF.Modules.Project
                 Header = "Output"
             };
 
+            tab.Groups.Add(importGroup);
             tab.Groups.Add(dataGroup);
             tab.Groups.Add(outputGroup);
 
@@ -234,67 +238,70 @@ namespace EasyAF.Modules.Project
         }
 
         /// <summary>
-        /// Determines if this module can handle a given file.
+        /// Creates the Import group with Import New Data and Import Old Data buttons.
         /// </summary>
-        /// <param name="filePath">The file path to check.</param>
-        /// <returns>True if the file extension is .ezaf; otherwise false.</returns>
-        public bool CanHandleFile(string filePath)
+        private Fluent.RibbonGroupBox CreateImportGroup()
         {
-            if (string.IsNullOrEmpty(filePath))
-                return false;
+            var group = new Fluent.RibbonGroupBox
+            {
+                Header = "Import"
+            };
 
-            var extension = System.IO.Path.GetExtension(filePath)?.TrimStart('.');
-            var canHandle = Array.Exists(SupportedFileExtensions, ext => 
-                ext.Equals(extension, StringComparison.OrdinalIgnoreCase));
+            // Import New Data button
+            var importNewButton = new Fluent.Button
+            {
+                Header = "Import New Data",
+                Icon = CreateGlyphIcon("\uE8B5"), // Download icon
+                LargeIcon = CreateGlyphIcon("\uE8B5", 32),
+                SizeDefinition = "Large",
+                ToolTip = "Import data files into New Data dataset (multi-select supported)"
+            };
+            importNewButton.SetBinding(Fluent.Button.CommandProperty, 
+                new System.Windows.Data.Binding("Summary.ImportNewDataCommand"));
 
-            Log.Debug("CanHandleFile({FilePath}): {CanHandle}", filePath, canHandle);
-            return canHandle;
+            // Import Old Data button
+            var importOldButton = new Fluent.Button
+            {
+                Header = "Import Old Data",
+                Icon = CreateGlyphIcon("\uE8B5"), // Download icon
+                LargeIcon = CreateGlyphIcon("\uE8B5", 32),
+                SizeDefinition = "Large",
+                ToolTip = "Import data files into Old Data dataset (multi-select supported)"
+            };
+            importOldButton.SetBinding(Fluent.Button.CommandProperty, 
+                new System.Windows.Data.Binding("Summary.ImportOldDataCommand"));
+
+            group.Items.Add(importNewButton);
+            group.Items.Add(importOldButton);
+
+            return group;
         }
 
         /// <summary>
-        /// Gets a suggested filename for the document based on its content.
+        /// Creates a glyph icon from Segoe MDL2 Assets font.
         /// </summary>
-        /// <param name="document">The document to suggest a filename for.</param>
-        /// <returns>
-        /// Filename in format "[LB Project Number] - [Site Name]" if both are present,
-        /// otherwise returns null to use default Title-based naming.
-        /// </returns>
-        /// <remarks>
-        /// <para>
-        /// This implements the Project module's default naming convention:
-        /// <strong>[LB Project Number] - [Site Name]</strong>
-        /// </para>
-        /// <para>
-        /// Examples:
-        /// - "12345 - Acme Manufacturing Plant"
-        /// - "LB-2024-001 - Downtown Distribution Center"
-        /// </para>
-        /// <para>
-        /// If either field is missing, returns null so the shell falls back to document.Title.
-        /// </para>
-        /// </remarks>
-        public string? GetSuggestedFileName(IDocument document)
+        private System.Windows.Media.ImageSource CreateGlyphIcon(string glyph, int size = 16)
         {
-            if (document is not ProjectDocument projectDoc)
-                return null;
-
-            var projectNumber = projectDoc.Project?.LBProjectNumber?.Trim();
-            var siteName = projectDoc.Project?.SiteName?.Trim();
-
-            // Both fields must be present for the naming convention
-            if (string.IsNullOrWhiteSpace(projectNumber) || string.IsNullOrWhiteSpace(siteName))
-                return null;
-
-            // Combine with hyphen separator
-            var suggested = $"{projectNumber} - {siteName}";
-
-            // Sanitize for filesystem (remove invalid characters)
-            foreach (var c in System.IO.Path.GetInvalidFileNameChars())
+            var visual = new System.Windows.Media.DrawingVisual();
+            using (var context = visual.RenderOpen())
             {
-                suggested = suggested.Replace(c, '_');
+                var formattedText = new System.Windows.Media.FormattedText(
+                    glyph,
+                    System.Globalization.CultureInfo.CurrentCulture,
+                    System.Windows.FlowDirection.LeftToRight,
+                    new System.Windows.Media.Typeface("Segoe MDL2 Assets"),
+                    size,
+                    System.Windows.Media.Brushes.Black,
+                    System.Windows.Media.VisualTreeHelper.GetDpi(visual).PixelsPerDip);
+
+                context.DrawText(formattedText, new System.Windows.Point(0, 0));
             }
 
-            return suggested;
+            var bitmap = new System.Windows.Media.Imaging.RenderTargetBitmap(
+                size, size, 96, 96, System.Windows.Media.PixelFormats.Pbgra32);
+            bitmap.Render(visual);
+
+            return bitmap;
         }
 
         /// <summary>
