@@ -35,6 +35,8 @@ namespace EasyAF.Modules.Project.Behaviors
         private bool _isHighlighting;
         private System.Windows.Threading.DispatcherTimer? _holdTimer;
         private SolidColorBrush? _currentAnimatedBrush; // Track the brush being animated
+        private DateTime _lastHighlightTime = DateTime.MinValue; // Debounce rapid triggers
+        private static readonly TimeSpan DebounceThreshold = TimeSpan.FromMilliseconds(100); // Ignore triggers within 100ms
 
         /// <summary>
         /// Identifies the IsHighlighted dependency property.
@@ -136,6 +138,16 @@ namespace EasyAF.Modules.Project.Behaviors
         /// </summary>
         private void StartHighlight()
         {
+            // Debounce: Ignore if we just triggered recently (within 100ms)
+            var now = DateTime.UtcNow;
+            if ((now - _lastHighlightTime) < DebounceThreshold)
+            {
+                Log.Verbose("Ignoring highlight request - debounced (last trigger {Ms}ms ago)", 
+                    (now - _lastHighlightTime).TotalMilliseconds);
+                return;
+            }
+            _lastHighlightTime = now;
+
             // Guard: Don't start if we're already in the middle of an animation
             if (_isHighlighting)
             {
