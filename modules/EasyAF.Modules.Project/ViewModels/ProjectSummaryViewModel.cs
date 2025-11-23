@@ -1159,6 +1159,31 @@ namespace EasyAF.Modules.Project.ViewModels
                 }
             }
 
+            // Auto-reset highlight flags after animation completes (2s hold + 1.5s fade = 3.5s total)
+            if (triggerHighlights)
+            {
+                var resetTimer = new System.Windows.Threading.DispatcherTimer
+                {
+                    Interval = TimeSpan.FromSeconds(4) // Slightly longer than animation to be safe
+                };
+                resetTimer.Tick += (s, e) =>
+                {
+                    foreach (var row in DataStatisticsRows)
+                    {
+                        row.IsNewCountHighlighted = false;
+                        row.IsOldCountHighlighted = false;
+                        foreach (var child in row.Children)
+                        {
+                            child.IsNewCountHighlighted = false;
+                            child.IsOldCountHighlighted = false;
+                        }
+                    }
+                    resetTimer.Stop();
+                    Log.Debug("Auto-reset all highlight flags after animation completion");
+                };
+                resetTimer.Start();
+            }
+
             // Build flattened visible list
             RebuildVisibleRows();
 
@@ -1195,18 +1220,7 @@ namespace EasyAF.Modules.Project.ViewModels
         {
             if (e.PropertyName == nameof(DataStatisticsRowViewModel.IsExpanded))
             {
-                // Clear highlight flags on child rows before they become visible
-                // This prevents their CellHighlightBehavior from triggering when attached
-                if (sender is DataStatisticsRowViewModel row && row.IsExpanded)
-                {
-                    foreach (var child in row.Children)
-                    {
-                        child.IsNewCountHighlighted = false;
-                        child.IsOldCountHighlighted = false;
-                    }
-                }
-                
-                // Rebuild the flattened visible list
+                // Just rebuild the visible list - no special highlight logic needed
                 RebuildVisibleRows();
             }
         }
