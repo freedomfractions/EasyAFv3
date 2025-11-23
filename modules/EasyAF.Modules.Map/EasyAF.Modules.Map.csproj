@@ -26,4 +26,9 @@
     <EmbeddedResource Include="Help\*.md" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Embedded PNG for in-app use (file tabs) -->
+    <Resource Include="Resources\map-icon.png" />
+  </ItemGroup>
+
 </Project>

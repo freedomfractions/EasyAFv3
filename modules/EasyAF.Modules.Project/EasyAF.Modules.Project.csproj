@@ -19,4 +19,9 @@
     <ProjectReference Include="..\..\lib\EasyAF.Import\EasyAF.Import.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Embedded PNG for in-app use (file tabs) -->
+    <Resource Include="Resources\project-icon.png" />
+  </ItemGroup>
+
 </Project>

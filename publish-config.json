@@ -1,0 +1,26 @@
+{
+  "publishLocation": "\\\\yourserver\\apps\\EasyAF",
+  "installUrl": "\\\\yourserver\\apps\\EasyAF",
+  "applicationName": "EasyAF",
+  "publisherName": "Your Company Name",
+  "productName": "EasyAF Power System Analysis",
+  "supportUrl": "https://yourcompany.com/support",
+  "updateMode": "Foreground",
+  "updateInterval": 1,
+  "updateIntervalUnits": "Days",
+  "minimumRequiredVersion": "",
+  "fileAssociations": [
+    {
+      "extension": "ezmap",
+      "description": "EasyAF Mapping Configuration",
+      "progId": "EasyAF.MapFile",
+      "defaultIcon": "Resources\\FileIcons\\ezmap.ico"
+    },
+    {
+      "extension": "ezproj",
+      "description": "EasyAF Project File",
+      "progId": "EasyAF.ProjectFile",
+      "defaultIcon": "Resources\\FileIcons\\ezproj.ico"
+    }
+  ]
+}

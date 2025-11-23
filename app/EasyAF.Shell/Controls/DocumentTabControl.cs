@@ -98,6 +98,15 @@ public class DocumentTabControl : ListBox
                     SelectedItem = tabItem;
                 }
             }
+            else if (item is WelcomeTabViewModel welcome)
+            {
+                // Active when document is null
+                welcome.IsActive = document == null;
+                if (welcome.IsActive)
+                {
+                    SelectedItem = welcome;
+                }
+            }
         }
     }
     #endregion

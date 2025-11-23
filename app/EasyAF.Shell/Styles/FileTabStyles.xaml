@@ -266,19 +266,7 @@
                                Margin="0,2,0,0"/>
                 </StackPanel>
                 
-                <!-- Close Button (X) -->
-                <Button Grid.Column="2"
-                        Style="{StaticResource FileTabCloseButtonStyle}"
-                        Command="{Binding CloseCommand}"
-                        VerticalAlignment="Center"
-                        Margin="4,0">
-                    <Button.Visibility>
-                        <MultiBinding Converter="{StaticResource BooleanOrToVisibilityConverter}">
-                            <Binding Path="IsHovered"/>
-                            <Binding Path="IsActive"/>
-                        </MultiBinding>
-                    </Button.Visibility>
-                </Button>
+                <!-- No close button for Welcome tab (permanently hidden) -->
             </Grid>
         </Border>
     </DataTemplate>

@@ -31,6 +31,7 @@ public class FileTabItemViewModel : BindableBase
 {
     private readonly IDocument _document;
     private readonly DispatcherTimer _savedIndicatorTimer;
+    private readonly DispatcherTimer _timestampRefreshTimer;
     private bool _isActive;
     private bool _isHovered;
     private DateTime _lastSaved;
@@ -46,6 +47,9 @@ public class FileTabItemViewModel : BindableBase
         _document = document ?? throw new ArgumentNullException(nameof(document));
         CloseCommand = closeCommand;
         
+        // Initialize last saved timestamp from file if it exists
+        InitializeLastSavedTimestamp();
+        
         // Watch for dirty state changes
         if (_document is System.ComponentModel.INotifyPropertyChanged notifyDoc)
         {
@@ -53,8 +57,23 @@ public class FileTabItemViewModel : BindableBase
             {
                 if (e.PropertyName == nameof(IDocument.IsDirty))
                 {
+                    // If document just became clean (was saved), update timestamp
+                    if (!_document.IsDirty)
+                    {
+                        NotifySaved();
+                    }
+                    
                     UpdateStatusColor();
                     RaisePropertyChanged(nameof(StatusBarColor));
+                    RaisePropertyChanged(nameof(LastSavedText));
+                }
+                else if (e.PropertyName == nameof(IDocument.FilePath))
+                {
+                    // File path changed (Save As), update timestamp
+                    InitializeLastSavedTimestamp();
+                    RaisePropertyChanged(nameof(FileName));
+                    RaisePropertyChanged(nameof(DirectoryPath));
+                    RaisePropertyChanged(nameof(LastSavedText));
                 }
             };
         }
@@ -73,7 +92,44 @@ public class FileTabItemViewModel : BindableBase
             }
         };
         
+        // Timer to refresh "X minutes ago" text periodically
+        _timestampRefreshTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromMinutes(1)
+        };
+        _timestampRefreshTimer.Tick += (_, __) =>
+        {
+            RaisePropertyChanged(nameof(LastSavedText));
+        };
+        _timestampRefreshTimer.Start();
+        
         UpdateStatusColor();
+    }
+    
+    /// <summary>
+    /// Initializes the last saved timestamp from the file's last write time.
+    /// </summary>
+    private void InitializeLastSavedTimestamp()
+    {
+        if (!string.IsNullOrWhiteSpace(_document.FilePath) && File.Exists(_document.FilePath))
+        {
+            try
+            {
+                var fileInfo = new FileInfo(_document.FilePath);
+                _lastSaved = fileInfo.LastWriteTime;
+                Log.Debug("Initialized last saved timestamp from file: {FilePath} -> {Timestamp}", 
+                    _document.FilePath, _lastSaved);
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Failed to read last write time for {FilePath}", _document.FilePath);
+                _lastSaved = default;
+            }
+        }
+        else
+        {
+            _lastSaved = default;
+        }
     }
     
     /// <summary>
@@ -148,6 +204,23 @@ public class FileTabItemViewModel : BindableBase
             if (_document.IsDirty)
                 return "Unsaved changes";
             
+            // If we don't have a timestamp, try to get it from the file
+            if (_lastSaved == default && !string.IsNullOrWhiteSpace(_document.FilePath))
+            {
+                try
+                {
+                    if (File.Exists(_document.FilePath))
+                    {
+                        var fileInfo = new FileInfo(_document.FilePath);
+                        _lastSaved = fileInfo.LastWriteTime;
+                    }
+                }
+                catch
+                {
+                    // Ignore errors, will show "Unknown"
+                }
+            }
+            
             if (_lastSaved == default)
                 return "Unknown";
             
@@ -160,12 +233,25 @@ public class FileTabItemViewModel : BindableBase
                 return "Saved moments ago";
             
             if (elapsed.TotalMinutes < 60)
-                return $"Saved {(int)elapsed.TotalMinutes} minute{(elapsed.TotalMinutes >= 2 ? "s" : "")} ago";
+            {
+                var minutes = (int)elapsed.TotalMinutes;
+                return $"Saved {minutes} minute{(minutes != 1 ? "s" : "")} ago";
+            }
             
             if (elapsed.TotalHours < 24)
-                return $"Saved {(int)elapsed.TotalHours} hour{(elapsed.TotalHours >= 2 ? "s" : "")} ago";
+            {
+                var hours = (int)elapsed.TotalHours;
+                return $"Saved {hours} hour{(hours != 1 ? "s" : "")} ago";
+            }
             
-            return $"Saved {(int)elapsed.TotalDays} day{(elapsed.TotalDays >= 2 ? "s" : "")} ago";
+            if (elapsed.TotalDays < 7)
+            {
+                var days = (int)elapsed.TotalDays;
+                return $"Saved {days} day{(days != 1 ? "s" : "")} ago";
+            }
+            
+            // For older files, show the actual date
+            return $"Saved {_lastSaved:MMM d, yyyy}";
         }
     }
     

@@ -89,9 +89,10 @@ namespace EasyAF.Modules.Map
         /// Gets the icon representing this module.
         /// </summary>
         /// <remarks>
-        /// Currently returns null; icon can be added as embedded resource in future.
+        /// Returns the embedded PNG resource for display in file tabs and UI.
         /// </remarks>
-        public ImageSource? ModuleIcon => null; // TODO: Add module icon
+        public ImageSource? ModuleIcon => new BitmapImage(
+            new Uri("pack://application:,,,/EasyAF.Modules.Map;component/Resources/map-icon.png"));
 
         /// <summary>
         /// Gets the help pages provided by this module.

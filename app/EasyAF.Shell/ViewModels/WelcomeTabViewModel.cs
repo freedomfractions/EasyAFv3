@@ -70,9 +70,9 @@ public class WelcomeTabViewModel : BindableBase
     /// Gets whether the close button should be visible.
     /// </summary>
     /// <remarks>
-    /// Visible when hovered or active.
+    /// Always false - Welcome tab is not closable.
     /// </remarks>
-    public bool ShowCloseButton => IsHovered || IsActive;
+    public bool ShowCloseButton => false;
     
     /// <summary>
     /// Gets the command to close this tab.

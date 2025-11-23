@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using EasyAF.Core.Contracts;
 using EasyAF.Modules.Project.Models;
 using Unity;
@@ -61,7 +62,8 @@ namespace EasyAF.Modules.Project
         /// <summary>
         /// Gets the icon for this module (null for now - can add embedded resource later).
         /// </summary>
-        public ImageSource? ModuleIcon => null;
+        public ImageSource? ModuleIcon => new BitmapImage(
+            new Uri("pack://application:,,,/EasyAF.Modules.Project;component/Resources/project-icon.png"));
 
         /// <summary>
         /// Initializes the module and registers services with the DI container.
