@@ -445,11 +445,29 @@ namespace EasyAF.Modules.Project.ViewModels
             get => _selectedMapping;
             set
             {
+                // Check if user selected Browse...
+                if (value != null && value.IsBrowseItem)
+                {
+                    // Trigger browse dialog
+                    ExecuteBrowseCustomMapping();
+                    
+                    // Don't change selection to Browse item - keep previous selection
+                    RaisePropertyChanged();  // Force UI update without changing value
+                    return;
+                }
+                
                 if (SetProperty(ref _selectedMapping, value))
                 {
                     // Update MapPath when selection changes
                     if (value != null && !string.IsNullOrEmpty(value.FilePath))
                     {
+                        // If it's a custom file item, update CustomMapPath
+                        if (value.IsCustomFileItem)
+                        {
+                            _document.Project.CustomMapPath = value.FilePath;
+                            _document.MarkDirty();
+                        }
+                        
                         MapPath = value.FilePath;
                     }
                     
@@ -524,23 +542,43 @@ namespace EasyAF.Modules.Project.ViewModels
         {
             AvailableMappings.Clear();
             
-            if (_document.Project.MapPathHistory == null || _document.Project.MapPathHistory.Count == 0)
-                return;
-            
-            foreach (var path in _document.Project.MapPathHistory)
+            // Add mapping files from history
+            if (_document.Project.MapPathHistory != null && _document.Project.MapPathHistory.Count > 0)
             {
-                if (string.IsNullOrWhiteSpace(path))
-                    continue;
-                
-                var fileName = System.IO.Path.GetFileName(path);
-                var item = MappingFileItem.CreateCustomFileItem(path, fileName);
-                AvailableMappings.Add(item);
+                foreach (var path in _document.Project.MapPathHistory)
+                {
+                    if (string.IsNullOrWhiteSpace(path))
+                        continue;
+                    
+                    var fileName = System.IO.Path.GetFileName(path);
+                    var item = MappingFileItem.CreateCustomFileItem(path, fileName);
+                    AvailableMappings.Add(item);
+                }
             }
             
-            // Select the first item (most recent) if available
-            if (AvailableMappings.Count > 0)
+            // Add custom file entry if it exists (project-specific)
+            if (!string.IsNullOrWhiteSpace(_document.Project.CustomMapPath) &&
+                System.IO.File.Exists(_document.Project.CustomMapPath))
             {
-                SelectedMapping = AvailableMappings[0];
+                var fileName = System.IO.Path.GetFileName(_document.Project.CustomMapPath);
+                var customItem = MappingFileItem.CreateCustomFileItem(_document.Project.CustomMapPath, fileName);
+                customItem.IsCustomFileItem = true;  // Mark it specially
+                
+                // Only add if not already in history
+                if (!AvailableMappings.Any(m => string.Equals(m.FilePath, _document.Project.CustomMapPath, StringComparison.OrdinalIgnoreCase)))
+                {
+                    AvailableMappings.Add(customItem);
+                }
+            }
+            
+            // Always add Browse... button at the end
+            AvailableMappings.Add(MappingFileItem.CreateBrowseItem());
+            
+            // Select the first non-browse item (most recent) if available
+            var firstMapping = AvailableMappings.FirstOrDefault(m => !m.IsBrowseItem);
+            if (firstMapping != null)
+            {
+                SelectedMapping = firstMapping;
             }
         }
 
@@ -722,6 +760,31 @@ namespace EasyAF.Modules.Project.ViewModels
             {
                 MapPath = dialog.FileName;
                 Log.Information("Map file selected: {Path}", dialog.FileName);
+            }
+        }
+
+        private void ExecuteBrowseCustomMapping()
+        {
+            var dialog = new OpenFileDialog
+            {
+                Title = "Select Custom Mapping File",
+                Filter = "Map Files (*.ezmap)|*.ezmap|All Files (*.*)|*.*",
+                CheckFileExists = true
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                // Store as custom map path (project-specific)
+                _document.Project.CustomMapPath = dialog.FileName;
+                _document.MarkDirty();
+                
+                // Also update MapPath to use this file
+                MapPath = dialog.FileName;
+                
+                Log.Information("Custom mapping file selected for project: {Path}", dialog.FileName);
+                
+                // Refresh the dropdown to show the new custom file
+                RefreshAvailableMappings();
             }
         }
 

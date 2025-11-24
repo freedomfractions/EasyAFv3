@@ -219,6 +219,8 @@ namespace EasyAF.Data.Models
         public List<string>? SpecPathHistory { get; set; } = new();
         /// <summary>History of mapping file paths.</summary>
         public List<string>? MapPathHistory { get; set; } = new();
+        /// <summary>Last custom mapping file browsed for this specific project (not in standard history).</summary>
+        public string? CustomMapPath { get; set; }
         /// <summary>Path to the report template file (.docx/.dotx) used for report generation.</summary>
         public string? TemplatePath { get; set; }
         /// <summary>History of template file paths.</summary>
@@ -461,6 +463,7 @@ namespace EasyAF.Data.Models
         public string? LastExternalMapChecksum { get; set; }
         public List<string>? SpecPathHistory { get; set; }
         public List<string>? MapPathHistory { get; set; }
+        public string? CustomMapPath { get; set; }
         public string? TemplatePath { get; set; }
         public List<string>? TemplatePathHistory { get; set; }
 
@@ -498,6 +501,7 @@ namespace EasyAF.Data.Models
                 LastExternalMapChecksum = p.LastExternalMapChecksum,
                 SpecPathHistory = p.SpecPathHistory,
                 MapPathHistory = p.MapPathHistory,
+                CustomMapPath = p.CustomMapPath,
                 TemplatePath = p.TemplatePath,
                 TemplatePathHistory = p.TemplatePathHistory
             };
@@ -522,6 +526,7 @@ namespace EasyAF.Data.Models
                 LastExternalMapChecksum = LastExternalMapChecksum,
                 SpecPathHistory = SpecPathHistory ?? new List<string>(),
                 MapPathHistory = MapPathHistory ?? new List<string>(),
+                CustomMapPath = CustomMapPath,
                 TemplatePath = TemplatePath,
                 TemplatePathHistory = TemplatePathHistory ?? new List<string>()
             };
