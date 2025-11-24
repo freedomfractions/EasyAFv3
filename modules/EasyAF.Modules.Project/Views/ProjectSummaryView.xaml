@@ -74,7 +74,7 @@
             
             <!-- Project GroupBox -->
             <GroupBox Grid.Row="0"
-                      Header="Project" 
+                      Header="Project Information" 
                       Margin="0,0,22,16"
                       HorizontalAlignment="Stretch"
                       BorderBrush="{DynamicResource ControlBorderBrush}"
@@ -100,6 +100,8 @@
                         <RowDefinition Height="32"/>
                         <RowDefinition Height="8"/>   <!-- Spacer row before Comments (reduced from 16) -->
                         <RowDefinition Height="80"/>  <!-- Comments row -->
+                        <RowDefinition Height="8"/>   <!-- Spacer row before Mapping File -->
+                        <RowDefinition Height="32"/>  <!-- Mapping File row -->
                         <RowDefinition Height="8"/>   <!-- Spacer row before Project Type (reduced from 16) -->
                         <RowDefinition Height="32"/>  <!-- Project Type row -->
                     </Grid.RowDefinitions>
@@ -237,11 +239,58 @@
                              HorizontalAlignment="Stretch"
                              VerticalAlignment="Stretch"/>
                     
-                    <!-- Row 9: Spacer (empty) -->
+                    <!-- Row 9: Spacer (empty) -->                    
+                    <!-- Row 10: Mapping File -->
+                    <TextBlock Grid.Row="10" Grid.Column="0" Text="Import Map:" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                    <ComboBox Grid.Row="10" Grid.Column="1" 
+                              ItemsSource="{Binding AvailableMappings}"
+                              SelectedItem="{Binding SelectedMapping}"
+                              VerticalAlignment="Center" 
+                              Margin="0,0,20,0" 
+                              HorizontalAlignment="Stretch">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding DisplayName}"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
                     
-                    <!-- Row 10: Project Type -->
-                    <TextBlock Grid.Row="10" Grid.Column="0" Text="Project Type:" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource TextPrimaryBrush}"/>
-                    <StackPanel Grid.Row="10" Grid.Column="1" Grid.ColumnSpan="7" Orientation="Horizontal">
+                    <Grid Grid.Row="10" Grid.Column="2" Grid.ColumnSpan="6" VerticalAlignment="Center">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <!-- Path label -->
+                        <TextBlock Grid.Column="0" Text="Path:" Margin="0,0,8,0" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        
+                        <!-- Path display -->
+                        <TextBlock Grid.Column="1" 
+                                   Text="{Binding MappingPathDisplay}" 
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                   TextTrimming="CharacterEllipsis"
+                                   ToolTip="{Binding MappingPathDisplay}"/>
+                        
+                        <!-- Validation indicator -->
+                        <TextBlock Grid.Column="2" 
+                                   Text="{Binding MappingValidationIcon}"
+                                   FontFamily="Segoe MDL2 Assets"
+                                   FontSize="16"
+                                   Margin="8,0,0,0"
+                                   VerticalAlignment="Center"
+                                   Foreground="{Binding MappingValidationBrush}"
+                                   ToolTip="{Binding MappingValidationTooltip}"/>
+                    </Grid>
+                    
+                    <!-- Row 10: Mapping File -->
+                    
+                    <!-- Row 11: Spacer (empty) -->
+                    
+                    <!-- Row 12: Project Type -->
+                    <TextBlock Grid.Row="12" Grid.Column="0" Text="Project Type:" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                    <StackPanel Grid.Row="12" Grid.Column="1" Grid.ColumnSpan="7" Orientation="Horizontal">
                         <RadioButton Content="Standard EasyPower Model" 
                                      IsChecked="{Binding IsStandardProjectType}" 
                                      GroupName="ProjectType" 
@@ -257,7 +306,7 @@
             
             <!-- Project Summary GroupBox -->
             <GroupBox Grid.Row="1"
-                      Header="Project Summary" 
+                      Header="Project Data" 
                       Margin="0,0,22,16"
                       HorizontalAlignment="Stretch"
                       BorderBrush="{DynamicResource ControlBorderBrush}"
@@ -512,8 +561,7 @@
                                                         Margin="0,3"
                                                         Padding="10,6">
                                                     <i:Interaction.Behaviors>
-                                                        <behaviors:CellHighlightBehavior IsHighlighted="{Binding IsNewCountHighlighted, Mode=OneWay}" 
-                                                                                         AllowHighlight="{Binding DataContext.AllowCellHighlights, RelativeSource={RelativeSource AncestorType=UserControl}}" IsNewData="True"
+                                                        <behaviors:CellHighlightBehavior IsHighlighted="{Binding IsNewCountHighlighted, Mode=OneWay}" IsNewData="True"
                                                                                          HoldDuration="0:0:2"/>
                                                     </i:Interaction.Behaviors>
                                                     <TextBlock Text="{Binding NewCountDisplay}" 
@@ -533,8 +581,7 @@
                                                         Margin="0,3,0,0"
                                                         Padding="10,6">
                                                     <i:Interaction.Behaviors>
-                                                        <behaviors:CellHighlightBehavior IsHighlighted="{Binding IsNewCountHighlighted, Mode=OneWay}" 
-                                                                                         AllowHighlight="{Binding DataContext.AllowCellHighlights, RelativeSource={RelativeSource AncestorType=UserControl}}" IsNewData="True"
+                                                        <behaviors:CellHighlightBehavior IsHighlighted="{Binding IsNewCountHighlighted, Mode=OneWay}" IsNewData="True"
                                                                                          HoldDuration="0:0:2"/>
                                                     </i:Interaction.Behaviors>
                                                     <TextBlock Text="{Binding NewCountDisplay}" 
@@ -551,8 +598,7 @@
                                                         BorderThickness="1,0,1,0"
                                                         Padding="10,6">
                                                     <i:Interaction.Behaviors>
-                                                        <behaviors:CellHighlightBehavior IsHighlighted="{Binding IsNewCountHighlighted, Mode=OneWay}" 
-                                                                                         AllowHighlight="{Binding DataContext.AllowCellHighlights, RelativeSource={RelativeSource AncestorType=UserControl}}" IsNewData="True"
+                                                        <behaviors:CellHighlightBehavior IsHighlighted="{Binding IsNewCountHighlighted, Mode=OneWay}" IsNewData="True"
                                                                                          HoldDuration="0:0:2"/>
                                                     </i:Interaction.Behaviors>
                                                     <TextBlock Text="{Binding NewCountDisplay}" 
@@ -571,8 +617,7 @@
                                                         Margin="0,0,0,3"
                                                         Padding="10,6">
                                                     <i:Interaction.Behaviors>
-                                                        <behaviors:CellHighlightBehavior IsHighlighted="{Binding IsNewCountHighlighted, Mode=OneWay}" 
-                                                                                         AllowHighlight="{Binding DataContext.AllowCellHighlights, RelativeSource={RelativeSource AncestorType=UserControl}}" IsNewData="True"
+                                                        <behaviors:CellHighlightBehavior IsHighlighted="{Binding IsNewCountHighlighted, Mode=OneWay}" IsNewData="True"
                                                                                          HoldDuration="0:0:2"/>
                                                     </i:Interaction.Behaviors>
                                                     <TextBlock Text="{Binding NewCountDisplay}" 
@@ -611,8 +656,7 @@
                                                         Margin="0,3"
                                                         Padding="10,6">
                                                     <i:Interaction.Behaviors>
-                                                        <behaviors:CellHighlightBehavior IsHighlighted="{Binding IsOldCountHighlighted, Mode=OneWay}" 
-                                                                                         AllowHighlight="{Binding DataContext.AllowCellHighlights, RelativeSource={RelativeSource AncestorType=UserControl}}" IsNewData="False"
+                                                        <behaviors:CellHighlightBehavior IsHighlighted="{Binding IsOldCountHighlighted, Mode=OneWay}" IsNewData="False"
                                                                                          HoldDuration="0:0:2"/>
                                                     </i:Interaction.Behaviors>
                                                     <TextBlock Text="{Binding OldCountDisplay}" 
@@ -632,8 +676,7 @@
                                                         Margin="0,3,0,0"
                                                         Padding="10,6">
                                                     <i:Interaction.Behaviors>
-                                                        <behaviors:CellHighlightBehavior IsHighlighted="{Binding IsOldCountHighlighted, Mode=OneWay}" 
-                                                                                         AllowHighlight="{Binding DataContext.AllowCellHighlights, RelativeSource={RelativeSource AncestorType=UserControl}}" IsNewData="False"
+                                                        <behaviors:CellHighlightBehavior IsHighlighted="{Binding IsOldCountHighlighted, Mode=OneWay}" IsNewData="False"
                                                                                          HoldDuration="0:0:2"/>
                                                     </i:Interaction.Behaviors>
                                                     <TextBlock Text="{Binding OldCountDisplay}" 
@@ -650,8 +693,7 @@
                                                         BorderThickness="1,0,1,0"
                                                         Padding="10,6">
                                                     <i:Interaction.Behaviors>
-                                                        <behaviors:CellHighlightBehavior IsHighlighted="{Binding IsOldCountHighlighted, Mode=OneWay}" 
-                                                                                         AllowHighlight="{Binding DataContext.AllowCellHighlights, RelativeSource={RelativeSource AncestorType=UserControl}}" IsNewData="False"
+                                                        <behaviors:CellHighlightBehavior IsHighlighted="{Binding IsOldCountHighlighted, Mode=OneWay}" IsNewData="False"
                                                                                          HoldDuration="0:0:2"/>
                                                     </i:Interaction.Behaviors>
                                                     <TextBlock Text="{Binding OldCountDisplay}" 
@@ -670,8 +712,7 @@
                                                         Margin="0,0,0,3"
                                                         Padding="10,6">
                                                     <i:Interaction.Behaviors>
-                                                        <behaviors:CellHighlightBehavior IsHighlighted="{Binding IsOldCountHighlighted, Mode=OneWay}" 
-                                                                                         AllowHighlight="{Binding DataContext.AllowCellHighlights, RelativeSource={RelativeSource AncestorType=UserControl}}" IsNewData="False"
+                                                        <behaviors:CellHighlightBehavior IsHighlighted="{Binding IsOldCountHighlighted, Mode=OneWay}" IsNewData="False"
                                                                                          HoldDuration="0:0:2"/>
                                                     </i:Interaction.Behaviors>
                                                     <TextBlock Text="{Binding OldCountDisplay}" 
@@ -690,7 +731,7 @@
                             <DataGridTemplateColumn Width="0.8*">
                                 <DataGridTemplateColumn.HeaderTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="? Difference" 
+                                        <TextBlock Text="Difference" 
                                                    HorizontalAlignment="Center"
                                                    FontWeight="SemiBold"
                                                    Margin="0,0,0,4"/>
@@ -784,6 +825,8 @@
         </Grid>
     </ScrollViewer>
 </UserControl>
+
+
 
 
 

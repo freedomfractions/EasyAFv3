@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows.Input;
+using System.Windows.Media;
 using Microsoft.Win32;
 using Prism.Commands;
 using Prism.Mvvm;
@@ -55,6 +56,9 @@ namespace EasyAF.Modules.Project.ViewModels
 
             // Build initial tree nodes (will be empty if no data loaded)
             RefreshStatistics();
+            
+            // Load available mappings from history
+            RefreshAvailableMappings();
 
             Log.Debug("ProjectSummaryViewModel initialized");
         }
@@ -419,7 +423,124 @@ namespace EasyAF.Modules.Project.ViewModels
                     
                     _document.MarkDirty();
                     RaisePropertyChanged();
+                    
+                    // Refresh available mappings when map path changes
+                    RefreshAvailableMappings();
                 }
+            }
+        }
+
+        /// <summary>
+        /// Gets the collection of available mapping files.
+        /// </summary>
+        public ObservableCollection<MappingFileItem> AvailableMappings { get; } = new();
+
+        private MappingFileItem? _selectedMapping;
+        
+        /// <summary>
+        /// Gets or sets the selected mapping file.
+        /// </summary>
+        public MappingFileItem? SelectedMapping
+        {
+            get => _selectedMapping;
+            set
+            {
+                if (SetProperty(ref _selectedMapping, value))
+                {
+                    // Update MapPath when selection changes
+                    if (value != null && !string.IsNullOrEmpty(value.FilePath))
+                    {
+                        MapPath = value.FilePath;
+                    }
+                    
+                    RaisePropertyChanged(nameof(MappingPathDisplay));
+                    RaisePropertyChanged(nameof(MappingValidationIcon));
+                    RaisePropertyChanged(nameof(MappingValidationBrush));
+                    RaisePropertyChanged(nameof(MappingValidationTooltip));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the mapping file path for display.
+        /// </summary>
+        public string MappingPathDisplay
+        {
+            get
+            {
+                if (SelectedMapping == null || string.IsNullOrEmpty(SelectedMapping.FilePath))
+                    return "No mapping selected";
+                
+                return SelectedMapping.FilePath;
+            }
+        }
+
+        /// <summary>
+        /// Gets the validation icon for the selected mapping.
+        /// </summary>
+        public string MappingValidationIcon
+        {
+            get
+            {
+                if (SelectedMapping == null || string.IsNullOrEmpty(SelectedMapping.FilePath))
+                    return "";
+                
+                return SelectedMapping.IsValid ? "\uE73E" : "\uE711"; // Checkmark : X
+            }
+        }
+
+        /// <summary>
+        /// Gets the validation brush color for the selected mapping.
+        /// </summary>
+        public Brush MappingValidationBrush
+        {
+            get
+            {
+                if (SelectedMapping == null || string.IsNullOrEmpty(SelectedMapping.FilePath))
+                    return Brushes.Gray;
+                
+                return SelectedMapping.IsValid ? Brushes.Green : Brushes.Red;
+            }
+        }
+
+        /// <summary>
+        /// Gets the validation tooltip for the selected mapping.
+        /// </summary>
+        public string MappingValidationTooltip
+        {
+            get
+            {
+                if (SelectedMapping == null || string.IsNullOrEmpty(SelectedMapping.FilePath))
+                    return "No mapping file selected";
+                
+                return SelectedMapping.IsValid ? "Mapping file is valid" : "Mapping file has errors";
+            }
+        }
+
+        /// <summary>
+        /// Refreshes the available mappings list from the map path history.
+        /// </summary>
+        private void RefreshAvailableMappings()
+        {
+            AvailableMappings.Clear();
+            
+            if (_document.Project.MapPathHistory == null || _document.Project.MapPathHistory.Count == 0)
+                return;
+            
+            foreach (var path in _document.Project.MapPathHistory)
+            {
+                if (string.IsNullOrWhiteSpace(path))
+                    continue;
+                
+                var fileName = System.IO.Path.GetFileName(path);
+                var item = MappingFileItem.CreateCustomFileItem(path, fileName);
+                AvailableMappings.Add(item);
+            }
+            
+            // Select the first item (most recent) if available
+            if (AvailableMappings.Count > 0)
+            {
+                SelectedMapping = AvailableMappings[0];
             }
         }
 
