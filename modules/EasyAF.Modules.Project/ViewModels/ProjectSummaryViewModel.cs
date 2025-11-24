@@ -45,7 +45,6 @@ namespace EasyAF.Modules.Project.ViewModels
             // Commands
             AddFileCommand = new DelegateCommand(ExecuteAddFile);
             RemoveFileCommand = new DelegateCommand(ExecuteRemoveFile, CanExecuteRemoveFile);
-            BrowseMapCommand = new DelegateCommand(ExecuteBrowseMap);
             BrowseSpecCommand = new DelegateCommand(ExecuteBrowseSpec);
             BrowseTemplateCommand = new DelegateCommand(ExecuteBrowseTemplate);
             BrowseOutputCommand = new DelegateCommand(ExecuteBrowseOutput);
@@ -720,7 +719,6 @@ namespace EasyAF.Modules.Project.ViewModels
 
         public ICommand AddFileCommand { get; }
         public ICommand RemoveFileCommand { get; }
-        public ICommand BrowseMapCommand { get; }
         public ICommand BrowseSpecCommand { get; }
         public ICommand BrowseTemplateCommand { get; }
         public ICommand BrowseOutputCommand { get; }
@@ -745,22 +743,6 @@ namespace EasyAF.Modules.Project.ViewModels
         {
             // TODO Task 21: Remove selected files
             Log.Information("RemoveFile command - To be implemented in Task 21");
-        }
-
-        private void ExecuteBrowseMap()
-        {
-            var dialog = new OpenFileDialog
-            {
-                Title = "Select Map File",
-                Filter = "Map Files (*.ezmap)|*.ezmap|All Files (*.*)|*.*",
-                CheckFileExists = true
-            };
-
-            if (dialog.ShowDialog() == true)
-            {
-                MapPath = dialog.FileName;
-                Log.Information("Map file selected: {Path}", dialog.FileName);
-            }
         }
 
         private void ExecuteBrowseCustomMapping()
@@ -920,7 +902,7 @@ namespace EasyAF.Modules.Project.ViewModels
                 if (string.IsNullOrWhiteSpace(MapPath) || !System.IO.File.Exists(MapPath))
                 {
                     _dialogService.ShowError(
-                        "Please select a mapping file first using the 'Map' field in the Report section below.",
+                        "Please select a mapping file using the 'Import Map' dropdown above.",
                         "No Mapping File");
                     return;
                 }
@@ -1108,7 +1090,7 @@ namespace EasyAF.Modules.Project.ViewModels
                 if (string.IsNullOrWhiteSpace(MapPath) || !System.IO.File.Exists(MapPath))
                 {
                     _dialogService.ShowError(
-                        "Please select a mapping file first using the 'Map' field in the Report section below.",
+                        "Please select a mapping file using the 'Import Map' dropdown above.",
                         "No Mapping File");
                     return;
                 }
