@@ -225,6 +225,8 @@ namespace EasyAF.Data.Models
         public string? TemplatePath { get; set; }
         /// <summary>History of template file paths.</summary>
         public List<string>? TemplatePathHistory { get; set; } = new();
+        /// <summary>History of imported files with data types and scenario mappings.</summary>
+        public List<ImportFileRecord>? ImportHistory { get; set; } = new();
 
         /// <summary>
         /// Embeds a specification file's content as JSON into the project.
@@ -466,6 +468,7 @@ namespace EasyAF.Data.Models
         public string? CustomMapPath { get; set; }
         public string? TemplatePath { get; set; }
         public List<string>? TemplatePathHistory { get; set; }
+        public List<ImportFileRecord>? ImportHistory { get; set; } = new();
 
         public static ProjectPersist FromProject(Project p)
         {
@@ -503,7 +506,8 @@ namespace EasyAF.Data.Models
                 MapPathHistory = p.MapPathHistory,
                 CustomMapPath = p.CustomMapPath,
                 TemplatePath = p.TemplatePath,
-                TemplatePathHistory = p.TemplatePathHistory
+                TemplatePathHistory = p.TemplatePathHistory,
+                ImportHistory = p.ImportHistory
             };
         }
         public Project ToProject()
@@ -528,7 +532,8 @@ namespace EasyAF.Data.Models
                 MapPathHistory = MapPathHistory ?? new List<string>(),
                 CustomMapPath = CustomMapPath,
                 TemplatePath = TemplatePath,
-                TemplatePathHistory = TemplatePathHistory ?? new List<string>()
+                TemplatePathHistory = TemplatePathHistory ?? new List<string>(),
+                ImportHistory = ImportHistory ?? new List<ImportFileRecord>()
             };
 
             // If legacy SiteAddress is provided but normalized fields are empty, attempt a simple split heuristic
@@ -718,5 +723,7 @@ namespace EasyAF.Data.Models
         public ShortCircuit? Value { get; set; } 
     }
 }
+
+
 
 
