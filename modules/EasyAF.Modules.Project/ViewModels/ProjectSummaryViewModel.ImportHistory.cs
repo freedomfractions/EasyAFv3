@@ -112,8 +112,8 @@ namespace EasyAF.Modules.Project.ViewModels
             }
             else
             {
-                // Renamed
-                displayText = $"{originalScenario} ? {targetScenario}";
+                // Renamed - use simple ASCII arrow for compatibility
+                displayText = $"{originalScenario} --> {targetScenario}";
                 tooltip = $"Scenario renamed:\nOriginal: {originalScenario}\nTarget: {targetScenario}";
             }
 
@@ -530,8 +530,8 @@ namespace EasyAF.Modules.Project.ViewModels
                     
                     if (entry.originalScenario != null && entry.originalScenario != entry.targetScenario)
                     {
-                        // Renamed scenario
-                        displayText = $"{entry.originalScenario} ? {entry.targetScenario}";
+                        // Renamed scenario - use simple ASCII arrow for compatibility
+                        displayText = $"{entry.originalScenario} --> {entry.targetScenario}";
                         tooltip = $"Scenario renamed:\nOriginal: {entry.originalScenario}\nTarget: {entry.targetScenario}";
                     }
                     else
