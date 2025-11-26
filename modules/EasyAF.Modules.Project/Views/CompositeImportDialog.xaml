@@ -12,8 +12,8 @@
         <!-- BooleanToVisibilityConverter -->
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         
-        <!-- Error TextBox Style -->
-        <Style x:Key="ErrorTextBoxStyle" TargetType="TextBox">
+        <!-- Error TextBox Style (inherits base TextBox theme) -->
+        <Style x:Key="ErrorTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
             <Style.Triggers>
                 <DataTrigger Binding="{Binding HasError}" Value="True">
                     <Setter Property="BorderBrush" Value="Red"/>
@@ -22,8 +22,8 @@
             </Style.Triggers>
         </Style>
 
-        <!-- Error ComboBox Style -->
-        <Style x:Key="ErrorComboBoxStyle" TargetType="ComboBox">
+        <!-- Error ComboBox Style (inherits base ComboBox theme) -->
+        <Style x:Key="ErrorComboBoxStyle" TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
             <Style.Triggers>
                 <DataTrigger Binding="{Binding HasError}" Value="True">
                     <Setter Property="BorderBrush" Value="Red"/>
@@ -174,9 +174,6 @@
                                                         <TextBox Text="{Binding NewScenarioName, UpdateSourceTrigger=PropertyChanged}" 
                                                                  Visibility="{Binding ShowTextBox, Converter={StaticResource BooleanToVisibilityConverter}}"
                                                                  Style="{StaticResource ErrorTextBoxStyle}"
-                                                                 Background="{DynamicResource ControlBackgroundBrush}"
-                                                                 Foreground="{DynamicResource TextPrimaryBrush}"
-                                                                 BorderBrush="{DynamicResource ControlBorderBrush}"
                                                                  VerticalAlignment="Center"/>
                                                         
                                                         <!-- ComboBox for Overwrite -->
@@ -184,9 +181,6 @@
                                                                   SelectedItem="{Binding SelectedExistingScenario}"
                                                                   Visibility="{Binding ShowComboBox, Converter={StaticResource BooleanToVisibilityConverter}}"
                                                                   Style="{StaticResource ErrorComboBoxStyle}"
-                                                                  Background="{DynamicResource ControlBackgroundBrush}"
-                                                                  Foreground="{DynamicResource TextPrimaryBrush}"
-                                                                  BorderBrush="{DynamicResource ControlBorderBrush}"
                                                                   VerticalAlignment="Center"/>
                                                     </Grid>
                                                 </Border>

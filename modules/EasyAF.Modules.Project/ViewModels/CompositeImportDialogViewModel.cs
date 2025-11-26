@@ -40,17 +40,12 @@ namespace EasyAF.Modules.Project.ViewModels
         /// </summary>
         public bool? DialogResult
         {
-            get => _dialogResult ? (bool?)true : null;
+            get => _dialogResult ? (bool?)true : (bool?)false;
             private set
             {
-                if (value == true && !_dialogResult)
+                if (value.HasValue)
                 {
-                    _dialogResult = true;
-                    RaisePropertyChanged();
-                }
-                else if (value == false && _dialogResult)
-                {
-                    _dialogResult = false;
+                    _dialogResult = value.Value;
                     RaisePropertyChanged();
                 }
             }
@@ -100,10 +95,8 @@ namespace EasyAF.Modules.Project.ViewModels
                 {
                     row.PropertyChanged += (s, e) =>
                     {
-                        if (e.PropertyName == nameof(ScenarioImportRow.HasError))
-                        {
-                            (ImportCommand as DelegateCommand)?.RaiseCanExecuteChanged();
-                        }
+                        // Re-evaluate Import button whenever any row changes
+                        (ImportCommand as DelegateCommand)?.RaiseCanExecuteChanged();
                     };
                 }
             }
