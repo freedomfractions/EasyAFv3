@@ -174,6 +174,9 @@
                                                         <TextBox Text="{Binding NewScenarioName, UpdateSourceTrigger=PropertyChanged}" 
                                                                  Visibility="{Binding ShowTextBox, Converter={StaticResource BooleanToVisibilityConverter}}"
                                                                  Style="{StaticResource ErrorTextBoxStyle}"
+                                                                 Background="{DynamicResource ControlBackgroundBrush}"
+                                                                 Foreground="{DynamicResource TextPrimaryBrush}"
+                                                                 BorderBrush="{DynamicResource ControlBorderBrush}"
                                                                  VerticalAlignment="Center"/>
                                                         
                                                         <!-- ComboBox for Overwrite -->
@@ -181,6 +184,9 @@
                                                                   SelectedItem="{Binding SelectedExistingScenario}"
                                                                   Visibility="{Binding ShowComboBox, Converter={StaticResource BooleanToVisibilityConverter}}"
                                                                   Style="{StaticResource ErrorComboBoxStyle}"
+                                                                  Background="{DynamicResource ControlBackgroundBrush}"
+                                                                  Foreground="{DynamicResource TextPrimaryBrush}"
+                                                                  BorderBrush="{DynamicResource ControlBorderBrush}"
                                                                   VerticalAlignment="Center"/>
                                                     </Grid>
                                                 </Border>

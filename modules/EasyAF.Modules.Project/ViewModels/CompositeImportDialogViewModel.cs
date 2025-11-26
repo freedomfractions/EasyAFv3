@@ -33,7 +33,28 @@ namespace EasyAF.Modules.Project.ViewModels
         public ICommand ImportCommand { get; }
         public ICommand CancelCommand { get; }
 
-        public bool? DialogResult { get; private set; }
+        private bool _dialogResult;
+        
+        /// <summary>
+        /// Gets or sets the dialog result.
+        /// </summary>
+        public bool? DialogResult
+        {
+            get => _dialogResult ? (bool?)true : null;
+            private set
+            {
+                if (value == true && !_dialogResult)
+                {
+                    _dialogResult = true;
+                    RaisePropertyChanged();
+                }
+                else if (value == false && _dialogResult)
+                {
+                    _dialogResult = false;
+                    RaisePropertyChanged();
+                }
+            }
+        }
 
         public CompositeImportDialogViewModel(
             Dictionary<string, FileScanResult> fileScanResults, 
