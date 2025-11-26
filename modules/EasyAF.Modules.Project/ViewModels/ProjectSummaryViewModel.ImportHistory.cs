@@ -133,6 +133,7 @@ namespace EasyAF.Modules.Project.ViewModels
         /// <summary>
         /// Records an import operation in the project's import history.
         /// Updates both ImportHistory (legacy) and DataSetSourceInfo (source of truth).
+        /// IMPORTANT: Source tracking is per-entry (last-writer-wins per scenario/type), not per-project.
         /// </summary>
         /// <param name="filePaths">Array of files that were imported.</param>
         /// <param name="isNewData">Whether data was imported into New Data (true) or Old Data (false).</param>
@@ -162,10 +163,25 @@ namespace EasyAF.Modules.Project.ViewModels
 
                 var sourceInfo = isNewData ? _document.Project.NewDataSources : _document.Project.OldDataSources;
 
-                // Update source tracking (source of truth)
+                // IMPORTANT: We need to track what THIS import contributed, not the entire dataset
+                // For each file, we'll scan the file BEFORE merging to know what it contains
+                // Then update source tracking with ONLY those entries
+                
+                // Since import has already happened, we do a best-effort reconstruction:
+                // - For non-composite types: File imported this type ? mark as source
+                // - For composite types: Extract scenarios from imported file's data and mark as source
+                
+                // NOTE: This is a simplified approach. For perfect accuracy, we'd need to:
+                // 1. Scan file before import (know what it contains)
+                // 2. Track during import (know what was added)
+                // 3. Update sources after import (mark those entries)
+                // For now, we use post-import scanning with best effort
+
                 foreach (var filePath in filePaths)
                 {
-                    DataSetSourceHelper.UpdateSourceTracking(targetDataSet, sourceInfo!, filePath);
+                    // Scan the actual file to determine what it contained
+                    UpdateSourceTrackingFromFile(filePath, mappingConfig, sourceInfo!, targetDataSet);
+                    
                     Log.Debug("Updated source tracking for: {File} ? {Target}", 
                         System.IO.Path.GetFileName(filePath), 
                         isNewData ? "New Data" : "Old Data");
@@ -187,6 +203,110 @@ namespace EasyAF.Modules.Project.ViewModels
                 Log.Error(ex, "Error recording import in source tracking");
                 // Don't fail the import if history recording fails
             }
+        }
+
+        /// <summary>
+        /// Updates source tracking by scanning what a specific file contributed.
+        /// Uses a temporary import to determine file contents.
+        /// </summary>
+        private void UpdateSourceTrackingFromFile(
+            string filePath,
+            EasyAF.Import.MappingConfig mappingConfig,
+            DataSetSourceInfo sourceInfo,
+            DataSet currentDataSet)
+        {
+            try
+            {
+                // Import the file into a temporary dataset to see what it contains
+                var tempDataSet = new DataSet();
+                var importManager = new EasyAF.Import.ImportManager();
+                
+                importManager.Import(filePath, mappingConfig, tempDataSet);
+
+                // Now scan the temp dataset to see what this file contributed
+                foreach (var property in DataSetSourceHelper.GetDataSetEntryProperties())
+                {
+                    var collection = property.GetValue(tempDataSet);
+                    if (collection == null)
+                        continue;
+
+                    var countProperty = collection.GetType().GetProperty("Count");
+                    if (countProperty == null)
+                        continue;
+
+                    var count = (int?)countProperty.GetValue(collection);
+                    if (count == null || count == 0)
+                        continue;
+
+                    var entryType = DataSetSourceHelper.GetEntryType(property);
+                    if (entryType == null)
+                        continue;
+
+                    var propertyName = property.Name;
+
+                    if (DataSetSourceHelper.IsCompositeType(entryType))
+                    {
+                        // Composite type - extract scenarios from THIS file's data
+                        var scenarios = ExtractScenariosFromCollection(collection);
+                        
+                        if (!sourceInfo.CompositeDataTypeSources.ContainsKey(propertyName))
+                            sourceInfo.CompositeDataTypeSources[propertyName] = new Dictionary<string, string>();
+
+                        foreach (var scenario in scenarios)
+                        {
+                            // Last-writer-wins per scenario
+                            sourceInfo.CompositeDataTypeSources[propertyName][scenario] = filePath;
+                            Log.Debug("Source tracking: {PropertyName}[{Scenario}] ? {File}", 
+                                propertyName, scenario, System.IO.Path.GetFileName(filePath));
+                        }
+                    }
+                    else
+                    {
+                        // Non-composite type - last-writer-wins per type
+                        sourceInfo.DataTypeSources[propertyName] = filePath;
+                        Log.Debug("Source tracking: {PropertyName} ? {File}", 
+                            propertyName, System.IO.Path.GetFileName(filePath));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Could not scan file for source tracking: {File}", filePath);
+                // Fall back to using current dataset (less accurate but better than nothing)
+                DataSetSourceHelper.UpdateSourceTracking(currentDataSet, sourceInfo, filePath);
+            }
+        }
+
+        /// <summary>
+        /// Extracts unique scenario names from a collection of entries.
+        /// </summary>
+        private HashSet<string> ExtractScenariosFromCollection(object collection)
+        {
+            var scenarios = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            var valuesProperty = collection.GetType().GetProperty("Values");
+            if (valuesProperty == null)
+                return scenarios;
+
+            var values = valuesProperty.GetValue(collection) as System.Collections.IEnumerable;
+            if (values == null)
+                return scenarios;
+
+            foreach (var entry in values)
+            {
+                if (entry == null)
+                    continue;
+
+                var scenarioProperty = entry.GetType().GetProperty("Scenario");
+                if (scenarioProperty == null)
+                    continue;
+
+                var scenario = scenarioProperty.GetValue(entry) as string;
+                if (!string.IsNullOrWhiteSpace(scenario))
+                    scenarios.Add(scenario);
+            }
+
+            return scenarios;
         }
 
         /// <summary>
