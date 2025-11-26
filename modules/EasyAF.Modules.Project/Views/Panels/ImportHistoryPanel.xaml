@@ -132,6 +132,7 @@
                             <!-- Display Text -->
                             <TextBlock Text="{Binding DisplayText}"
                                      VerticalAlignment="Center"
+                                     FontFamily="Segoe UI, Segoe MDL2 Assets"
                                      Foreground="{DynamicResource TextPrimaryBrush}"/>
                         </StackPanel>
                     </HierarchicalDataTemplate>

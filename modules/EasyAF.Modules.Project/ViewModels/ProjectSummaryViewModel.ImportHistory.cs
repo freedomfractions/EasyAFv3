@@ -112,8 +112,8 @@ namespace EasyAF.Modules.Project.ViewModels
             }
             else
             {
-                // Renamed - use simple ASCII arrow for compatibility
-                displayText = $"{originalScenario} --> {targetScenario}";
+                // Renamed - use Segoe MDL2 Assets arrow icon
+                displayText = $"{originalScenario} \uE72A {targetScenario}";
                 tooltip = $"Scenario renamed:\nOriginal: {originalScenario}\nTarget: {targetScenario}";
             }
 
@@ -530,8 +530,8 @@ namespace EasyAF.Modules.Project.ViewModels
                     
                     if (entry.originalScenario != null && entry.originalScenario != entry.targetScenario)
                     {
-                        // Renamed scenario - use simple ASCII arrow for compatibility
-                        displayText = $"{entry.originalScenario} --> {entry.targetScenario}";
+                        // Renamed scenario - use Segoe MDL2 Assets arrow icon
+                        displayText = $"{entry.originalScenario} \uE72A {entry.targetScenario}";
                         tooltip = $"Scenario renamed:\nOriginal: {entry.originalScenario}\nTarget: {entry.targetScenario}";
                     }
                     else
