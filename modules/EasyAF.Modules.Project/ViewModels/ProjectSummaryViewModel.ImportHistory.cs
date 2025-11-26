@@ -134,7 +134,7 @@ namespace EasyAF.Modules.Project.ViewModels
         #endregion
 
         /// <summary>
-        /// Records import operations in the project's import history.
+        /// Records an import operation in the project's import history.
         /// </summary>
         /// <param name="filePaths">Array of files that were imported.</param>
         /// <param name="isNewData">Whether data was imported into New Data (true) or Old Data (false).</param>
@@ -159,6 +159,10 @@ namespace EasyAF.Modules.Project.ViewModels
 
                 foreach (var filePath in filePaths)
                 {
+                    // Check if this file was already imported (update existing record instead of duplicating)
+                    var existingRecord = _document.Project.ImportHistory
+                        .FirstOrDefault(r => string.Equals(r.FilePath, filePath, StringComparison.OrdinalIgnoreCase));
+
                     // Get data types present in this file
                     var dataTypes = GetDataTypesFromDataSet(targetDataSet);
 
@@ -168,23 +172,48 @@ namespace EasyAF.Modules.Project.ViewModels
                     // Count entries for this file (best effort - counts all entries in target dataset)
                     var entryCount = CountEntriesInDataSet(targetDataSet);
 
-                    var record = new ImportFileRecord
+                    if (existingRecord != null)
                     {
-                        ImportedAt = timestamp,
-                        FilePath = filePath,
-                        IsNewData = isNewData,
-                        MappingPath = mappingPath,
-                        DataTypes = dataTypes,
-                        ScenarioMappings = fileScenarioMappings,
-                        EntryCount = entryCount
-                    };
+                        // UPDATE existing record
+                        existingRecord.ImportedAt = timestamp; // Update to most recent import time
+                        existingRecord.IsNewData = isNewData; // Update target (in case it changed)
+                        existingRecord.MappingPath = mappingPath; // Update mapping
+                        existingRecord.EntryCount = entryCount; // Update count
+                        
+                        // Union data types (accumulate all types ever imported from this file)
+                        var allDataTypes = existingRecord.DataTypes.Union(dataTypes).Distinct().ToList();
+                        existingRecord.DataTypes = allDataTypes;
+                        
+                        // Replace scenario mappings with latest (most recent import wins)
+                        existingRecord.ScenarioMappings = fileScenarioMappings;
 
-                    _document.Project.ImportHistory.Add(record);
-                    Log.Debug("Recorded import: {File} ? {Target} ({Count} entries, {DataTypeCount} data types)",
-                        System.IO.Path.GetFileName(filePath),
-                        isNewData ? "New" : "Old",
-                        entryCount,
-                        dataTypes.Count);
+                        Log.Debug("Updated import history: {File} ? {Target} ({Count} entries, {DataTypeCount} data types)",
+                            System.IO.Path.GetFileName(filePath),
+                            isNewData ? "New" : "Old",
+                            entryCount,
+                            allDataTypes.Count);
+                    }
+                    else
+                    {
+                        // CREATE new record
+                        var record = new ImportFileRecord
+                        {
+                            ImportedAt = timestamp,
+                            FilePath = filePath,
+                            IsNewData = isNewData,
+                            MappingPath = mappingPath,
+                            DataTypes = dataTypes,
+                            ScenarioMappings = fileScenarioMappings,
+                            EntryCount = entryCount
+                        };
+
+                        _document.Project.ImportHistory.Add(record);
+                        Log.Debug("Recorded import: {File} ? {Target} ({Count} entries, {DataTypeCount} data types)",
+                            System.IO.Path.GetFileName(filePath),
+                            isNewData ? "New" : "Old",
+                            entryCount,
+                            dataTypes.Count);
+                    }
                 }
 
                 // Mark project as dirty (changes need to be saved)
