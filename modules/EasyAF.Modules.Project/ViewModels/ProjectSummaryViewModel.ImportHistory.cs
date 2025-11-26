@@ -251,7 +251,7 @@ namespace EasyAF.Modules.Project.ViewModels
                         var originalScenarios = ExtractScenariosFromCollection(collection);
                         
                         if (!sourceInfo.CompositeDataTypeSources.ContainsKey(propertyName))
-                            sourceInfo.CompositeDataTypeSources[propertyName] = new Dictionary<string, string>();
+                            sourceInfo.CompositeDataTypeSources[propertyName] = new Dictionary<string, ScenarioSource>();
 
                         // IMPORTANT: Only track scenarios that were ACTUALLY imported (in scenarioMappings)
                         // If scenarioMappings is null, track all scenarios (standard import)
@@ -262,7 +262,12 @@ namespace EasyAF.Modules.Project.ViewModels
                             // Standard import - track all scenarios found in file
                             foreach (var scenario in originalScenarios)
                             {
-                                sourceInfo.CompositeDataTypeSources[propertyName][scenario] = filePath;
+                                sourceInfo.CompositeDataTypeSources[propertyName][scenario] = new ScenarioSource
+                                {
+                                    FilePath = filePath,
+                                    OriginalScenario = null, // No renaming in standard import
+                                    TargetScenario = scenario
+                                };
                                 Log.Debug("Source tracking: {PropertyName}[{Scenario}] ? {File}", 
                                     propertyName, scenario, System.IO.Path.GetFileName(filePath));
                             }
@@ -278,8 +283,13 @@ namespace EasyAF.Modules.Project.ViewModels
                                 // Only track if this scenario was in the file
                                 if (originalScenarios.Contains(originalScenario))
                                 {
-                                    // Track using TARGET scenario name (after renaming)
-                                    sourceInfo.CompositeDataTypeSources[propertyName][targetScenario] = filePath;
+                                    // Track using TARGET scenario name (after renaming) as the key
+                                    sourceInfo.CompositeDataTypeSources[propertyName][targetScenario] = new ScenarioSource
+                                    {
+                                        FilePath = filePath,
+                                        OriginalScenario = originalScenario,
+                                        TargetScenario = targetScenario
+                                    };
                                     
                                     if (originalScenario != targetScenario)
                                     {
@@ -430,33 +440,36 @@ namespace EasyAF.Modules.Project.ViewModels
         private bool BuildTreeFromSourceInfo(DataSetSourceInfo sourceInfo, bool isNewData)
         {
             // Group all sources by file path
-            var fileGroups = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
+            var fileGroups = new Dictionary<string, List<(string propertyName, string? originalScenario, string targetScenario)>>(StringComparer.OrdinalIgnoreCase);
 
             // Add non-composite types
             foreach (var (propertyName, filePath) in sourceInfo.DataTypeSources)
             {
                 if (!fileGroups.ContainsKey(filePath))
-                    fileGroups[filePath] = new HashSet<string>();
+                    fileGroups[filePath] = new();
                 
-                fileGroups[filePath].Add(propertyName);
+                fileGroups[filePath].Add((propertyName, null, propertyName)); // No scenario for non-composite
             }
 
             // Add composite types (group scenarios by file)
             foreach (var (propertyName, scenarioSources) in sourceInfo.CompositeDataTypeSources)
             {
-                foreach (var (scenario, filePath) in scenarioSources)
+                foreach (var (targetScenario, scenarioSource) in scenarioSources)
                 {
-                    if (!fileGroups.ContainsKey(filePath))
-                        fileGroups[filePath] = new HashSet<string>();
+                    var filePath = scenarioSource.FilePath;
                     
-                    fileGroups[filePath].Add($"{propertyName}:{scenario}"); // Store with scenario marker
+                    if (!fileGroups.ContainsKey(filePath))
+                        fileGroups[filePath] = new();
+                    
+                    // Store with original and target scenario info
+                    fileGroups[filePath].Add((propertyName, scenarioSource.OriginalScenario, targetScenario));
                 }
             }
 
             // Create file nodes
-            foreach (var (filePath, dataTypeMarkers) in fileGroups.OrderByDescending(kvp => System.IO.File.Exists(kvp.Key) ? System.IO.File.GetLastWriteTime(kvp.Key) : DateTime.MinValue))
+            foreach (var (filePath, entries) in fileGroups.OrderByDescending(kvp => System.IO.File.Exists(kvp.Key) ? System.IO.File.GetLastWriteTime(kvp.Key) : DateTime.MinValue))
             {
-                var fileNode = CreateFileNodeFromSourceInfo(filePath, dataTypeMarkers, isNewData);
+                var fileNode = CreateFileNodeFromSourceInfo(filePath, entries, isNewData);
                 ImportHistoryNodes.Add(fileNode);
             }
 
@@ -468,7 +481,7 @@ namespace EasyAF.Modules.Project.ViewModels
         /// </summary>
         private ImportHistoryNodeViewModel CreateFileNodeFromSourceInfo(
             string filePath,
-            HashSet<string> dataTypeMarkers,
+            List<(string propertyName, string? originalScenario, string targetScenario)> entries,
             bool isNewData)
         {
             var fileName = System.IO.Path.GetFileName(filePath);
@@ -490,18 +503,9 @@ namespace EasyAF.Modules.Project.ViewModels
                 IsExpanded = true
             };
 
-            // Group by data type (handle both regular and scenario-marked types)
-            var dataTypeGroups = dataTypeMarkers
-                .Select(marker =>
-                {
-                    var parts = marker.Split(':');
-                    return new
-                    {
-                        PropertyName = parts[0],
-                        Scenario = parts.Length > 1 ? parts[1] : null
-                    };
-                })
-                .GroupBy(x => x.PropertyName)
+            // Group by data type
+            var dataTypeGroups = entries
+                .GroupBy(x => x.propertyName)
                 .OrderBy(g => g.Key);
 
             foreach (var group in dataTypeGroups)
@@ -517,15 +521,32 @@ namespace EasyAF.Modules.Project.ViewModels
                 };
 
                 // Add scenario children if any
-                var scenarios = group.Where(x => x.Scenario != null).Select(x => x.Scenario!).Distinct().OrderBy(s => s);
-                foreach (var scenario in scenarios)
+                var scenarioEntries = group.Where(x => x.originalScenario != null || x.targetScenario != x.propertyName);
+                foreach (var entry in scenarioEntries.OrderBy(x => x.targetScenario))
                 {
+                    // Create scenario node with rename arrow if applicable
+                    string displayText;
+                    string tooltip;
+                    
+                    if (entry.originalScenario != null && entry.originalScenario != entry.targetScenario)
+                    {
+                        // Renamed scenario
+                        displayText = $"{entry.originalScenario} ? {entry.targetScenario}";
+                        tooltip = $"Scenario renamed:\nOriginal: {entry.originalScenario}\nTarget: {entry.targetScenario}";
+                    }
+                    else
+                    {
+                        // Not renamed (or standard import)
+                        displayText = entry.targetScenario;
+                        tooltip = $"Scenario: {entry.targetScenario}";
+                    }
+                    
                     var scenarioNode = new ImportHistoryNodeViewModel
                     {
-                        DisplayText = scenario,
+                        DisplayText = displayText,
                         Icon = "\uE8F4", // Tag icon
-                        Tooltip = $"Scenario: {scenario}",
-                        ScenarioMappings = scenario
+                        Tooltip = tooltip,
+                        ScenarioMappings = displayText
                     };
                     dataTypeNode.Children.Add(scenarioNode);
                 }

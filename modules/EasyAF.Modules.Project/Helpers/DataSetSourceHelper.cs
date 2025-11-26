@@ -160,12 +160,17 @@ namespace EasyAF.Modules.Project.Helpers
 
             // Ensure nested dictionary exists
             if (!sourceInfo.CompositeDataTypeSources.ContainsKey(propertyName))
-                sourceInfo.CompositeDataTypeSources[propertyName] = new Dictionary<string, string>();
+                sourceInfo.CompositeDataTypeSources[propertyName] = new Dictionary<string, ScenarioSource>();
 
             // Update source for each scenario
             foreach (var scenario in scenarios)
             {
-                sourceInfo.CompositeDataTypeSources[propertyName][scenario] = filePath;
+                sourceInfo.CompositeDataTypeSources[propertyName][scenario] = new ScenarioSource
+                {
+                    FilePath = filePath,
+                    OriginalScenario = null, // No renaming in fallback path
+                    TargetScenario = scenario
+                };
                 Log.Debug("Source tracking: {PropertyName}[{Scenario}] ? {File}", 
                     propertyName, scenario, System.IO.Path.GetFileName(filePath));
             }
