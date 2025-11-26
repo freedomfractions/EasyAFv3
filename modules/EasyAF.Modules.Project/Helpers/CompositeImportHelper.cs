@@ -151,21 +151,51 @@ namespace EasyAF.Modules.Project.Helpers
         /// <param name="newScenario">New scenario name.</param>
         public static void RenameScenarioInDataSet(DataSet dataSet, string oldScenario, string newScenario)
         {
-            // Rename in ArcFlash entries
+            // Rename in ArcFlash entries - rebuild dictionary with new keys
             if (dataSet.ArcFlashEntries != null)
             {
-                foreach (var entry in dataSet.ArcFlashEntries.Values.Where(e => e.Scenario == oldScenario))
+                var entriesToRename = dataSet.ArcFlashEntries
+                    .Where(kvp => kvp.Value.Scenario == oldScenario)
+                    .ToList();
+
+                foreach (var kvp in entriesToRename)
                 {
-                    entry.Scenario = newScenario;
+                    // Remove old entry
+                    dataSet.ArcFlashEntries.Remove(kvp.Key);
+                    
+                    // Update scenario name in value
+                    kvp.Value.Scenario = newScenario;
+                    
+                    // Rebuild composite key with new scenario name
+                    var newKey = EasyAF.Import.CompositeKeyHelper.BuildCompositeKey(kvp.Value, typeof(ArcFlash));
+                    if (newKey != null)
+                    {
+                        dataSet.ArcFlashEntries[newKey] = kvp.Value;
+                    }
                 }
             }
 
-            // Rename in ShortCircuit entries
+            // Rename in ShortCircuit entries - rebuild dictionary with new keys
             if (dataSet.ShortCircuitEntries != null)
             {
-                foreach (var entry in dataSet.ShortCircuitEntries.Values.Where(e => e.Scenario == oldScenario))
+                var entriesToRename = dataSet.ShortCircuitEntries
+                    .Where(kvp => kvp.Value.Scenario == oldScenario)
+                    .ToList();
+
+                foreach (var kvp in entriesToRename)
                 {
-                    entry.Scenario = newScenario;
+                    // Remove old entry
+                    dataSet.ShortCircuitEntries.Remove(kvp.Key);
+                    
+                    // Update scenario name in value
+                    kvp.Value.Scenario = newScenario;
+                    
+                    // Rebuild composite key with new scenario name
+                    var newKey = EasyAF.Import.CompositeKeyHelper.BuildCompositeKey(kvp.Value, typeof(ShortCircuit));
+                    if (newKey != null)
+                    {
+                        dataSet.ShortCircuitEntries[newKey] = kvp.Value;
+                    }
                 }
             }
         }
