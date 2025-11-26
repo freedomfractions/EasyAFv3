@@ -266,6 +266,13 @@ namespace EasyAF.Modules.Project.ViewModels
             {
                 if (SetProperty(ref _action, value))
                 {
+                    // Auto-populate new scenario name when switching to "Add New"
+                    if (value == ImportAction.AddNew && string.IsNullOrWhiteSpace(_newScenarioName))
+                    {
+                        _newScenarioName = ScenarioName;
+                        RaisePropertyChanged(nameof(NewScenarioName));
+                    }
+
                     RaisePropertyChanged(nameof(ShowTextBox));
                     RaisePropertyChanged(nameof(ShowComboBox));
                     RaisePropertyChanged(nameof(ShowNothing));
