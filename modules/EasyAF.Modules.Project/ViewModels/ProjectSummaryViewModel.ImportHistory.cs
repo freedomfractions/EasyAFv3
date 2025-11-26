@@ -180,7 +180,7 @@ namespace EasyAF.Modules.Project.ViewModels
                 foreach (var filePath in filePaths)
                 {
                     // Scan the actual file to determine what it contained
-                    UpdateSourceTrackingFromFile(filePath, mappingConfig, sourceInfo!, targetDataSet);
+                    UpdateSourceTrackingFromFile(filePath, mappingConfig, sourceInfo!, targetDataSet, scenarioMappings);
                     
                     Log.Debug("Updated source tracking for: {File} ? {Target}", 
                         System.IO.Path.GetFileName(filePath), 
@@ -207,13 +207,14 @@ namespace EasyAF.Modules.Project.ViewModels
 
         /// <summary>
         /// Updates source tracking by scanning what a specific file contributed.
-        /// Uses a temporary import to determine file contents.
+        /// Uses a temporary import to determine file contents, then applies scenario renaming.
         /// </summary>
         private void UpdateSourceTrackingFromFile(
             string filePath,
             EasyAF.Import.MappingConfig mappingConfig,
             DataSetSourceInfo sourceInfo,
-            DataSet currentDataSet)
+            DataSet currentDataSet,
+            Dictionary<string, string>? scenarioMappings = null)
         {
             try
             {
@@ -247,17 +248,26 @@ namespace EasyAF.Modules.Project.ViewModels
                     if (DataSetSourceHelper.IsCompositeType(entryType))
                     {
                         // Composite type - extract scenarios from THIS file's data
-                        var scenarios = ExtractScenariosFromCollection(collection);
+                        var originalScenarios = ExtractScenariosFromCollection(collection);
                         
                         if (!sourceInfo.CompositeDataTypeSources.ContainsKey(propertyName))
                             sourceInfo.CompositeDataTypeSources[propertyName] = new Dictionary<string, string>();
 
-                        foreach (var scenario in scenarios)
+                        foreach (var originalScenario in originalScenarios)
                         {
-                            // Last-writer-wins per scenario
-                            sourceInfo.CompositeDataTypeSources[propertyName][scenario] = filePath;
+                            // Apply scenario renaming if provided
+                            var targetScenario = originalScenario;
+                            if (scenarioMappings != null && scenarioMappings.TryGetValue(originalScenario, out var renamed))
+                            {
+                                targetScenario = renamed;
+                                Log.Debug("Scenario mapping applied: {Original} ? {Target}", 
+                                    originalScenario, targetScenario);
+                            }
+
+                            // Last-writer-wins per TARGET scenario (after renaming)
+                            sourceInfo.CompositeDataTypeSources[propertyName][targetScenario] = filePath;
                             Log.Debug("Source tracking: {PropertyName}[{Scenario}] ? {File}", 
-                                propertyName, scenario, System.IO.Path.GetFileName(filePath));
+                                propertyName, targetScenario, System.IO.Path.GetFileName(filePath));
                         }
                     }
                     else
