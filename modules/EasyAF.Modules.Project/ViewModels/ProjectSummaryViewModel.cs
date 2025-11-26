@@ -962,23 +962,38 @@ namespace EasyAF.Modules.Project.ViewModels
                 if (ProjectType == ProjectType.Composite)
                 {
                     var fileScanResults = CompositeImportHelper.PreScanFilesForScenarios(fileNames, mappingConfig);
-                    var existingDataSet = isNewData ? _document.Project.NewData : _document.Project.OldData;
-                    var existingScenarios = existingDataSet?.GetAvailableScenarios().ToList() ?? new System.Collections.Generic.List<string>();
                     
-                    var compositeDialog = new CompositeImportDialog(fileScanResults, existingScenarios)
+                    // OPTIMIZATION: If NO files contain composite data (scenarios), bypass the dialog
+                    bool hasAnyCompositeData = fileScanResults.Values.Any(f => f.Scenarios.Count > 0);
+                    
+                    if (!hasAnyCompositeData)
                     {
-                        Owner = System.Windows.Application.Current.MainWindow
-                    };
+                        // All files are non-composite (Bus, Breaker, Fuse, Cable, etc.)
+                        // Just import directly without showing composite dialog
+                        Log.Information("Composite mode: All {Count} file(s) contain only non-composite data - bypassing scenario dialog", fileNames.Length);
+                        // Fall through to standard import logic below
+                    }
+                    else
+                    {
+                        // At least one file has composite data - show scenario selection dialog
+                        var existingDataSet = isNewData ? _document.Project.NewData : _document.Project.OldData;
+                        var existingScenarios = existingDataSet?.GetAvailableScenarios().ToList() ?? new System.Collections.Generic.List<string>();
+                        
+                        var compositeDialog = new CompositeImportDialog(fileScanResults, existingScenarios)
+                        {
+                            Owner = System.Windows.Application.Current.MainWindow
+                        };
 
-                    if (compositeDialog.ShowDialog() != true)
-                    {
-                        Log.Information("User cancelled composite import");
+                        if (compositeDialog.ShowDialog() != true)
+                        {
+                            Log.Information("User cancelled composite import");
+                            return;
+                        }
+
+                        var importPlan = compositeDialog.ViewModel.GetImportPlan();
+                        ExecuteCompositeImport(importPlan, mappingConfig, isNewData);
                         return;
                     }
-
-                    var importPlan = compositeDialog.ViewModel.GetImportPlan();
-                    ExecuteCompositeImport(importPlan, mappingConfig, isNewData);
-                    return;
                 }
 
                 // STANDARD MODE - Continue with existing logic
@@ -1165,23 +1180,38 @@ namespace EasyAF.Modules.Project.ViewModels
                 if (ProjectType == ProjectType.Composite)
                 {
                     var fileScanResults = CompositeImportHelper.PreScanFilesForScenarios(filePaths, mappingConfig);
-                    var existingDataSet = isNewData ? _document.Project.NewData : _document.Project.OldData;
-                    var existingScenarios = existingDataSet?.GetAvailableScenarios().ToList() ?? new System.Collections.Generic.List<string>();
                     
-                    var compositeDialog = new CompositeImportDialog(fileScanResults, existingScenarios)
+                    // OPTIMIZATION: If NO files contain composite data (scenarios), bypass the dialog
+                    bool hasAnyCompositeData = fileScanResults.Values.Any(f => f.Scenarios.Count > 0);
+                    
+                    if (!hasAnyCompositeData)
                     {
-                        Owner = System.Windows.Application.Current.MainWindow
-                    };
+                        // All files are non-composite (Bus, Breaker, Fuse, Cable, etc.)
+                        // Just import directly without showing composite dialog
+                        Log.Information("Composite mode (drop): All {Count} file(s) contain only non-composite data - bypassing scenario dialog", filePaths.Length);
+                        // Fall through to standard import logic below
+                    }
+                    else
+                    {
+                        // At least one file has composite data - show scenario selection dialog
+                        var existingDataSet = isNewData ? _document.Project.NewData : _document.Project.OldData;
+                        var existingScenarios = existingDataSet?.GetAvailableScenarios().ToList() ?? new System.Collections.Generic.List<string>();
+                        
+                        var compositeDialog = new CompositeImportDialog(fileScanResults, existingScenarios)
+                        {
+                            Owner = System.Windows.Application.Current.MainWindow
+                        };
 
-                    if (compositeDialog.ShowDialog() != true)
-                    {
-                        Log.Information("User cancelled composite drop import");
+                        if (compositeDialog.ShowDialog() != true)
+                        {
+                            Log.Information("User cancelled composite drop import");
+                            return;
+                        }
+
+                        var importPlan = compositeDialog.ViewModel.GetImportPlan();
+                        ExecuteCompositeImport(importPlan, mappingConfig, isNewData);
                         return;
                     }
-
-                    var importPlan = compositeDialog.ViewModel.GetImportPlan();
-                    ExecuteCompositeImport(importPlan, mappingConfig, isNewData);
-                    return;
                 }
 
                 // STANDARD MODE - Continue with existing logic
