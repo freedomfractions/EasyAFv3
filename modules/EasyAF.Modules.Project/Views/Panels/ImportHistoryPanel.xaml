@@ -10,7 +10,9 @@
         <Grid Margin="8">
             <TreeView ItemsSource="{Binding ImportHistoryNodes}"
                       BorderBrush="{DynamicResource ControlBorderBrush}"
-                      Background="{DynamicResource ControlBackgroundBrush}">
+                      Background="{DynamicResource ControlBackgroundBrush}"
+                      MaxHeight="400"
+                      ScrollViewer.VerticalScrollBarVisibility="Auto">
                 <TreeView.ItemContainerStyle>
                     <Style TargetType="TreeViewItem">
                         <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>

@@ -59,7 +59,7 @@ namespace EasyAF.Modules.Project.ViewModels
                 Icon = "\uE8A5", // Document icon
                 Tooltip = $"File: {record.FilePath}\nImported: {record.ImportedAt:MMM dd, yyyy h:mm tt}\nMapping: {System.IO.Path.GetFileName(record.MappingPath ?? "Unknown")}",
                 FilePath = record.FilePath,
-                IsExpanded = false // Collapsed by default
+                IsExpanded = true // Expand by default to show data types
             };
 
             // Add data type children
@@ -82,7 +82,8 @@ namespace EasyAF.Modules.Project.ViewModels
                 DisplayText = dataType,
                 Icon = "\uE8F1", // Database icon
                 Tooltip = $"Data Type: {dataType}",
-                DataTypes = dataType
+                DataTypes = dataType,
+                IsExpanded = true // Expand by default to show scenarios
             };
 
             // Add scenario children (if any)
