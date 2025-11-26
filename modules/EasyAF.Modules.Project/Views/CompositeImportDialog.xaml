@@ -13,7 +13,7 @@
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         
         <!-- Error TextBox Style -->
-        <Style x:Key="ErrorTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+        <Style x:Key="ErrorTextBoxStyle" TargetType="TextBox">
             <Style.Triggers>
                 <DataTrigger Binding="{Binding HasError}" Value="True">
                     <Setter Property="BorderBrush" Value="Red"/>
@@ -23,7 +23,7 @@
         </Style>
 
         <!-- Error ComboBox Style -->
-        <Style x:Key="ErrorComboBoxStyle" TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
+        <Style x:Key="ErrorComboBoxStyle" TargetType="ComboBox">
             <Style.Triggers>
                 <DataTrigger Binding="{Binding HasError}" Value="True">
                     <Setter Property="BorderBrush" Value="Red"/>
@@ -156,13 +156,11 @@
                                                         BorderThickness="0,0,1,1" 
                                                         Padding="8,6">
                                                     <ComboBox SelectedValue="{Binding Action}"
+                                                              SelectedValuePath="Tag"
                                                               VerticalAlignment="Center">
-                                                        <ComboBox.Items>
-                                                            <ComboBoxItem Content="Add New" Tag="{x:Static vm:ImportAction.AddNew}"/>
-                                                            <ComboBoxItem Content="Overwrite Existing" Tag="{x:Static vm:ImportAction.Overwrite}"/>
-                                                            <ComboBoxItem Content="Do Not Import" Tag="{x:Static vm:ImportAction.DoNotImport}"/>
-                                                        </ComboBox.Items>
-                                                        <ComboBox.SelectedValuePath>Tag</ComboBox.SelectedValuePath>
+                                                        <ComboBoxItem Content="Add New" Tag="{x:Static vm:ImportAction.AddNew}"/>
+                                                        <ComboBoxItem Content="Overwrite Existing" Tag="{x:Static vm:ImportAction.Overwrite}"/>
+                                                        <ComboBoxItem Content="Do Not Import" Tag="{x:Static vm:ImportAction.DoNotImport}"/>
                                                     </ComboBox>
                                                 </Border>
 
