@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EasyAF.Shell.Views"
         xmlns:converters="clr-namespace:EasyAF.Shell.Converters"
+        xmlns:behaviors="clr-namespace:EasyAF.Shell.Behaviors"
         mc:Ignorable="d"
         Title="Settings" 
         Height="500" 
@@ -73,7 +74,8 @@
                                      BorderThickness="1"
                                      Padding="8"
                                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                                     ScrollViewer.VerticalScrollBarVisibility="Disabled">
+                                     ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                                     behaviors:MouseWheelBubbleBehavior.IsEnabled="True">
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal" Margin="4">
