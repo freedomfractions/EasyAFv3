@@ -259,15 +259,6 @@ namespace EasyAF.Modules.Project.ViewModels
             FilePath = filePath;
             DataTypes = dataTypes ?? new List<string>();
             _parentViewModel = parentViewModel;
-
-            // Add implicit scenario for non-scenario files (based on data types)
-            if (dataTypes != null && dataTypes.Any())
-            {
-                foreach (var dataType in dataTypes)
-                {
-                    Scenarios.Add(new ScenarioImportRow(dataType, ImportAction.AddNew, this, parentViewModel));
-                }
-            }
         }
     }
 
