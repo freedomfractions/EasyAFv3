@@ -142,7 +142,9 @@
                       SelectedItem="{Binding SelectedMapping}"
                       VerticalAlignment="Center" 
                       Margin="0,0,20,0" 
-                      HorizontalAlignment="Stretch">
+                      HorizontalAlignment="Stretch"
+                      HorizontalContentAlignment="Left"
+                      VerticalContentAlignment="Center">
                 <i:Interaction.Behaviors>
                     <behaviors:RefreshOnDropDownBehavior RefreshAction="{Binding RefreshMappingsAction}"/>
                 </i:Interaction.Behaviors>
