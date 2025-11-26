@@ -574,10 +574,16 @@ namespace EasyAF.Modules.Project.ViewModels
             AvailableMappings.Add(MappingFileItem.CreateBrowseItem());
             
             // Select the first non-browse item (most recent) if available
+            // Do this silently without marking dirty (just loading saved state)
             var firstMapping = AvailableMappings.FirstOrDefault(m => !m.IsBrowseItem);
             if (firstMapping != null)
             {
-                SelectedMapping = firstMapping;
+                _selectedMapping = firstMapping; // Set backing field directly to avoid setter
+                RaisePropertyChanged(nameof(SelectedMapping));
+                RaisePropertyChanged(nameof(MappingPathDisplay));
+                RaisePropertyChanged(nameof(MappingValidationIcon));
+                RaisePropertyChanged(nameof(MappingValidationBrush));
+                RaisePropertyChanged(nameof(MappingValidationTooltip));
             }
         }
 

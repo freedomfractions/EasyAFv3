@@ -95,7 +95,7 @@ namespace EasyAF.Modules.Project
             
             var document = ProjectDocument.CreateNew();
             document.OwnerModule = this;
-            document.MarkDirty(); // New documents are dirty until saved
+            // NOTE: Do NOT mark dirty here - document should only be dirty when user makes actual changes
             
             // Resolve IUserDialogService from container
             var dialogService = _container?.Resolve<IUserDialogService>() 
