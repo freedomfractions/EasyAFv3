@@ -18,6 +18,7 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             
             <!-- Project Information Panel -->
@@ -28,6 +29,9 @@
             
             <!-- Report Settings Panel -->
             <panels:ProjectReportSettingsPanel Grid.Row="2" DataContext="{Binding}"/>
+            
+            <!-- Import History Panel -->
+            <panels:ImportHistoryPanel Grid.Row="3" DataContext="{Binding}"/>
         </Grid>
     </ScrollViewer>
 </UserControl>
