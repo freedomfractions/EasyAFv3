@@ -105,6 +105,18 @@ namespace EasyAF.Modules.Project.ViewModels
                 // Log scenario discovery
                 LogScenarioDiscovery(targetDataSet, isNewData);
 
+                // Record composite import in history (AFTER successful import)
+                if (successCount > 0)
+                {
+                    // Build scenario mappings from import plan
+                    var scenarioMappings = BuildScenarioMappingsFromPlan(importPlan);
+                    
+                    // Get unique file paths
+                    var filePaths = importPlan.Select(p => p.FilePath).Distinct().ToArray();
+                    
+                    RecordImportInHistory(filePaths, isNewData, mappingConfig, scenarioMappings);
+                }
+
                 if (errors.Count == 0)
                 {
                     Log.Information("Composite import completed successfully: {Count} file(s) processed", successCount);

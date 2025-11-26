@@ -1065,6 +1065,12 @@ namespace EasyAF.Modules.Project.ViewModels
 
                 // Log scenario discovery for verification
                 LogScenarioDiscovery(targetDataSet, isNewData);
+                
+                // Record import in history (AFTER successful import)
+                if (successCount > 0)
+                {
+                    RecordImportInHistory(fileNames, isNewData, mappingConfig);
+                }
 
                 if (successCount == fileNames.Length)
                 {
@@ -1262,6 +1268,12 @@ namespace EasyAF.Modules.Project.ViewModels
 
                 // Log scenario discovery for verification
                 LogScenarioDiscovery(targetDataSet, isNewData);
+
+                // Record import in history (AFTER successful import)
+                if (successCount > 0)
+                {
+                    RecordImportInHistory(filePaths, isNewData, mappingConfig);
+                }
 
                 if (successCount == filePaths.Length)
                 {
