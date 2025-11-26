@@ -12,11 +12,6 @@
         <!-- BooleanToVisibilityConverter -->
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         
-        <!-- Inverse BooleanToVisibilityConverter -->
-        <Style x:Key="InverseBooleanToVisibilityConverter" TargetType="FrameworkElement">
-            <!-- This is a workaround - we'll need a proper converter -->
-        </Style>
-        
         <!-- Error TextBox Style -->
         <Style x:Key="ErrorTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
             <Style.Triggers>
@@ -57,15 +52,12 @@
                                 Background="{DynamicResource ControlBackgroundBrush}">
                             <Grid>
                                 <Grid.RowDefinitions>
-                                    <!-- File header row -->
                                     <RowDefinition Height="Auto"/>
-                                    <!-- Table header row (Scenario | Action | Target) -->
                                     <RowDefinition Height="Auto"/>
-                                    <!-- Scenario rows -->
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
 
-                                <!-- File Header (spans full width) -->
+                                <!-- File Header -->
                                 <Border Grid.Row="0" 
                                         Background="{DynamicResource HeaderBackgroundBrush}" 
                                         Padding="8,6">
@@ -77,8 +69,27 @@
                                                ToolTip="{Binding FilePath}"/>
                                 </Border>
 
-                                <!-- Table Header -->
+                                <!-- Table Header (only show if file has scenarios) -->
+                                <Grid Grid.Row="1" Visibility="{Binding IsNonScenarioFile, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <Border Padding="12,8">
+                                        <TextBlock Text="{Binding NonScenarioMessage}" 
+                                                   FontStyle="Italic"
+                                                   Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                    </Border>
+                                </Grid>
+
                                 <Grid Grid.Row="1">
+                                    <Grid.Style>
+                                        <Style TargetType="Grid">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsNonScenarioFile}" Value="True">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Grid.Style>
+                                    
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="2*" MinWidth="150"/>
                                         <ColumnDefinition Width="2*" MinWidth="150"/>
@@ -145,11 +156,10 @@
                                                         BorderThickness="0,0,1,1" 
                                                         Padding="8,6">
                                                     <ComboBox SelectedValue="{Binding Action}" 
-                                                              SelectedValuePath="Tag"
                                                               VerticalAlignment="Center">
-                                                        <ComboBoxItem Content="Add New Scenario" Tag="AddNew"/>
-                                                        <ComboBoxItem Content="Overwrite Scenario" Tag="Overwrite"/>
-                                                        <ComboBoxItem Content="Do not import" Tag="DoNotImport"/>
+                                                        <vm:ImportAction>AddNew</vm:ImportAction>
+                                                        <vm:ImportAction>Overwrite</vm:ImportAction>
+                                                        <vm:ImportAction>DoNotImport</vm:ImportAction>
                                                     </ComboBox>
                                                 </Border>
 
