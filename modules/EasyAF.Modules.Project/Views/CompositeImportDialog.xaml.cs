@@ -17,13 +17,13 @@ namespace EasyAF.Modules.Project.Views
             var viewModel = new CompositeImportDialogViewModel(fileScanResults, existingScenarios);
             DataContext = viewModel;
 
-            // Watch for dialog result changes and close the window
+            // Watch for dialog result changes
             viewModel.PropertyChanged += (s, e) =>
             {
                 if (e.PropertyName == nameof(CompositeImportDialogViewModel.DialogResult))
                 {
+                    // Setting DialogResult automatically closes the window in WPF
                     DialogResult = viewModel.DialogResult;
-                    Close(); // Close the dialog window
                 }
             };
         }
