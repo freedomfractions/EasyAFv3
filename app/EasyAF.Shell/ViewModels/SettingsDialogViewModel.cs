@@ -20,6 +20,7 @@ public class SettingsDialogViewModel : BindableBase
     private readonly int _originalRecentFilesLimit;
     private IThemeService.ThemeDescriptor? _selectedThemeDescriptor;
     private int _recentFilesLimit;
+    private string _recentFilesLimitText = string.Empty;
     private bool? _dialogResult;
     private string _mapsDirectory = string.Empty;
     private string _specsDirectory = string.Empty;
@@ -44,7 +45,8 @@ public class SettingsDialogViewModel : BindableBase
 
         // Load recent files limit setting (default 25, range 3-250)
         _originalRecentFilesLimit = _settingsService.GetSetting("RecentFiles.MaxCount", 25);
-        _recentFilesLimit = ClampRecentFilesLimit(_originalRecentFilesLimit);
+        _recentFilesLimit = _originalRecentFilesLimit;
+        _recentFilesLimitText = _recentFilesLimit.ToString();
 
         // Load directory paths
         _mapsDirectory = _settingsService.GetSetting("Directories.Maps", GetDefaultMapsDirectory());
@@ -96,17 +98,50 @@ public class SettingsDialogViewModel : BindableBase
     }
 
     /// <summary>
-    /// Gets or sets the maximum number of recent files to display (3-250).
+    /// Gets or sets the maximum number of recent files to display (3-250) as text.
     /// </summary>
     /// <remarks>
-    /// This setting controls how many recent files are shown in the Open backstage.
-    /// Valid range is 3-250. Values outside this range are automatically clamped.
-    /// The service always stores up to 1000 items, this only controls the display count.
+    /// This property allows free-form text entry. Validation and clamping occurs
+    /// when focus is lost or when OK/Apply is clicked, not during typing.
+    /// Valid range is 3-250.
     /// </remarks>
-    public int RecentFilesLimit
+    public string RecentFilesLimitText
     {
-        get => _recentFilesLimit;
-        set => SetProperty(ref _recentFilesLimit, ClampRecentFilesLimit(value));
+        get => _recentFilesLimitText;
+        set
+        {
+            if (SetProperty(ref _recentFilesLimitText, value))
+            {
+                // Try to parse, but don't clamp yet - allow user to type
+                if (int.TryParse(value, out var parsed))
+                {
+                    _recentFilesLimit = parsed;
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Validates and clamps the recent files limit text input.
+    /// Called when the TextBox loses focus or when OK/Apply is clicked.
+    /// </summary>
+    public void ValidateRecentFilesLimit()
+    {
+        // Parse the text input
+        if (!int.TryParse(_recentFilesLimitText, out var value))
+        {
+            // Invalid input - revert to last valid value
+            value = _recentFilesLimit;
+        }
+
+        // Clamp to valid range
+        var clamped = ClampRecentFilesLimit(value);
+        
+        // Update both the value and text
+        _recentFilesLimit = clamped;
+        RecentFilesLimitText = clamped.ToString();
+        
+        Log.Debug("Recent files limit validated and clamped to: {Limit}", clamped);
     }
 
     /// <summary>
@@ -211,6 +246,9 @@ public class SettingsDialogViewModel : BindableBase
     /// </summary>
     private void Apply()
     {
+        // Validate recent files limit before applying
+        ValidateRecentFilesLimit();
+
         if (SelectedThemeDescriptor != null)
         {
             _themeService.ApplyTheme(SelectedThemeDescriptor.Name);
@@ -255,6 +293,7 @@ public class SettingsDialogViewModel : BindableBase
 
         // Revert recent files limit (no need to persist, just local state)
         _recentFilesLimit = _originalRecentFilesLimit;
+        RecentFilesLimitText = _originalRecentFilesLimit.ToString();
 
         // Reload Map module settings if available (discard changes)
         if (MapSettingsViewModel is EasyAF.Modules.Map.ViewModels.MapModuleSettingsViewModel mapVm)

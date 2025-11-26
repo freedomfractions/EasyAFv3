@@ -149,7 +149,8 @@
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBox Grid.Column="0"
-                                         Text="{Binding RecentFilesLimit, UpdateSourceTrigger=PropertyChanged}"
+                                          x:Name="RecentFilesLimitTextBox"
+                                         Text="{Binding RecentFilesLimitText, UpdateSourceTrigger=PropertyChanged}"
                                          HorizontalContentAlignment="Center"
                                          VerticalContentAlignment="Center"
                                          Height="28"
@@ -157,7 +158,7 @@
                                          Foreground="{DynamicResource TextPrimaryBrush}"
                                          BorderBrush="{DynamicResource ControlBorderBrush}"/>
                                 <TextBlock Grid.Column="1"
-                                           Text="{Binding RecentFilesLimit, StringFormat='({0} items)'}"
+                                           Text="{Binding RecentFilesLimitText, StringFormat='({0} items)'}"
                                            Foreground="{DynamicResource TextSecondaryBrush}"
                                            VerticalAlignment="Center"
                                            Margin="12,0,0,0"/>

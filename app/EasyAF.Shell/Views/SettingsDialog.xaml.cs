@@ -11,6 +11,15 @@ public partial class SettingsDialog : Window
     {
         InitializeComponent();
 
+        // Attach LostFocus handler to RecentFilesLimit TextBox
+        RecentFilesLimitTextBox.LostFocus += (sender, e) =>
+        {
+            if (DataContext is ViewModels.SettingsDialogViewModel vm)
+            {
+                vm.ValidateRecentFilesLimit();
+            }
+        };
+
         // Close the dialog when the ViewModel signals DialogResult
         DataContextChanged += (_, __) => HookViewModel();
         Loaded += (_, __) => HookViewModel();
