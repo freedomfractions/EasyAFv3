@@ -253,21 +253,46 @@ namespace EasyAF.Modules.Project.ViewModels
                         if (!sourceInfo.CompositeDataTypeSources.ContainsKey(propertyName))
                             sourceInfo.CompositeDataTypeSources[propertyName] = new Dictionary<string, string>();
 
-                        foreach (var originalScenario in originalScenarios)
+                        // IMPORTANT: Only track scenarios that were ACTUALLY imported (in scenarioMappings)
+                        // If scenarioMappings is null, track all scenarios (standard import)
+                        // If scenarioMappings exists, only track mapped scenarios (composite import with selection)
+                        
+                        if (scenarioMappings == null)
                         {
-                            // Apply scenario renaming if provided
-                            var targetScenario = originalScenario;
-                            if (scenarioMappings != null && scenarioMappings.TryGetValue(originalScenario, out var renamed))
+                            // Standard import - track all scenarios found in file
+                            foreach (var scenario in originalScenarios)
                             {
-                                targetScenario = renamed;
-                                Log.Debug("Scenario mapping applied: {Original} ? {Target}", 
-                                    originalScenario, targetScenario);
+                                sourceInfo.CompositeDataTypeSources[propertyName][scenario] = filePath;
+                                Log.Debug("Source tracking: {PropertyName}[{Scenario}] ? {File}", 
+                                    propertyName, scenario, System.IO.Path.GetFileName(filePath));
                             }
-
-                            // Last-writer-wins per TARGET scenario (after renaming)
-                            sourceInfo.CompositeDataTypeSources[propertyName][targetScenario] = filePath;
-                            Log.Debug("Source tracking: {PropertyName}[{Scenario}] ? {File}", 
-                                propertyName, targetScenario, System.IO.Path.GetFileName(filePath));
+                        }
+                        else
+                        {
+                            // Composite import - only track scenarios that user selected for import
+                            foreach (var mapping in scenarioMappings)
+                            {
+                                var originalScenario = mapping.Key;
+                                var targetScenario = mapping.Value;
+                                
+                                // Only track if this scenario was in the file
+                                if (originalScenarios.Contains(originalScenario))
+                                {
+                                    // Track using TARGET scenario name (after renaming)
+                                    sourceInfo.CompositeDataTypeSources[propertyName][targetScenario] = filePath;
+                                    
+                                    if (originalScenario != targetScenario)
+                                    {
+                                        Log.Debug("Source tracking (renamed): {PropertyName}[{Original} ? {Target}] ? {File}", 
+                                            propertyName, originalScenario, targetScenario, System.IO.Path.GetFileName(filePath));
+                                    }
+                                    else
+                                    {
+                                        Log.Debug("Source tracking: {PropertyName}[{Scenario}] ? {File}", 
+                                            propertyName, targetScenario, System.IO.Path.GetFileName(filePath));
+                                    }
+                                }
+                            }
                         }
                     }
                     else
