@@ -5,6 +5,7 @@
     <GroupBox Header="Import History" 
               Margin="0,0,22,16"
               HorizontalAlignment="Stretch"
+              FontFamily="Segoe UI, Segoe MDL2 Assets"
               BorderBrush="{DynamicResource ControlBorderBrush}"
               Foreground="{DynamicResource TextPrimaryBrush}">
         <Grid Margin="8">
@@ -132,7 +133,6 @@
                             <!-- Display Text -->
                             <TextBlock Text="{Binding DisplayText}"
                                      VerticalAlignment="Center"
-                                     FontFamily="Segoe UI, Segoe MDL2 Assets"
                                      Foreground="{DynamicResource TextPrimaryBrush}"/>
                         </StackPanel>
                     </HierarchicalDataTemplate>
