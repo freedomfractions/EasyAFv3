@@ -17,24 +17,18 @@ namespace EasyAF.Modules.Project.ViewModels
         #region Import History Tree
 
         /// <summary>
-        /// Gets the tree nodes for New Data import history.
+        /// Gets the tree nodes for import history (all imports, both New and Old Data).
         /// </summary>
-        public ObservableCollection<ImportHistoryNodeViewModel> NewDataImportHistory { get; } = new();
-
-        /// <summary>
-        /// Gets the tree nodes for Old Data import history.
-        /// </summary>
-        public ObservableCollection<ImportHistoryNodeViewModel> OldDataImportHistory { get; } = new();
+        public ObservableCollection<ImportHistoryNodeViewModel> ImportHistoryNodes { get; } = new();
 
         /// <summary>
         /// Builds the import history tree from the project's import records.
-        /// Creates separate trees for New Data and Old Data.
+        /// Each top-level node is a FILE, with children for DATA TYPES, and grandchildren for SCENARIOS.
         /// </summary>
         public void BuildImportHistoryTree()
         {
-            // Clear existing trees
-            NewDataImportHistory.Clear();
-            OldDataImportHistory.Clear();
+            // Clear existing tree
+            ImportHistoryNodes.Clear();
 
             if (_document.Project.ImportHistory == null || _document.Project.ImportHistory.Count == 0)
             {
@@ -42,110 +36,99 @@ namespace EasyAF.Modules.Project.ViewModels
                 return;
             }
 
-            // Group imports by timestamp and target (creates parent nodes)
-            var importGroups = _document.Project.ImportHistory
-                .GroupBy(record => new { record.ImportedAt, record.IsNewData })
-                .OrderByDescending(g => g.Key.ImportedAt) // Most recent first
-                .ToList();
-
-            foreach (var group in importGroups)
+            // Build tree: File ? Data Type ? Scenario
+            foreach (var record in _document.Project.ImportHistory.OrderByDescending(r => r.ImportedAt))
             {
-                var parentNode = CreateParentNode(group.Key.ImportedAt.LocalDateTime, group.Key.IsNewData, group.ToList());
-
-                // Add to appropriate tree
-                if (group.Key.IsNewData)
-                    NewDataImportHistory.Add(parentNode);
-                else
-                    OldDataImportHistory.Add(parentNode);
+                var fileNode = CreateFileNode(record);
+                ImportHistoryNodes.Add(fileNode);
             }
 
-            Log.Debug("Built import history tree: {NewCount} New Data sessions, {OldCount} Old Data sessions",
-                NewDataImportHistory.Count, OldDataImportHistory.Count);
+            Log.Debug("Built import history tree: {Count} file(s)", ImportHistoryNodes.Count);
         }
 
         /// <summary>
-        /// Creates a parent node representing an import session.
+        /// Creates a file node (top level) with data type children and scenario grandchildren.
         /// </summary>
-        private ImportHistoryNodeViewModel CreateParentNode(DateTime timestamp, bool isNewData, List<ImportFileRecord> files)
+        private ImportHistoryNodeViewModel CreateFileNode(ImportFileRecord record)
         {
-            var totalEntries = files.Sum(f => f.EntryCount);
-            var fileCount = files.Count;
-            var targetName = isNewData ? "New Data" : "Old Data";
-
-            // Get mapping path from first file (all files in a session use the same mapping)
-            var mappingPath = files.FirstOrDefault()?.MappingPath ?? "Unknown";
-            var mappingName = System.IO.Path.GetFileName(mappingPath);
-
-            var parentNode = new ImportHistoryNodeViewModel
+            var targetIndicator = record.IsNewData ? "? New Data" : "? Old Data";
+            
+            var fileNode = new ImportHistoryNodeViewModel
             {
-                DisplayText = $"{timestamp:MMM dd, yyyy h:mm tt} - {targetName} ({fileCount} file{(fileCount == 1 ? "" : "s")}, {totalEntries} entries)",
-                Icon = isNewData ? "\uE8B7" : "\uE823", // Database or Archive icon
-                Tooltip = $"Imported to {targetName}\nMapping: {mappingName}\n{totalEntries} total entries",
-                IsExpanded = false, // Collapsed by default
-                Timestamp = timestamp,
-                IsNewData = isNewData,
-                MappingPath = mappingPath,
-                TotalEntries = totalEntries
+                DisplayText = $"{record.FileName} {targetIndicator}",
+                Icon = "\uE8A5", // Document icon
+                Tooltip = $"File: {record.FilePath}\nImported: {record.ImportedAt:MMM dd, yyyy h:mm tt}\nMapping: {System.IO.Path.GetFileName(record.MappingPath ?? "Unknown")}",
+                FilePath = record.FilePath,
+                IsExpanded = false // Collapsed by default
             };
 
-            // Add child nodes for each file
-            foreach (var fileRecord in files.OrderBy(f => f.FilePath))
+            // Add data type children
+            foreach (var dataType in record.DataTypes.OrderBy(dt => dt))
             {
-                var childNode = CreateChildNode(fileRecord);
-                parentNode.Children.Add(childNode);
+                var dataTypeNode = CreateDataTypeNode(dataType, record);
+                fileNode.Children.Add(dataTypeNode);
             }
 
-            return parentNode;
+            return fileNode;
         }
 
         /// <summary>
-        /// Creates a child node representing an imported file.
+        /// Creates a data type node (second level) with scenario children.
         /// </summary>
-        private ImportHistoryNodeViewModel CreateChildNode(ImportFileRecord fileRecord)
+        private ImportHistoryNodeViewModel CreateDataTypeNode(string dataType, ImportFileRecord record)
         {
-            var fileName = System.IO.Path.GetFileName(fileRecord.FilePath);
-            var dataTypesSummary = string.Join(", ", fileRecord.DataTypes.OrderBy(dt => dt));
-
-            // Build scenario mapping summary (if any)
-            string? scenarioSummary = null;
-            if (fileRecord.ScenarioMappings != null && fileRecord.ScenarioMappings.Count > 0)
+            var dataTypeNode = new ImportHistoryNodeViewModel
             {
-                var mappings = fileRecord.ScenarioMappings
-                    .Where(kvp => kvp.Key != kvp.Value) // Only show renames
-                    .Select(kvp => $"{kvp.Key} ? {kvp.Value}");
-                
-                if (mappings.Any())
-                    scenarioSummary = string.Join(", ", mappings);
-            }
-
-            // Build display text
-            var displayText = $"{fileName} - {dataTypesSummary}";
-            if (fileRecord.EntryCount > 0)
-                displayText += $" ({fileRecord.EntryCount} entries)";
-
-            // Build tooltip
-            var tooltipLines = new List<string>
-            {
-                $"File: {fileRecord.FilePath}",
-                $"Data Types: {dataTypesSummary}",
-                $"Entries: {fileRecord.EntryCount}"
+                DisplayText = dataType,
+                Icon = "\uE8F1", // Database icon
+                Tooltip = $"Data Type: {dataType}",
+                DataTypes = dataType
             };
 
-            if (scenarioSummary != null)
-                tooltipLines.Add($"Scenario Mappings: {scenarioSummary}");
+            // Add scenario children (if any)
+            if (record.ScenarioMappings != null && record.ScenarioMappings.Count > 0)
+            {
+                foreach (var mapping in record.ScenarioMappings.OrderBy(kvp => kvp.Key))
+                {
+                    var scenarioNode = CreateScenarioNode(mapping.Key, mapping.Value);
+                    dataTypeNode.Children.Add(scenarioNode);
+                }
+            }
 
-            var childNode = new ImportHistoryNodeViewModel
+            return dataTypeNode;
+        }
+
+        /// <summary>
+        /// Creates a scenario node (third level) showing original and target scenario names.
+        /// </summary>
+        private ImportHistoryNodeViewModel CreateScenarioNode(string originalScenario, string targetScenario)
+        {
+            // Determine display text and tooltip
+            string displayText;
+            string tooltip;
+            
+            if (originalScenario == targetScenario)
+            {
+                // No rename
+                displayText = originalScenario;
+                tooltip = $"Scenario: {originalScenario}";
+            }
+            else
+            {
+                // Renamed
+                displayText = $"{originalScenario} ? {targetScenario}";
+                tooltip = $"Scenario renamed:\nOriginal: {originalScenario}\nTarget: {targetScenario}";
+            }
+
+            var scenarioNode = new ImportHistoryNodeViewModel
             {
                 DisplayText = displayText,
-                Icon = "\uE8A5", // Document icon
-                Tooltip = string.Join("\n", tooltipLines),
-                FilePath = fileRecord.FilePath,
-                DataTypes = dataTypesSummary,
-                ScenarioMappings = scenarioSummary,
-                FileEntryCount = fileRecord.EntryCount
+                Icon = "\uE8F4", // Tag icon
+                Tooltip = tooltip,
+                ScenarioMappings = displayText
             };
 
-            return childNode;
+            return scenarioNode;
         }
 
         #endregion

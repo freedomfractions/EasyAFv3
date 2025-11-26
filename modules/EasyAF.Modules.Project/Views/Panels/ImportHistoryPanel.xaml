@@ -8,23 +8,7 @@
               BorderBrush="{DynamicResource ControlBorderBrush}"
               Foreground="{DynamicResource TextPrimaryBrush}">
         <Grid Margin="8">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="16"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-
-            <!-- New Data History -->
-            <TextBlock Grid.Row="0" 
-                       Text="New Data Imports" 
-                       FontWeight="SemiBold"
-                       Foreground="{DynamicResource TextPrimaryBrush}"
-                       Margin="0,0,0,8"/>
-            
-            <TreeView Grid.Row="1"
-                      ItemsSource="{Binding NewDataImportHistory}"
+            <TreeView ItemsSource="{Binding ImportHistoryNodes}"
                       BorderBrush="{DynamicResource ControlBorderBrush}"
                       Background="{DynamicResource ControlBackgroundBrush}">
                 <TreeView.ItemContainerStyle>
@@ -57,7 +41,7 @@
                 <TreeView.Style>
                     <Style TargetType="TreeView">
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding NewDataImportHistory.Count}" Value="0">
+                            <DataTrigger Binding="{Binding ImportHistoryNodes.Count}" Value="0">
                                 <Setter Property="Template">
                                     <Setter.Value>
                                         <ControlTemplate TargetType="TreeView">
@@ -65,74 +49,7 @@
                                                   BorderThickness="1"
                                                   Background="{DynamicResource ControlBackgroundBrush}"
                                                   Padding="16">
-                                                <TextBlock Text="No New Data imports yet"
-                                                         HorizontalAlignment="Center"
-                                                         VerticalAlignment="Center"
-                                                         Foreground="{DynamicResource TextSecondaryBrush}"
-                                                         FontStyle="Italic"/>
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </TreeView.Style>
-            </TreeView>
-
-            <!-- Spacer -->
-            <Rectangle Grid.Row="2" Fill="Transparent"/>
-
-            <!-- Old Data History -->
-            <TextBlock Grid.Row="3" 
-                       Text="Old Data Imports" 
-                       FontWeight="SemiBold"
-                       Foreground="{DynamicResource TextPrimaryBrush}"
-                       Margin="0,0,0,8"/>
-            
-            <TreeView Grid.Row="4"
-                      ItemsSource="{Binding OldDataImportHistory}"
-                      BorderBrush="{DynamicResource ControlBorderBrush}"
-                      Background="{DynamicResource ControlBackgroundBrush}">
-                <TreeView.ItemContainerStyle>
-                    <Style TargetType="TreeViewItem">
-                        <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
-                        <Setter Property="ToolTip" Value="{Binding Tooltip}"/>
-                    </Style>
-                </TreeView.ItemContainerStyle>
-                <TreeView.ItemTemplate>
-                    <HierarchicalDataTemplate DataType="{x:Type vm:ImportHistoryNodeViewModel}"
-                                            ItemsSource="{Binding Children}">
-                        <StackPanel Orientation="Horizontal">
-                            <!-- Icon -->
-                            <TextBlock Text="{Binding Icon}"
-                                     FontFamily="Segoe MDL2 Assets"
-                                     FontSize="16"
-                                     VerticalAlignment="Center"
-                                     Margin="0,0,8,0"
-                                     Foreground="{DynamicResource TextPrimaryBrush}"/>
-                            
-                            <!-- Display Text -->
-                            <TextBlock Text="{Binding DisplayText}"
-                                     VerticalAlignment="Center"
-                                     Foreground="{DynamicResource TextPrimaryBrush}"/>
-                        </StackPanel>
-                    </HierarchicalDataTemplate>
-                </TreeView.ItemTemplate>
-                
-                <!-- Empty State -->
-                <TreeView.Style>
-                    <Style TargetType="TreeView">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding OldDataImportHistory.Count}" Value="0">
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="TreeView">
-                                            <Border BorderBrush="{DynamicResource ControlBorderBrush}"
-                                                  BorderThickness="1"
-                                                  Background="{DynamicResource ControlBackgroundBrush}"
-                                                  Padding="16">
-                                                <TextBlock Text="No Old Data imports yet"
+                                                <TextBlock Text="No imports yet - import data to see history here"
                                                          HorizontalAlignment="Center"
                                                          VerticalAlignment="Center"
                                                          Foreground="{DynamicResource TextSecondaryBrush}"
