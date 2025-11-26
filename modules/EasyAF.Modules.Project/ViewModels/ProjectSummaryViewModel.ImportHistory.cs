@@ -30,17 +30,13 @@ namespace EasyAF.Modules.Project.ViewModels
             // Clear existing tree
             ImportHistoryNodes.Clear();
 
-            if (_document.Project.ImportHistory == null || _document.Project.ImportHistory.Count == 0)
+            // Try building from source tracking first (new way)
+            bool builtFromSourceTracking = TryBuildFromSourceTracking();
+            
+            // Fall back to legacy ImportHistory if needed
+            if (!builtFromSourceTracking)
             {
-                Log.Debug("No import history to display");
-                return;
-            }
-
-            // Build tree: File ? Data Type ? Scenario
-            foreach (var record in _document.Project.ImportHistory.OrderByDescending(r => r.ImportedAt))
-            {
-                var fileNode = CreateFileNode(record);
-                ImportHistoryNodes.Add(fileNode);
+                BuildFromLegacyImportHistory();
             }
 
             Log.Debug("Built import history tree: {Count} file(s)", ImportHistoryNodes.Count);
@@ -136,6 +132,7 @@ namespace EasyAF.Modules.Project.ViewModels
 
         /// <summary>
         /// Records an import operation in the project's import history.
+        /// Updates both ImportHistory (legacy) and DataSetSourceInfo (source of truth).
         /// </summary>
         /// <param name="filePaths">Array of files that were imported.</param>
         /// <param name="isNewData">Whether data was imported into New Data (true) or Old Data (false).</param>
@@ -149,89 +146,259 @@ namespace EasyAF.Modules.Project.ViewModels
         {
             try
             {
-                if (_document.Project.ImportHistory == null)
-                    _document.Project.ImportHistory = new List<ImportFileRecord>();
-
-                var timestamp = DateTimeOffset.Now;
                 var targetDataSet = isNewData ? _document.Project.NewData : _document.Project.OldData;
+                if (targetDataSet == null)
+                    return;
 
-                // Get mapping path (MappingConfig doesn't have FilePath, use MapPath from ViewModel)
-                var mappingPath = MapPath ?? "Unknown";
+                // Ensure source tracking exists
+                if (isNewData)
+                {
+                    _document.Project.NewDataSources ??= new DataSetSourceInfo();
+                }
+                else
+                {
+                    _document.Project.OldDataSources ??= new DataSetSourceInfo();
+                }
 
+                var sourceInfo = isNewData ? _document.Project.NewDataSources : _document.Project.OldDataSources;
+
+                // Update source tracking (source of truth)
                 foreach (var filePath in filePaths)
                 {
-                    // Check if this file was already imported (update existing record instead of duplicating)
-                    var existingRecord = _document.Project.ImportHistory
-                        .FirstOrDefault(r => string.Equals(r.FilePath, filePath, StringComparison.OrdinalIgnoreCase));
-
-                    // Get data types present in this file
-                    var dataTypes = GetDataTypesFromDataSet(targetDataSet);
-
-                    // Get scenario mappings (if composite import or provided)
-                    var fileScenarioMappings = scenarioMappings ?? GetScenarioMappingsFromDataSet(targetDataSet);
-
-                    // Count entries for this file (best effort - counts all entries in target dataset)
-                    var entryCount = CountEntriesInDataSet(targetDataSet);
-
-                    if (existingRecord != null)
-                    {
-                        // UPDATE existing record
-                        existingRecord.ImportedAt = timestamp; // Update to most recent import time
-                        existingRecord.IsNewData = isNewData; // Update target (in case it changed)
-                        existingRecord.MappingPath = mappingPath; // Update mapping
-                        existingRecord.EntryCount = entryCount; // Update count
-                        
-                        // Union data types (accumulate all types ever imported from this file)
-                        var allDataTypes = existingRecord.DataTypes.Union(dataTypes).Distinct().ToList();
-                        existingRecord.DataTypes = allDataTypes;
-                        
-                        // Replace scenario mappings with latest (most recent import wins)
-                        existingRecord.ScenarioMappings = fileScenarioMappings;
-
-                        Log.Debug("Updated import history: {File} ? {Target} ({Count} entries, {DataTypeCount} data types)",
-                            System.IO.Path.GetFileName(filePath),
-                            isNewData ? "New" : "Old",
-                            entryCount,
-                            allDataTypes.Count);
-                    }
-                    else
-                    {
-                        // CREATE new record
-                        var record = new ImportFileRecord
-                        {
-                            ImportedAt = timestamp,
-                            FilePath = filePath,
-                            IsNewData = isNewData,
-                            MappingPath = mappingPath,
-                            DataTypes = dataTypes,
-                            ScenarioMappings = fileScenarioMappings,
-                            EntryCount = entryCount
-                        };
-
-                        _document.Project.ImportHistory.Add(record);
-                        Log.Debug("Recorded import: {File} ? {Target} ({Count} entries, {DataTypeCount} data types)",
-                            System.IO.Path.GetFileName(filePath),
-                            isNewData ? "New" : "Old",
-                            entryCount,
-                            dataTypes.Count);
-                    }
+                    DataSetSourceHelper.UpdateSourceTracking(targetDataSet, sourceInfo!, filePath);
+                    Log.Debug("Updated source tracking for: {File} ? {Target}", 
+                        System.IO.Path.GetFileName(filePath), 
+                        isNewData ? "New Data" : "Old Data");
                 }
+
+                // Legacy: Also update ImportHistory for backward compatibility
+                UpdateLegacyImportHistory(filePaths, isNewData, mappingConfig, scenarioMappings, targetDataSet);
 
                 // Mark project as dirty (changes need to be saved)
                 _document.MarkDirty();
 
-                // Rebuild import history tree to show new entries
+                // Rebuild import history tree from source tracking
                 BuildImportHistoryTree();
 
-                Log.Information("Import history updated: {Count} file(s) recorded", filePaths.Length);
+                Log.Information("Source tracking updated: {Count} file(s) recorded", filePaths.Length);
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error recording import in history");
+                Log.Error(ex, "Error recording import in source tracking");
                 // Don't fail the import if history recording fails
             }
         }
 
+        /// <summary>
+        /// Updates legacy ImportHistory for backward compatibility.
+        /// </summary>
+        private void UpdateLegacyImportHistory(
+            string[] filePaths,
+            bool isNewData,
+            EasyAF.Import.MappingConfig mappingConfig,
+            Dictionary<string, string>? scenarioMappings,
+            DataSet targetDataSet)
+        {
+            if (_document.Project.ImportHistory == null)
+                _document.Project.ImportHistory = new List<ImportFileRecord>();
+
+            var timestamp = DateTimeOffset.Now;
+            var mappingPath = MapPath ?? "Unknown";
+
+            foreach (var filePath in filePaths)
+            {
+                var existingRecord = _document.Project.ImportHistory
+                    .FirstOrDefault(r => string.Equals(r.FilePath, filePath, StringComparison.OrdinalIgnoreCase));
+
+                var dataTypes = GetDataTypesFromDataSet(targetDataSet);
+                var fileScenarioMappings = scenarioMappings ?? GetScenarioMappingsFromDataSet(targetDataSet);
+                var entryCount = CountEntriesInDataSet(targetDataSet);
+
+                if (existingRecord != null)
+                {
+                    existingRecord.ImportedAt = timestamp;
+                    existingRecord.IsNewData = isNewData;
+                    existingRecord.MappingPath = mappingPath;
+                    existingRecord.EntryCount = entryCount;
+                    existingRecord.DataTypes = existingRecord.DataTypes.Union(dataTypes).Distinct().ToList();
+                    existingRecord.ScenarioMappings = fileScenarioMappings;
+                }
+                else
+                {
+                    var record = new ImportFileRecord
+                    {
+                        ImportedAt = timestamp,
+                        FilePath = filePath,
+                        IsNewData = isNewData,
+                        MappingPath = mappingPath,
+                        DataTypes = dataTypes,
+                        ScenarioMappings = fileScenarioMappings,
+                        EntryCount = entryCount
+                    };
+                    _document.Project.ImportHistory.Add(record);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Attempts to build tree from DataSetSourceInfo.
+        /// Returns true if successful, false if no source info available.
+        /// </summary>
+        private bool TryBuildFromSourceTracking()
+        {
+            var newSources = _document.Project.NewDataSources;
+            var oldSources = _document.Project.OldDataSources;
+
+            if (newSources == null && oldSources == null)
+                return false; // No source tracking data
+
+            bool hasData = false;
+
+            // Build tree from New Data sources
+            if (newSources != null)
+            {
+                hasData |= BuildTreeFromSourceInfo(newSources, isNewData: true);
+            }
+
+            // Build tree from Old Data sources
+            if (oldSources != null)
+            {
+                hasData |= BuildTreeFromSourceInfo(oldSources, isNewData: false);
+            }
+
+            return hasData;
+        }
+
+        /// <summary>
+        /// Builds tree nodes from a DataSetSourceInfo object.
+        /// </summary>
+        private bool BuildTreeFromSourceInfo(DataSetSourceInfo sourceInfo, bool isNewData)
+        {
+            // Group all sources by file path
+            var fileGroups = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
+
+            // Add non-composite types
+            foreach (var (propertyName, filePath) in sourceInfo.DataTypeSources)
+            {
+                if (!fileGroups.ContainsKey(filePath))
+                    fileGroups[filePath] = new HashSet<string>();
+                
+                fileGroups[filePath].Add(propertyName);
+            }
+
+            // Add composite types (group scenarios by file)
+            foreach (var (propertyName, scenarioSources) in sourceInfo.CompositeDataTypeSources)
+            {
+                foreach (var (scenario, filePath) in scenarioSources)
+                {
+                    if (!fileGroups.ContainsKey(filePath))
+                        fileGroups[filePath] = new HashSet<string>();
+                    
+                    fileGroups[filePath].Add($"{propertyName}:{scenario}"); // Store with scenario marker
+                }
+            }
+
+            // Create file nodes
+            foreach (var (filePath, dataTypeMarkers) in fileGroups.OrderByDescending(kvp => System.IO.File.Exists(kvp.Key) ? System.IO.File.GetLastWriteTime(kvp.Key) : DateTime.MinValue))
+            {
+                var fileNode = CreateFileNodeFromSourceInfo(filePath, dataTypeMarkers, isNewData);
+                ImportHistoryNodes.Add(fileNode);
+            }
+
+            return fileGroups.Count > 0;
+        }
+
+        /// <summary>
+        /// Creates a file node from source tracking information.
+        /// </summary>
+        private ImportHistoryNodeViewModel CreateFileNodeFromSourceInfo(
+            string filePath,
+            HashSet<string> dataTypeMarkers,
+            bool isNewData)
+        {
+            var fileName = System.IO.Path.GetFileName(filePath);
+            var targetIndicator = isNewData ? "? New Data" : "? Old Data";
+            
+            // Try to get last modified time
+            DateTime? lastModified = System.IO.File.Exists(filePath) 
+                ? System.IO.File.GetLastWriteTime(filePath) 
+                : (DateTime?)null;
+
+            var fileNode = new ImportHistoryNodeViewModel
+            {
+                DisplayText = $"{fileName} {targetIndicator}",
+                Icon = "\uE8A5", // Document icon
+                Tooltip = lastModified.HasValue
+                    ? $"File: {filePath}\nLast Modified: {lastModified.Value:MMM dd, yyyy h:mm tt}"
+                    : $"File: {filePath}",
+                FilePath = filePath,
+                IsExpanded = true
+            };
+
+            // Group by data type (handle both regular and scenario-marked types)
+            var dataTypeGroups = dataTypeMarkers
+                .Select(marker =>
+                {
+                    var parts = marker.Split(':');
+                    return new
+                    {
+                        PropertyName = parts[0],
+                        Scenario = parts.Length > 1 ? parts[1] : null
+                    };
+                })
+                .GroupBy(x => x.PropertyName)
+                .OrderBy(g => g.Key);
+
+            foreach (var group in dataTypeGroups)
+            {
+                var friendlyName = DataSetSourceHelper.GetFriendlyDataTypeName(group.Key);
+                var dataTypeNode = new ImportHistoryNodeViewModel
+                {
+                    DisplayText = friendlyName,
+                    Icon = "\uE8F1", // Database icon
+                    Tooltip = $"Data Type: {friendlyName}",
+                    DataTypes = friendlyName,
+                    IsExpanded = true
+                };
+
+                // Add scenario children if any
+                var scenarios = group.Where(x => x.Scenario != null).Select(x => x.Scenario!).Distinct().OrderBy(s => s);
+                foreach (var scenario in scenarios)
+                {
+                    var scenarioNode = new ImportHistoryNodeViewModel
+                    {
+                        DisplayText = scenario,
+                        Icon = "\uE8F4", // Tag icon
+                        Tooltip = $"Scenario: {scenario}",
+                        ScenarioMappings = scenario
+                    };
+                    dataTypeNode.Children.Add(scenarioNode);
+                }
+
+                fileNode.Children.Add(dataTypeNode);
+            }
+
+            return fileNode;
+        }
+
+        /// <summary>
+        /// Builds tree from legacy ImportHistory (fallback).
+        /// </summary>
+        private void BuildFromLegacyImportHistory()
+        {
+            if (_document.Project.ImportHistory == null || _document.Project.ImportHistory.Count == 0)
+            {
+                Log.Debug("No import history to display");
+                return;
+            }
+
+            foreach (var record in _document.Project.ImportHistory.OrderByDescending(r => r.ImportedAt))
+            {
+                var fileNode = CreateFileNode(record);
+                ImportHistoryNodes.Add(fileNode);
+            }
+        }
+        
         /// <summary>
         /// Extracts data type names from a DataSet.
         /// </summary>
