@@ -47,6 +47,11 @@ namespace EasyAF.Data.Models
         public int EntryCount { get; set; }
 
         /// <summary>
+        /// Path to the mapping file (.ezmap) used for this import.
+        /// </summary>
+        public string? MappingPath { get; set; }
+
+        /// <summary>
         /// Creates a new import file record.
         /// </summary>
         public ImportFileRecord() { }

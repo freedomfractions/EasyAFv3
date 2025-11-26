@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using EasyAF.Data.Models;
 using EasyAF.Data.Extensions;
@@ -9,10 +10,146 @@ using Serilog;
 namespace EasyAF.Modules.Project.ViewModels
 {
     /// <summary>
-    /// Partial class containing Import History recording functionality.
+    /// Partial class containing Import History recording and tree building functionality.
     /// </summary>
     public partial class ProjectSummaryViewModel
     {
+        #region Import History Tree
+
+        /// <summary>
+        /// Gets the tree nodes for New Data import history.
+        /// </summary>
+        public ObservableCollection<ImportHistoryNodeViewModel> NewDataImportHistory { get; } = new();
+
+        /// <summary>
+        /// Gets the tree nodes for Old Data import history.
+        /// </summary>
+        public ObservableCollection<ImportHistoryNodeViewModel> OldDataImportHistory { get; } = new();
+
+        /// <summary>
+        /// Builds the import history tree from the project's import records.
+        /// Creates separate trees for New Data and Old Data.
+        /// </summary>
+        public void BuildImportHistoryTree()
+        {
+            // Clear existing trees
+            NewDataImportHistory.Clear();
+            OldDataImportHistory.Clear();
+
+            if (_document.Project.ImportHistory == null || _document.Project.ImportHistory.Count == 0)
+            {
+                Log.Debug("No import history to display");
+                return;
+            }
+
+            // Group imports by timestamp and target (creates parent nodes)
+            var importGroups = _document.Project.ImportHistory
+                .GroupBy(record => new { record.ImportedAt, record.IsNewData })
+                .OrderByDescending(g => g.Key.ImportedAt) // Most recent first
+                .ToList();
+
+            foreach (var group in importGroups)
+            {
+                var parentNode = CreateParentNode(group.Key.ImportedAt.LocalDateTime, group.Key.IsNewData, group.ToList());
+
+                // Add to appropriate tree
+                if (group.Key.IsNewData)
+                    NewDataImportHistory.Add(parentNode);
+                else
+                    OldDataImportHistory.Add(parentNode);
+            }
+
+            Log.Debug("Built import history tree: {NewCount} New Data sessions, {OldCount} Old Data sessions",
+                NewDataImportHistory.Count, OldDataImportHistory.Count);
+        }
+
+        /// <summary>
+        /// Creates a parent node representing an import session.
+        /// </summary>
+        private ImportHistoryNodeViewModel CreateParentNode(DateTime timestamp, bool isNewData, List<ImportFileRecord> files)
+        {
+            var totalEntries = files.Sum(f => f.EntryCount);
+            var fileCount = files.Count;
+            var targetName = isNewData ? "New Data" : "Old Data";
+
+            // Get mapping path from first file (all files in a session use the same mapping)
+            var mappingPath = files.FirstOrDefault()?.MappingPath ?? "Unknown";
+            var mappingName = System.IO.Path.GetFileName(mappingPath);
+
+            var parentNode = new ImportHistoryNodeViewModel
+            {
+                DisplayText = $"{timestamp:MMM dd, yyyy h:mm tt} - {targetName} ({fileCount} file{(fileCount == 1 ? "" : "s")}, {totalEntries} entries)",
+                Icon = isNewData ? "\uE8B7" : "\uE823", // Database or Archive icon
+                Tooltip = $"Imported to {targetName}\nMapping: {mappingName}\n{totalEntries} total entries",
+                IsExpanded = false, // Collapsed by default
+                Timestamp = timestamp,
+                IsNewData = isNewData,
+                MappingPath = mappingPath,
+                TotalEntries = totalEntries
+            };
+
+            // Add child nodes for each file
+            foreach (var fileRecord in files.OrderBy(f => f.FilePath))
+            {
+                var childNode = CreateChildNode(fileRecord);
+                parentNode.Children.Add(childNode);
+            }
+
+            return parentNode;
+        }
+
+        /// <summary>
+        /// Creates a child node representing an imported file.
+        /// </summary>
+        private ImportHistoryNodeViewModel CreateChildNode(ImportFileRecord fileRecord)
+        {
+            var fileName = System.IO.Path.GetFileName(fileRecord.FilePath);
+            var dataTypesSummary = string.Join(", ", fileRecord.DataTypes.OrderBy(dt => dt));
+
+            // Build scenario mapping summary (if any)
+            string? scenarioSummary = null;
+            if (fileRecord.ScenarioMappings != null && fileRecord.ScenarioMappings.Count > 0)
+            {
+                var mappings = fileRecord.ScenarioMappings
+                    .Where(kvp => kvp.Key != kvp.Value) // Only show renames
+                    .Select(kvp => $"{kvp.Key} ? {kvp.Value}");
+                
+                if (mappings.Any())
+                    scenarioSummary = string.Join(", ", mappings);
+            }
+
+            // Build display text
+            var displayText = $"{fileName} - {dataTypesSummary}";
+            if (fileRecord.EntryCount > 0)
+                displayText += $" ({fileRecord.EntryCount} entries)";
+
+            // Build tooltip
+            var tooltipLines = new List<string>
+            {
+                $"File: {fileRecord.FilePath}",
+                $"Data Types: {dataTypesSummary}",
+                $"Entries: {fileRecord.EntryCount}"
+            };
+
+            if (scenarioSummary != null)
+                tooltipLines.Add($"Scenario Mappings: {scenarioSummary}");
+
+            var childNode = new ImportHistoryNodeViewModel
+            {
+                DisplayText = displayText,
+                Icon = "\uE8A5", // Document icon
+                Tooltip = string.Join("\n", tooltipLines),
+                FilePath = fileRecord.FilePath,
+                DataTypes = dataTypesSummary,
+                ScenarioMappings = scenarioSummary,
+                FileEntryCount = fileRecord.EntryCount
+            };
+
+            return childNode;
+        }
+
+        #endregion
+
         /// <summary>
         /// Records import operations in the project's import history.
         /// </summary>
@@ -28,51 +165,57 @@ namespace EasyAF.Modules.Project.ViewModels
         {
             try
             {
-                _document.Project.ImportHistory ??= new List<ImportFileRecord>();
+                if (_document.Project.ImportHistory == null)
+                    _document.Project.ImportHistory = new List<ImportFileRecord>();
+
+                var timestamp = DateTimeOffset.Now;
+                var targetDataSet = isNewData ? _document.Project.NewData : _document.Project.OldData;
+
+                // Get mapping path (MappingConfig doesn't have FilePath, use MapPath from ViewModel)
+                var mappingPath = MapPath ?? "Unknown";
 
                 foreach (var filePath in filePaths)
                 {
-                    // Create temp dataset to analyze file contents
-                    var tempDataSet = new DataSet();
-                    var importManager = new EasyAF.Import.ImportManager();
+                    // Get data types present in this file
+                    var dataTypes = GetDataTypesFromDataSet(targetDataSet);
 
-                    try
+                    // Get scenario mappings (if composite import or provided)
+                    var fileScenarioMappings = scenarioMappings ?? GetScenarioMappingsFromDataSet(targetDataSet);
+
+                    // Count entries for this file (best effort - counts all entries in target dataset)
+                    var entryCount = CountEntriesInDataSet(targetDataSet);
+
+                    var record = new ImportFileRecord
                     {
-                        importManager.Import(filePath, mappingConfig, tempDataSet);
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Warning(ex, "Could not analyze file {File} for history recording - skipping", System.IO.Path.GetFileName(filePath));
-                        continue;
-                    }
-
-                    // Detect data types present in this file
-                    var dataTypes = GetDataTypesFromDataSet(tempDataSet);
-
-                    // Get scenario mappings (either from composite plan or discover from dataset)
-                    var mappings = scenarioMappings ?? GetScenarioMappingsFromDataSet(tempDataSet);
-
-                    // Count total entries
-                    int entryCount = CountEntriesInDataSet(tempDataSet);
-
-                    // Create history record
-                    var record = new ImportFileRecord(filePath, isNewData, dataTypes, mappings, entryCount);
+                        ImportedAt = timestamp,
+                        FilePath = filePath,
+                        IsNewData = isNewData,
+                        MappingPath = mappingPath,
+                        DataTypes = dataTypes,
+                        ScenarioMappings = fileScenarioMappings,
+                        EntryCount = entryCount
+                    };
 
                     _document.Project.ImportHistory.Add(record);
-
-                    Log.Information("Recorded import history: {File} -> {DataTypes} ({Count} entries, {Scenarios} scenarios)",
+                    Log.Debug("Recorded import: {File} ? {Target} ({Count} entries, {DataTypeCount} data types)",
                         System.IO.Path.GetFileName(filePath),
-                        string.Join(", ", dataTypes),
+                        isNewData ? "New" : "Old",
                         entryCount,
-                        mappings.Count);
+                        dataTypes.Count);
                 }
 
+                // Mark project as dirty (changes need to be saved)
                 _document.MarkDirty();
+
+                // Rebuild import history tree to show new entries
+                BuildImportHistoryTree();
+
+                Log.Information("Import history updated: {Count} file(s) recorded", filePaths.Length);
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error recording import history");
-                // Don't throw - this is non-critical functionality
+                Log.Error(ex, "Error recording import in history");
+                // Don't fail the import if history recording fails
             }
         }
 

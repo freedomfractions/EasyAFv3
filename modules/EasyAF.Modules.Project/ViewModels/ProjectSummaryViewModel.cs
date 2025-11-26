@@ -61,6 +61,9 @@ namespace EasyAF.Modules.Project.ViewModels
             // Load available mappings from history
             RefreshAvailableMappings();
 
+            // Build import history tree (will be empty if no imports yet)
+            BuildImportHistoryTree();
+
             Log.Debug("ProjectSummaryViewModel initialized");
         }
 
