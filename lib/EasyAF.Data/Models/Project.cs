@@ -155,6 +155,10 @@ namespace EasyAF.Data.Models
         public string? OldDataImportMapFile { get; set; }
         /// <summary>Additional custom properties for the project.</summary>
         public Dictionary<string,string>? Properties { get; set; } = new();
+        /// <summary>Tracks source file paths for New Data dataset entries (project-level metadata).</summary>
+        public DataSetSourceInfo? NewDataSources { get; set; }
+        /// <summary>Tracks source file paths for Old Data dataset entries (project-level metadata).</summary>
+        public DataSetSourceInfo? OldDataSources { get; set; }
 
         /// <summary>
         /// Produce a ProjectDiff comparing this project (old) to the provided project (new).
@@ -469,6 +473,8 @@ namespace EasyAF.Data.Models
         public string? TemplatePath { get; set; }
         public List<string>? TemplatePathHistory { get; set; }
         public List<ImportFileRecord>? ImportHistory { get; set; } = new();
+        public DataSetSourceInfo? NewDataSources { get; set; }
+        public DataSetSourceInfo? OldDataSources { get; set; }
 
         public static ProjectPersist FromProject(Project p)
         {
@@ -507,9 +513,12 @@ namespace EasyAF.Data.Models
                 CustomMapPath = p.CustomMapPath,
                 TemplatePath = p.TemplatePath,
                 TemplatePathHistory = p.TemplatePathHistory,
-                ImportHistory = p.ImportHistory
+                ImportHistory = p.ImportHistory,
+                NewDataSources = p.NewDataSources,
+                OldDataSources = p.OldDataSources
             };
         }
+        
         public Project ToProject()
         {
             var proj = new Project(StudyDate, Revision, LBProjectNumber, Client, SiteName, SiteAddress, StudyEngineer, Comments, PreferredDateFormat,
@@ -533,7 +542,9 @@ namespace EasyAF.Data.Models
                 CustomMapPath = CustomMapPath,
                 TemplatePath = TemplatePath,
                 TemplatePathHistory = TemplatePathHistory ?? new List<string>(),
-                ImportHistory = ImportHistory ?? new List<ImportFileRecord>()
+                ImportHistory = ImportHistory ?? new List<ImportFileRecord>(),
+                NewDataSources = NewDataSources,
+                OldDataSources = OldDataSources
             };
 
             // If legacy SiteAddress is provided but normalized fields are empty, attempt a simple split heuristic
@@ -723,6 +734,27 @@ namespace EasyAF.Data.Models
         public ShortCircuit? Value { get; set; } 
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
