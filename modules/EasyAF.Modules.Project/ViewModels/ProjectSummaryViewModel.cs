@@ -8,6 +8,8 @@ using Microsoft.Win32;
 using Prism.Commands;
 using Prism.Mvvm;
 using EasyAF.Modules.Project.Models;
+using EasyAF.Modules.Project.Views;
+using EasyAF.Modules.Project.Helpers;
 using EasyAF.Data.Models;
 using EasyAF.Data.Extensions;
 using EasyAF.Core.Contracts;
@@ -25,7 +27,7 @@ namespace EasyAF.Modules.Project.ViewModels
     /// - Data statistics (equipment counts for New/Old data)
     /// - Project type selection (Standard vs Composite pipeline)
     /// </remarks>
-    public class ProjectSummaryViewModel : BindableBase, IDisposable
+    public partial class ProjectSummaryViewModel : BindableBase, IDisposable
     {
         private readonly ProjectDocument _document;
         private readonly IUserDialogService _dialogService;
@@ -948,6 +950,30 @@ namespace EasyAF.Modules.Project.ViewModels
                     Log.Warning("Mapping validation warnings: {Warnings}", warnings);
                 }
 
+                // Step 2.5: COMPOSITE MODE - Show scenario selection dialog
+                if (ProjectType == ProjectType.Composite)
+                {
+                    var fileScenarios = CompositeImportHelper.PreScanFilesForScenarios(fileNames, mappingConfig);
+                    var existingDataSet = isNewData ? _document.Project.NewData : _document.Project.OldData;
+                    var existingScenarios = existingDataSet?.GetAvailableScenarios().ToList() ?? new System.Collections.Generic.List<string>();
+                    
+                    var compositeDialog = new CompositeImportDialog(fileScenarios, existingScenarios)
+                    {
+                        Owner = System.Windows.Application.Current.MainWindow
+                    };
+
+                    if (compositeDialog.ShowDialog() != true)
+                    {
+                        Log.Information("User cancelled composite import");
+                        return;
+                    }
+
+                    var importPlan = compositeDialog.ViewModel.GetImportPlan();
+                    ExecuteCompositeImport(importPlan, mappingConfig, isNewData);
+                    return;
+                }
+
+                // STANDARD MODE - Continue with existing logic
                 // Step 2.5: Smart conflict detection - check if files will actually overwrite existing data
                 var targetDataSet = isNewData ? _document.Project.NewData : _document.Project.OldData;
                 if (targetDataSet != null && HasDatasetEntriesInternal(targetDataSet))
@@ -1120,6 +1146,31 @@ namespace EasyAF.Modules.Project.ViewModels
                     Log.Warning("Mapping validation warnings: {Warnings}", warnings);
                 }
 
+
+                // Step 2.5: COMPOSITE MODE - Show scenario selection dialog
+                if (ProjectType == ProjectType.Composite)
+                {
+                    var fileScenarios = CompositeImportHelper.PreScanFilesForScenarios(filePaths, mappingConfig);
+                    var existingDataSet = isNewData ? _document.Project.NewData : _document.Project.OldData;
+                    var existingScenarios = existingDataSet?.GetAvailableScenarios().ToList() ?? new System.Collections.Generic.List<string>();
+                    
+                    var compositeDialog = new CompositeImportDialog(fileScenarios, existingScenarios)
+                    {
+                        Owner = System.Windows.Application.Current.MainWindow
+                    };
+
+                    if (compositeDialog.ShowDialog() != true)
+                    {
+                        Log.Information("User cancelled composite drop import");
+                        return;
+                    }
+
+                    var importPlan = compositeDialog.ViewModel.GetImportPlan();
+                    ExecuteCompositeImport(importPlan, mappingConfig, isNewData);
+                    return;
+                }
+
+                // STANDARD MODE - Continue with existing logic
                 // Step 2.5: Smart conflict detection - check if files will actually overwrite existing data
                 var targetDataSet = isNewData ? _document.Project.NewData : _document.Project.OldData;
                 if (targetDataSet != null && HasDatasetEntriesInternal(targetDataSet))

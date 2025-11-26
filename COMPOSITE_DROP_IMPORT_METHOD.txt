@@ -1,0 +1,215 @@
+// ADD THIS METHOD AFTER ExecuteImport (around line 1072) in ProjectSummaryViewModel.cs
+// This is the complete ExecuteDropImport method with Composite Import Dialog support
+
+        /// <summary>
+        /// Executes import operation triggered by drag-and-drop.
+        /// </summary>
+        /// <param name="filePaths">Array of file paths dropped on the zone.</param>
+        /// <param name="isNewData">True to import into New Data, false for Old Data.</param>
+        /// <remarks>
+        /// This method is called by the ImportDropBehavior when files are dropped.
+        /// It reuses the same import logic as the button-triggered import but skips
+        /// the file picker dialog since files are already provided.
+        /// 
+        /// For Composite projects, shows the Composite Import Dialog to allow scenario selection.
+        /// For Standard projects, follows the same conflict detection logic as button import.
+        /// </remarks>
+        public void ExecuteDropImport(string[] filePaths, bool isNewData)
+        {
+            try
+            {
+                if (filePaths == null || filePaths.Length == 0)
+                {
+                    Log.Warning("ExecuteDropImport called with no files");
+                    return;
+                }
+
+                // Step 1: Validate mapping file exists
+                if (string.IsNullOrWhiteSpace(MapPath) || !System.IO.File.Exists(MapPath))
+                {
+                    _dialogService.ShowError(
+                        "Please select a mapping file using the 'Import Map' dropdown above.",
+                        "No Mapping File");
+                    return;
+                }
+
+                Log.Information("Drop import: {Count} file(s) into {Target} data", filePaths.Length, isNewData ? "New" : "Old");
+
+                // Step 2: Load mapping config once (reuse for all files)
+                var mappingConfig = EasyAF.Import.MappingConfig.Load(MapPath);
+                var validation = mappingConfig.Validate();
+                
+                if (validation.HasErrors)
+                {
+                    var validationErrors = string.Join("\n", validation.Errors);
+                    _dialogService.ShowError($"Mapping configuration has errors:\n\n{validationErrors}", "Invalid Mapping");
+                    return;
+                }
+
+                if (validation.Warnings.Any())
+                {
+                    var warnings = string.Join("\n", validation.Warnings);
+                    Log.Warning("Mapping validation warnings: {Warnings}", warnings);
+                }
+
+                // Step 2.5: COMPOSITE MODE - Show scenario selection dialog
+                if (ProjectType == ProjectType.Composite)
+                {
+                    // Pre-scan files to extract scenarios
+                    var fileScenarios = CompositeImportHelper.PreScanFilesForScenarios(filePaths, mappingConfig);
+
+                    // Get existing scenarios from target dataset
+                    var existingDataSet = isNewData ? _document.Project.NewData : _document.Project.OldData;
+                    var existingScenarios = existingDataSet?.GetAvailableScenarios().ToList() ?? new System.Collections.Generic.List<string>();
+
+                    // Show composite import dialog
+                    var compositeDialog = new CompositeImportDialog(fileScenarios, existingScenarios)
+                    {
+                        Owner = System.Windows.Application.Current.MainWindow
+                    };
+
+                    if (compositeDialog.ShowDialog() != true)
+                    {
+                        Log.Information("User cancelled composite drop import");
+                        return;
+                    }
+
+                    // Get import plan from dialog
+                    var importPlan = compositeDialog.ViewModel.GetImportPlan();
+
+                    // Execute selective import based on plan
+                    ExecuteCompositeImport(importPlan, mappingConfig, isNewData);
+                    return;
+                }
+
+                // STANDARD MODE - Continue with existing logic
+                // Step 2.5: Smart conflict detection - check if files will actually overwrite existing data
+                var targetDataSet = isNewData ? _document.Project.NewData : _document.Project.OldData;
+                if (targetDataSet != null && HasDatasetEntriesInternal(targetDataSet))
+                {
+                    var dataTypeName = isNewData ? "New" : "Old";
+                    var (willOverwrite, affectedTypes) = WillImportOverwriteData(filePaths, mappingConfig, targetDataSet);
+                    
+                    if (willOverwrite)
+                    {
+                        var fileCount = filePaths.Length;
+                        var fileWord = fileCount == 1 ? "file" : "files";
+                        var affectedList = string.Join("\n  • ", affectedTypes);
+                        
+                        var behaviorNote = ProjectType == ProjectType.Standard
+                            ? "Existing data for these types will be REPLACED."
+                            : "New scenarios will be added to existing data.";
+                        
+                        var confirmed = _dialogService.Confirm(
+                            $"?? WARNING: {dataTypeName} Data Conflict\n\n" +
+                            $"Affected data types:\n  • {affectedList}\n\n" +
+                            $"{behaviorNote}\n\n" +
+                            $"Continue with import?",
+                            $"Confirm Import");
+
+                        if (!confirmed)
+                        {
+                            Log.Information("User cancelled drop import due to {DataType} data conflict with {Count} type(s)", 
+                                dataTypeName, affectedTypes.Count);
+                            return;
+                        }
+                        
+                        // STANDARD MODE: Clear affected data types before importing
+                        if (ProjectType == ProjectType.Standard)
+                        {
+                            ClearDataTypes(targetDataSet!, affectedTypes);
+                            Log.Warning("Cleared {Count} data type(s) for Standard mode replacement import (drop)", affectedTypes.Count);
+                        }
+                    }
+                    else
+                    {
+                        Log.Information("Smart detection: Drop import will not affect existing {DataType} data - proceeding without warning", dataTypeName);
+                    }
+                }
+
+                // Step 3: Ensure target dataset exists
+                targetDataSet = isNewData ? _document.Project.NewData : _document.Project.OldData;
+                if (targetDataSet == null)
+                {
+                    targetDataSet = new DataSet();
+                    if (isNewData)
+                        _document.Project.NewData = targetDataSet;
+                    else
+                        _document.Project.OldData = targetDataSet;
+                }
+
+                // Step 4: Import each file
+                var importManager = new EasyAF.Import.ImportManager();
+                int successCount = 0;
+                var errors = new System.Collections.Generic.List<string>();
+
+                foreach (var filePath in filePaths)
+                {
+                    try
+                    {
+                        Log.Information("Importing dropped file: {File}", System.IO.Path.GetFileName(filePath));
+                        importManager.Import(filePath, mappingConfig, targetDataSet);
+                        successCount++;
+                    }
+                    catch (Exception fileEx)
+                    {
+                        var fileName = System.IO.Path.GetFileName(filePath);
+                        errors.Add($"{fileName}: {fileEx.Message}");
+                        Log.Error(fileEx, "Error importing dropped file: {File}", filePath);
+                    }
+                }
+
+                // Step 5: Report results
+                _document.MarkDirty();
+                RefreshStatistics(triggerHighlights: true); // Trigger highlights on drop import
+
+                // Update command states
+                (ClearNewDataCommand as DelegateCommand)?.RaiseCanExecuteChanged();
+                (ClearOldDataCommand as DelegateCommand)?.RaiseCanExecuteChanged();
+
+                // Log scenario discovery for verification
+                LogScenarioDiscovery(targetDataSet, isNewData);
+
+                if (successCount == filePaths.Length)
+                {
+                    // All files imported successfully - UI feedback via cell highlighting is enough
+                    Log.Information("Drop import completed successfully: {Count} file(s) imported into {Target} data", 
+                        successCount, isNewData ? "New" : "Old");
+                }
+                else if (successCount > 0)
+                {
+                    // Some files failed
+                    var errorSummary = string.Join("\n", errors);
+                    _dialogService.ShowWarning(
+                        $"{successCount} of {filePaths.Length} file(s) imported successfully.\n\nErrors:\n{errorSummary}",
+                        "Partial Import");
+                }
+                else
+                {
+                    // All files failed
+                    var errorSummary = string.Join("\n", errors);
+                    _dialogService.ShowError($"All imports failed:\n\n{errorSummary}", "Import Failed");
+                }
+
+                Log.Information("Drop import completed: {Success} of {Total} files imported successfully", successCount, filePaths.Length);
+            }
+            catch (System.IO.IOException ioEx)
+            {
+                Log.Error(ioEx, "I/O error during drop import");
+                _dialogService.ShowError(
+                    $"File error: {ioEx.Message}\n\nMake sure the file is not open in another program.",
+                    "Import Failed");
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error during drop import");
+                _dialogService.ShowError($"Import failed: {ex.Message}", "Import Failed");
+            }
+        }
+
+// ALSO ADD using directive at top of file if not present:
+using EasyAF.Modules.Project.Views;
+using EasyAF.Modules.Project.Helpers;
+
+// ALSO ADD ExecuteCompositeImport method (should already exist from your FILE CONTEXT)
+// If not, it's in your original file context starting around line 1272
