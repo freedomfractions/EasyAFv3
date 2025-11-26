@@ -182,7 +182,7 @@ namespace EasyAF.Modules.Project.ViewModels
                     // Scan the actual file to determine what it contained
                     UpdateSourceTrackingFromFile(filePath, mappingConfig, sourceInfo!, targetDataSet, scenarioMappings);
                     
-                    Log.Debug("Updated source tracking for: {File} ? {Target}", 
+                    Log.Debug("Updated source tracking for: {File} -> {Target}", 
                         System.IO.Path.GetFileName(filePath), 
                         isNewData ? "New Data" : "Old Data");
                 }
@@ -268,7 +268,7 @@ namespace EasyAF.Modules.Project.ViewModels
                                     OriginalScenario = null, // No renaming in standard import
                                     TargetScenario = scenario
                                 };
-                                Log.Debug("Source tracking: {PropertyName}[{Scenario}] ? {File}", 
+                                Log.Debug("Source tracking: {PropertyName}[{Scenario}] <- {File}", 
                                     propertyName, scenario, System.IO.Path.GetFileName(filePath));
                             }
                         }
@@ -293,12 +293,12 @@ namespace EasyAF.Modules.Project.ViewModels
                                     
                                     if (originalScenario != targetScenario)
                                     {
-                                        Log.Debug("Source tracking (renamed): {PropertyName}[{Original} ? {Target}] ? {File}", 
+                                        Log.Debug("Source tracking (renamed): {PropertyName}[{Original} -> {Target}] <- {File}", 
                                             propertyName, originalScenario, targetScenario, System.IO.Path.GetFileName(filePath));
                                     }
                                     else
                                     {
-                                        Log.Debug("Source tracking: {PropertyName}[{Scenario}] ? {File}", 
+                                        Log.Debug("Source tracking: {PropertyName}[{Scenario}] <- {File}", 
                                             propertyName, targetScenario, System.IO.Path.GetFileName(filePath));
                                     }
                                 }
@@ -309,7 +309,7 @@ namespace EasyAF.Modules.Project.ViewModels
                     {
                         // Non-composite type - last-writer-wins per type
                         sourceInfo.DataTypeSources[propertyName] = filePath;
-                        Log.Debug("Source tracking: {PropertyName} ? {File}", 
+                        Log.Debug("Source tracking: {PropertyName} <- {File}", 
                             propertyName, System.IO.Path.GetFileName(filePath));
                     }
                 }
