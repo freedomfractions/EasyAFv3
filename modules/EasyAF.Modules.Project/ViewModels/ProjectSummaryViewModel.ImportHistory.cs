@@ -47,7 +47,7 @@ namespace EasyAF.Modules.Project.ViewModels
         /// </summary>
         private ImportHistoryNodeViewModel CreateFileNode(ImportFileRecord record)
         {
-            var targetIndicator = record.IsNewData ? "? New Data" : "? Old Data";
+            var targetIndicator = record.IsNewData ? "\uE72A New Data" : "\uE72A Old Data";
             
             var fileNode = new ImportHistoryNodeViewModel
             {
@@ -485,7 +485,7 @@ namespace EasyAF.Modules.Project.ViewModels
             bool isNewData)
         {
             var fileName = System.IO.Path.GetFileName(filePath);
-            var targetIndicator = isNewData ? "? New Data" : "? Old Data";
+            var targetIndicator = isNewData ? "\uE72A New Data" : "\uE72A Old Data";
             
             // Try to get last modified time
             DateTime? lastModified = System.IO.File.Exists(filePath) 
