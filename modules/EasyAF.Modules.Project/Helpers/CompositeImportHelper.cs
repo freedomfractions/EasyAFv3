@@ -14,45 +14,67 @@ namespace EasyAF.Modules.Project.Helpers
     public static class CompositeImportHelper
     {
         /// <summary>
-        /// Pre-scans files to extract scenarios for the Composite import dialog.
+        /// Pre-scans files to extract scenarios and data types for the Composite import dialog.
         /// </summary>
         /// <param name="filePaths">Files to scan.</param>
         /// <param name="mappingConfig">Mapping configuration.</param>
-        /// <returns>Dictionary mapping file paths to their scenario lists.</returns>
-        public static Dictionary<string, List<string>> PreScanFilesForScenarios(
+        /// <returns>Dictionary mapping file paths to their file scan results (data types and scenarios).</returns>
+        public static Dictionary<string, FileScanResult> PreScanFilesForScenarios(
             string[] filePaths,
             EasyAF.Import.MappingConfig mappingConfig)
         {
-            var fileScenarios = new Dictionary<string, List<string>>();
+            var fileResults = new Dictionary<string, FileScanResult>();
             var importManager = new EasyAF.Import.ImportManager();
 
             foreach (var filePath in filePaths)
             {
                 try
                 {
-                    // Import into temporary dataset to extract scenarios
+                    // Import into temporary dataset to extract scenarios and data types
                     var tempDataSet = new DataSet();
                     importManager.Import(filePath, mappingConfig, tempDataSet);
 
                     // Get scenarios from this file
-                    var scenarios = tempDataSet.GetAvailableScenarios();
+                    var scenarios = tempDataSet.GetAvailableScenarios().ToList();
 
-                    fileScenarios[filePath] = scenarios.ToList();
+                    // Detect which data types this file contains
+                    var dataTypes = new List<string>();
+                    if ((tempDataSet.ArcFlashEntries?.Count ?? 0) > 0)
+                        dataTypes.Add("ArcFlash");
+                    if ((tempDataSet.ShortCircuitEntries?.Count ?? 0) > 0)
+                        dataTypes.Add("ShortCircuit");
 
-                    Log.Debug("Pre-scan {File}: Found {Count} scenario(s): {Scenarios}",
+                    // If no scenario-based data types, it's a non-scenario file
+                    var isNonScenarioFile = dataTypes.Count == 0;
+
+                    var result = new FileScanResult
+                    {
+                        Scenarios = scenarios,
+                        DataTypes = dataTypes,
+                        IsNonScenarioFile = isNonScenarioFile
+                    };
+
+                    fileResults[filePath] = result;
+
+                    Log.Debug("Pre-scan {File}: DataTypes=[{DataTypes}], Scenarios=[{Scenarios}]",
                         System.IO.Path.GetFileName(filePath),
-                        scenarios.Count,
-                        scenarios.Count > 0 ? string.Join(", ", scenarios) : "(none)");
+                        dataTypes.Count > 0 ? string.Join(", ", dataTypes) : "None",
+                        scenarios.Count > 0 ? string.Join(", ", scenarios) : "none");
                 }
                 catch (Exception ex)
                 {
                     Log.Warning(ex, "Error pre-scanning file {File} for scenarios", System.IO.Path.GetFileName(filePath));
-                    // Add empty list for files that failed to scan
-                    fileScenarios[filePath] = new List<string>();
+                    // Add empty result for files that failed to scan
+                    fileResults[filePath] = new FileScanResult
+                    {
+                        Scenarios = new List<string>(),
+                        DataTypes = new List<string>(),
+                        IsNonScenarioFile = true
+                    };
                 }
             }
 
-            return fileScenarios;
+            return fileResults;
         }
 
         /// <summary>
@@ -463,5 +485,15 @@ namespace EasyAF.Modules.Project.Helpers
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Result of pre-scanning a file for scenarios and data types.
+    /// </summary>
+    public class FileScanResult
+    {
+        public List<string> Scenarios { get; set; } = new();
+        public List<string> DataTypes { get; set; } = new();
+        public bool IsNonScenarioFile { get; set; }
     }
 }

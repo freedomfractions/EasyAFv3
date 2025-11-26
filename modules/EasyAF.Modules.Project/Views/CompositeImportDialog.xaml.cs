@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Windows;
 using EasyAF.Modules.Project.ViewModels;
+using EasyAF.Modules.Project.Helpers;
 
 namespace EasyAF.Modules.Project.Views
 {
@@ -9,11 +10,11 @@ namespace EasyAF.Modules.Project.Views
     /// </summary>
     public partial class CompositeImportDialog : Window
     {
-        public CompositeImportDialog(Dictionary<string, List<string>> fileScenarios, List<string> existingScenarios)
+        public CompositeImportDialog(Dictionary<string, FileScanResult> fileScanResults, List<string> existingScenarios)
         {
             InitializeComponent();
 
-            var viewModel = new CompositeImportDialogViewModel(fileScenarios, existingScenarios);
+            var viewModel = new CompositeImportDialogViewModel(fileScanResults, existingScenarios);
             DataContext = viewModel;
 
             // Watch for dialog result changes and close the window

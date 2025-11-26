@@ -7,6 +7,7 @@ using Prism.Commands;
 using Prism.Mvvm;
 using EasyAF.Data.Models;
 using EasyAF.Data.Extensions;
+using EasyAF.Modules.Project.Helpers;
 using Serilog;
 
 namespace EasyAF.Modules.Project.ViewModels
@@ -35,28 +36,28 @@ namespace EasyAF.Modules.Project.ViewModels
         public bool? DialogResult { get; private set; }
 
         public CompositeImportDialogViewModel(
-            Dictionary<string, List<string>> fileScenarios, 
+            Dictionary<string, FileScanResult> fileScanResults, 
             List<string> existingScenarios)
         {
             _existingScenarios = existingScenarios ?? new List<string>();
 
             // Build file groups
-            foreach (var kvp in fileScenarios.OrderBy(x => x.Key))
+            foreach (var kvp in fileScanResults.OrderBy(x => x.Key))
             {
                 var filePath = kvp.Key;
-                var scenarios = kvp.Value;
+                var scanResult = kvp.Value;
 
-                var fileGroup = new FileScenarioGroup(filePath, this);
+                var fileGroup = new FileScenarioGroup(filePath, scanResult.DataTypes, this);
 
-                if (scenarios.Count > 0)
+                if (!scanResult.IsNonScenarioFile && scanResult.Scenarios.Count > 0)
                 {
                     // Scenario-based file
-                    for (int i = 0; i < scenarios.Count; i++)
+                    for (int i = 0; i < scanResult.Scenarios.Count; i++)
                     {
-                        var scenario = scenarios[i];
+                        var scenario = scanResult.Scenarios[i];
                         var action = i == 0 ? ImportAction.AddNew : ImportAction.DoNotImport;
                         
-                        fileGroup.Scenarios.Add(new ScenarioImportRow(scenario, action, this));
+                        fileGroup.Scenarios.Add(new ScenarioImportRow(scenario, action, fileGroup, this));
                     }
                 }
                 else
@@ -163,6 +164,7 @@ namespace EasyAF.Modules.Project.ViewModels
 
         /// <summary>
         /// Validates scenario name against existing scenarios and other rows in dialog.
+        /// Only validates against scenarios within the same data type(s).
         /// </summary>
         public bool ValidateScenarioName(string scenarioName, ScenarioImportRow currentRow)
         {
@@ -171,13 +173,22 @@ namespace EasyAF.Modules.Project.ViewModels
 
             var normalized = scenarioName.Trim();
 
-            // Check against existing scenarios in dataset
+            // Get the data types for the current row's file
+            var currentDataTypes = currentRow.ParentFileGroup.DataTypes;
+
+            // Check against existing scenarios in dataset (only for matching data types)
+            // NOTE: _existingScenarios is a flat list, so we conservatively check all
+            // This could be enhanced to be per-data-type if needed
             if (_existingScenarios.Any(s => string.Equals(s.Trim(), normalized, StringComparison.OrdinalIgnoreCase)))
                 return false;
 
-            // Check against other "Add New" scenarios in this dialog
+            // Check against other "Add New" scenarios in this dialog (only same data types)
             foreach (var fileGroup in FileGroups)
             {
+                // Skip if no data type overlap
+                if (!currentDataTypes.Any(dt => fileGroup.DataTypes.Contains(dt)))
+                    continue;
+
                 foreach (var row in fileGroup.Scenarios)
                 {
                     if (row == currentRow)
@@ -234,6 +245,7 @@ namespace EasyAF.Modules.Project.ViewModels
         public string FilePath { get; }
         public string FileName => System.IO.Path.GetFileName(FilePath);
         public string FileHeader => $"{FileName} - {FilePath}";
+        public List<string> DataTypes { get; }
         
         public ObservableCollection<ScenarioImportRow> Scenarios { get; } = new();
         
@@ -242,10 +254,20 @@ namespace EasyAF.Modules.Project.ViewModels
 
         private readonly CompositeImportDialogViewModel _parentViewModel;
 
-        public FileScenarioGroup(string filePath, CompositeImportDialogViewModel parentViewModel)
+        public FileScenarioGroup(string filePath, List<string> dataTypes, CompositeImportDialogViewModel parentViewModel)
         {
             FilePath = filePath;
+            DataTypes = dataTypes ?? new List<string>();
             _parentViewModel = parentViewModel;
+
+            // Add implicit scenario for non-scenario files (based on data types)
+            if (dataTypes != null && dataTypes.Any())
+            {
+                foreach (var dataType in dataTypes)
+                {
+                    Scenarios.Add(new ScenarioImportRow(dataType, ImportAction.AddNew, this, parentViewModel));
+                }
+            }
         }
     }
 
@@ -255,6 +277,7 @@ namespace EasyAF.Modules.Project.ViewModels
     public class ScenarioImportRow : BindableBase
     {
         private readonly CompositeImportDialogViewModel _parentViewModel;
+        public FileScenarioGroup ParentFileGroup { get; }
 
         public string ScenarioName { get; }
 
@@ -320,10 +343,11 @@ namespace EasyAF.Modules.Project.ViewModels
 
         public List<string> ExistingScenarios => _parentViewModel.ExistingScenarios;
 
-        public ScenarioImportRow(string scenarioName, ImportAction defaultAction, CompositeImportDialogViewModel parentViewModel)
+        public ScenarioImportRow(string scenarioName, ImportAction defaultAction, FileScenarioGroup parentFileGroup, CompositeImportDialogViewModel parentViewModel)
         {
             ScenarioName = scenarioName;
             _action = defaultAction;
+            ParentFileGroup = parentFileGroup;
             _parentViewModel = parentViewModel;
 
             // Pre-fill new scenario name with original scenario name

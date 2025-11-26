@@ -953,11 +953,11 @@ namespace EasyAF.Modules.Project.ViewModels
                 // Step 2.5: COMPOSITE MODE - Show scenario selection dialog
                 if (ProjectType == ProjectType.Composite)
                 {
-                    var fileScenarios = CompositeImportHelper.PreScanFilesForScenarios(fileNames, mappingConfig);
+                    var fileScanResults = CompositeImportHelper.PreScanFilesForScenarios(fileNames, mappingConfig);
                     var existingDataSet = isNewData ? _document.Project.NewData : _document.Project.OldData;
                     var existingScenarios = existingDataSet?.GetAvailableScenarios().ToList() ?? new System.Collections.Generic.List<string>();
                     
-                    var compositeDialog = new CompositeImportDialog(fileScenarios, existingScenarios)
+                    var compositeDialog = new CompositeImportDialog(fileScanResults, existingScenarios)
                     {
                         Owner = System.Windows.Application.Current.MainWindow
                     };
@@ -1150,11 +1150,11 @@ namespace EasyAF.Modules.Project.ViewModels
                 // Step 2.5: COMPOSITE MODE - Show scenario selection dialog
                 if (ProjectType == ProjectType.Composite)
                 {
-                    var fileScenarios = CompositeImportHelper.PreScanFilesForScenarios(filePaths, mappingConfig);
+                    var fileScanResults = CompositeImportHelper.PreScanFilesForScenarios(filePaths, mappingConfig);
                     var existingDataSet = isNewData ? _document.Project.NewData : _document.Project.OldData;
                     var existingScenarios = existingDataSet?.GetAvailableScenarios().ToList() ?? new System.Collections.Generic.List<string>();
                     
-                    var compositeDialog = new CompositeImportDialog(fileScenarios, existingScenarios)
+                    var compositeDialog = new CompositeImportDialog(fileScanResults, existingScenarios)
                     {
                         Owner = System.Windows.Application.Current.MainWindow
                     };
