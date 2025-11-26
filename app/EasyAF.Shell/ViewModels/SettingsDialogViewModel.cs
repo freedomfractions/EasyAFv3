@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.IO;
 using Prism.Commands;
 using Prism.Mvvm;
 using EasyAF.Core.Contracts;
@@ -20,6 +21,10 @@ public class SettingsDialogViewModel : BindableBase
     private IThemeService.ThemeDescriptor? _selectedThemeDescriptor;
     private int _recentFilesLimit;
     private bool? _dialogResult;
+    private string _mapsDirectory = string.Empty;
+    private string _specsDirectory = string.Empty;
+    private string _templatesDirectory = string.Empty;
+    private string _outputDirectory = string.Empty;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="SettingsDialogViewModel"/> class.
@@ -41,6 +46,12 @@ public class SettingsDialogViewModel : BindableBase
         _originalRecentFilesLimit = _settingsService.GetSetting("RecentFiles.MaxCount", 25);
         _recentFilesLimit = ClampRecentFilesLimit(_originalRecentFilesLimit);
 
+        // Load directory paths
+        _mapsDirectory = _settingsService.GetSetting("Directories.Maps", GetDefaultMapsDirectory());
+        _specsDirectory = _settingsService.GetSetting("Directories.Specs", GetDefaultSpecsDirectory());
+        _templatesDirectory = _settingsService.GetSetting("Directories.Templates", GetDefaultTemplatesDirectory());
+        _outputDirectory = _settingsService.GetSetting("Directories.Output", GetDefaultOutputDirectory());
+
         // Store Map module settings VM if provided
         MapSettingsViewModel = mapSettingsViewModel;
 
@@ -48,6 +59,10 @@ public class SettingsDialogViewModel : BindableBase
         ApplyCommand = new DelegateCommand(Apply);
         OkCommand = new DelegateCommand(Ok);
         CancelCommand = new DelegateCommand(Cancel);
+        BrowseMapsDirectoryCommand = new DelegateCommand(BrowseMapsDirectory);
+        BrowseSpecsDirectoryCommand = new DelegateCommand(BrowseSpecsDirectory);
+        BrowseTemplatesDirectoryCommand = new DelegateCommand(BrowseTemplatesDirectory);
+        BrowseOutputDirectoryCommand = new DelegateCommand(BrowseOutputDirectory);
 
         // Populate theme descriptors
         AvailableThemes = new ObservableCollection<IThemeService.ThemeDescriptor>(_themeService.AvailableThemeDescriptors);
@@ -100,6 +115,54 @@ public class SettingsDialogViewModel : BindableBase
     public object? MapSettingsViewModel { get; }
 
     /// <summary>
+    /// Gets or sets the default maps directory path.
+    /// </summary>
+    public string MapsDirectory
+    {
+        get => _mapsDirectory;
+        set => SetProperty(ref _mapsDirectory, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the default specs directory path.
+    /// </summary>
+    public string SpecsDirectory
+    {
+        get => _specsDirectory;
+        set => SetProperty(ref _specsDirectory, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the default templates directory path.
+    /// </summary>
+    public string TemplatesDirectory
+    {
+        get => _templatesDirectory;
+        set => SetProperty(ref _templatesDirectory, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the default output directory path.
+    /// </summary>
+    public string OutputDirectory
+    {
+        get => _outputDirectory;
+        set => SetProperty(ref _outputDirectory, value);
+    }
+
+    /// <summary>
+    /// Gets the application directory (read-only).
+    /// </summary>
+    public string ApplicationDirectory => AppDomain.CurrentDomain.BaseDirectory;
+
+    /// <summary>
+    /// Gets the settings directory (read-only).
+    /// </summary>
+    public string SettingsDirectory => Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+        "EasyAF");
+
+    /// <summary>
     /// Gets the Apply command (applies settings without closing dialog).
     /// </summary>
     public ICommand ApplyCommand { get; }
@@ -113,6 +176,26 @@ public class SettingsDialogViewModel : BindableBase
     /// Gets the Cancel command (closes dialog without applying changes).
     /// </summary>
     public ICommand CancelCommand { get; }
+
+    /// <summary>
+    /// Gets the command to browse for maps directory.
+    /// </summary>
+    public ICommand BrowseMapsDirectoryCommand { get; }
+
+    /// <summary>
+    /// Gets the command to browse for specs directory.
+    /// </summary>
+    public ICommand BrowseSpecsDirectoryCommand { get; }
+
+    /// <summary>
+    /// Gets the command to browse for templates directory.
+    /// </summary>
+    public ICommand BrowseTemplatesDirectoryCommand { get; }
+
+    /// <summary>
+    /// Gets the command to browse for output directory.
+    /// </summary>
+    public ICommand BrowseOutputDirectoryCommand { get; }
 
     /// <summary>
     /// Gets or sets a value indicating whether the dialog should close.
@@ -136,6 +219,12 @@ public class SettingsDialogViewModel : BindableBase
 
         // Save recent files limit
         _settingsService.SetSetting("RecentFiles.MaxCount", _recentFilesLimit);
+
+        // Save directory paths
+        _settingsService.SetSetting("Directories.Maps", _mapsDirectory);
+        _settingsService.SetSetting("Directories.Specs", _specsDirectory);
+        _settingsService.SetSetting("Directories.Templates", _templatesDirectory);
+        _settingsService.SetSetting("Directories.Output", _outputDirectory);
 
         // CROSS-MODULE EDIT: 2025-01-16 Map Module Settings Feature - Step 8
         // Modified for: Save Map module settings when user clicks OK/Apply
@@ -188,5 +277,101 @@ public class SettingsDialogViewModel : BindableBase
         if (value < 3) return 3;
         if (value > 250) return 250;
         return value;
+    }
+
+    /// <summary>
+    /// Opens a folder browser dialog for selecting the maps directory.
+    /// </summary>
+    private void BrowseMapsDirectory()
+    {
+        var folder = BrowseForFolder("Select Maps Directory", _mapsDirectory);
+        if (folder != null)
+            MapsDirectory = folder;
+    }
+
+    /// <summary>
+    /// Opens a folder browser dialog for selecting the specs directory.
+    /// </summary>
+    private void BrowseSpecsDirectory()
+    {
+        var folder = BrowseForFolder("Select Specs Directory", _specsDirectory);
+        if (folder != null)
+            SpecsDirectory = folder;
+    }
+
+    /// <summary>
+    /// Opens a folder browser dialog for selecting the templates directory.
+    /// </summary>
+    private void BrowseTemplatesDirectory()
+    {
+        var folder = BrowseForFolder("Select Templates Directory", _templatesDirectory);
+        if (folder != null)
+            TemplatesDirectory = folder;
+    }
+
+    /// <summary>
+    /// Opens a folder browser dialog for selecting the output directory.
+    /// </summary>
+    private void BrowseOutputDirectory()
+    {
+        var folder = BrowseForFolder("Select Output Directory", _outputDirectory);
+        if (folder != null)
+            OutputDirectory = folder;
+    }
+
+    /// <summary>
+    /// Opens a folder browser dialog and returns the selected path.
+    /// </summary>
+    /// <param name="description">The dialog description text.</param>
+    /// <param name="selectedPath">The initially selected path.</param>
+    /// <returns>The selected folder path, or null if cancelled.</returns>
+    private static string? BrowseForFolder(string description, string selectedPath)
+    {
+        // Use OpenFolderDialog (available in .NET 8+)
+        var dialog = new Microsoft.Win32.OpenFolderDialog
+        {
+            Title = description,
+            InitialDirectory = Directory.Exists(selectedPath) ? selectedPath : Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
+        };
+
+        return dialog.ShowDialog() == true 
+            ? dialog.FolderName 
+            : null;
+    }
+
+    /// <summary>
+    /// Gets the default maps directory path.
+    /// </summary>
+    private static string GetDefaultMapsDirectory()
+    {
+        var appData = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        return Path.Combine(appData, "EasyAF", "Maps");
+    }
+
+    /// <summary>
+    /// Gets the default specs directory path.
+    /// </summary>
+    private static string GetDefaultSpecsDirectory()
+    {
+        var appData = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        return Path.Combine(appData, "EasyAF", "Specs");
+    }
+
+    /// <summary>
+    /// Gets the default templates directory path.
+    /// </summary>
+    private static string GetDefaultTemplatesDirectory()
+    {
+        var appData = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        return Path.Combine(appData, "EasyAF", "Templates");
+    }
+
+    /// <summary>
+    /// Gets the default output directory path.
+    /// </summary>
+    private static string GetDefaultOutputDirectory()
+    {
+        var appData = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        return Path.Combine(appData, "EasyAF", "Output");
     }
 }

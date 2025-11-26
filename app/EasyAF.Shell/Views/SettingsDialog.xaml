@@ -34,8 +34,8 @@
                     BorderBrush="{DynamicResource ControlBorderBrush}"
                     BorderThickness="0">
             
-            <!-- Application Settings Tab -->
-            <TabItem Header="Application">
+            <!-- General Settings Tab -->
+            <TabItem Header="General">
                 <TabItem.HeaderTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding}" 
@@ -44,8 +44,9 @@
                                    Padding="12,8"/>
                     </DataTemplate>
                 </TabItem.HeaderTemplate>
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="20">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" 
+                              HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Margin="20" HorizontalAlignment="Stretch">
                         <!-- Theme Selection -->
                         <TextBlock Text="Theme" 
                                    FontSize="16" 
@@ -62,7 +63,9 @@
                                  Background="{DynamicResource ControlBackgroundBrush}"
                                  BorderBrush="{DynamicResource ControlBorderBrush}"
                                  BorderThickness="1"
-                                 Padding="8">
+                                 Padding="8"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                 ScrollViewer.VerticalScrollBarVisibility="Disabled">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal" Margin="4">
@@ -157,6 +160,188 @@
                                   IsChecked="True"
                                   Foreground="{DynamicResource TextPrimaryBrush}"
                                   Margin="0,8"/>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- File Paths Tab -->
+            <TabItem Header="File Paths">
+                <TabItem.HeaderTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}" 
+                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                   FontWeight="SemiBold"
+                                   Padding="12,8"/>
+                    </DataTemplate>
+                </TabItem.HeaderTemplate>
+                <ScrollViewer VerticalScrollBarVisibility="Auto" 
+                              HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Margin="20" HorizontalAlignment="Stretch">
+                        <!-- File Paths Section -->
+                        <TextBlock Text="Default Directories" 
+                                   FontSize="16" 
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                   Margin="0,0,0,8"/>
+                        <TextBlock Text="Configure default directories for application files" 
+                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                   FontSize="12"
+                                   Margin="0,0,0,20"
+                                   TextWrapping="Wrap"/>
+
+                        <!-- Maps Directory -->
+                        <TextBlock Text="Maps Directory" 
+                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,4"/>
+                        <TextBlock Text="Default location for .ezmap mapping configuration files" 
+                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                   FontSize="11"
+                                   Margin="0,0,0,8"/>
+                        <Grid Margin="0,0,0,20">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox Grid.Column="0"
+                                     Text="{Binding MapsDirectory, UpdateSourceTrigger=PropertyChanged}"
+                                     VerticalContentAlignment="Center"
+                                     Height="28"
+                                     Margin="0,0,8,0"/>
+                            <Button Grid.Column="1"
+                                    Content="Browse..."
+                                    Width="80"
+                                    Height="28"
+                                    Command="{Binding BrowseMapsDirectoryCommand}"/>
+                        </Grid>
+
+                        <!-- Specs Directory -->
+                        <TextBlock Text="Specs Directory" 
+                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,4"/>
+                        <TextBlock Text="Default location for .ezspec report specification files" 
+                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                   FontSize="11"
+                                   Margin="0,0,0,8"/>
+                        <Grid Margin="0,0,0,20">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox Grid.Column="0"
+                                     Text="{Binding SpecsDirectory, UpdateSourceTrigger=PropertyChanged}"
+                                     VerticalContentAlignment="Center"
+                                     Height="28"
+                                     Margin="0,0,8,0"/>
+                            <Button Grid.Column="1"
+                                    Content="Browse..."
+                                    Width="80"
+                                    Height="28"
+                                    Command="{Binding BrowseSpecsDirectoryCommand}"/>
+                        </Grid>
+
+                        <!-- Templates Directory -->
+                        <TextBlock Text="Templates Directory" 
+                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,4"/>
+                        <TextBlock Text="Default location for Word document templates" 
+                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                   FontSize="11"
+                                   Margin="0,0,0,8"/>
+                        <Grid Margin="0,0,0,20">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox Grid.Column="0"
+                                     Text="{Binding TemplatesDirectory, UpdateSourceTrigger=PropertyChanged}"
+                                     VerticalContentAlignment="Center"
+                                     Height="28"
+                                     Margin="0,0,8,0"/>
+                            <Button Grid.Column="1"
+                                    Content="Browse..."
+                                    Width="80"
+                                    Height="28"
+                                    Command="{Binding BrowseTemplatesDirectoryCommand}"/>
+                        </Grid>
+
+                        <!-- Output Directory -->
+                        <TextBlock Text="Output Directory" 
+                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,4"/>
+                        <TextBlock Text="Default location for generated reports and output files" 
+                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                   FontSize="11"
+                                   Margin="0,0,0,8"/>
+                        <Grid Margin="0,0,0,20">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox Grid.Column="0"
+                                     Text="{Binding OutputDirectory, UpdateSourceTrigger=PropertyChanged}"
+                                     VerticalContentAlignment="Center"
+                                     Height="28"
+                                     Margin="0,0,8,0"/>
+                            <Button Grid.Column="1"
+                                    Content="Browse..."
+                                    Width="80"
+                                    Height="28"
+                                    Command="{Binding BrowseOutputDirectoryCommand}"/>
+                        </Grid>
+
+                        <!-- Read-Only Information -->
+                        <Border Background="{DynamicResource SecondaryBackgroundBrush}"
+                                BorderBrush="{DynamicResource ControlBorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="4"
+                                Padding="16"
+                                Margin="0,12,0,0">
+                            <StackPanel>
+                                <TextBlock Text="Application Information" 
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"
+                                           Margin="0,0,0,12"/>
+                                
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="140"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Grid.Row="0" Grid.Column="0" 
+                                               Text="Application Directory:" 
+                                               Foreground="{DynamicResource TextSecondaryBrush}" 
+                                               Margin="0,4"/>
+                                    <TextBox Grid.Row="0" Grid.Column="1" 
+                                             Text="{Binding ApplicationDirectory, Mode=OneWay}" 
+                                             IsReadOnly="True"
+                                             Background="{DynamicResource ReadonlyBackgroundBrush}"
+                                             Foreground="{DynamicResource TextSecondaryBrush}"
+                                             BorderBrush="{DynamicResource ControlBorderBrush}"
+                                             Margin="8,4"/>
+
+                                    <TextBlock Grid.Row="1" Grid.Column="0" 
+                                               Text="Settings Directory:" 
+                                               Foreground="{DynamicResource TextSecondaryBrush}" 
+                                               Margin="0,4"/>
+                                    <TextBox Grid.Row="1" Grid.Column="1" 
+                                             Text="{Binding SettingsDirectory, Mode=OneWay}" 
+                                             IsReadOnly="True"
+                                             Background="{DynamicResource ReadonlyBackgroundBrush}"
+                                             Foreground="{DynamicResource TextSecondaryBrush}"
+                                             BorderBrush="{DynamicResource ControlBorderBrush}"
+                                             Margin="8,4"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
