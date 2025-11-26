@@ -10,6 +10,8 @@ namespace EasyAF.Modules.Project.Views
     /// </summary>
     public partial class CompositeImportDialog : Window
     {
+        private bool _isClosing = false;
+
         public CompositeImportDialog(Dictionary<string, FileScanResult> fileScanResults, List<string> existingScenarios)
         {
             InitializeComponent();
@@ -18,14 +20,18 @@ namespace EasyAF.Modules.Project.Views
             DataContext = viewModel;
 
             // Watch for dialog result changes
-            viewModel.PropertyChanged += (s, e) =>
+            viewModel.PropertyChanged += ViewModel_PropertyChanged;
+        }
+
+        private void ViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(CompositeImportDialogViewModel.DialogResult) && !_isClosing)
             {
-                if (e.PropertyName == nameof(CompositeImportDialogViewModel.DialogResult))
-                {
-                    // Setting DialogResult automatically closes the window in WPF
-                    DialogResult = viewModel.DialogResult;
-                }
-            };
+                _isClosing = true;
+                var viewModel = (CompositeImportDialogViewModel)DataContext;
+                // Setting DialogResult automatically closes the window in WPF
+                DialogResult = viewModel.DialogResult;
+            }
         }
 
         public CompositeImportDialogViewModel ViewModel => (CompositeImportDialogViewModel)DataContext;
