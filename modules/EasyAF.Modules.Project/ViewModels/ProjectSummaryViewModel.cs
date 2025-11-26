@@ -537,6 +537,11 @@ namespace EasyAF.Modules.Project.ViewModels
         }
 
         /// <summary>
+        /// Gets the action to refresh available mappings (for behavior binding).
+        /// </summary>
+        public Action? RefreshMappingsAction => RefreshAvailableMappings;
+
+        /// <summary>
         /// Refreshes the available mappings list from the map path history.
         /// </summary>
         private void RefreshAvailableMappings()

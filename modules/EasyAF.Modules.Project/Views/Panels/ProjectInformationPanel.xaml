@@ -85,7 +85,9 @@
                 
                 <TextBlock Grid.Column="2" Text="State:" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource TextPrimaryBrush}"/>
                 <ComboBox Grid.Column="3" Text="{Binding State, UpdateSourceTrigger=PropertyChanged}" 
-                          VerticalAlignment="Center" Margin="0,0,20,0" HorizontalAlignment="Stretch" IsEditable="True">
+                          VerticalAlignment="Center" Margin="0,0,20,0" HorizontalAlignment="Stretch" IsEditable="True"
+                          HorizontalContentAlignment="Left"
+                          VerticalContentAlignment="Center">
                     <ComboBox.Items>
                         <ComboBoxItem Content="AL"/><ComboBoxItem Content="AK"/><ComboBoxItem Content="AZ"/><ComboBoxItem Content="AR"/>
                         <ComboBoxItem Content="CA"/><ComboBoxItem Content="CO"/><ComboBoxItem Content="CT"/><ComboBoxItem Content="DE"/>
