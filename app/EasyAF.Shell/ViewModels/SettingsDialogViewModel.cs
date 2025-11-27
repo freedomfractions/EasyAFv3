@@ -343,10 +343,8 @@ public class SettingsDialogViewModel : BindableBase
         // Reload Project module settings if available (discard changes)
         if (ProjectSettingsViewModel is EasyAF.Modules.Project.ViewModels.ProjectModuleSettingsViewModel projectVm)
         {
-            // ProjectModuleSettingsViewModel doesn't currently have ReloadSettings
-            // Settings are reloaded from ISettingsService each time dialog opens
-            // Nothing to do here - the ViewModel will be recreated fresh next time
-            Log.Debug("Project module settings will be reloaded on next open");
+            projectVm.ReloadSettings();
+            Log.Debug("Project module settings reloaded (changes discarded)");
         }
 
         DialogResult = false;

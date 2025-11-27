@@ -287,8 +287,36 @@ namespace EasyAF.Modules.Project.ViewModels
         public void SaveSettings()
         {
             _settingsService.SetProjectModuleSettings(_settings);
-            Log.Information("Project Module settings saved - Default map: {Path}", 
-                _settings.DefaultImportMapPath ?? "(none - use most recent)");
+            Log.Information("Project Module settings saved - Default map: {Path}, Templates: {Templates}, Output: {Output}", 
+                _settings.DefaultImportMapPath ?? "(none - use most recent)",
+                _settings.TemplatesDirectory ?? "(default)",
+                _settings.OutputDirectory ?? "(default)");
+        }
+        
+        /// <summary>
+        /// Reloads settings from ISettingsService (for Cancel operation).
+        /// </summary>
+        /// <remarks>
+        /// CROSS-MODULE EDIT: 2025-01-27 Project Module Settings Persistence Fix
+        /// Modified for: Add ReloadSettings for proper Cancel behavior
+        /// Related modules: Shell (SettingsDialogViewModel calls this on Cancel)
+        /// Rollback instructions: Remove this method
+        /// </remarks>
+        public void ReloadSettings()
+        {
+            _settings = _settingsService.GetProjectModuleSettings();
+            _templatesDirectory = _settings.TemplatesDirectory ?? GetDefaultTemplatesDirectory();
+            _outputDirectory = _settings.OutputDirectory ?? GetDefaultOutputDirectory();
+            
+            // Reload map files list (settings might have changed)
+            LoadAvailableMapFiles();
+            
+            // Notify UI of all changes
+            RaisePropertyChanged(nameof(TemplatesDirectory));
+            RaisePropertyChanged(nameof(OutputDirectory));
+            RaisePropertyChanged(nameof(SelectedDefaultMapPath));
+            
+            Log.Debug("Project module settings reloaded");
         }
         
         /// <summary>
