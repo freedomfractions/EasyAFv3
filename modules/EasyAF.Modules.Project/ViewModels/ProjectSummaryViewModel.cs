@@ -1,6 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -547,11 +548,61 @@ namespace EasyAF.Modules.Project.ViewModels
         /// <summary>
         /// Refreshes the available mappings list from the map path history.
         /// </summary>
+        /// <remarks>
+        /// CROSS-MODULE EDIT: 2025-01-27 Auto-Discover Maps from Default Folder
+        /// Modified for: Scan Documents\EasyAF\Maps\ and populate dropdown with discovered files
+        /// Related modules: Shell (FileCommandsViewModel - default paths), Map (MapModule)
+        /// Rollback instructions: Remove directory scanning logic, keep history-only approach
+        /// 
+        /// Behavior:
+        /// 1. Scans Documents\EasyAF\Maps\ for .ezmap files (sorted by LastWriteTime desc)
+        /// 2. Adds files from project's MapPathHistory (most recent first)
+        /// 3. Adds project's CustomMapPath if set
+        /// 4. Adds "Browse..." item at the end
+        /// 5. Auto-selects most recent file (first in list) ONLY if no selection exists
+        /// 6. Displays filenames without .ezmap extension for cleaner UI
+        /// 
+        /// This ensures users see all available maps without manually adding them to history.
+        /// </remarks>
         private void RefreshAvailableMappings()
         {
+            // Preserve current selection path before clearing
+            var currentSelectionPath = SelectedMapping?.FilePath;
+            
             AvailableMappings.Clear();
             
-            // Add mapping files from history
+            // Step 1: Scan the default Maps folder for .ezmap files
+            try
+            {
+                var mapsFolder = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                    "EasyAF",
+                    "Maps");
+                
+                if (Directory.Exists(mapsFolder))
+                {
+                    var mapFiles = Directory.GetFiles(mapsFolder, "*.ezmap")
+                        .Select(f => new FileInfo(f))
+                        .OrderByDescending(f => f.LastWriteTime) // Most recent first
+                        .ToList();
+                    
+                    foreach (var file in mapFiles)
+                    {
+                        // Display name without extension for cleaner UI
+                        var displayName = Path.GetFileNameWithoutExtension(file.FullName);
+                        var item = MappingFileItem.CreateCustomFileItem(file.FullName, displayName);
+                        AvailableMappings.Add(item);
+                    }
+                    
+                    Log.Debug("Discovered {Count} map files from {Folder}", mapFiles.Count, mapsFolder);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Failed to scan default Maps folder for .ezmap files");
+            }
+            
+            // Step 2: Add mapping files from history (if not already in list)
             if (_document.Project.MapPathHistory != null && _document.Project.MapPathHistory.Count > 0)
             {
                 foreach (var path in _document.Project.MapPathHistory)
@@ -559,36 +610,65 @@ namespace EasyAF.Modules.Project.ViewModels
                     if (string.IsNullOrWhiteSpace(path))
                         continue;
                     
-                    var fileName = System.IO.Path.GetFileName(path);
-                    var item = MappingFileItem.CreateCustomFileItem(path, fileName);
+                    // Skip if already added from folder scan
+                    if (AvailableMappings.Any(m => string.Equals(m.FilePath, path, StringComparison.OrdinalIgnoreCase)))
+                        continue;
+                    
+                    // Display name without extension for cleaner UI
+                    var displayName = Path.GetFileNameWithoutExtension(path);
+                    var item = MappingFileItem.CreateCustomFileItem(path, displayName);
                     AvailableMappings.Add(item);
                 }
             }
             
-            // Add custom file entry if it exists (project-specific)
+            // Step 3: Add custom file entry if it exists (project-specific)
             if (!string.IsNullOrWhiteSpace(_document.Project.CustomMapPath) &&
                 System.IO.File.Exists(_document.Project.CustomMapPath))
             {
-                var fileName = System.IO.Path.GetFileName(_document.Project.CustomMapPath);
-                var customItem = MappingFileItem.CreateCustomFileItem(_document.Project.CustomMapPath, fileName);
-                customItem.IsCustomFileItem = true;  // Mark it specially
-                
-                // Only add if not already in history
+                // Skip if already in list
                 if (!AvailableMappings.Any(m => string.Equals(m.FilePath, _document.Project.CustomMapPath, StringComparison.OrdinalIgnoreCase)))
                 {
+                    // Display name without extension for cleaner UI
+                    var displayName = Path.GetFileNameWithoutExtension(_document.Project.CustomMapPath);
+                    var customItem = MappingFileItem.CreateCustomFileItem(_document.Project.CustomMapPath, displayName);
+                    customItem.IsCustomFileItem = true;  // Mark it specially
                     AvailableMappings.Add(customItem);
                 }
             }
             
-            // Always add Browse... button at the end
+            // Step 4: Always add Browse... button at the end
             AvailableMappings.Add(MappingFileItem.CreateBrowseItem());
             
-            // Select the first non-browse item (most recent) if available
-            // Do this silently without marking dirty (just loading saved state)
-            var firstMapping = AvailableMappings.FirstOrDefault(m => !m.IsBrowseItem);
-            if (firstMapping != null)
+            // Step 5: Restore previous selection if it still exists in the list
+            MappingFileItem? itemToSelect = null;
+            
+            if (!string.IsNullOrEmpty(currentSelectionPath))
             {
-                _selectedMapping = firstMapping; // Set backing field directly to avoid setter
+                // Try to find the previously selected item in the new list
+                itemToSelect = AvailableMappings.FirstOrDefault(m => 
+                    !m.IsBrowseItem && 
+                    string.Equals(m.FilePath, currentSelectionPath, StringComparison.OrdinalIgnoreCase));
+                
+                if (itemToSelect != null)
+                {
+                    Log.Debug("Restored previous mapping selection: {Path}", currentSelectionPath);
+                }
+            }
+            
+            // If previous selection not found (or no previous selection), select first non-browse item
+            if (itemToSelect == null)
+            {
+                itemToSelect = AvailableMappings.FirstOrDefault(m => !m.IsBrowseItem);
+                if (itemToSelect != null)
+                {
+                    Log.Debug("Auto-selected most recent mapping: {Path}", itemToSelect.FilePath);
+                }
+            }
+            
+            // Update selection silently (don't mark dirty - just restoring/loading state)
+            if (itemToSelect != null)
+            {
+                _selectedMapping = itemToSelect; // Set backing field directly to avoid setter
                 RaisePropertyChanged(nameof(SelectedMapping));
                 RaisePropertyChanged(nameof(MappingPathDisplay));
                 RaisePropertyChanged(nameof(MappingValidationIcon));

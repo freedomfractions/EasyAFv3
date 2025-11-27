@@ -13,6 +13,7 @@ namespace EasyAF.Modules.Map.Models
     {
         private bool _isMapped;
         private string? _mappedColumn;
+        private double? _confidence;
 
         /// <summary>
         /// Gets or sets the property name (e.g., "Name", "kV", "TripUnit.Rating").
@@ -70,5 +71,32 @@ namespace EasyAF.Modules.Map.Models
         /// </para>
         /// </remarks>
         public bool IsRequired { get; set; }
+        
+        /// <summary>
+        /// Gets or sets the confidence score for this mapping (0.0 to 1.0), or null if not applicable.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// CROSS-MODULE EDIT: 2025-01-26 Auto-Map Confidence Badges
+        /// Modified for: Display confidence badges on auto-mapped properties
+        /// Related modules: Map (DataTypeMappingView XAML, ConfidenceToColorConverter)
+        /// Rollback instructions: Remove this property and associated UI elements
+        /// </para>
+        /// <para>
+        /// Used to show visual feedback about auto-map quality:
+        /// - null: Manually mapped or no confidence info
+        /// - 0.9-1.0: High confidence (green badge showing "95%")
+        /// - 0.7-0.89: Medium confidence (yellow badge showing "75%")
+        /// - 0.6-0.69: Low confidence (yellow badge showing "65%")
+        /// </para>
+        /// <para>
+        /// The badge fades out after save or manual edit to avoid visual clutter.
+        /// </para>
+        /// </remarks>
+        public double? Confidence
+        {
+            get => _confidence;
+            set => SetProperty(ref _confidence, value);
+        }
     }
 }

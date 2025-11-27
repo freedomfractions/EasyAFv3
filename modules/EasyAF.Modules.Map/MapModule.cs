@@ -268,8 +268,8 @@ namespace EasyAF.Modules.Map
             
             var document = new MapDocument
             {
-                MapName = "Untitled Map",
-                SoftwareVersion = "0.1.0",
+                MapName = "EasyPower Map",
+                SoftwareVersion = DateTime.Now.Year.ToString(),
                 IsDirty = true, // New documents are dirty until saved
                 OwnerModule = this
             };
@@ -380,8 +380,7 @@ namespace EasyAF.Modules.Map
 
         /// <summary>
         /// Saves a mapping document to a file.
-        /// </summary>
-        /// <param name="document">The document to save.</param>
+        /// /// <param name="document">The document to save.</param>
         /// <param name="filePath">Path where the .ezmap file should be saved.</param>
         /// <exception cref="ArgumentNullException">If document is null.</exception>
         /// <exception cref="InvalidCastException">If document is not a MapDocument.</exception>
@@ -547,18 +546,16 @@ namespace EasyAF.Modules.Map
                 Header = "Samples"
             };
 
-            // Load Sample button
-            var loadSampleButton = new Fluent.Button
-            {
-                Header = "Load Sample",
-                Icon = CreateGlyphIcon("\uE8E5"), // OpenFile glyph
-                LargeIcon = CreateGlyphIcon("\uE8E5", 32),
-                SizeDefinition = "Large",
-                ToolTip = "Load a sample data file to preview columns"
-            };
-            loadSampleButton.SetBinding(Fluent.Button.CommandProperty, new System.Windows.Data.Binding("LoadFromFileCommand"));
-
-            group.Items.Add(loadSampleButton);
+            // CROSS-MODULE EDIT: 2025-01-26 Ribbon Button Binding Fix
+            // Modified for: Remove LoadFromFile button (command doesn't exist, functionality is in Summary tab)
+            // Related modules: Map (MapSummaryViewModel has AddFileCommand for this functionality)
+            // Rollback instructions: Restore the commented-out button below
+            
+            // File loading is handled via the Summary tab's Add File button
+            // No need for duplicate ribbon command - users can use Summary tab to manage sample files
+            
+            // REMOVED: LoadFromFileCommand button (caused binding error)
+            // File management is done through Summary tab instead
             
             return group;
         }

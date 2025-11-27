@@ -562,16 +562,121 @@ public class FileCommandsViewModel : BindableBase
     /// Gets the initial directory for file dialogs.
     /// </summary>
     /// <returns>
-    /// The last used directory if it exists, otherwise the user's Documents folder.
+    /// Module-specific subfolder in Documents\EasyAF\, falling back to last used directory if in EasyAF hierarchy.
     /// </returns>
+    /// <remarks>
+    /// CROSS-MODULE EDIT: 2025-01-27 Professional File Organization
+    /// Modified for: Use structured EasyAF subfolders instead of flat Documents folder
+    /// Related modules: All document modules (Map, Project, Spec)
+    /// Rollback instructions: Restore original MyDocuments fallback
+    /// 
+    /// Directory structure for one-click installer deployment:
+    /// - %USERPROFILE%\Documents\EasyAF\Maps\     - Map files (.ezmap)
+    /// - %USERPROFILE%\Documents\EasyAF\Projects\ - Project files (.ezproj)
+    /// - %USERPROFILE%\Documents\EasyAF\Specs\    - Spec files (.ezspec)
+    /// - %USERPROFILE%\Documents\EasyAF\Templates\ - Template files
+    /// 
+    /// This provides clean organization and allows backup/sync of entire EasyAF folder.
+    /// 
+    /// PRIORITY LOGIC:
+    /// 1. Module-specific directory (Maps/, Projects/, Specs/) - PREFERRED
+    /// 2. Last used directory IF it's within EasyAF hierarchy - fallback for flexibility
+    /// 3. EasyAF root - safe fallback
+    /// 4. Documents - ultimate fallback
+    /// </remarks>
     private string GetInitialDirectory()
     {
+        // PRIORITY 1: Get module-specific directory (always preferred for new saves)
+        var activeDoc = _documentManager.ActiveDocument;
+        if (activeDoc?.OwnerModule != null)
+        {
+            var moduleSpecificDir = GetModuleDefaultDirectory(activeDoc.OwnerModule);
+            if (!string.IsNullOrEmpty(moduleSpecificDir))
+            {
+                // Create directory if it doesn't exist
+                try
+                {
+                    if (!Directory.Exists(moduleSpecificDir))
+                    {
+                        Directory.CreateDirectory(moduleSpecificDir);
+                        Log.Information("Created module directory: {Path}", moduleSpecificDir);
+                    }
+                    Log.Debug("Using module-specific directory: {Path} for {Module}", 
+                        moduleSpecificDir, activeDoc.OwnerModule.ModuleName);
+                    return moduleSpecificDir;
+                }
+                catch (Exception ex)
+                {
+                    Log.Warning(ex, "Failed to create module directory: {Path}", moduleSpecificDir);
+                    // Fall through to other options
+                }
+            }
+        }
+        
+        // PRIORITY 2: Check for last used directory (only if within EasyAF hierarchy)
         var last = _settingsService.GetSetting(LastDirectorySettingKey, string.Empty);
         if (!string.IsNullOrWhiteSpace(last) && Directory.Exists(last))
-            return last;
-        return Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        {
+            // Only use last directory if it's within the EasyAF folder structure
+            var easyAFPath = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                "EasyAF");
+            
+            if (last.StartsWith(easyAFPath, StringComparison.OrdinalIgnoreCase))
+            {
+                Log.Debug("Using last directory (within EasyAF): {Path}", last);
+                return last;
+            }
+            else
+            {
+                Log.Debug("Ignoring last directory (outside EasyAF): {Path}", last);
+            }
+        }
+        
+        // PRIORITY 3: Final fallback - Documents\EasyAF\ folder
+        try
+        {
+            var easyAFRoot = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                "EasyAF");
+            
+            if (!Directory.Exists(easyAFRoot))
+            {
+                Directory.CreateDirectory(easyAFRoot);
+                Log.Information("Created EasyAF root directory: {Path}", easyAFRoot);
+            }
+            
+            Log.Debug("Using EasyAF root directory: {Path}", easyAFRoot);
+            return easyAFRoot;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to create EasyAF root directory, falling back to Documents");
+            // Ultimate fallback: just Documents
+            return Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        }
     }
 
+    /// <summary>
+    /// Gets the default directory for a specific module type.
+    /// </summary>
+    /// <param name="module">The document module.</param>
+    /// <returns>Module-specific subfolder path, or null if module type unknown.</returns>
+    private string? GetModuleDefaultDirectory(IDocumentModule module)
+    {
+        var documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        var basePath = Path.Combine(documentsPath, "EasyAF");
+        
+        // Map module names to subdirectories
+        return module.ModuleName switch
+        {
+            "Map Editor" => Path.Combine(basePath, "Maps"),
+            "Project Editor" => Path.Combine(basePath, "Projects"),
+            "Spec Editor" => Path.Combine(basePath, "Specs"),
+            _ => basePath // Unknown module type - use root EasyAF folder
+        };
+    }
+    
     /// <summary>
     /// Remembers the directory of a file path for future file dialogs.
     /// </summary>

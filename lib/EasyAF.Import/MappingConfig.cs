@@ -303,7 +303,8 @@ namespace EasyAF.Import
                 Required = e.Required,
                 Aliases = e.Aliases == null ? null : e.Aliases.ToArray(),
                 Severity = e.Severity,
-                DefaultValue = e.DefaultValue
+                DefaultValue = e.DefaultValue,
+                Confidence = e.Confidence
             }).ToList();
             return new ImmutableMappingConfig(SoftwareVersion, MapVersion, cloned);
         }
@@ -627,6 +628,31 @@ namespace EasyAF.Import
         /// </para>
         /// </remarks>
         public string? DefaultValue { get; set; }
+        
+        /// <summary>
+        /// Gets or sets the confidence score for this mapping (0.0 to 1.0).
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// CROSS-MODULE EDIT: 2025-01-26 Auto-Map Confidence Badges
+        /// Modified for: Store confidence score from Auto-Map fuzzy matching
+        /// Related modules: Map (DataTypeMappingViewModel, Auto-Map UI)
+        /// Rollback instructions: Remove this property
+        /// </para>
+        /// <para>
+        /// Used by the Map Editor to display confidence badges on auto-mapped properties.
+        /// Values:
+        /// - null or 0.0: Manually mapped (no confidence info)
+        /// - 0.6-0.69: Low confidence (yellow badge)
+        /// - 0.7-0.89: Medium confidence (yellow badge)
+        /// - 0.9-1.0: High confidence (green badge)
+        /// </para>
+        /// <para>
+        /// This is UI metadata only and does not affect import behavior.
+        /// Cleared when user manually edits the mapping or saves the document.
+        /// </para>
+        /// </remarks>
+        public double? Confidence { get; set; }
     }
 
     /// <summary>

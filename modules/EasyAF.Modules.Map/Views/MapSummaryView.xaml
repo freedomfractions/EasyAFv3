@@ -13,6 +13,8 @@
             
             <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
             <converters:InverseNullToVisibilityConverter x:Key="InverseNullToVisibility"/>
+            <converters:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibility"/>
+            <converters:CountToVisibilityConverter x:Key="CountToVisibility"/>
         </ResourceDictionary>
     </UserControl.Resources>
     
@@ -267,7 +269,7 @@
                     <Grid Margin="10">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="150"/>
+                            <RowDefinition Height="200"/>  <!-- Increased from 150px to 200px for more room -->
                         </Grid.RowDefinitions>
                         
                         <!-- Toolbar -->
@@ -279,10 +281,6 @@
                                     Style="{StaticResource ToolBarButtonStyle}"/>
                             <Button Command="{Binding RemoveFileCommand}" 
                                     Content="Remove"
-                                    Style="{StaticResource ToolBarButtonStyle}"/>
-                            <Separator Style="{StaticResource ToolBarSeparatorStyle}"/>
-                            <Button Command="{Binding BrowseFileCommand}" 
-                                    Content="Browse..."
                                     Style="{StaticResource ToolBarButtonStyle}"/>
                         </ToolBar>
                         
@@ -298,6 +296,9 @@
                                   AllowDrop="True"
                                   DragOver="FilesDataGrid_DragOver"
                                   Drop="FilesDataGrid_Drop"
+                                  ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                  ScrollViewer.CanContentScroll="False"
                                   RowStyle="{StaticResource MapDataGridRowStyle}">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="File Name" 
@@ -311,6 +312,54 @@
                                                     Width="100"/>
                             </DataGrid.Columns>
                         </DataGrid>
+                        
+                        <!-- CROSS-MODULE EDIT: 2025-01-26 No Files Overlay -->
+                        <!-- Modified for: Clean monotone overlay matching data type tab style -->
+                        <!-- Related modules: Map (MapSummaryViewModel) -->
+                        <!-- Rollback instructions: Remove this Border overlay -->
+                        
+                        <!-- No Files Overlay - Centered in DataGrid area with data type tab styling -->
+                        <Border Grid.Row="1"
+                                Background="{DynamicResource WindowBackgroundBrush}"
+                                Opacity="0.95"
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Center"
+                                CornerRadius="8"
+                                Padding="32,24"
+                                BorderBrush="{DynamicResource ControlBorderBrush}"
+                                BorderThickness="2"
+                                Margin="10"
+                                IsHitTestVisible="False"
+                                Visibility="{Binding ReferencedFiles.Count, Converter={StaticResource CountToVisibility}}">
+                            
+                            <StackPanel MaxWidth="400">
+                                <!-- Icon (info icon matching data type tabs) -->
+                                <TextBlock Text="&#xE946;"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="48"
+                                           HorizontalAlignment="Center"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                           Margin="0,0,0,16"/>
+                                
+                                <!-- Title -->
+                                <TextBlock Text="No Sample Files Loaded"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           HorizontalAlignment="Center"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"
+                                           Margin="0,0,0,8"/>
+                                
+                                <!-- Message -->
+                                <TextBlock TextWrapping="Wrap"
+                                           TextAlignment="Center"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                           Margin="0,0,0,16">
+                                    <Run Text="Click"/>
+                                    <Run Text="Add File" FontWeight="Bold"/>
+                                    <Run Text="above or drag and drop Excel or CSV files here. The files will be used to generate your import map."/>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
                     </Grid>
                 </GroupBox>
                 
@@ -332,6 +381,9 @@
                                   IsReadOnly="True"
                                   CanUserAddRows="False"
                                   CanUserDeleteRows="False"
+                                  ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                  ScrollViewer.CanContentScroll="False"
                                   RowStyle="{StaticResource MapDataGridRowStyle}">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Data Type" 
@@ -349,12 +401,27 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
                                 
+                                <!-- Available Column - Centered text for professional look -->
                                 <DataGridTextColumn Header="Available" 
                                                     Binding="{Binding FieldsAvailable}" 
-                                                    Width="80"/>
+                                                    Width="80">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                
+                                <!-- Mapped Column - Centered text for professional look -->
                                 <DataGridTextColumn Header="Mapped" 
                                                     Binding="{Binding FieldsMapped}" 
-                                                    Width="80"/>
+                                                    Width="80">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
                                 
                                 <!-- Progress Column -->
                                 <DataGridTemplateColumn Header="Progress" Width="*">

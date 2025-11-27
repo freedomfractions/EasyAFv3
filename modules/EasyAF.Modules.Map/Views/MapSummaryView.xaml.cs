@@ -1,6 +1,8 @@
 using System.Windows.Controls;
 using System.Windows;
 using System.Linq;
+using System.Windows.Input;
+using System.Windows.Media;
 using EasyAF.Modules.Map.ViewModels;
 
 namespace EasyAF.Modules.Map.Views
@@ -14,7 +16,8 @@ namespace EasyAF.Modules.Map.Views
     /// - Referenced sample files with add/remove functionality
     /// - Data type mapping status overview with progress indicators
     /// 
-    /// MVVM Pattern: Code-behind contains only event wire-up for drag-and-drop.
+    /// MVVM Pattern: Code-behind contains only event wire-up for drag-and-drop
+    /// and scroll forwarding logic to prevent DataGrids from absorbing scroll events.
     /// All business logic is in MapSummaryViewModel.
     /// </remarks>
     public partial class MapSummaryView : UserControl
@@ -25,6 +28,51 @@ namespace EasyAF.Modules.Map.Views
         public MapSummaryView()
         {
             InitializeComponent();
+        }
+
+        /// <summary>
+        /// Forwards mouse wheel events from the DataGrid to the parent ScrollViewer.
+        /// This prevents the DataGrid from absorbing scroll events.
+        /// </summary>
+        protected override void OnPreviewMouseWheel(MouseWheelEventArgs e)
+        {
+            base.OnPreviewMouseWheel(e);
+
+            // Only handle if the event originated from a DataGrid and hasn't been handled yet
+            if (e.Handled || !(e.OriginalSource is DependencyObject source))
+                return;
+
+            // Find the DataGrid in the visual tree
+            var dataGrid = FindParent<DataGrid>(source);
+            if (dataGrid == null)
+                return;
+
+            // Find the parent ScrollViewer (the main ScrollViewer for the entire view)
+            var scrollViewer = FindParent<ScrollViewer>(dataGrid);
+            if (scrollViewer == null)
+                return;
+
+            // Forward the scroll to the parent ScrollViewer
+            scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset - (e.Delta / 3.0));
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// Finds the first parent of a specific type in the visual tree.
+        /// </summary>
+        private static T? FindParent<T>(DependencyObject child) where T : DependencyObject
+        {
+            DependencyObject? parentObject = child;
+
+            while (parentObject != null)
+            {
+                if (parentObject is T parent)
+                    return parent;
+
+                parentObject = VisualTreeHelper.GetParent(parentObject);
+            }
+
+            return null;
         }
 
         /// <summary>

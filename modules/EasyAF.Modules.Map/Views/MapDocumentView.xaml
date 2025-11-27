@@ -62,15 +62,40 @@
             <TabControl.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal" Margin="8,4">
-                        <!-- Status Indicator (converted from enum to MDL2 glyph with themed color) -->
-                        <TextBlock Text="{Binding Status, Converter={StaticResource StatusToGlyphConverter}}" 
-                                   FontFamily="Segoe MDL2 Assets"
+                        <!-- Icon: Gear for Setup tab, Status glyph for data type tabs -->
+                        <TextBlock FontFamily="Segoe MDL2 Assets"
                                    FontSize="14"
                                    Margin="0,0,6,0"
-                                   VerticalAlignment="Center"
-                                   Foreground="{Binding Status, Converter={StaticResource StatusToBrushConverter}}"/>
+                                   VerticalAlignment="Center">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <!-- Default: Show status glyph for data type tabs -->
+                                    <Setter Property="Text" Value="{Binding StatusGlyph}"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                                    
+                                    <Style.Triggers>
+                                        <!-- Data type tabs: Color by status (order matters - most specific last) -->
+                                        <DataTrigger Binding="{Binding Status}" Value="Unmapped">
+                                            <Setter Property="Foreground" Value="{DynamicResource ErrorBrush}"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Status}" Value="Partial">
+                                            <Setter Property="Foreground" Value="{DynamicResource WarningBrush}"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Status}" Value="Complete">
+                                            <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}"/>
+                                        </DataTrigger>
+                                        
+                                        <!-- Setup tab: Override everything - MUST BE LAST to take priority -->
+                                        <DataTrigger Binding="{Binding DataType}" Value="{x:Null}">
+                                            <Setter Property="Text" Value="&#xE713;"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
                         
-                        <!-- Tab Header Text - NOW USING DISPLAY NAME -->
+                        <!-- Tab Header Text -->
                         <TextBlock Text="{Binding DisplayName}"
                                    FontSize="13"
                                    VerticalAlignment="Center"

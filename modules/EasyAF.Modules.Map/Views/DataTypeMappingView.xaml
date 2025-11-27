@@ -18,6 +18,10 @@
             
             <!-- NullToVisibility Converter -->
             <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
+            
+            <!-- Confidence Converters -->
+            <converters:ConfidenceToColorConverter x:Key="ConfidenceToColorConverter"/>
+            <converters:ConfidenceToVisibilityConverter x:Key="ConfidenceToVisibilityConverter"/>
         </ResourceDictionary>
     </UserControl.Resources>
     
@@ -350,11 +354,12 @@
                                         </Style.Triggers>
                                     </Style>
                                 </Border.Style>
-                            
+                        
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/> <!-- Confidence badge -->
+                                        <ColumnDefinition Width="Auto"/> <!-- Check mark -->
                                     </Grid.ColumnDefinitions>
                                     
                                     <StackPanel Grid.Column="0">
@@ -395,13 +400,30 @@
                                                    FontSize="10"
                                                    Foreground="{DynamicResource SuccessBrush}"
                                                    Visibility="{Binding IsMapped, Converter={StaticResource BoolToVisibilityConverter}}"/>
-                                        <!-- CROSS-MODULE EDIT: 2025-01-18 Removed redundant Description display -->
-                                        <!-- Description is now shown as the main text above, so we don't show it again -->
-                                        <!-- Previous code showed both PropertyName and Description, creating redundancy -->
                                     </StackPanel>
                                     
+                                    <!-- CROSS-MODULE EDIT: 2025-01-26 Auto-Map Confidence Badge -->
+                                    <!-- Modified for: Display confidence score as a colored percentage badge -->
+                                    <!-- Related modules: Map (PropertyInfo.Confidence, ConfidenceToColorConverter) -->
+                                    <!-- Rollback instructions: Remove this Border with badge -->
+                                    
+                                    <!-- Confidence Badge -->
+                                    <Border Grid.Column="1"
+                                            Background="{Binding Confidence, Converter={StaticResource ConfidenceToColorConverter}}"
+                                            CornerRadius="8"
+                                            Padding="6,2"
+                                            Margin="4,0"
+                                            VerticalAlignment="Center"
+                                            Visibility="{Binding Confidence, Converter={StaticResource ConfidenceToVisibilityConverter}}"
+                                            ToolTip="Auto-map confidence score (higher is better)">
+                                        <TextBlock Text="{Binding Confidence, StringFormat={}{0:P0}}"
+                                                   FontSize="9"
+                                                   FontWeight="Bold"
+                                                   Foreground="White"/>
+                                    </Border>
+                                    
                                     <!-- Mapping Indicator -->
-                                    <TextBlock Grid.Column="1"
+                                    <TextBlock Grid.Column="2"
                                                Text="&#xE73E;"
                                                FontFamily="Segoe MDL2 Assets"
                                                FontSize="16"

@@ -18,13 +18,13 @@ public class MappingStatusToGlyphConverter : IValueConverter
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
         if (value is not MappingStatus status)
-            return "\uE711"; // QuestionMark glyph as fallback
+            return "\uE711"; // CircleRing glyph as fallback
         
         return status switch
         {
-            MappingStatus.Unmapped => "\uE711",  // CircleRing (empty circle)
-            MappingStatus.Partial => "\uE73C",   // ProgressRingDots (partial indicator)
-            MappingStatus.Complete => "\uE73E",  // CheckMark (complete)
+            MappingStatus.Unmapped => "\uE91F",  // StatusCircleRing - hollow circle
+            MappingStatus.Partial => "\uE9F5",   // ProgressRing - animated/partial circle
+            MappingStatus.Complete => "\uE930", // CompletedSolid - filled circle with checkmark
             _ => "\uE711"
         };
     }

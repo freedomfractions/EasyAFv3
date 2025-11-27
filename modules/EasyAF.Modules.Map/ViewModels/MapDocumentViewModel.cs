@@ -115,11 +115,11 @@ namespace EasyAF.Modules.Map.ViewModels
                     SelectedTabContent = TabHeaders[value].ViewModel;
                     Log.Debug("Selected tab: {TabName}", TabHeaders[value].Header);
                     
-                    // Auto-refresh Summary tab statistics asynchronously when it gains focus
-                    if (TabHeaders[value].Header == "Summary" && TabHeaders[value].ViewModel is MapSummaryViewModel summaryVm)
+                    // Auto-refresh Setup tab statistics asynchronously when it gains focus
+                    if (TabHeaders[value].Header == "Setup" && TabHeaders[value].ViewModel is MapSummaryViewModel summaryVm)
                     {
                         _ = summaryVm.RefreshStatusAsync();
-                        Log.Debug("Triggered async auto-refresh of Summary tab statistics");
+                        Log.Debug("Triggered async auto-refresh of Setup tab statistics");
                     }
                 }
             }
@@ -207,7 +207,7 @@ namespace EasyAF.Modules.Map.ViewModels
         #region Tab Management
 
         /// <summary>
-        /// Initializes the tab collection with Summary + enabled data type tabs.
+        /// Initializes the tab collection with Setup + enabled data type tabs.
         /// </summary>
         /// <remarks>
         /// <para>
@@ -219,13 +219,13 @@ namespace EasyAF.Modules.Map.ViewModels
         {
             TabHeaders.Clear();
 
-            // Summary tab (always first)
+            // Setup tab (always first) - where users configure sample files and view mapping status
             var summaryVm = new MapSummaryViewModel(_document, _propertyDiscovery, _settingsService, this);
             TabHeaders.Add(new TabHeaderInfo
             {
-                Header = "Summary",
-                DisplayName = "Summary", // Summary tab uses same name
-                Status = MappingStatus.Unmapped, // Summary tab doesn't have a status
+                Header = "Setup",
+                DisplayName = "Setup", // Setup tab uses same name
+                Status = MappingStatus.Unmapped, // Setup tab doesn't have a status
                 ViewModel = summaryVm,
                 DataType = null
             });
@@ -737,8 +737,38 @@ namespace EasyAF.Modules.Map.ViewModels
         public MappingStatus Status
         {
             get => _status;
-            set => SetProperty(ref _status, value);
+            set
+            {
+                if (SetProperty(ref _status, value))
+                {
+                    // Update glyph and color when status changes
+                    RaisePropertyChanged(nameof(StatusGlyph));
+                    RaisePropertyChanged(nameof(StatusColor));
+                }
+            }
         }
+
+        /// <summary>
+        /// Gets the MDL2 glyph for the current status (for direct binding without converter).
+        /// </summary>
+        public string StatusGlyph => Status switch
+        {
+            MappingStatus.Unmapped => "\uEA3A",  // CircleFill - solid filled circle
+            MappingStatus.Partial => "\uEA3A",   // CircleFill - solid filled circle (same, color differs)
+            MappingStatus.Complete => "\uE73E", // CheckMark - checkmark only
+            _ => "\uEA3A"
+        };
+
+        /// <summary>
+        /// Gets the theme brush key for the current status (for direct DynamicResource binding).
+        /// </summary>
+        public string StatusColor => Status switch
+        {
+            MappingStatus.Unmapped => "ErrorBrush",      // Red
+            MappingStatus.Partial => "WarningBrush",     // Orange
+            MappingStatus.Complete => "SuccessBrush",    // Green
+            _ => "TextSecondaryBrush"
+        };
 
         /// <summary>
         /// Gets or sets the view model for this tab's content.
