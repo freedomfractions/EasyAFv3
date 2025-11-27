@@ -1000,15 +1000,17 @@ namespace EasyAF.Modules.Map.ViewModels
 
                 // PHASE 2: Special ID property handling
                 // Check if the class has an "Id" property (case-insensitive check for common variations)
+                // OR check for a Required property that's still unmapped (often the ID field)
                 var idProperty = TargetProperties.FirstOrDefault(p => 
                     !p.IsMapped && 
                     (p.PropertyName.Equals("Id", StringComparison.OrdinalIgnoreCase) ||
                      p.PropertyName.Equals("ID", StringComparison.OrdinalIgnoreCase) ||
-                     p.PropertyName.Equals("Identifier", StringComparison.OrdinalIgnoreCase)));
+                     p.PropertyName.Equals("Identifier", StringComparison.OrdinalIgnoreCase) ||
+                     p.IsRequired)); // Also consider Required properties as potential IDs
 
                 if (idProperty != null)
                 {
-                    Log.Debug("Auto-Map: Found unmapped ID property '{Property}' - attempting smart ID mapping", idProperty.PropertyName);
+                    Log.Debug("Auto-Map: Found unmapped ID/Required property '{Property}' - attempting smart ID mapping", idProperty.PropertyName);
                     
                     // Try explicit ID column matches first
                     var idColumnNames = new[] { "ID", "Id", "id", "ID Name", "Id Name", "Identifier", "UniqueID" };
@@ -1023,7 +1025,7 @@ namespace EasyAF.Modules.Map.ViewModels
                         successfulMappings.Add((idProperty.PropertyName, idColumn.ColumnName, 1.0, "ID Column Match"));
                         unmappedColumnNames.Remove(idColumn.ColumnName);
                         
-                        Log.Information("Auto-Map: Mapped ID property '{Property}' ? '{Column}' (explicit ID column)", 
+                        Log.Information("Auto-Map: Mapped ID/Required property '{Property}' ? '{Column}' (explicit ID column)", 
                             idProperty.PropertyName, idColumn.ColumnName);
                     }
                     else
@@ -1041,12 +1043,12 @@ namespace EasyAF.Modules.Map.ViewModels
                             successfulMappings.Add((idProperty.PropertyName, firstColumn.ColumnName, 0.85, "First Column Fallback (ID)"));
                             unmappedColumnNames.Remove(firstColumn.ColumnName);
                             
-                            Log.Information("Auto-Map: Mapped ID property '{Property}' ? '{Column}' (first column fallback - index {Index}, ID properties ????? ?????????? ?????? ???????)", 
+                            Log.Information("Auto-Map: Mapped ID/Required property '{Property}' ? '{Column}' (first column fallback - index {Index}, ID properties ????? ?????????? ?????? ???????)", 
                                 idProperty.PropertyName, firstColumn.ColumnName, firstColumn.ColumnIndex);
                         }
                         else
                         {
-                            Log.Debug("Auto-Map: ID property '{Property}' remains unmapped (no ID column found, first column already mapped)", 
+                            Log.Debug("Auto-Map: ID/Required property '{Property}' remains unmapped (no ID column found, first column already mapped)", 
                                 idProperty.PropertyName);
                         }
                     }
