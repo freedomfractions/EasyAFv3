@@ -932,6 +932,18 @@ namespace EasyAF.Modules.Map.ViewModels
 
                 const double confidenceThreshold = 0.6;
 
+                // CROSS-MODULE EDIT: 2025-01-21 Semantic Filtering for ID Properties
+                // Modified for: Reject style/type columns when matching ID/name properties
+                // Related modules: Core (IFuzzyMatcher)
+                // Rollback instructions: Remove semantic filtering logic
+                // 
+                // Problem: "LVBreakers" was matching "Breaker Style" at 63% (false positive)
+                // Solution: Detect when we're mapping an ID/name property to a type/style column
+                // Strategy: If property looks like an ID (ends with data type name or is Required)
+                //           AND column contains style/type/category keywords
+                //           THEN increase threshold to 85% to avoid false positives
+                var stylishKeywords = new[] { "style", "type", "category", "class", "kind", "mode" };
+
                 // PHASE 1: Regular fuzzy matching for all properties
                 foreach (var property in unmappedProperties)
                 {
@@ -972,8 +984,30 @@ namespace EasyAF.Modules.Map.ViewModels
                     }
 
                     var bestMatch = matches[0];
+                    
+                    // Semantic filtering: Detect ID/name properties being matched to style/type columns
+                    // ID properties often have names like "Buses", "LVBreakers", "Fuses" (plural form of class name)
+                    // or they are marked as Required (which often indicates the primary key)
+                    bool isLikelyIdProperty = property.IsRequired ||
+                                              property.PropertyName.Equals("Id", StringComparison.OrdinalIgnoreCase) ||
+                                              property.PropertyName.Equals(_dataType, StringComparison.OrdinalIgnoreCase) ||
+                                              property.PropertyName.Equals(_dataType + "s", StringComparison.OrdinalIgnoreCase); // Plural form
+                    
+                    bool columnLooksLikeStyleOrType = stylishKeywords.Any(keyword => 
+                        bestMatch.Target.Contains(keyword, StringComparison.OrdinalIgnoreCase));
+                    
+                    double effectiveThreshold = confidenceThreshold;
+                    
+                    if (isLikelyIdProperty && columnLooksLikeStyleOrType)
+                    {
+                        // This is likely a false positive (ID property ? style/type column)
+                        // Require much higher confidence (85%) to accept this mapping
+                        effectiveThreshold = 0.85;
+                        Log.Debug("Auto-Map: Semantic filter triggered for '{Property}' ? '{Column}' (ID property vs style/type column, raising threshold to 85%)",
+                            property.PropertyName, bestMatch.Target);
+                    }
 
-                    if (bestMatch.Score >= confidenceThreshold)
+                    if (bestMatch.Score >= effectiveThreshold)
                     {
                         // High confidence - create mapping automatically
                         var sourceColumn = SourceColumns.FirstOrDefault(c => c.ColumnName == bestMatch.Target);
