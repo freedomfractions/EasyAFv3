@@ -1046,43 +1046,52 @@ namespace EasyAF.Modules.Map.ViewModels
                 {
                     Log.Debug("Auto-Map: Found unmapped ID/Required property '{Property}' - attempting smart ID mapping", idProperty.PropertyName);
                     
-                    // Try explicit ID column matches first
-                    var idColumnNames = new[] { "ID", "Id", "id", "ID Name", "Id Name", "Identifier", "UniqueID" };
-                    var idColumn = SourceColumns.FirstOrDefault(c => 
-                        !c.IsMapped && 
-                        idColumnNames.Contains(c.ColumnName, StringComparer.OrdinalIgnoreCase));
-
-                    if (idColumn != null)
+                    // CROSS-MODULE EDIT: 2025-01-21 ID Alias First Column Priority
+                    // Modified for: Prioritize first-column mapping for ID properties (most reliable assumption)
+                    // Related modules: Data (All model classes have Id alias pointing to Required property)
+                    // Rollback instructions: Move first-column logic back to fallback position
+                    // 
+                    // Rationale: All data classes have an Id alias that points to the Required property
+                    // (e.g., Fuse.Id ? Fuse.Fuses, LVBreaker.Id ? LVBreaker.LVBreakers)
+                    // The first column in EasyPower exports is ALWAYS the equipment ID/name.
+                    // This is the most reliable assumption, so we prioritize it over fuzzy matching.
+                    
+                    // STRATEGY 1 (PROMOTED): Use first column (by ColumnIndex) if unmapped
+                    var firstColumn = SourceColumns
+                        .Where(c => !c.IsMapped)
+                        .OrderBy(c => c.ColumnIndex)
+                        .FirstOrDefault();
+                    
+                    if (firstColumn != null)
                     {
-                        // Found an explicit ID column - map it!
-                        CreateMapping(idProperty, idColumn);
-                        successfulMappings.Add((idProperty.PropertyName, idColumn.ColumnName, 1.0, "ID Column Match"));
-                        unmappedColumnNames.Remove(idColumn.ColumnName);
+                        CreateMapping(idProperty, firstColumn);
+                        successfulMappings.Add((idProperty.PropertyName, firstColumn.ColumnName, 1.0, "First Column (ID)"));
+                        unmappedColumnNames.Remove(firstColumn.ColumnName);
                         
-                        Log.Information("Auto-Map: Mapped ID/Required property '{Property}' ? '{Column}' (explicit ID column)", 
-                            idProperty.PropertyName, idColumn.ColumnName);
+                        Log.Information("Auto-Map: Mapped ID/Required property '{Property}' ? '{Column}' (first column - index {Index}, highest confidence for ID fields)", 
+                            idProperty.PropertyName, firstColumn.ColumnName, firstColumn.ColumnIndex);
                     }
                     else
                     {
-                        // FALLBACK STRATEGY: Use first column (by ColumnIndex) if unmapped
-                        // Rationale: First column in data exports is almost always the ID
-                        var firstColumn = SourceColumns
-                            .Where(c => !c.IsMapped)
-                            .OrderBy(c => c.ColumnIndex)
-                            .FirstOrDefault();
-                        
-                        if (firstColumn != null)
+                        // STRATEGY 2 (FALLBACK): Try explicit ID column matches if first column is already mapped
+                        var idColumnNames = new[] { "ID", "Id", "id", "ID Name", "Id Name", "Identifier", "UniqueID" };
+                        var idColumn = SourceColumns.FirstOrDefault(c => 
+                            !c.IsMapped && 
+                            idColumnNames.Contains(c.ColumnName, StringComparer.OrdinalIgnoreCase));
+
+                        if (idColumn != null)
                         {
-                            CreateMapping(idProperty, firstColumn);
-                            successfulMappings.Add((idProperty.PropertyName, firstColumn.ColumnName, 0.85, "First Column Fallback (ID)"));
-                            unmappedColumnNames.Remove(firstColumn.ColumnName);
+                            // Found an explicit ID column - map it!
+                            CreateMapping(idProperty, idColumn);
+                            successfulMappings.Add((idProperty.PropertyName, idColumn.ColumnName, 0.95, "Explicit ID Column"));
+                            unmappedColumnNames.Remove(idColumn.ColumnName);
                             
-                            Log.Information("Auto-Map: Mapped ID/Required property '{Property}' ? '{Column}' (first column fallback - index {Index}, ID properties ????? ?????????? ?????? ???????)", 
-                                idProperty.PropertyName, firstColumn.ColumnName, firstColumn.ColumnIndex);
+                            Log.Information("Auto-Map: Mapped ID/Required property '{Property}' ? '{Column}' (explicit ID column name match)", 
+                                idProperty.PropertyName, idColumn.ColumnName);
                         }
                         else
                         {
-                            Log.Debug("Auto-Map: ID/Required property '{Property}' remains unmapped (no ID column found, first column already mapped)", 
+                            Log.Debug("Auto-Map: ID/Required property '{Property}' remains unmapped (first column already mapped, no explicit ID column found)", 
                                 idProperty.PropertyName);
                         }
                     }
