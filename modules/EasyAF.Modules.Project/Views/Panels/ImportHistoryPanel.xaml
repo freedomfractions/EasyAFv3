@@ -9,12 +9,82 @@
               BorderBrush="{DynamicResource ControlBorderBrush}"
               Foreground="{DynamicResource TextPrimaryBrush}">
         <Grid Margin="8">
-            <TreeView ItemsSource="{Binding ImportHistoryNodes}"
+            <!-- Empty State Splash Screen -->
+            <Border x:Name="EmptySplash"
+                    BorderBrush="{DynamicResource ControlBorderBrush}"
+                    BorderThickness="1"
+                    Background="{DynamicResource ControlBackgroundBrush}"
+                    CornerRadius="8"
+                    Padding="40,60">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ImportHistoryNodes.Count}" Value="0">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <!-- Icon -->
+                    <TextBlock Text="&#xE8B7;" 
+                               FontFamily="Segoe MDL2 Assets" 
+                               FontSize="48" 
+                               HorizontalAlignment="Center"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               Opacity="0.5"
+                               Margin="0,0,0,16"/>
+                    
+                    <!-- Main Message -->
+                    <TextBlock Text="Ready to Import Data" 
+                               FontSize="18" 
+                               FontWeight="SemiBold"
+                               HorizontalAlignment="Center"
+                               Foreground="{DynamicResource TextPrimaryBrush}"
+                               Margin="0,0,0,12"/>
+                    
+                    <!-- Instructions -->
+                    <TextBlock TextAlignment="Center" 
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               LineHeight="24"
+                               Margin="0,0,0,8">
+                        <Run Text="Drop data files onto the "/><Run Text="New Data" FontWeight="SemiBold"/><Run Text=" or "/><Run Text="Old Data" FontWeight="SemiBold"/><Run Text=" columns above"/>
+                        <LineBreak/>
+                        <Run Text="or use the "/>
+                        <Run Text="Import" FontWeight="SemiBold"/>
+                        <Run Text=" buttons in the ribbon"/>
+                    </TextBlock>
+                    
+                    <!-- Additional Hint -->
+                    <TextBlock Text="Import history will appear here once data is loaded" 
+                               FontSize="11" 
+                               FontStyle="Italic"
+                               HorizontalAlignment="Center"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               Opacity="0.7"
+                               Margin="0,12,0,0"/>
+                </StackPanel>
+            </Border>
+            
+            <!-- TreeView with Import History -->
+            <TreeView x:Name="HistoryTreeView"
+                      ItemsSource="{Binding ImportHistoryNodes}"
                       BorderBrush="{DynamicResource ControlBorderBrush}"
                       Background="{DynamicResource ControlBackgroundBrush}"
                       MaxHeight="400"
                       ScrollViewer.VerticalScrollBarVisibility="Auto"
                       PreviewMouseWheel="TreeView_PreviewMouseWheel">
+                <TreeView.Style>
+                    <Style TargetType="TreeView">
+                        <Setter Property="Visibility" Value="Visible"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ImportHistoryNodes.Count}" Value="0">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TreeView.Style>
                 <TreeView.ItemContainerStyle>
                     <Style TargetType="TreeViewItem">
                         <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
@@ -139,30 +209,6 @@
                 </TreeView.ItemTemplate>
                 
                 <!-- Empty State -->
-                <TreeView.Style>
-                    <Style TargetType="TreeView">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding ImportHistoryNodes.Count}" Value="0">
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="TreeView">
-                                            <Border BorderBrush="{DynamicResource ControlBorderBrush}"
-                                                  BorderThickness="1"
-                                                  Background="{DynamicResource ControlBackgroundBrush}"
-                                                  Padding="16">
-                                                <TextBlock Text="No imports yet - import data to see history here"
-                                                         HorizontalAlignment="Center"
-                                                         VerticalAlignment="Center"
-                                                         Foreground="{DynamicResource TextSecondaryBrush}"
-                                                         FontStyle="Italic"/>
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </TreeView.Style>
             </TreeView>
         </Grid>
     </GroupBox>
