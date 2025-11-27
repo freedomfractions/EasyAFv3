@@ -681,13 +681,25 @@ namespace EasyAF.Modules.Project.ViewModels
                 // CROSS-MODULE EDIT: 2025-01-27 Fix Default Map Not Saving to MapPathHistory
                 // Modified for: Ensure auto-selected map updates MapPathHistory
                 // Related modules: Project (ProjectDocument.CreateNew pre-populates with default)
-                // Rollback instructions: Remove MapPath update below
+                // Rollback instructions: Remove MapPathHistory update logic below
                 
-                // Update MapPath to ensure it's recorded in MapPathHistory
+                // Ensure MapPathHistory has this selection at the front
                 // This is critical for new documents where default map is auto-selected
                 if (!string.IsNullOrEmpty(itemToSelect.FilePath) && !itemToSelect.IsBrowseItem)
                 {
-                    MapPath = itemToSelect.FilePath; // This updates MapPathHistory[0]
+                    // Initialize MapPathHistory if needed
+                    if (_document.Project.MapPathHistory == null)
+                        _document.Project.MapPathHistory = new System.Collections.Generic.List<string>();
+                    
+                    // Check if it's already at the front (common case - already there from CreateNew)
+                    var currentFirst = _document.Project.MapPathHistory.FirstOrDefault();
+                    if (!string.Equals(currentFirst, itemToSelect.FilePath, StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Not at front - move it there
+                        _document.Project.MapPathHistory.Remove(itemToSelect.FilePath);
+                        _document.Project.MapPathHistory.Insert(0, itemToSelect.FilePath);
+                        Log.Debug("Updated MapPathHistory[0] to: {Path}", itemToSelect.FilePath);
+                    }
                 }
                 
                 RaisePropertyChanged(nameof(SelectedMapping));
