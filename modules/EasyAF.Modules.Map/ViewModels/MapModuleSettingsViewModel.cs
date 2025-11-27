@@ -33,6 +33,7 @@ namespace EasyAF.Modules.Map.ViewModels
         private readonly Services.IPropertyDiscoveryService _propertyDiscovery;
         private readonly IUserDialogService _dialogService; // NEW: For confirmation dialogs
         private DataTypeVisibilitySettings _settings;
+        private string _mapsDirectory = string.Empty;
 
         /// <summary>
         /// Initializes a new instance of the MapModuleSettingsViewModel.
@@ -51,6 +52,14 @@ namespace EasyAF.Modules.Map.ViewModels
 
             // Load current settings
             _settings = _settingsService.GetMapVisibilitySettings();
+            
+            // CROSS-MODULE EDIT: 2025-01-27 Module Directory Settings Refactoring
+            // Modified for: Add Maps Directory to Map module settings
+            // Related modules: Core (CrossModuleSettingsExtensions), Shell (removed File Paths tab)
+            // Rollback instructions: Remove MapsDirectory property and BrowseMapsDirectoryCommand
+            
+            // Load Maps directory (uses extension method with fallback)
+            _mapsDirectory = _settingsService.GetSetting("Directories.Maps", GetDefaultMapsDirectory());
 
             // Create data type items
             DataTypes = new ObservableCollection<DataTypeItem>();
@@ -59,11 +68,27 @@ namespace EasyAF.Modules.Map.ViewModels
             // Commands
             ConfigurePropertiesCommand = new DelegateCommand<DataTypeItem>(ExecuteConfigureProperties);
             ResetToDefaultsCommand = new DelegateCommand(ExecuteResetToDefaults);
+            BrowseMapsDirectoryCommand = new DelegateCommand(ExecuteBrowseMapsDirectory);
 
             Log.Debug("MapModuleSettingsViewModel initialized with {Count} data types", DataTypes.Count);
         }
 
         #region Properties
+        
+        /// <summary>
+        /// Gets or sets the Maps directory path.
+        /// </summary>
+        /// <remarks>
+        /// CROSS-MODULE EDIT: 2025-01-27 Module Directory Settings Refactoring
+        /// Modified for: Maps directory moved from Shell to Map module
+        /// Related modules: Core (CrossModuleSettingsExtensions), Project (uses via GetMapsDirectory())
+        /// Rollback instructions: Remove this property
+        /// </remarks>
+        public string MapsDirectory
+        {
+            get => _mapsDirectory;
+            set => SetProperty(ref _mapsDirectory, value);
+        }
 
         /// <summary>
         /// Gets the collection of data type configuration items.
@@ -93,6 +118,17 @@ namespace EasyAF.Modules.Map.ViewModels
         /// Gets the command to reset all settings to defaults.
         /// </summary>
         public ICommand ResetToDefaultsCommand { get; }
+        
+        /// <summary>
+        /// Gets the command to browse for Maps directory.
+        /// </summary>
+        /// <remarks>
+        /// CROSS-MODULE EDIT: 2025-01-27 Module Directory Settings Refactoring
+        /// Modified for: Add Maps directory selection to Map module settings
+        /// Related modules: Core (CrossModuleSettingsExtensions)
+        /// Rollback instructions: Remove this command
+        /// </remarks>
+        public ICommand BrowseMapsDirectoryCommand { get; }
 
         #endregion
 
@@ -253,6 +289,39 @@ namespace EasyAF.Modules.Map.ViewModels
                 Log.Error(ex, "Error resetting to defaults");
             }
         }
+        
+        /// <summary>
+        /// Executes the browse Maps directory command.
+        /// </summary>
+        /// <remarks>
+        /// CROSS-MODULE EDIT: 2025-01-27 Module Directory Settings Refactoring
+        /// Modified for: Allow users to select custom Maps directory
+        /// Related modules: Core (CrossModuleSettingsExtensions)
+        /// Rollback instructions: Remove this method
+        /// </remarks>
+        private void ExecuteBrowseMapsDirectory()
+        {
+            try
+            {
+                var dialog = new Microsoft.Win32.OpenFolderDialog
+                {
+                    Title = "Select Maps Directory",
+                    InitialDirectory = System.IO.Directory.Exists(_mapsDirectory) 
+                        ? _mapsDirectory 
+                        : GetDefaultMapsDirectory()
+                };
+
+                if (dialog.ShowDialog() == true)
+                {
+                    MapsDirectory = dialog.FolderName;
+                    Log.Information("Maps directory changed to: {Path}", dialog.FolderName);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error browsing for Maps directory");
+            }
+        }
 
         #endregion
 
@@ -303,7 +372,16 @@ namespace EasyAF.Modules.Map.ViewModels
 
                 _settingsService.SetMapVisibilitySettings(settings);
                 
-                Log.Information("Map module settings saved: {Count} data types configured", DataTypes.Count);
+                // CROSS-MODULE EDIT: 2025-01-27 Module Directory Settings Refactoring
+                // Modified for: Save Maps directory to public settings key
+                // Related modules: Core (CrossModuleSettingsExtensions), Project (reads via GetMapsDirectory())
+                // Rollback instructions: Remove directory save logic
+                
+                // Save Maps directory to public settings key (other modules can read via extension method)
+                _settingsService.SetSetting("Directories.Maps", _mapsDirectory);
+                
+                Log.Information("Map module settings saved: {Count} data types configured, Maps directory: {Path}", 
+                    DataTypes.Count, _mapsDirectory);
             }
             catch (Exception ex)
             {
@@ -318,10 +396,29 @@ namespace EasyAF.Modules.Map.ViewModels
         public void ReloadSettings()
         {
             _settings = _settingsService.GetMapVisibilitySettings();
+            _mapsDirectory = _settingsService.GetSetting("Directories.Maps", GetDefaultMapsDirectory());
             DataTypes.Clear();
             InitializeDataTypes();
+            RaisePropertyChanged(nameof(MapsDirectory));
             
             Log.Debug("Map module settings reloaded");
+        }
+        
+        /// <summary>
+        /// Gets the default Maps directory path.
+        /// </summary>
+        /// <remarks>
+        /// CROSS-MODULE EDIT: 2025-01-27 Module Directory Settings Refactoring
+        /// Modified for: Provide fallback directory location
+        /// Related modules: Core (CrossModuleSettingsExtensions uses same default)
+        /// Rollback instructions: Remove this method
+        /// </remarks>
+        private static string GetDefaultMapsDirectory()
+        {
+            return System.IO.Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                "EasyAF",
+                "Maps");
         }
 
         #endregion

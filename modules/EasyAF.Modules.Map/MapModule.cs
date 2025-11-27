@@ -233,6 +233,23 @@ namespace EasyAF.Modules.Map
                 // Save defaults to settings
                 settingsService.SetMapVisibilitySettings(defaults);
                 
+                // CROSS-MODULE EDIT: 2025-01-27 Module Directory Settings Refactoring
+                // Modified for: Initialize default Maps directory on first run
+                // Related modules: Core (CrossModuleSettingsExtensions), Project (reads via GetMapsDirectory())
+                // Rollback instructions: Remove directory initialization logic
+                
+                // Initialize default Maps directory if not set (public key for cross-module access)
+                var currentMapsDir = settingsService.GetSetting<string>("Directories.Maps");
+                if (string.IsNullOrEmpty(currentMapsDir))
+                {
+                    var defaultMapsDir = Path.Combine(
+                        Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                        "EasyAF",
+                        "Maps");
+                    settingsService.SetSetting("Directories.Maps", defaultMapsDir);
+                    Log.Information("Default Maps directory initialized: {Path}", defaultMapsDir);
+                }
+                
                 Log.Information("Default Map visibility settings created: {Count} data types, all properties enabled", dataTypes.Length);
             }
             catch (Exception ex)

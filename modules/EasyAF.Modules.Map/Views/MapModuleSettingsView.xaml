@@ -7,6 +7,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/> <!-- Header -->
             <RowDefinition Height="Auto"/> <!-- Description -->
+            <RowDefinition Height="Auto"/> <!-- Maps Directory Section -->
             <RowDefinition Height="*"/>    <!-- DataGrid -->
             <RowDefinition Height="Auto"/> <!-- Reset Button -->
         </Grid.RowDefinitions>
@@ -23,14 +24,59 @@
         <TextBlock Grid.Row="1"
                    TextWrapping="Wrap"
                    Foreground="{DynamicResource TextSecondaryBrush}"
-                   Margin="0,0,0,8">
+                   Margin="0,0,0,16">
             <Run Text="Control which data types and properties are available in the Map Editor."/>
             <LineBreak/>
             <Run Text="Unchecked data types will not appear as tabs. Click 'Properties...' to configure which properties are available for mapping."/>
         </TextBlock>
         
+        <!-- CROSS-MODULE EDIT: 2025-01-27 Module Directory Settings Refactoring -->
+        <!-- Modified for: Add Maps Directory configuration to Map module settings -->
+        <!-- Related modules: Core (CrossModuleSettingsExtensions), Project (uses via GetMapsDirectory()) -->
+        <!-- Rollback instructions: Remove this entire StackPanel section -->
+        
+        <!-- Maps Directory Section -->
+        <StackPanel Grid.Row="2" Margin="0,0,0,20">
+            <TextBlock Text="Maps Directory"
+                       FontWeight="SemiBold"
+                       Foreground="{DynamicResource TextPrimaryBrush}"
+                       Margin="0,0,0,4"/>
+            <TextBlock Text="Default location for .ezmap mapping configuration files"
+                       Foreground="{DynamicResource TextSecondaryBrush}"
+                       FontSize="11"
+                       Margin="0,0,0,8"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBox Grid.Column="0"
+                         Text="{Binding MapsDirectory, UpdateSourceTrigger=PropertyChanged}"
+                         VerticalContentAlignment="Center"
+                         Height="28"
+                         Margin="0,0,8,0"
+                         Background="{DynamicResource ControlBackgroundBrush}"
+                         Foreground="{DynamicResource TextPrimaryBrush}"
+                         BorderBrush="{DynamicResource ControlBorderBrush}"/>
+                <Button Grid.Column="1"
+                        Content="Browse..."
+                        Width="80"
+                        Height="28"
+                        Command="{Binding BrowseMapsDirectoryCommand}"
+                        Style="{StaticResource BaseButtonStyle}"/>
+            </Grid>
+        </StackPanel>
+        
+        <!-- Data Type Configuration Section Header -->
+        <TextBlock Grid.Row="2"
+                   Text="Data Types &amp; Properties"
+                   FontWeight="SemiBold"
+                   Foreground="{DynamicResource TextPrimaryBrush}"
+                   Margin="0,0,0,8"
+                   VerticalAlignment="Bottom"/>
+        
         <!-- Data Type Count -->
-        <TextBlock Grid.Row="1"
+        <TextBlock Grid.Row="2"
                    HorizontalAlignment="Right"
                    VerticalAlignment="Bottom"
                    Foreground="{DynamicResource TextSecondaryBrush}"
@@ -43,7 +89,7 @@
         </TextBlock>
         
         <!-- Data Types Grid -->
-        <Border Grid.Row="2"
+        <Border Grid.Row="3"
                 BorderBrush="{DynamicResource ControlBorderBrush}"
                 BorderThickness="1"
                 Background="{DynamicResource ControlBackgroundBrush}">
@@ -149,7 +195,7 @@
         </Border>
         
         <!-- Reset Button -->
-        <Button Grid.Row="3"
+        <Button Grid.Row="4"
                 Content="Reset to Defaults"
                 Command="{Binding ResetToDefaultsCommand}"
                 Style="{StaticResource BaseButtonStyle}"
