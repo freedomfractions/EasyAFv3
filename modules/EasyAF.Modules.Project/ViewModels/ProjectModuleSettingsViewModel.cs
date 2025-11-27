@@ -20,6 +20,8 @@ namespace EasyAF.Modules.Project.ViewModels
         private readonly ISettingsService _settingsService;
         private ProjectModuleSettings _settings;
         private string? _selectedDefaultMapPath;
+        private string _templatesDirectory = string.Empty;
+        private string _outputDirectory = string.Empty;
 
         /// <summary>
         /// Initializes a new instance of the ProjectModuleSettingsViewModel.
@@ -32,9 +34,20 @@ namespace EasyAF.Modules.Project.ViewModels
             // Initialize collections
             AvailableMapFiles = new ObservableCollection<MapFileOption>();
 
+            // CROSS-MODULE EDIT: 2025-01-27 Module Directory Settings Refactoring
+            // Modified for: Initialize directory settings from saved preferences
+            // Related modules: Core (CrossModuleSettingsExtensions)
+            // Rollback instructions: Remove directory initialization
+            
+            // Load directory settings with fallback to defaults
+            _templatesDirectory = _settings.TemplatesDirectory ?? GetDefaultTemplatesDirectory();
+            _outputDirectory = _settings.OutputDirectory ?? GetDefaultOutputDirectory();
+
             // Commands
             BrowseMapCommand = new DelegateCommand(ExecuteBrowseMap);
             ClearDefaultMapCommand = new DelegateCommand(ExecuteClearDefaultMap, CanExecuteClearDefaultMap);
+            BrowseTemplatesDirectoryCommand = new DelegateCommand(ExecuteBrowseTemplatesDirectory);
+            BrowseOutputDirectoryCommand = new DelegateCommand(ExecuteBrowseOutputDirectory);
 
             // Load available maps
             LoadAvailableMapFiles();
@@ -64,6 +77,48 @@ namespace EasyAF.Modules.Project.ViewModels
                 }
             }
         }
+        
+        /// <summary>
+        /// Gets or sets the Templates directory path.
+        /// </summary>
+        /// <remarks>
+        /// CROSS-MODULE EDIT: 2025-01-27 Module Directory Settings Refactoring
+        /// Modified for: Templates directory moved from Shell to Project module
+        /// Related modules: Core (future GetTemplatesDirectory() extension)
+        /// Rollback instructions: Remove this property
+        /// </remarks>
+        public string TemplatesDirectory
+        {
+            get => _templatesDirectory;
+            set
+            {
+                if (SetProperty(ref _templatesDirectory, value))
+                {
+                    _settings.TemplatesDirectory = value;
+                }
+            }
+        }
+        
+        /// <summary>
+        /// Gets or sets the Output directory path.
+        /// </summary>
+        /// <remarks>
+        /// CROSS-MODULE EDIT: 2025-01-27 Module Directory Settings Refactoring
+        /// Modified for: Output directory moved from Shell to Project module
+        /// Related modules: Core (future GetOutputDirectory() extension)
+        /// Rollback instructions: Remove this property
+        /// </remarks>
+        public string OutputDirectory
+        {
+            get => _outputDirectory;
+            set
+            {
+                if (SetProperty(ref _outputDirectory, value))
+                {
+                    _settings.OutputDirectory = value;
+                }
+            }
+        }
 
         #endregion
 
@@ -78,6 +133,26 @@ namespace EasyAF.Modules.Project.ViewModels
         /// Command to clear the default map selection.
         /// </summary>
         public DelegateCommand ClearDefaultMapCommand { get; }
+        
+        /// <summary>
+        /// Command to browse for Templates directory.
+        /// </summary>
+        /// <remarks>
+        /// CROSS-MODULE EDIT: 2025-01-27 Module Directory Settings Refactoring
+        /// Modified for: Add Templates directory selection to Project module settings
+        /// Rollback instructions: Remove this command
+        /// </remarks>
+        public DelegateCommand BrowseTemplatesDirectoryCommand { get; }
+        
+        /// <summary>
+        /// Command to browse for Output directory.
+        /// </summary>
+        /// <remarks>
+        /// CROSS-MODULE EDIT: 2025-01-27 Module Directory Settings Refactoring
+        /// Modified for: Add Output directory selection to Project module settings
+        /// Rollback instructions: Remove this command
+        /// </remarks>
+        public DelegateCommand BrowseOutputDirectoryCommand { get; }
 
         #endregion
 
@@ -214,6 +289,102 @@ namespace EasyAF.Modules.Project.ViewModels
             _settingsService.SetProjectModuleSettings(_settings);
             Log.Information("Project Module settings saved - Default map: {Path}", 
                 _settings.DefaultImportMapPath ?? "(none - use most recent)");
+        }
+        
+        /// <summary>
+        /// Executes the browse Templates directory command.
+        /// </summary>
+        /// <remarks>
+        /// CROSS-MODULE EDIT: 2025-01-27 Module Directory Settings Refactoring
+        /// Modified for: Allow users to select custom Templates directory
+        /// Rollback instructions: Remove this method
+        /// </remarks>
+        private void ExecuteBrowseTemplatesDirectory()
+        {
+            try
+            {
+                var dialog = new Microsoft.Win32.OpenFolderDialog
+                {
+                    Title = "Select Templates Directory",
+                    InitialDirectory = Directory.Exists(_templatesDirectory) 
+                        ? _templatesDirectory 
+                        : GetDefaultTemplatesDirectory()
+                };
+
+                if (dialog.ShowDialog() == true)
+                {
+                    TemplatesDirectory = dialog.FolderName;
+                    Log.Information("Templates directory changed to: {Path}", dialog.FolderName);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error browsing for Templates directory");
+            }
+        }
+        
+        /// <summary>
+        /// Executes the browse Output directory command.
+        /// </summary>
+        /// <remarks>
+        /// CROSS-MODULE EDIT: 2025-01-27 Module Directory Settings Refactoring
+        /// Modified for: Allow users to select custom Output directory
+        /// Rollback instructions: Remove this method
+        /// </remarks>
+        private void ExecuteBrowseOutputDirectory()
+        {
+            try
+            {
+                var dialog = new Microsoft.Win32.OpenFolderDialog
+                {
+                    Title = "Select Output Directory",
+                    InitialDirectory = Directory.Exists(_outputDirectory) 
+                        ? _outputDirectory 
+                        : GetDefaultOutputDirectory()
+                };
+
+                if (dialog.ShowDialog() == true)
+                {
+                    OutputDirectory = dialog.FolderName;
+                    Log.Information("Output directory changed to: {Path}", dialog.FolderName);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error browsing for Output directory");
+            }
+        }
+        
+        /// <summary>
+        /// Gets the default Templates directory path.
+        /// </summary>
+        /// <remarks>
+        /// CROSS-MODULE EDIT: 2025-01-27 Module Directory Settings Refactoring
+        /// Modified for: Provide fallback directory location
+        /// Rollback instructions: Remove this method
+        /// </remarks>
+        private static string GetDefaultTemplatesDirectory()
+        {
+            return Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                "EasyAF",
+                "Templates");
+        }
+        
+        /// <summary>
+        /// Gets the default Output directory path.
+        /// </summary>
+        /// <remarks>
+        /// CROSS-MODULE EDIT: 2025-01-27 Module Directory Settings Refactoring
+        /// Modified for: Provide fallback directory location
+        /// Rollback instructions: Remove this method
+        /// </remarks>
+        private static string GetDefaultOutputDirectory()
+        {
+            return Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                "EasyAF",
+                "Output");
         }
 
         #endregion
