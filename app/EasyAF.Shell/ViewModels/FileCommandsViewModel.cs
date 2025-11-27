@@ -39,6 +39,7 @@ public class FileCommandsViewModel : BindableBase
     private readonly IDocumentManager _documentManager;
     private readonly EasyAF.Core.Contracts.IModuleCatalog _moduleCatalog;
     private readonly IRecentFilesService _recentFiles;
+    private readonly IRecentFoldersService _recentFolders;
     private readonly ISettingsService _settingsService;
     private readonly IBackstageService _backstageService;
     private IDocument? _currentDocument;
@@ -56,14 +57,16 @@ public class FileCommandsViewModel : BindableBase
     /// <param name="documentManager">Document lifecycle manager.</param>
     /// <param name="moduleCatalog">Catalog of loaded modules for file type discovery.</param>
     /// <param name="recentFilesService">Service for tracking recent files.</param>
+    /// <param name="recentFoldersService">Service for tracking recent folders.</param>
     /// <param name="settingsService">Service for persisting user preferences.</param>
     /// <param name="moduleLoader">Module loader to subscribe to module loading events.</param>
     /// <param name="backstageService">Service for backstage control.</param>
-    public FileCommandsViewModel(IDocumentManager documentManager, EasyAF.Core.Contracts.IModuleCatalog moduleCatalog, IRecentFilesService recentFilesService, ISettingsService settingsService, IModuleLoader moduleLoader, IBackstageService backstageService)
+    public FileCommandsViewModel(IDocumentManager documentManager, EasyAF.Core.Contracts.IModuleCatalog moduleCatalog, IRecentFilesService recentFilesService, IRecentFoldersService recentFoldersService, ISettingsService settingsService, IModuleLoader moduleLoader, IBackstageService backstageService)
     {
         _documentManager = documentManager;
         _moduleCatalog = moduleCatalog;
         _recentFiles = recentFilesService;
+        _recentFolders = recentFoldersService;
         _settingsService = settingsService;
         _backstageService = backstageService;
 
@@ -311,6 +314,14 @@ public class FileCommandsViewModel : BindableBase
             var path = dialog.FileName;
             var doc = _documentManager.OpenDocument(path);
             _recentFiles.AddRecentFile(path);
+            
+            // Track the folder containing this file
+            var folderPath = Path.GetDirectoryName(path);
+            if (!string.IsNullOrWhiteSpace(folderPath))
+            {
+                _recentFolders.AddRecentFolder(folderPath);
+            }
+            
             RememberDirectory(path);
             Log.Information("Opened document via dialog: {Path}", path);
         }
@@ -331,6 +342,14 @@ public class FileCommandsViewModel : BindableBase
         {
             var doc = _documentManager.OpenDocument(path);
             _recentFiles.AddRecentFile(path);
+            
+            // Track the folder containing this file
+            var folderPath = Path.GetDirectoryName(path);
+            if (!string.IsNullOrWhiteSpace(folderPath))
+            {
+                _recentFolders.AddRecentFolder(folderPath);
+            }
+            
             RememberDirectory(path);
             Log.Information("Opened recent file: {Path}", path);
         }

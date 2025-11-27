@@ -201,6 +201,7 @@ public partial class App : PrismApplication
         containerRegistry.RegisterSingleton<IModuleLoader, ModuleLoader>();
         containerRegistry.RegisterSingleton<IModuleRibbonService, ModuleRibbonService>();
         containerRegistry.RegisterSingleton<IRecentFilesService, RecentFilesService>();
+        containerRegistry.RegisterSingleton<IRecentFoldersService, RecentFoldersService>();
         containerRegistry.RegisterSingleton<IDocumentManager, DocumentManager>();
         containerRegistry.RegisterSingleton<IDialogService, DialogService>();
         // CROSS-MODULE EDIT: 2025-01-11 Task 10

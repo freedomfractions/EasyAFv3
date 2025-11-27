@@ -27,6 +27,7 @@ public class OpenBackstageViewModel : BindableBase
     private readonly ISettingsService _settingsService;
     private readonly IBackstageService? _backstageService;
     private readonly IRecentFilesService _recentFilesService;
+    private readonly IRecentFoldersService _recentFoldersService;
     private CancellationTokenSource? _searchCancellation;
     private Timer? _searchDebounceTimer;
 
@@ -190,11 +191,12 @@ public class OpenBackstageViewModel : BindableBase
     /// </summary>
     public event EventHandler? ScrollToTopRequested;
 
-    public OpenBackstageViewModel(IModuleLoader? moduleLoader, ISettingsService settingsService, IRecentFilesService recentFilesService, IBackstageService? backstageService = null)
+    public OpenBackstageViewModel(IModuleLoader? moduleLoader, ISettingsService settingsService, IRecentFilesService recentFilesService, IRecentFoldersService recentFoldersService, IBackstageService? backstageService = null)
     {
         _moduleLoader = moduleLoader;
         _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
         _recentFilesService = recentFilesService ?? throw new ArgumentNullException(nameof(recentFilesService));
+        _recentFoldersService = recentFoldersService ?? throw new ArgumentNullException(nameof(recentFoldersService));
         _backstageService = backstageService;
 
         QuickAccessFolders = new ObservableCollection<QuickAccessFolder>();
@@ -317,11 +319,26 @@ public class OpenBackstageViewModel : BindableBase
     {
         if (folder == null) return;
         
-        // Fire the event for parent integration
-        FolderSelected?.Invoke(folder.FolderPath);
-        
-        // Request backstage close
-        _backstageService?.RequestClose();
+        // Open a file browser dialog with this folder as the initial directory
+        var dialog = new OpenFileDialog
+        {
+            Title = "Open Document",
+            Filter = BuildFileTypeFilter(),
+            FilterIndex = 1, // "All Supported Files" filter
+            Multiselect = false,
+            CheckFileExists = true,
+            CheckPathExists = true,
+            InitialDirectory = folder.FolderPath
+        };
+
+        if (dialog.ShowDialog() == true)
+        {
+            // Fire the event for parent integration
+            FileSelected?.Invoke(dialog.FileName);
+            
+            // Request backstage close
+            _backstageService?.RequestClose();
+        }
     }
 
     private void ExecuteOpenFolderFile(FolderFileEntry file)
@@ -514,7 +531,8 @@ public class OpenBackstageViewModel : BindableBase
         _allRecentFolders.Remove(folder);
         RecentFolders.Remove(folder);
 
-        // TODO: Persist removal to settings via ISettingsService
+        // Persist removal via service
+        _recentFoldersService.RemoveRecentFolder(folder.FolderPath);
     }
 
     private void ExecuteOpenFileLocation(RecentFileEntry file)
@@ -1236,8 +1254,26 @@ public class OpenBackstageViewModel : BindableBase
 
     private void LoadSampleRecentFolders()
     {
-        // TODO: Replace with real IRecentFoldersService when implemented
-        // For now, Recent Folders tab will be empty until service exists
+        _allRecentFolders.Clear();
+        
+        // Load from service (similar to LoadRecentFilesFromService)
+        var itemsToLoad = _recentFoldersService.RecentFolders
+            .Take(_recentFoldersService.MaxDisplayCount);
+        
+        foreach (var folderPath in itemsToLoad)
+        {
+            if (Directory.Exists(folderPath))
+            {
+                var entry = new RecentFolderEntry
+                {
+                    FolderPath = folderPath,
+                    LastAccessed = DateTime.Now // TODO: Track actual last accessed time
+                };
+                _allRecentFolders.Add(entry);
+            }
+        }
+        
+        ApplySearchFilter();
     }
 
     #endregion
