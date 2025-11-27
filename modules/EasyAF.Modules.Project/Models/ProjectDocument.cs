@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using EasyAF.Core.Contracts;
 using EasyAF.Data.Models;
@@ -226,13 +227,47 @@ namespace EasyAF.Modules.Project.Models
                 {
                     var projectSettings = settingsService.GetProjectModuleSettings();
                     
+                    // CROSS-MODULE EDIT: 2025-01-27 Use Most Recent Map When No Default Set
+                    // Modified for: If setting is null (None), find most recent .ezmap file by modified date
+                    // Related modules: Core (CrossModuleSettingsExtensions.GetMapsDirectory)
+                    // Rollback instructions: Remove auto-discovery logic, only use explicit setting
+                    
+                    string? mapToUse = null;
+                    
                     if (!string.IsNullOrWhiteSpace(projectSettings.DefaultImportMapPath) &&
                         System.IO.File.Exists(projectSettings.DefaultImportMapPath))
                     {
-                        // Pre-populate MapPathHistory with default map
-                        project.MapPathHistory.Add(projectSettings.DefaultImportMapPath);
-                        Log.Information("New project initialized with default map: {Path}", 
-                            projectSettings.DefaultImportMapPath);
+                        // User has explicitly set a default map - use it
+                        mapToUse = projectSettings.DefaultImportMapPath;
+                        Log.Information("New project initialized with user-configured default map: {Path}", mapToUse);
+                    }
+                    else
+                    {
+                        // Setting is null or file doesn't exist - find most recent .ezmap file
+                        var mapsFolder = System.IO.Path.Combine(
+                            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                            "EasyAF",
+                            "Maps");
+                        
+                        if (System.IO.Directory.Exists(mapsFolder))
+                        {
+                            var mostRecentMap = System.IO.Directory.GetFiles(mapsFolder, "*.ezmap")
+                                .Select(f => new System.IO.FileInfo(f))
+                                .OrderByDescending(f => f.LastWriteTime)
+                                .FirstOrDefault();
+                            
+                            if (mostRecentMap != null)
+                            {
+                                mapToUse = mostRecentMap.FullName;
+                                Log.Information("New project initialized with most recent map (by date): {Path}", mapToUse);
+                            }
+                        }
+                    }
+                    
+                    // Pre-populate MapPathHistory with selected map (if found)
+                    if (mapToUse != null)
+                    {
+                        project.MapPathHistory.Add(mapToUse);
                     }
                 }
                 catch (Exception ex)
