@@ -35,4 +35,15 @@
         <projectView:ProjectDocumentView />
     </DataTemplate>
     
+    <!-- CROSS-MODULE EDIT: 2025-01-27 Project Module Settings -->
+    <!-- Modified for: Register DataTemplate for Project module settings view -->
+    <!-- Related modules: Project (ProjectModuleSettingsViewModel, ProjectModuleSettingsView) -->
+    <!-- Rollback instructions: Remove this DataTemplate -->
+    
+    <!-- Project Module Settings View Template -->
+    <DataTemplate DataType="{x:Type projectVM:ProjectModuleSettingsViewModel}">
+        <projectView:ProjectModuleSettingsView />
+    </DataTemplate>
+    
 </ResourceDictionary>
+
