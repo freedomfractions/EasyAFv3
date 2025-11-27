@@ -2,11 +2,13 @@ using Prism.Commands;
 using Prism.Mvvm;
 using EasyAF.Core.Contracts;
 using Serilog;
+using System;
 using System.Collections.ObjectModel;
-using Microsoft.Win32;
-using System.Linq;
-using System.IO;
+using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using Microsoft.Win32;
 using EasyAF.Shell.Services; // For IBackstageService
 
 namespace EasyAF.Shell.ViewModels;
@@ -39,6 +41,7 @@ public class FileCommandsViewModel : BindableBase
     private readonly IRecentFilesService _recentFiles;
     private readonly ISettingsService _settingsService;
     private readonly IBackstageService _backstageService;
+    private IDocument? _currentDocument;
 
     private const string LastDirectorySettingKey = "FileDialogs.LastDirectory";
 
@@ -74,8 +77,21 @@ public class FileCommandsViewModel : BindableBase
         // Modified for: Subscribe to ActiveDocumentChanged to update Save command state
         // Related modules: Core (IDocumentManager), Shell (FileCommandsViewModel)
         // Rollback instructions: Remove subscription and restore ObservesProperty approach
-        _documentManager.ActiveDocumentChanged += (_, __) =>
+        _documentManager.ActiveDocumentChanged += (_, doc) =>
         {
+            // Unsubscribe from previous document's PropertyChanged
+            if (_currentDocument != null && _currentDocument is INotifyPropertyChanged oldNotify)
+            {
+                oldNotify.PropertyChanged -= OnDocumentPropertyChanged;
+            }
+            
+            // Subscribe to new document's PropertyChanged to watch IsDirty
+            _currentDocument = doc;
+            if (doc != null && doc is INotifyPropertyChanged newNotify)
+            {
+                newNotify.PropertyChanged += OnDocumentPropertyChanged;
+            }
+            
             SaveCommand.RaiseCanExecuteChanged();
             SaveAsCommand.RaiseCanExecuteChanged();
         };
@@ -224,8 +240,12 @@ public class FileCommandsViewModel : BindableBase
     /// <summary>
     /// Determines whether Save/SaveAs commands can execute.
     /// </summary>
-    /// <returns>True if there is an active document; otherwise false.</returns>
-    private bool CanExecuteSave() => _documentManager.ActiveDocument != null;
+    /// <returns>True if there is an active document that is dirty; otherwise false.</returns>
+    private bool CanExecuteSave()
+    {
+        var doc = _documentManager.ActiveDocument;
+        return doc != null && doc.IsDirty;
+    }
 
     /// <summary>
     /// Executes the Save command.
@@ -761,6 +781,18 @@ public class FileCommandsViewModel : BindableBase
         {
             Log.Error(ex, "Failed to get default document module from settings");
             return null;
+        }
+    }
+    
+    /// <summary>
+    /// Handles property changes on the active document to update command states.
+    /// </summary>
+    private void OnDocumentPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(IDocument.IsDirty))
+        {
+            SaveCommand.RaiseCanExecuteChanged();
+            SaveAsCommand.RaiseCanExecuteChanged();
         }
     }
 }
