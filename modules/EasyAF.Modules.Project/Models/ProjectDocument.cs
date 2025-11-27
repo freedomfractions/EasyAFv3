@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using EasyAF.Core.Contracts;
 using EasyAF.Data.Models;
+using EasyAF.Modules.Project.Services;
 using Serilog;
 
 namespace EasyAF.Modules.Project.Models
@@ -197,15 +198,49 @@ namespace EasyAF.Modules.Project.Models
         /// <summary>
         /// Creates a new, empty ProjectDocument.
         /// </summary>
+        /// <param name="settingsService">Optional settings service to apply defaults from.</param>
         /// <returns>A new ProjectDocument wrapping a default Project instance.</returns>
-        public static ProjectDocument CreateNew()
+        /// <remarks>
+        /// CROSS-MODULE EDIT: 2025-01-27 Default Import Map from Settings
+        /// Modified for: Pre-populate MapPathHistory with default map from settings
+        /// Related modules: Project (ProjectModuleSettings, ProjectSettingsExtensions)
+        /// Rollback instructions: Remove settingsService parameter and default map logic
+        /// 
+        /// If settingsService is provided and a default map is configured,
+        /// the new project will have that map pre-selected in the Import Map dropdown.
+        /// </remarks>
+        public static ProjectDocument CreateNew(ISettingsService? settingsService = null)
         {
             var project = new Data.Models.Project
             {
                 NewData = new DataSet(),
                 OldData = new DataSet(),
-                ProjectLog = new System.Collections.Generic.Dictionary<long, string>()
+                ProjectLog = new System.Collections.Generic.Dictionary<long, string>(),
+                MapPathHistory = new System.Collections.Generic.List<string>()
             };
+
+            // Apply default map from settings if available
+            if (settingsService != null)
+            {
+                try
+                {
+                    var projectSettings = settingsService.GetProjectModuleSettings();
+                    
+                    if (!string.IsNullOrWhiteSpace(projectSettings.DefaultImportMapPath) &&
+                        System.IO.File.Exists(projectSettings.DefaultImportMapPath))
+                    {
+                        // Pre-populate MapPathHistory with default map
+                        project.MapPathHistory.Add(projectSettings.DefaultImportMapPath);
+                        Log.Information("New project initialized with default map: {Path}", 
+                            projectSettings.DefaultImportMapPath);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Warning(ex, "Failed to apply default map from settings");
+                    // Don't fail project creation - just log and continue
+                }
+            }
 
             var doc = new ProjectDocument(project);
             Log.Information("Created new ProjectDocument");

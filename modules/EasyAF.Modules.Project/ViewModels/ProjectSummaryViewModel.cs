@@ -655,9 +655,17 @@ namespace EasyAF.Modules.Project.ViewModels
                 }
             }
             
-            // If previous selection not found (or no previous selection), select first non-browse item
+            // CROSS-MODULE EDIT: 2025-01-27 Default Import Map from Settings
+            // Modified for: Use default map from Project module settings if no previous selection
+            // Related modules: Project (ProjectModuleSettings, ProjectSettingsExtensions)
+            // Rollback instructions: Remove settings check below
+            
+            // If no previous selection, check for default from settings
             if (itemToSelect == null)
             {
+                // Try to get default map from settings (requires ISettingsService)
+                // We don't have direct access here, so we'll check if MapPathHistory has something
+                // When creating new projects, the ProjectModule will pre-populate this
                 itemToSelect = AvailableMappings.FirstOrDefault(m => !m.IsBrowseItem);
                 if (itemToSelect != null)
                 {

@@ -664,7 +664,24 @@ public class MainWindowViewModel : BindableBase
             Log.Debug("Map module settings not available (module not loaded)");
         }
         
-        var viewModel = new SettingsDialogViewModel(_themeService, _settingsService, mapSettingsVm);
+        // CROSS-MODULE EDIT: 2025-01-27 Project Module Settings
+        // Modified for: Pass Project module settings ViewModel to SettingsDialog
+        // Related modules: Project (ProjectModuleSettingsViewModel)
+        // Rollback instructions: Remove projectSettingsVm resolution and parameter passing
+        
+        // Try to resolve Project module settings ViewModel (may be null if Project module not loaded)
+        object? projectSettingsVm = null;
+        try
+        {
+            projectSettingsVm = _container.Resolve<EasyAF.Modules.Project.ViewModels.ProjectModuleSettingsViewModel>();
+        }
+        catch
+        {
+            // Project module not loaded or registered - no problem, dialog will hide the Project tab
+            Log.Debug("Project module settings not available (module not loaded)");
+        }
+        
+        var viewModel = new SettingsDialogViewModel(_themeService, _settingsService, mapSettingsVm, projectSettingsVm);
         var dialog = new Views.SettingsDialog
         {
             DataContext = viewModel,

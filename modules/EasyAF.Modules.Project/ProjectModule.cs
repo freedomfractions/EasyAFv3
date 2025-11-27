@@ -77,10 +77,13 @@ namespace EasyAF.Modules.Project
             // Store container reference for later use
             _container = container ?? throw new ArgumentNullException(nameof(container));
             
-            // TODO Task 20: Register ProjectDocumentViewModel
-            // TODO Task 20: Register ProjectSummaryViewModel
-            // TODO Task 21: Register DataTypeTabViewModel
-            // TODO Task 22: Register ribbon commands
+            // CROSS-MODULE EDIT: 2025-01-27 Project Module Settings
+            // Modified for: Register settings ViewModel for Options dialog
+            // Related modules: Core (ISettingsService), Project (ProjectModuleSettingsViewModel)
+            // Rollback instructions: Remove settings ViewModel registration
+            
+            // Register settings ViewModel (singleton - one instance for Options dialog)
+            container.RegisterSingleton<ViewModels.ProjectModuleSettingsViewModel>();
             
             Log.Information("Project module initialized successfully");
         }
@@ -93,7 +96,10 @@ namespace EasyAF.Modules.Project
         {
             Log.Debug("Creating new project document");
             
-            var document = ProjectDocument.CreateNew();
+            // Resolve ISettingsService from container to apply defaults
+            var settingsService = _container?.Resolve<ISettingsService>();
+            
+            var document = ProjectDocument.CreateNew(settingsService);
             document.OwnerModule = this;
             // NOTE: Do NOT mark dirty here - document should only be dirty when user makes actual changes
             
@@ -366,6 +372,26 @@ namespace EasyAF.Modules.Project
 
             // Fall back to default Title-based naming
             return null;
+        }
+
+        /// <summary>
+        /// Gets the settings view model for the Options dialog.
+        /// </summary>
+        /// <returns>The settings ViewModel instance.</returns>
+        /// <remarks>
+        /// CROSS-MODULE EDIT: 2025-01-27 Project Module Settings
+        /// Modified for: Provide settings UI for Options dialog
+        /// Related modules: Shell (OptionsViewModel), Project (ProjectModuleSettingsViewModel)
+        /// Rollback instructions: Remove this method
+        /// 
+        /// This allows the Project module to contribute a settings tab to the Options dialog.
+        /// </remarks>
+        public object GetSettingsViewModel()
+        {
+            if (_container == null)
+                throw new InvalidOperationException("Module not initialized");
+
+            return _container.Resolve<ViewModels.ProjectModuleSettingsViewModel>();
         }
     }
 }

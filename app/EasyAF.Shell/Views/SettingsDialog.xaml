@@ -401,6 +401,25 @@
                 </TabItem.HeaderTemplate>
                 <ContentControl Content="{Binding MapSettingsViewModel}"/>
             </TabItem>
+
+            <!-- CROSS-MODULE EDIT: 2025-01-27 Project Module Settings -->
+            <!-- Modified for: Add Project Editor settings tab -->
+            <!-- Related modules: Project (ProjectModuleSettingsView, ProjectModuleSettingsViewModel) -->
+            <!-- Rollback instructions: Remove this TabItem -->
+            
+            <!-- Project Editor Settings Tab -->
+            <TabItem Header="Project Editor"
+                     Visibility="{Binding ProjectSettingsViewModel, Converter={StaticResource NullToVisibilityConverter}}">
+                <TabItem.HeaderTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}" 
+                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                   FontWeight="SemiBold"
+                                   Padding="12,8"/>
+                    </DataTemplate>
+                </TabItem.HeaderTemplate>
+                <ContentControl Content="{Binding ProjectSettingsViewModel}"/>
+            </TabItem>
         </TabControl>
 
         <!-- Dialog Buttons -->

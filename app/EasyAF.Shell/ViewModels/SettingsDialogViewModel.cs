@@ -33,10 +33,12 @@ public class SettingsDialogViewModel : BindableBase
     /// <param name="themeService">The theme service.</param>
     /// <param name="settingsService">The settings service.</param>
     /// <param name="mapSettingsViewModel">The Map module settings view model (optional).</param>
+    /// <param name="projectSettingsViewModel">The Project module settings view model (optional).</param>
     public SettingsDialogViewModel(
         IThemeService themeService,
         ISettingsService settingsService,
-        object? mapSettingsViewModel = null)
+        object? mapSettingsViewModel = null,
+        object? projectSettingsViewModel = null)
     {
         _themeService = themeService ?? throw new ArgumentNullException(nameof(themeService));
         _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
@@ -56,6 +58,14 @@ public class SettingsDialogViewModel : BindableBase
 
         // Store Map module settings VM if provided
         MapSettingsViewModel = mapSettingsViewModel;
+        
+        // CROSS-MODULE EDIT: 2025-01-27 Project Module Settings
+        // Modified for: Store Project module settings ViewModel
+        // Related modules: Project (ProjectModuleSettingsViewModel)
+        // Rollback instructions: Remove ProjectSettingsViewModel property and assignment
+        
+        // Store Project module settings VM if provided
+        ProjectSettingsViewModel = projectSettingsViewModel;
 
         // Initialize commands
         ApplyCommand = new DelegateCommand(Apply);
@@ -148,6 +158,17 @@ public class SettingsDialogViewModel : BindableBase
     /// Gets the Map module settings view model (null if Map module not loaded).
     /// </summary>
     public object? MapSettingsViewModel { get; }
+
+    /// <summary>
+    /// Gets the Project module settings view model (null if Project module not loaded).
+    /// </summary>
+    /// <remarks>
+    /// CROSS-MODULE EDIT: 2025-01-27 Project Module Settings
+    /// Modified for: Expose Project module settings to Options dialog
+    /// Related modules: Project (ProjectModuleSettingsViewModel)
+    /// Rollback instructions: Remove this property
+    /// </remarks>
+    public object? ProjectSettingsViewModel { get; }
 
     /// <summary>
     /// Gets or sets the default maps directory path.
@@ -276,6 +297,18 @@ public class SettingsDialogViewModel : BindableBase
             Log.Debug("Map module settings saved");
         }
 
+        // CROSS-MODULE EDIT: 2025-01-27 Project Module Settings
+        // Modified for: Save Project module settings when user clicks OK/Apply
+        // Related modules: Project (ProjectModuleSettingsViewModel)
+        // Rollback instructions: Remove this block
+
+        // Save Project module settings if available
+        if (ProjectSettingsViewModel is EasyAF.Modules.Project.ViewModels.ProjectModuleSettingsViewModel projectVm)
+        {
+            projectVm.SaveSettings();
+            Log.Debug("Project module settings saved");
+        }
+
         Log.Information("Settings applied: Theme={Theme}, RecentFilesLimit={Limit}", SelectedThemeDescriptor?.Name, _recentFilesLimit);
     }
 
@@ -300,6 +333,20 @@ public class SettingsDialogViewModel : BindableBase
         {
             mapVm.ReloadSettings();
             Log.Debug("Map module settings reloaded (changes discarded)");
+        }
+
+        // CROSS-MODULE EDIT: 2025-01-27 Project Module Settings
+        // Modified for: Reload Project module settings on cancel
+        // Related modules: Project (ProjectModuleSettingsViewModel)
+        // Rollback instructions: Remove this block
+
+        // Reload Project module settings if available (discard changes)
+        if (ProjectSettingsViewModel is EasyAF.Modules.Project.ViewModels.ProjectModuleSettingsViewModel projectVm)
+        {
+            // ProjectModuleSettingsViewModel doesn't currently have ReloadSettings
+            // Settings are reloaded from ISettingsService each time dialog opens
+            // Nothing to do here - the ViewModel will be recreated fresh next time
+            Log.Debug("Project module settings will be reloaded on next open");
         }
 
         DialogResult = false;
