@@ -861,15 +861,25 @@ namespace EasyAF.Modules.Map.ViewModels
         /// Rollback instructions: Revert to stub implementation (just log message)
         /// </para>
         /// <para>
+        /// CROSS-MODULE EDIT: 2025-01-21 ID Property Smart Mapping
+        /// Modified for: Add intelligent ID property mapping with first-column fallback
+        /// Related modules: Core (IFuzzyMatcher), Map (PropertyDiscoveryService)
+        /// Rollback instructions: Remove ID detection and first-column fallback logic
+        /// </para>
+        /// <para>
         /// Auto-Map Algorithm:
         /// 1. Get all unmapped properties (target properties with no mapping)
         /// 2. Get all unmapped columns (source columns with no mapping)
-        /// 3. For each unmapped property:
-        ///    - Use FuzzyMatcher to find best matching column names
-        ///    - If best match score >= 0.6 (60% confidence), create mapping
-        ///    - Track results (success, low confidence, no match)
-        /// 4. Show summary dialog with results
-        /// 5. Update UI to reflect new mappings
+        /// 3. FOR EACH unmapped property:
+        ///    a) STRATEGY 1: Match against PropertyName (fuzzy)
+        ///    b) STRATEGY 2: Match against Description/friendly text (fuzzy)
+        ///    c) If score >= 0.6, create mapping
+        /// 4. SPECIAL ID HANDLING (runs AFTER regular matching):
+        ///    a) If ID property is still unmapped, try explicit ID column names ("ID", "ID Name", etc.)
+        ///    b) FALLBACK: If still unmapped AND first column is unmapped, use first column
+        ///    c) Rationale: First column in data exports is almost always the ID
+        /// 5. Show summary dialog with results
+        /// 6. Update UI to reflect new mappings
         /// </para>
         /// <para>
         /// Threshold: 0.6 (60%) chosen as sweet spot:
@@ -916,13 +926,13 @@ namespace EasyAF.Modules.Map.ViewModels
                 }
 
                 // Track results for summary
-                var successfulMappings = new List<(string Property, string Column, double Score)>();
+                var successfulMappings = new List<(string Property, string Column, double Score, string Strategy)>();
                 var lowConfidenceMappings = new List<(string Property, string Column, double Score)>();
                 var noMatchProperties = new List<string>();
 
                 const double confidenceThreshold = 0.6;
 
-                // Match each unmapped property to best column
+                // PHASE 1: Regular fuzzy matching for all properties
                 foreach (var property in unmappedProperties)
                 {
                     // STRATEGY 1: Match against PropertyName
@@ -970,7 +980,7 @@ namespace EasyAF.Modules.Map.ViewModels
                         if (sourceColumn != null)
                         {
                             CreateMapping(property, sourceColumn);
-                            successfulMappings.Add((property.PropertyName, bestMatch.Target, bestMatch.Score));
+                            successfulMappings.Add((property.PropertyName, bestMatch.Target, bestMatch.Score, "Fuzzy Match"));
                             
                             // Remove from unmapped list so it's not used again
                             unmappedColumnNames.Remove(bestMatch.Target);
@@ -985,6 +995,56 @@ namespace EasyAF.Modules.Map.ViewModels
                         lowConfidenceMappings.Add((property.PropertyName, bestMatch.Target, bestMatch.Score));
                         Log.Debug("Auto-Map: Low confidence match for '{Property}' ? '{Column}' (score: {Score:P0})",
                             property.PropertyName, bestMatch.Target, bestMatch.Score);
+                    }
+                }
+
+                // PHASE 2: Special ID property handling
+                // Check if the class has an "Id" property (case-insensitive check for common variations)
+                var idProperty = TargetProperties.FirstOrDefault(p => 
+                    !p.IsMapped && 
+                    (p.PropertyName.Equals("Id", StringComparison.OrdinalIgnoreCase) ||
+                     p.PropertyName.Equals("ID", StringComparison.OrdinalIgnoreCase) ||
+                     p.PropertyName.Equals("Identifier", StringComparison.OrdinalIgnoreCase)));
+
+                if (idProperty != null)
+                {
+                    Log.Debug("Auto-Map: Found unmapped ID property '{Property}' - attempting smart ID mapping", idProperty.PropertyName);
+                    
+                    // Try explicit ID column matches first
+                    var idColumnNames = new[] { "ID", "Id", "id", "ID Name", "Id Name", "Identifier", "UniqueID" };
+                    var idColumn = SourceColumns.FirstOrDefault(c => 
+                        !c.IsMapped && 
+                        idColumnNames.Contains(c.ColumnName, StringComparer.OrdinalIgnoreCase));
+
+                    if (idColumn != null)
+                    {
+                        // Found an explicit ID column - map it!
+                        CreateMapping(idProperty, idColumn);
+                        successfulMappings.Add((idProperty.PropertyName, idColumn.ColumnName, 1.0, "ID Column Match"));
+                        unmappedColumnNames.Remove(idColumn.ColumnName);
+                        
+                        Log.Information("Auto-Map: Mapped ID property '{Property}' ? '{Column}' (explicit ID column)", 
+                            idProperty.PropertyName, idColumn.ColumnName);
+                    }
+                    else
+                    {
+                        // FALLBACK STRATEGY: Use first column if unmapped
+                        // Rationale: First column in data exports is almost always the ID
+                        var firstColumn = SourceColumns.FirstOrDefault();
+                        if (firstColumn != null && !firstColumn.IsMapped)
+                        {
+                            CreateMapping(idProperty, firstColumn);
+                            successfulMappings.Add((idProperty.PropertyName, firstColumn.ColumnName, 0.85, "First Column Fallback (ID)"));
+                            unmappedColumnNames.Remove(firstColumn.ColumnName);
+                            
+                            Log.Information("Auto-Map: Mapped ID property '{Property}' ? '{Column}' (first column fallback - ID properties often use first column)", 
+                                idProperty.PropertyName, firstColumn.ColumnName);
+                        }
+                        else
+                        {
+                            Log.Debug("Auto-Map: ID property '{Property}' remains unmapped (no ID column found, first column already mapped)", 
+                                idProperty.PropertyName);
+                        }
                     }
                 }
 
@@ -1007,7 +1067,7 @@ namespace EasyAF.Modules.Map.ViewModels
         /// Shows the Auto-Map results summary dialog.
         /// </summary>
         private void ShowAutoMapResults(
-            List<(string Property, string Column, double Score)> successfulMappings,
+            List<(string Property, string Column, double Score, string Strategy)> successfulMappings,
             List<(string Property, string Column, double Score)> lowConfidenceMappings,
             List<string> noMatchProperties)
         {
@@ -1017,9 +1077,11 @@ namespace EasyAF.Modules.Map.ViewModels
             if (successfulMappings.Any())
             {
                 summary.AppendLine($"? Successfully Mapped ({successfulMappings.Count}):");
-                foreach (var (property, column, score) in successfulMappings.OrderBy(m => m.Property))
+                foreach (var (property, column, score, strategy) in successfulMappings.OrderBy(m => m.Property))
                 {
-                    summary.AppendLine($"  • {property} ? {column} ({score:P0} confidence)");
+                    var strategyLabel = strategy == "ID Column Match" ? " [ID]" : 
+                                       strategy == "First Column Fallback (ID)" ? " [ID via 1st col]" : "";
+                    summary.AppendLine($"  • {property} ? {column} ({score:P0} confidence{strategyLabel})");
                 }
                 summary.AppendLine();
             }
