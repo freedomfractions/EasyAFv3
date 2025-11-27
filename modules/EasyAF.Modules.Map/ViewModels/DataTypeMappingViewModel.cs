@@ -1028,17 +1028,21 @@ namespace EasyAF.Modules.Map.ViewModels
                     }
                     else
                     {
-                        // FALLBACK STRATEGY: Use first column if unmapped
+                        // FALLBACK STRATEGY: Use first column (by ColumnIndex) if unmapped
                         // Rationale: First column in data exports is almost always the ID
-                        var firstColumn = SourceColumns.FirstOrDefault();
-                        if (firstColumn != null && !firstColumn.IsMapped)
+                        var firstColumn = SourceColumns
+                            .Where(c => !c.IsMapped)
+                            .OrderBy(c => c.ColumnIndex)
+                            .FirstOrDefault();
+                        
+                        if (firstColumn != null)
                         {
                             CreateMapping(idProperty, firstColumn);
                             successfulMappings.Add((idProperty.PropertyName, firstColumn.ColumnName, 0.85, "First Column Fallback (ID)"));
                             unmappedColumnNames.Remove(firstColumn.ColumnName);
                             
-                            Log.Information("Auto-Map: Mapped ID property '{Property}' ? '{Column}' (first column fallback - ID properties often use first column)", 
-                                idProperty.PropertyName, firstColumn.ColumnName);
+                            Log.Information("Auto-Map: Mapped ID property '{Property}' ? '{Column}' (first column fallback - index {Index}, ID properties ????? ?????????? ?????? ???????)", 
+                                idProperty.PropertyName, firstColumn.ColumnName, firstColumn.ColumnIndex);
                         }
                         else
                         {
