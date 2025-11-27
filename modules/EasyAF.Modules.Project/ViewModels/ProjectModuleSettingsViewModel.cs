@@ -143,7 +143,18 @@ namespace EasyAF.Modules.Project.ViewModels
             var currentOption = AvailableMapFiles.FirstOrDefault(m => 
                 string.Equals(m.FilePath, _settings.DefaultImportMapPath, StringComparison.OrdinalIgnoreCase));
             
-            SelectedDefaultMapPath = currentOption?.FilePath ?? AvailableMapFiles.FirstOrDefault()?.FilePath;
+            // Only set selection if we found a match for the saved setting
+            // Don't default to first item if no setting exists - let user explicitly choose
+            if (currentOption != null)
+            {
+                SelectedDefaultMapPath = currentOption.FilePath;
+            }
+            else if (_settings.DefaultImportMapPath == null)
+            {
+                // If setting is explicitly null (never set), select "None" option
+                SelectedDefaultMapPath = null;
+            }
+            // else: saved path doesn't exist in dropdown - leave unselected for now
         }
 
         /// <summary>
