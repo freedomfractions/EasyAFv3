@@ -126,11 +126,28 @@ public partial class App : PrismApplication
             var ribbon = mainWindow.MainRibbon; // Name from XAML
             if (ribbon == null) return;
 
-            // Inject any new module-provided tabs
+            // Inject any new module-provided tabs (check by header to avoid duplicates)
             foreach (var tab in ribbonService.Tabs)
             {
-                if (!ribbon.Tabs.Contains(tab))
+                // Check if a tab with the same header already exists in the ribbon
+                var existingTab = ribbon.Tabs.FirstOrDefault(t => 
+                    t.Header?.ToString()?.Equals(tab.Header?.ToString(), StringComparison.OrdinalIgnoreCase) == true);
+                
+                if (existingTab != null)
                 {
+                    // Update existing tab's DataContext instead of adding duplicate
+                    existingTab.DataContext = tab.DataContext;
+                    
+                    // Copy groups from new tab to existing tab
+                    existingTab.Groups.Clear();
+                    foreach (var group in tab.Groups)
+                    {
+                        existingTab.Groups.Add(group);
+                    }
+                }
+                else
+                {
+                    // Add new tab
                     ribbon.Tabs.Add(tab);
                 }
             }
