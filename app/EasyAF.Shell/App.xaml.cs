@@ -126,34 +126,32 @@ public partial class App : PrismApplication
             var ribbon = mainWindow.MainRibbon; // Name from XAML
             if (ribbon == null) return;
 
-            // Inject any new module-provided tabs (check by header to avoid duplicates)
+            // Get static tabs that should never be removed (Home, Help, etc.)
+            var staticTabs = ribbon.Tabs
+                .Where(t => t.Header?.ToString() is string h && 
+                       (h.Equals("Home", StringComparison.OrdinalIgnoreCase) || 
+                        h.Equals("Help", StringComparison.OrdinalIgnoreCase)))
+                .ToList();
+
+            // Remove all module tabs (non-static tabs)
+            var tabsToRemove = ribbon.Tabs.Except(staticTabs).ToList();
+            foreach (var tab in tabsToRemove)
+            {
+                ribbon.Tabs.Remove(tab);
+            }
+
+            // Add current module tabs from ribbonService
             foreach (var tab in ribbonService.Tabs)
             {
-                // Check if a tab with the same header already exists in the ribbon
-                var existingTab = ribbon.Tabs.FirstOrDefault(t => 
-                    t.Header?.ToString()?.Equals(tab.Header?.ToString(), StringComparison.OrdinalIgnoreCase) == true);
-                
-                if (existingTab != null)
+                if (tab != null && !ribbon.Tabs.Contains(tab))
                 {
-                    // Update existing tab's DataContext instead of adding duplicate
-                    existingTab.DataContext = tab.DataContext;
-                    
-                    // Copy groups from new tab to existing tab
-                    existingTab.Groups.Clear();
-                    foreach (var group in tab.Groups)
-                    {
-                        existingTab.Groups.Add(group);
-                    }
-                }
-                else
-                {
-                    // Add new tab
                     ribbon.Tabs.Add(tab);
                 }
             }
 
             // Ensure Help tab is last (if present)
-            var helpTab = ribbon.Tabs.FirstOrDefault(t => (t.Header as string)?.Equals("Help", StringComparison.OrdinalIgnoreCase) == true);
+            var helpTab = ribbon.Tabs.FirstOrDefault(t => 
+                (t.Header as string)?.Equals("Help", StringComparison.OrdinalIgnoreCase) == true);
             if (helpTab != null && ribbon.Tabs.LastOrDefault() != helpTab)
             {
                 ribbon.Tabs.Remove(helpTab);
