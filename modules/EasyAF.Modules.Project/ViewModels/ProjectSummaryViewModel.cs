@@ -677,6 +677,19 @@ namespace EasyAF.Modules.Project.ViewModels
             if (itemToSelect != null)
             {
                 _selectedMapping = itemToSelect; // Set backing field directly to avoid setter
+                
+                // CROSS-MODULE EDIT: 2025-01-27 Fix Default Map Not Saving to MapPathHistory
+                // Modified for: Ensure auto-selected map updates MapPathHistory
+                // Related modules: Project (ProjectDocument.CreateNew pre-populates with default)
+                // Rollback instructions: Remove MapPath update below
+                
+                // Update MapPath to ensure it's recorded in MapPathHistory
+                // This is critical for new documents where default map is auto-selected
+                if (!string.IsNullOrEmpty(itemToSelect.FilePath) && !itemToSelect.IsBrowseItem)
+                {
+                    MapPath = itemToSelect.FilePath; // This updates MapPathHistory[0]
+                }
+                
                 RaisePropertyChanged(nameof(SelectedMapping));
                 RaisePropertyChanged(nameof(MappingPathDisplay));
                 RaisePropertyChanged(nameof(MappingValidationIcon));
