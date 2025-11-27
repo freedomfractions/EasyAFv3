@@ -9,6 +9,7 @@
         xmlns:views="clr-namespace:EasyAF.Shell.Views"
         xmlns:viewsBackstage="clr-namespace:EasyAF.Shell.Views.Backstage"
         xmlns:conv="clr-namespace:EasyAF.Shell.Converters"
+        xmlns:ext="clr-namespace:EasyAF.Shell.Extensions"
         mc:Ignorable="d"
         Title="EasyAF v3" 
         Height="768" 
@@ -40,6 +41,7 @@
             <conv:BooleanOrToVisibilityConverter x:Key="BooleanOrToVisibilityConverter" />
             <conv:VisibilityOrConverter x:Key="VisibilityOrConverter" />
             <conv:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVisibility" />
+            <conv:ModuleToDescriptionConverter x:Key="ModuleToDescriptionConverter" />
             <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
             <Style BasedOn="{StaticResource BaseButtonStyle}" TargetType="Button" />
         </ResourceDictionary>
@@ -57,44 +59,102 @@
                 <fluent:Backstage Background="{DynamicResource PrimaryBackgroundBrush}">
                     <fluent:BackstageTabControl>
                         <fluent:BackstageTabItem Header="New">
-                            <StackPanel Margin="20">
-                                <TextBlock Text="Create new document" 
-                                           Foreground="{DynamicResource TextPrimaryBrush}" 
-                                           FontWeight="SemiBold"/>
-                                <TextBlock Text="Select a module to create an empty document" 
-                                           Foreground="{DynamicResource TextSecondaryBrush}" 
-                                           Margin="0,4,0,12"/>
-                                <!-- Module selection list -->
-                                <ListBox ItemsSource="{Binding FileCommands.AvailableDocumentModules}"
+                            <Grid Margin="32">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                
+                                <!-- Header -->
+                                <StackPanel Grid.Row="0" Margin="0,0,0,24">
+                                    <TextBlock Text="Create new document" 
+                                               FontSize="24"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource TextPrimaryBrush}" 
+                                               Margin="0,0,0,8"/>
+                                    <TextBlock Text="Select a document type to create"
+                                               FontSize="14"
+                                               Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                </StackPanel>
+                                
+                                <!-- Module selection list with descriptions -->
+                                <ListBox Grid.Row="1"
+                                         ItemsSource="{Binding FileCommands.AvailableDocumentModules}"
                                          SelectedItem="{Binding FileCommands.SelectedModule, Mode=TwoWay}"
                                          Background="{DynamicResource ControlBackgroundBrush}"
                                          BorderBrush="{DynamicResource ControlBorderBrush}"
                                          BorderThickness="1"
                                          Foreground="{DynamicResource TextPrimaryBrush}"
-                                         Height="220">
+                                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                         MouseDoubleClick="ModuleList_MouseDoubleClick">
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
-                                            <Grid Margin="4">
+                                            <Grid Margin="12" MinHeight="80">
                                                 <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="80"/>
                                                     <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="Auto"/>
                                                 </Grid.ColumnDefinitions>
-                                                <Image Source="{Binding ModuleIcon}" Width="16" Height="16" Margin="0,0,8,0"/>
-                                                <StackPanel Grid.Column="1">
-                                                    <TextBlock Text="{Binding ModuleName}" FontWeight="SemiBold"/>
-                                                    <TextBlock Text="{Binding ModuleVersion}" FontSize="10" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                                
+                                                <!-- Large icon (64x64) -->
+                                                <Border Grid.Column="0"
+                                                        Width="64" Height="64"
+                                                        Background="{DynamicResource SecondaryBackgroundBrush}"
+                                                        BorderBrush="{DynamicResource ControlBorderBrush}"
+                                                        BorderThickness="1"
+                                                        CornerRadius="4"
+                                                        VerticalAlignment="Top">
+                                                    <Image Source="{Binding ModuleIcon}" 
+                                                           Width="48" Height="48"
+                                                           Stretch="Uniform"/>
+                                                </Border>
+                                                
+                                                <!-- Module info -->
+                                                <StackPanel Grid.Column="1" 
+                                                            Margin="16,0,0,0"
+                                                            VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding ModuleName}" 
+                                                               FontSize="16"
+                                                               FontWeight="SemiBold"
+                                                               Foreground="{DynamicResource TextPrimaryBrush}"
+                                                               Margin="0,0,0,8"/>
+                                                    <TextBlock Text="{Binding Converter={StaticResource ModuleToDescriptionConverter}}"
+                                                               FontSize="13"
+                                                               Foreground="{DynamicResource TextSecondaryBrush}"
+                                                               TextWrapping="Wrap"
+                                                               LineHeight="20"/>
                                                 </StackPanel>
-                                                <Ellipse Grid.Column="2" Width="10" Height="10" Fill="{DynamicResource AccentBrush}"
-                                                         Visibility="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}, Converter={StaticResource BoolToVisibility}}"/>
                                             </Grid>
                                         </DataTemplate>
                                     </ListBox.ItemTemplate>
+                                    <ListBox.ItemContainerStyle>
+                                        <Style TargetType="ListBoxItem">
+                                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                            <Setter Property="Margin" Value="0,0,0,8"/>
+                                            <Setter Property="Padding" Value="0"/>
+                                            <Style.Triggers>
+                                                <Trigger Property="IsSelected" Value="True">
+                                                    <Setter Property="Background" Value="{DynamicResource HighlightSelectionBrush}"/>
+                                                    <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                                                    <Setter Property="BorderThickness" Value="2"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </ListBox.ItemContainerStyle>
                                 </ListBox>
-                                <Button Content="Create" Width="120" Margin="0,12,0,0" 
+                                
+                                <!-- Create button -->
+                                <Button Grid.Row="2"
+                                        Content="Create" 
+                                        Width="140" 
+                                        Height="40"
+                                        FontSize="15"
+                                        Margin="0,24,0,0" 
+                                        HorizontalAlignment="Left"
+                                        Style="{StaticResource AccentButtonStyle}"
                                         Command="{Binding FileCommands.NewCommand}" 
                                         IsEnabled="{Binding FileCommands.SelectedModule, Converter={StaticResource NullToBooleanConverter}}"/>
-                            </StackPanel>
+                            </Grid>
                         </fluent:BackstageTabItem>
                         <fluent:BackstageTabItem Header="Open">
                             <!-- Replace previous inline Open content with dedicated view for stepwise implementation -->

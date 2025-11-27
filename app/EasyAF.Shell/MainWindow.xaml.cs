@@ -1,5 +1,7 @@
-﻿using Fluent;
+﻿using System.Windows.Input;
+using Fluent;
 using EasyAF.Shell.Services;
+using EasyAF.Shell.ViewModels;
 
 namespace EasyAF.Shell;
 
@@ -21,5 +23,17 @@ public partial class MainWindow : RibbonWindow
                 backstage.IsOpen = false;
             }
         };
+    }
+    
+    /// <summary>
+    /// Handles double-click on module list to create document.
+    /// </summary>
+    private void ModuleList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+        // Execute New command if a module is selected
+        if (DataContext is MainWindowViewModel vm && vm.FileCommands.SelectedModule != null)
+        {
+            vm.FileCommands.NewCommand.Execute();
+        }
     }
 }

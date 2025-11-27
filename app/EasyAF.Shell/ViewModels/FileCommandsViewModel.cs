@@ -141,8 +141,12 @@ public class FileCommandsViewModel : BindableBase
     /// <remarks>
     /// This list is dynamically populated from the ModuleCatalog and updates automatically
     /// when modules are loaded or unloaded.
+    /// Modules are sorted with Project Editor first, then alphabetically by name.
     /// </remarks>
-    public IEnumerable<IDocumentModule> AvailableDocumentModules => _moduleCatalog.DocumentModules;
+    public IEnumerable<IDocumentModule> AvailableDocumentModules => 
+        _moduleCatalog.DocumentModules
+            .OrderByDescending(m => m.ModuleName.Contains("Project", StringComparison.OrdinalIgnoreCase))
+            .ThenBy(m => m.ModuleName);
 
     private IDocumentModule? _selectedModule;
     
