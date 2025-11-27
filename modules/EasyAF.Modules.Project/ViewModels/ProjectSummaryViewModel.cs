@@ -655,53 +655,24 @@ namespace EasyAF.Modules.Project.ViewModels
                 }
             }
             
-            // CROSS-MODULE EDIT: 2025-01-27 Default Import Map from Settings
-            // Modified for: Use default map from Project module settings if no previous selection
-            // Related modules: Project (ProjectModuleSettings, ProjectSettingsExtensions)
-            // Rollback instructions: Remove settings check below
-            
-            // If no previous selection, check for default from settings
-            if (itemToSelect == null)
+            // If no previous selection, use whatever is in MapPathHistory[0] (set by CreateNew or user)
+            if (itemToSelect == null && _document.Project.MapPathHistory != null && _document.Project.MapPathHistory.Count > 0)
             {
-                // Try to get default map from settings (requires ISettingsService)
-                // We don't have direct access here, so we'll check if MapPathHistory has something
-                // When creating new projects, the ProjectModule will pre-populate this
-                itemToSelect = AvailableMappings.FirstOrDefault(m => !m.IsBrowseItem);
+                var historyFirst = _document.Project.MapPathHistory.First();
+                itemToSelect = AvailableMappings.FirstOrDefault(m => 
+                    !m.IsBrowseItem && 
+                    string.Equals(m.FilePath, historyFirst, StringComparison.OrdinalIgnoreCase));
+                
                 if (itemToSelect != null)
                 {
-                    Log.Debug("Auto-selected most recent mapping: {Path}", itemToSelect.FilePath);
+                    Log.Debug("Selected map from MapPathHistory: {Path}", historyFirst);
                 }
             }
             
-            // Update selection silently (don't mark dirty - just restoring/loading state)
+            // Update selection (just set backing field, MapPathHistory is already correct)
             if (itemToSelect != null)
             {
-                _selectedMapping = itemToSelect; // Set backing field directly to avoid setter
-                
-                // CROSS-MODULE EDIT: 2025-01-27 Fix Default Map Not Saving to MapPathHistory
-                // Modified for: Ensure auto-selected map updates MapPathHistory
-                // Related modules: Project (ProjectDocument.CreateNew pre-populates with default)
-                // Rollback instructions: Remove MapPathHistory update logic below
-                
-                // Ensure MapPathHistory has this selection at the front
-                // This is critical for new documents where default map is auto-selected
-                if (!string.IsNullOrEmpty(itemToSelect.FilePath) && !itemToSelect.IsBrowseItem)
-                {
-                    // Initialize MapPathHistory if needed
-                    if (_document.Project.MapPathHistory == null)
-                        _document.Project.MapPathHistory = new System.Collections.Generic.List<string>();
-                    
-                    // Check if it's already at the front (common case - already there from CreateNew)
-                    var currentFirst = _document.Project.MapPathHistory.FirstOrDefault();
-                    if (!string.Equals(currentFirst, itemToSelect.FilePath, StringComparison.OrdinalIgnoreCase))
-                    {
-                        // Not at front - move it there
-                        _document.Project.MapPathHistory.Remove(itemToSelect.FilePath);
-                        _document.Project.MapPathHistory.Insert(0, itemToSelect.FilePath);
-                        Log.Debug("Updated MapPathHistory[0] to: {Path}", itemToSelect.FilePath);
-                    }
-                }
-                
+                _selectedMapping = itemToSelect;
                 RaisePropertyChanged(nameof(SelectedMapping));
                 RaisePropertyChanged(nameof(MappingPathDisplay));
                 RaisePropertyChanged(nameof(MappingValidationIcon));
