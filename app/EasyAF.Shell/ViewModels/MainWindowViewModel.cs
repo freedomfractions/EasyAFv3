@@ -161,10 +161,17 @@ public class MainWindowViewModel : BindableBase
             // Attempt to open via DocumentManager (will throw if no module can handle it)
             var document = _documentManager.OpenDocument(filePath);
             
-            // DocumentManager already adds to recent files via DocumentOpened event handler in FileCommandsViewModel
-            // But we'll add it again here to ensure it's at the top of the list
+            // Add to recent files
             var recentFilesService = _container.Resolve<IRecentFilesService>();
             recentFilesService.AddRecentFile(filePath);
+            
+            // Track the folder containing this file
+            var recentFoldersService = _container.Resolve<IRecentFoldersService>();
+            var folderPath = Path.GetDirectoryName(filePath);
+            if (!string.IsNullOrWhiteSpace(folderPath))
+            {
+                recentFoldersService.AddRecentFolder(folderPath);
+            }
             
             Log.Information("Opened document from backstage: {Path}", filePath);
         }
