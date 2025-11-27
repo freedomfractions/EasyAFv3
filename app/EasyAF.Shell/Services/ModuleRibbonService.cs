@@ -39,7 +39,23 @@ public class ModuleRibbonService : IModuleRibbonService
             {
                 foreach (var tab in tabs)
                 {
-                    if (tab != null) Tabs.Add(tab);
+                    if (tab != null)
+                    {
+                        // Check if a tab with the same header already exists
+                        var existingTab = Tabs.FirstOrDefault(t => 
+                            t.Header?.ToString()?.Equals(tab.Header?.ToString(), StringComparison.OrdinalIgnoreCase) == true);
+                        
+                        if (existingTab != null)
+                        {
+                            // Update existing tab's DataContext instead of adding duplicate
+                            existingTab.DataContext = tab.DataContext;
+                        }
+                        else
+                        {
+                            // Add new tab
+                            Tabs.Add(tab);
+                        }
+                    }
                 }
             }
         }
