@@ -234,6 +234,9 @@ public class OpenBackstageViewModel : BindableBase
         // Subscribe to RecentFiles changes to keep our list in sync
         _recentFilesService.RecentFiles.CollectionChanged += OnRecentFilesChanged;
         
+        // Subscribe to RecentFolders changes to keep our list in sync
+        _recentFoldersService.RecentFolders.CollectionChanged += OnRecentFoldersChanged;
+        
         // Initial load from service
         LoadRecentFilesFromService();
         LoadSampleRecentFolders(); // TODO: Replace with real folder tracking service
@@ -1132,6 +1135,15 @@ public class OpenBackstageViewModel : BindableBase
     {
         // Reload when the service's list changes
         LoadRecentFilesFromService();
+    }
+
+    /// <summary>
+    /// Handles changes to the RecentFolders collection from IRecentFoldersService.
+    /// </summary>
+    private void OnRecentFoldersChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    {
+        // Reload when the service's list changes
+        LoadSampleRecentFolders();
     }
 
     /// <summary>
