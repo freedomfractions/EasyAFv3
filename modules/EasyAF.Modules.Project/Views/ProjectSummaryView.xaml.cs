@@ -2,6 +2,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows;
 using System.Windows.Media;
+using System.Windows.Media.Media3D;
 
 namespace EasyAF.Modules.Project.Views
 {
@@ -27,8 +28,12 @@ namespace EasyAF.Modules.Project.Views
         {
             base.OnPreviewMouseWheel(e);
 
-            // Only handle if the event originated from a DataGrid and hasn't been handled yet
+            // Only handle if the event originated from a DependencyObject and hasn't been handled yet
             if (e.Handled || !(e.OriginalSource is DependencyObject source))
+                return;
+
+            // Skip if source is not a Visual (e.g., Run elements in text)
+            if (source is not Visual and not Visual3D)
                 return;
 
             // Find the DataGrid in the visual tree
@@ -58,7 +63,16 @@ namespace EasyAF.Modules.Project.Views
                 if (parentObject is T parent)
                     return parent;
 
-                parentObject = VisualTreeHelper.GetParent(parentObject);
+                // Only try to get parent if current object is a Visual or Visual3D
+                if (parentObject is Visual or Visual3D)
+                {
+                    parentObject = VisualTreeHelper.GetParent(parentObject);
+                }
+                else
+                {
+                    // Not in visual tree, exit early
+                    return null;
+                }
             }
 
             return null;
