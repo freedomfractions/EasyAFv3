@@ -21,11 +21,85 @@
               Foreground="{DynamicResource TextPrimaryBrush}">
         <Grid Margin="8">
             <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/> <!-- Import Map row -->
+                <RowDefinition Height="8"/>    <!-- Spacer -->
+                <RowDefinition Height="Auto"/> <!-- Project Type row -->
+                <RowDefinition Height="16"/>   <!-- Spacer -->
+                <RowDefinition Height="*"/>    <!-- Data Statistics Table -->
             </Grid.RowDefinitions>
             
+            <!-- Import Map Row -->
+            <Grid Grid.Row="0" x:Name="ImportMapContainer">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <TextBlock Grid.Column="0" Text="Import Map:" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                <ComboBox Grid.Column="1" 
+                          ItemsSource="{Binding AvailableMappings}"
+                          SelectedItem="{Binding SelectedMapping}"
+                          VerticalAlignment="Center" 
+                          Margin="0,0,20,0" 
+                          MinWidth="200"
+                          HorizontalAlignment="Stretch"
+                          HorizontalContentAlignment="Left"
+                          VerticalContentAlignment="Center"
+                          xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+                          xmlns:behaviors="clr-namespace:EasyAF.Modules.Project.Behaviors">
+                    <i:Interaction.Behaviors>
+                        <behaviors:RefreshOnDropDownBehavior RefreshAction="{Binding RefreshMappingsAction}"/>
+                    </i:Interaction.Behaviors>
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding FormattedDisplayName}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                
+                <TextBlock Grid.Column="2" Text="Path:" Margin="0,0,8,0" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                <TextBlock Grid.Column="3" 
+                           Text="{Binding MappingPathDisplay}" 
+                           VerticalAlignment="Center"
+                           Foreground="{DynamicResource TextSecondaryBrush}"
+                           TextTrimming="CharacterEllipsis"
+                           ToolTip="{Binding MappingPathDisplay}"/>
+                <TextBlock Grid.Column="4" 
+                           Text="{Binding MappingValidationIcon}"
+                           FontFamily="Segoe MDL2 Assets"
+                           FontSize="16"
+                           Margin="8,0,0,0"
+                           VerticalAlignment="Center"
+                           Foreground="{Binding MappingValidationBrush}"
+                           ToolTip="{Binding MappingValidationTooltip}"/>
+            </Grid>
+            
+            <!-- Project Type Row -->
+            <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                
+                <TextBlock Grid.Column="0" Text="Project Type:" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <RadioButton Content="Standard EasyPower Model" 
+                                 IsChecked="{Binding IsStandardProjectType}" 
+                                 GroupName="ProjectType" 
+                                 Margin="0,0,20,0"
+                                 VerticalAlignment="Center"/>
+                    <RadioButton Content="Composite Model" 
+                                 IsChecked="{Binding IsCompositeProjectType}" 
+                                 GroupName="ProjectType"
+                                 VerticalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+            
             <!-- Data Statistics Table -->
-            <Grid Grid.Row="0" x:Name="StatisticsTableContainer">
+            <Grid Grid.Row="4" x:Name="StatisticsTableContainer">
                 <!-- Background rounded rectangles for New Data and Old Data columns -->
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1.5*"/> <!-- Data Type column (proportional) -->
