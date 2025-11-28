@@ -3,14 +3,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Background="{DynamicResource SecondaryBackgroundBrush}">
     
-    <!-- CROSS-MODULE EDIT: 2025-01-27 Settings Tab Layout Improvement -->
-    <!-- Modified for: Make entire tab scrollable to prevent clipping and compressed grids -->
-    <!-- Related modules: None -->
-    <!-- Rollback instructions: Remove ScrollViewer wrapper, restore direct Grid -->
+    <!-- DEPRECATED: 2025-11-28 Data Types moved to global Shell settings -->
+    <!-- Modified for: This view now only contains Maps Directory setting -->
+    <!-- The Data Types configuration has been moved to Shell > Options > Data Types tab -->
+    <!-- TODO: Remove data type-related code from MapModuleSettingsViewModel -->
     
-    <ScrollViewer VerticalScrollBarVisibility="Auto"
-                  HorizontalScrollBarVisibility="Disabled">
-        <StackPanel Margin="20">
+    <Grid Margin="20">
+        <StackPanel>
             
             <!-- Header -->
             <TextBlock Text="Map Editor Configuration"
@@ -23,9 +22,9 @@
             <TextBlock TextWrapping="Wrap"
                        Foreground="{DynamicResource TextSecondaryBrush}"
                        Margin="0,0,0,20">
-                <Run Text="Control which data types and properties are available in the Map Editor."/>
+                <Run Text="Configure Map Editor-specific settings."/>
                 <LineBreak/>
-                <Run Text="Unchecked data types will not appear as tabs. Click 'Properties...' to configure which properties are available for mapping."/>
+                <Run Text="Note: Data type and property filtering has been moved to the global 'Data Types' tab."/>
             </TextBlock>
             
             <!-- Maps Directory Section -->
@@ -58,142 +57,18 @@
                         Style="{StaticResource BaseButtonStyle}"/>
             </Grid>
             
-            <!-- Data Type Configuration Section Header -->
-            <Grid Margin="0,0,0,8">
-                <TextBlock Text="Data Types &amp; Properties"
+            <!-- DEPRECATED: Data Types section moved to Shell > Options > Data Types tab -->
+            <!-- The code below is hidden but kept for reference during migration -->
+            <!-- TODO: Remove this entire section and related ViewModel code -->
+            <!--
+            <Grid Margin="0,0,0,8" Visibility="Collapsed">
+                <TextBlock Text="Data Types &amp; Properties (DEPRECATED - use global Data Types tab)"
                            FontWeight="SemiBold"
-                           Foreground="{DynamicResource TextPrimaryBrush}"
-                           VerticalAlignment="Center"/>
-                
-                <!-- Data Type Count -->
-                <TextBlock HorizontalAlignment="Right"
-                           VerticalAlignment="Center"
                            Foreground="{DynamicResource TextSecondaryBrush}"
-                           FontSize="12">
-                    <Run Text="{Binding EnabledCount, Mode=OneWay}" FontWeight="SemiBold"/>
-                    <Run Text="of"/>
-                    <Run Text="{Binding TotalCount, Mode=OneWay}" FontWeight="SemiBold"/>
-                    <Run Text="data types enabled"/>
-                </TextBlock>
+                           VerticalAlignment="Center"/>
             </Grid>
-            
-            <!-- Data Types Grid with fixed height for proper scrolling -->
-            <Border BorderBrush="{DynamicResource ControlBorderBrush}"
-                    BorderThickness="1"
-                    Background="{DynamicResource ControlBackgroundBrush}"
-                    Margin="0,0,0,16"
-                    MinHeight="300"
-                    MaxHeight="400">
-                <DataGrid ItemsSource="{Binding DataTypes}"
-                          AutoGenerateColumns="False"
-                          CanUserAddRows="False"
-                          CanUserDeleteRows="False"
-                          CanUserResizeRows="False"
-                          CanUserReorderColumns="False"
-                          HeadersVisibility="Column"
-                          GridLinesVisibility="Horizontal"
-                          RowBackground="{DynamicResource ControlBackgroundBrush}"
-                          AlternatingRowBackground="{DynamicResource SecondaryBackgroundBrush}"
-                          Background="{DynamicResource ControlBackgroundBrush}"
-                          BorderThickness="0"
-                          SelectionMode="Single"
-                          RowHeight="48">
-                    
-                    <!-- Style for DataGrid to theme the ScrollViewer background -->
-                    <DataGrid.Resources>
-                        <Style TargetType="ScrollViewer">
-                            <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}"/>
-                        </Style>
-                    </DataGrid.Resources>
-                    
-                    <!-- Style for headers -->
-                    <DataGrid.ColumnHeaderStyle>
-                        <Style TargetType="DataGridColumnHeader">
-                            <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
-                            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
-                            <Setter Property="BorderBrush" Value="{DynamicResource ControlBorderBrush}"/>
-                            <Setter Property="BorderThickness" Value="0,0,0,1"/>
-                            <Setter Property="Padding" Value="8,6"/>
-                            <Setter Property="FontWeight" Value="SemiBold"/>
-                        </Style>
-                    </DataGrid.ColumnHeaderStyle>
-                    
-                    <!-- Style for cells -->
-                    <DataGrid.CellStyle>
-                        <Style TargetType="DataGridCell">
-                            <Setter Property="BorderThickness" Value="0"/>
-                            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
-                            <Setter Property="Padding" Value="0"/>
-                            <Setter Property="VerticalContentAlignment" Value="Center"/>
-                            <Style.Triggers>
-                                <Trigger Property="IsSelected" Value="True">
-                                    <Setter Property="Background" Value="{DynamicResource HighlightSelectionBrush}"/>
-                                    <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </DataGrid.CellStyle>
-                    
-                    <!-- Columns -->
-                    <DataGrid.Columns>
-                        <!-- Enabled Checkbox -->
-                        <DataGridTemplateColumn Header="Enabled" Width="80">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <CheckBox IsChecked="{Binding IsEnabled, UpdateSourceTrigger=PropertyChanged}"
-                                              HorizontalAlignment="Center"
-                                              VerticalAlignment="Center"
-                                              Margin="8"/>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        
-                        <!-- Data Type Name -->
-                        <DataGridTextColumn Header="Data Type" 
-                                            Binding="{Binding DataTypeDisplayName}" 
-                                            Width="250"
-                                            IsReadOnly="True">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="VerticalAlignment" Value="Center"/>
-                                    <Setter Property="Padding" Value="8,0"/>
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
-                        
-                        <!-- Properties Button -->
-                        <DataGridTemplateColumn Header="Properties" Width="*">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Button Content="{Binding PropertiesDisplay}"
-                                            Command="{Binding DataContext.ConfigurePropertiesCommand, 
-                                                     RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                            CommandParameter="{Binding}"
-                                            Style="{StaticResource BaseButtonStyle}"
-                                            HorizontalAlignment="Left"
-                                            VerticalAlignment="Center"
-                                            Padding="12,6"
-                                            Margin="8,0"/>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
-            </Border>
-            
-            <!-- Reset Button -->
-            <Button Content="Reset to Defaults"
-                    Command="{Binding ResetToDefaultsCommand}"
-                    Style="{StaticResource BaseButtonStyle}"
-                    HorizontalAlignment="Left"
-                    Padding="12,6">
-                <Button.ToolTip>
-                    <ToolTip>
-                        <TextBlock Text="Enable all data types and properties (wildcard mode)"/>
-                    </ToolTip>
-                </Button.ToolTip>
-            </Button>
+            -->
             
         </StackPanel>
-    </ScrollViewer>
+    </Grid>
 </UserControl>
