@@ -4,6 +4,7 @@
              Background="{DynamicResource PrimaryBackgroundBrush}">
     
     <ScrollViewer VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled"
                   Background="{DynamicResource PrimaryBackgroundBrush}">
         <Grid Margin="20">
             <!-- Two-column layout (same as Map/Project Setup tabs) -->
@@ -24,6 +25,7 @@
                 <!-- Table Definitions Section -->
                 <GroupBox Grid.Row="0" 
                           Header="Tables" 
+                          Foreground="{DynamicResource TextPrimaryBrush}"
                           BorderBrush="{DynamicResource ControlBorderBrush}">
                     <Grid Margin="8">
                         <Grid.RowDefinitions>
@@ -33,24 +35,25 @@
                         
                         <!-- Toolbar -->
                         <ToolBar Grid.Row="0" 
-                                 Background="Transparent"
-                                 BorderThickness="0">
+                                 Background="{DynamicResource SecondaryBackgroundBrush}"
+                                 BorderBrush="{DynamicResource ControlBorderBrush}"
+                                 BorderThickness="0,0,0,1">
                             <Button Content="Add Table" 
                                     Command="{Binding AddTableCommand}"
-                                    Style="{DynamicResource BaseButtonStyle}"/>
+                                    Style="{StaticResource BaseButtonStyle}"/>
                             <Button Content="Remove" 
                                     Command="{Binding RemoveTableCommand}"
-                                    Style="{DynamicResource BaseButtonStyle}"/>
+                                    Style="{StaticResource BaseButtonStyle}"/>
                             <Separator/>
                             <Button Content="▲" 
                                     Command="{Binding MoveTableUpCommand}"
                                     ToolTip="Move Up"
-                                    Style="{DynamicResource BaseButtonStyle}"
+                                    Style="{StaticResource BaseButtonStyle}"
                                     Width="32"/>
                             <Button Content="▼" 
                                     Command="{Binding MoveTableDownCommand}"
                                     ToolTip="Move Down"
-                                    Style="{DynamicResource BaseButtonStyle}"
+                                    Style="{StaticResource BaseButtonStyle}"
                                     Width="32"/>
                         </ToolBar>
                         
@@ -65,7 +68,10 @@
                                   Foreground="{DynamicResource TextPrimaryBrush}"
                                   BorderBrush="{DynamicResource ControlBorderBrush}"
                                   BorderThickness="1"
-                                  Margin="0,8,0,0">
+                                  Margin="0,8,0,0"
+                                  ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                  ScrollViewer.CanContentScroll="False">
                             <DataGrid.Columns>
                                 <!-- Table Name Column -->
                                 <DataGridTextColumn Header="Table Name" 
@@ -82,21 +88,80 @@
                                 <DataGridTextColumn Header="Columns" 
                                                     Binding="{Binding ColumnCount, Mode=OneWay}" 
                                                     Width="80"
-                                                    IsReadOnly="True"/>
+                                                    IsReadOnly="True">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
                                 
-                                <!-- Mode Column -->
+                                <!-- Mode Column (TODO: Bind to TableMode property) -->
                                 <DataGridComboBoxColumn Header="Mode" 
                                                         Width="100">
-                                    <!-- TODO: Bind to TableMode property -->
+                                    <!-- Placeholder for Task 26 -->
                                 </DataGridComboBoxColumn>
                             </DataGrid.Columns>
                         </DataGrid>
+                        
+                        <!-- Empty State Overlay (shown when no tables) -->
+                        <Border Grid.Row="1"
+                                Background="{DynamicResource WindowBackgroundBrush}"
+                                Opacity="0.95"
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Center"
+                                CornerRadius="8"
+                                Padding="32,24"
+                                BorderBrush="{DynamicResource ControlBorderBrush}"
+                                BorderThickness="2"
+                                Margin="10"
+                                IsHitTestVisible="False">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Tables.Count}" Value="0">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            
+                            <StackPanel MaxWidth="350">
+                                <!-- Icon -->
+                                <TextBlock Text="&#xE946;"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="48"
+                                           HorizontalAlignment="Center"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                           Margin="0,0,0,16"/>
+                                
+                                <!-- Title -->
+                                <TextBlock Text="No Tables Defined"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           HorizontalAlignment="Center"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"
+                                           Margin="0,0,0,8"/>
+                                
+                                <!-- Message -->
+                                <TextBlock TextWrapping="Wrap"
+                                           TextAlignment="Center"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                           Margin="0,0,0,16">
+                                    <Run Text="Click"/>
+                                    <Run Text="Add Table" FontWeight="Bold"/>
+                                    <Run Text="above to create your first table specification. Each table represents a report or label layout."/>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
                     </Grid>
                 </GroupBox>
                 
                 <!-- Statistics Section -->
                 <GroupBox Grid.Row="2" 
                           Header="Table Statistics" 
+                          Foreground="{DynamicResource TextPrimaryBrush}"
                           BorderBrush="{DynamicResource ControlBorderBrush}"
                           MaxHeight="300">
                     <DataGrid ItemsSource="{Binding Statistics}"
@@ -106,7 +171,10 @@
                               Foreground="{DynamicResource TextPrimaryBrush}"
                               BorderBrush="{DynamicResource ControlBorderBrush}"
                               BorderThickness="1"
-                              HeadersVisibility="Column">
+                              HeadersVisibility="Column"
+                              ScrollViewer.VerticalScrollBarVisibility="Auto"
+                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                              ScrollViewer.CanContentScroll="False">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Data Type" 
                                                 Binding="{Binding DataTypeName}" 
@@ -126,11 +194,23 @@
                             
                             <DataGridTextColumn Header="Fields Used" 
                                                 Binding="{Binding FieldsUsed}" 
-                                                Width="100"/>
+                                                Width="100">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="HorizontalAlignment" Value="Center"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
                             
                             <DataGridTextColumn Header="Fields Available" 
                                                 Binding="{Binding FieldsAvailable}" 
-                                                Width="120"/>
+                                                Width="120">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="HorizontalAlignment" Value="Center"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
                         </DataGrid.Columns>
                     </DataGrid>
                 </GroupBox>
@@ -139,6 +219,7 @@
             <!-- RIGHT COLUMN: Map Validation -->
             <GroupBox Grid.Column="2" 
                       Header="Map Validation" 
+                      Foreground="{DynamicResource TextPrimaryBrush}"
                       BorderBrush="{DynamicResource ControlBorderBrush}">
                 <Grid Margin="8">
                     <Grid.RowDefinitions>
@@ -173,44 +254,98 @@
                     <Button Grid.Row="2" 
                             Content="Validate Against Map" 
                             Command="{Binding ValidateMapCommand}"
-                            Style="{DynamicResource AccentButtonStyle}"
+                            Style="{StaticResource AccentButtonStyle}"
                             HorizontalAlignment="Stretch"
                             Padding="8,4"/>
                     
                     <!-- Validation Results -->
-                    <GroupBox Grid.Row="4" 
-                              Header="Validation Results"
-                              BorderBrush="{DynamicResource ControlBorderBrush}">
-                        <DataGrid ItemsSource="{Binding ValidationResults}"
-                                  AutoGenerateColumns="False"
-                                  IsReadOnly="True"
-                                  Background="{DynamicResource ControlBackgroundBrush}"
+                    <Grid Grid.Row="4">
+                        <GroupBox Header="Validation Results"
                                   Foreground="{DynamicResource TextPrimaryBrush}"
-                                  BorderBrush="{DynamicResource ControlBorderBrush}"
-                                  BorderThickness="1">
-                            <DataGrid.Columns>
-                                <!-- Status Icon -->
-                                <DataGridTemplateColumn Header="" Width="30">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <Ellipse Width="12" 
-                                                     Height="12" 
-                                                     Fill="{Binding StatusColor}"
-                                                     HorizontalAlignment="Center"/>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
+                                  BorderBrush="{DynamicResource ControlBorderBrush}">
+                            <DataGrid ItemsSource="{Binding ValidationResults}"
+                                      AutoGenerateColumns="False"
+                                      IsReadOnly="True"
+                                      Background="{DynamicResource ControlBackgroundBrush}"
+                                      Foreground="{DynamicResource TextPrimaryBrush}"
+                                      BorderBrush="{DynamicResource ControlBorderBrush}"
+                                      BorderThickness="1"
+                                      ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                      ScrollViewer.CanContentScroll="False">
+                                <DataGrid.Columns>
+                                    <!-- Status Icon -->
+                                    <DataGridTemplateColumn Header="" Width="30">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Ellipse Width="12" 
+                                                         Height="12" 
+                                                         Fill="{Binding StatusColor}"
+                                                         HorizontalAlignment="Center"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    
+                                    <DataGridTextColumn Header="Property Path" 
+                                                        Binding="{Binding PropertyPath}" 
+                                                        Width="*"/>
+                                    
+                                    <DataGridTextColumn Header="Status" 
+                                                        Binding="{Binding Status}" 
+                                                        Width="100"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </GroupBox>
+                        
+                        <!-- Empty Results Overlay (sibling to GroupBox, not child) -->
+                        <Border Background="{DynamicResource WindowBackgroundBrush}"
+                                Opacity="0.95"
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Center"
+                                CornerRadius="8"
+                                Padding="24,16"
+                                BorderBrush="{DynamicResource ControlBorderBrush}"
+                                BorderThickness="2"
+                                Margin="10"
+                                IsHitTestVisible="False">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ValidationResults.Count}" Value="0">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            
+                            <StackPanel MaxWidth="300">
+                                <!-- Icon -->
+                                <TextBlock Text="&#xE946;"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="32"
+                                           HorizontalAlignment="Center"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                           Margin="0,0,0,12"/>
                                 
-                                <DataGridTextColumn Header="Property Path" 
-                                                    Binding="{Binding PropertyPath}" 
-                                                    Width="*"/>
+                                <!-- Message -->
+                                <TextBlock Text="No validation results yet"
+                                           FontSize="13"
+                                           TextAlignment="Center"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                           Margin="0,0,0,8"/>
                                 
-                                <DataGridTextColumn Header="Status" 
-                                                    Binding="{Binding Status}" 
-                                                    Width="100"/>
-                            </DataGrid.Columns>
-                        </DataGrid>
-                    </GroupBox>
+                                <TextBlock TextWrapping="Wrap"
+                                           TextAlignment="Center"
+                                           FontSize="11"
+                                           Foreground="{DynamicResource TextTertiaryBrush}">
+                                    <Run Text="Select a map file and click"/>
+                                    <Run Text="Validate" FontWeight="Bold"/>
+                                    <Run Text="to check property compatibility"/>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
                 </Grid>
             </GroupBox>
         </Grid>
