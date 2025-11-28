@@ -8,6 +8,7 @@ using System.Windows.Input;
 using Prism.Mvvm;
 using Prism.Commands;
 using EasyAF.Core.Contracts;
+using EasyAF.Core.Services; // NEW: For DataTypeSettingsExtensions
 using EasyAF.Modules.Map.Models;
 using EasyAF.Modules.Map.Services;
 using Serilog;

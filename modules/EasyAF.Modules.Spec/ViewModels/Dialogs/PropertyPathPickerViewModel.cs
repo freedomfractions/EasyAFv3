@@ -10,7 +10,8 @@ using Prism.Mvvm;
 using EasyAF.Engine;
 using EasyAF.Modules.Spec.Models;
 using EasyAF.Modules.Map.Services;
-using EasyAF.Core.Contracts; // NEW: For ISettingsService
+using EasyAF.Core.Contracts;
+using EasyAF.Core.Services; // NEW: For DataTypeSettingsExtensions
 using Serilog;
 
 namespace EasyAF.Modules.Spec.ViewModels.Dialogs

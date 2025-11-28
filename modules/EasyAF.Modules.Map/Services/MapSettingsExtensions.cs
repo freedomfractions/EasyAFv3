@@ -5,7 +5,7 @@ using EasyAF.Core.Services; // NEW: Use global settings
 namespace EasyAF.Modules.Map.Services
 {
     // CROSS-MODULE EDIT: 2025-11-28 Task 26 - Global Data Type Filtering
-    // Modified for: Redirect to global settings (backward compatibility wrapper)
+    // Modified for: DEPRECATED - All methods moved to Core.Services.DataTypeSettingsExtensions
     // Related modules: Map (this file), Core (DataTypeSettingsExtensions)
     // Rollback instructions: Restore original Map-only implementation
 
@@ -13,40 +13,21 @@ namespace EasyAF.Modules.Map.Services
     /// Extension methods for accessing Map module settings.
     /// </summary>
     /// <remarks>
-    /// DEPRECATED: This class now wraps global DataTypeSettingsExtensions.
-    /// Use Core.Services.DataTypeSettingsExtensions directly for new code.
+    /// <para>
+    /// DEPRECATED: This class is obsolete and kept only for backward compatibility.
+    /// All functionality has been moved to <see cref="DataTypeSettingsExtensions"/> in EasyAF.Core.
+    /// </para>
+    /// <para>
+    /// <strong>DO NOT ADD NEW METHODS HERE.</strong> Use Core.Services.DataTypeSettingsExtensions directly.
+    /// </para>
+    /// <para>
+    /// This file will be removed in a future version once all references are migrated.
+    /// </para>
     /// </remarks>
+    [System.Obsolete("Use EasyAF.Core.Services.DataTypeSettingsExtensions instead", false)]
     public static class MapSettingsExtensions
     {
-        // DEPRECATED: Redirect to global settings
-        public static Core.Models.DataTypeVisibilitySettings GetMapVisibilitySettings(this ISettingsService settingsService)
-        {
-            return settingsService.GetDataTypeVisibilitySettings();
-        }
-
-        public static void SetMapVisibilitySettings(this ISettingsService settingsService, Core.Models.DataTypeVisibilitySettings settings)
-        {
-            settingsService.SetDataTypeVisibilitySettings(settings);
-        }
-
-        public static bool IsDataTypeEnabled(this ISettingsService settingsService, string dataTypeName)
-        {
-            return settingsService.IsDataTypeEnabled(dataTypeName);
-        }
-
-        public static List<string> GetEnabledProperties(this ISettingsService settingsService, string dataTypeName)
-        {
-            return settingsService.GetEnabledProperties(dataTypeName);
-        }
-
-        public static void SetEnabledProperties(this ISettingsService settingsService, string dataTypeName, List<string> enabledProperties)
-        {
-            settingsService.SetEnabledProperties(dataTypeName, enabledProperties);
-        }
-
-        public static bool IsPropertyEnabled(this ISettingsService settingsService, string dataTypeName, string propertyName)
-        {
-            return settingsService.IsPropertyEnabled(dataTypeName, propertyName);
-        }
+        // All methods removed - use DataTypeSettingsExtensions in EasyAF.Core instead
+        // This class is kept as an empty shell to avoid breaking existing using statements
     }
 }

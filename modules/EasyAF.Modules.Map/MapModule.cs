@@ -6,6 +6,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using EasyAF.Core.Contracts;
 using EasyAF.Core.Models; // CHANGED: Use Core models
+using EasyAF.Core.Services; // NEW: For DataTypeSettingsExtensions
 using EasyAF.Modules.Map.Models;
 using EasyAF.Modules.Map.Services;
 using EasyAF.Import;
@@ -205,7 +206,7 @@ namespace EasyAF.Modules.Map
         {
             try
             {
-                var existing = settingsService.GetMapVisibilitySettings();
+                var existing = settingsService.GetDataTypeVisibilitySettings();
                 
                 // If settings already exist and have data types configured, don't overwrite
                 if (existing.DataTypes.Count > 0)
@@ -232,7 +233,7 @@ namespace EasyAF.Modules.Map
                 }
 
                 // Save defaults to settings
-                settingsService.SetMapVisibilitySettings(defaults);
+                settingsService.SetDataTypeVisibilitySettings(defaults);
                 
                 // CROSS-MODULE EDIT: 2025-01-27 Module Directory Settings Refactoring
                 // Modified for: Initialize default Maps directory on first run

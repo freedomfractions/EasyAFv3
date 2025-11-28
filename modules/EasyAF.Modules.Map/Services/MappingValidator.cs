@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using EasyAF.Import;
 using EasyAF.Modules.Map.Models;
-using EasyAF.Modules.Map.Services;
 using EasyAF.Core.Contracts;
+using EasyAF.Core.Services; // NEW: For DataTypeSettingsExtensions
 using Serilog;
 
 namespace EasyAF.Modules.Map.Services

@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Input;
 using EasyAF.Core.Contracts;
 using EasyAF.Core.Models; // CHANGED: Use Core models
+using EasyAF.Core.Services; // NEW: For DataTypeSettingsExtensions
 using EasyAF.Modules.Map.Models;
 using EasyAF.Modules.Map.Services;
 using EasyAF.Modules.Map.Views;
@@ -42,24 +43,14 @@ namespace EasyAF.Modules.Map.ViewModels
         /// <param name="settingsService">Service for accessing application settings.</param>
         /// <param name="propertyDiscovery">Service for discovering data type properties.</param>
         /// <param name="dialogService">Service for showing user dialogs.</param>
-        public MapModuleSettingsViewModel(
-            ISettingsService settingsService,
-            Services.IPropertyDiscoveryService propertyDiscovery,
-            IUserDialogService dialogService)
+        public MapModuleSettingsViewModel(ISettingsService settingsService, IPropertyDiscoveryService propertyDiscovery, IUserDialogService dialogService)
         {
             _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
             _propertyDiscovery = propertyDiscovery ?? throw new ArgumentNullException(nameof(propertyDiscovery));
             _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
 
-            // Load current settings
-            _settings = _settingsService.GetMapVisibilitySettings();
-            
-            // CROSS-MODULE EDIT: 2025-01-27 Module Directory Settings Refactoring
-            // Modified for: Add Maps Directory to Map module settings
-            // Related modules: Core (CrossModuleSettingsExtensions), Shell (removed File Paths tab)
-            // Rollback instructions: Remove MapsDirectory property and BrowseMapsDirectoryCommand
-            
-            // Load Maps directory (uses extension method with fallback)
+            // Load settings
+            _settings = _settingsService.GetDataTypeVisibilitySettings();
             _mapsDirectory = _settingsService.GetSetting("Directories.Maps", GetDefaultMapsDirectory());
 
             // Create data type items
@@ -371,16 +362,11 @@ namespace EasyAF.Modules.Map.ViewModels
                     };
                 }
 
-                _settingsService.SetMapVisibilitySettings(settings);
+                _settingsService.SetDataTypeVisibilitySettings(settings);
                 
-                // CROSS-MODULE EDIT: 2025-01-27 Module Directory Settings Refactoring
-                // Modified for: Save Maps directory to public settings key
-                // Related modules: Core (CrossModuleSettingsExtensions), Project (reads via GetMapsDirectory())
-                // Rollback instructions: Remove directory save logic
-                
-                // Save Maps directory to public settings key (other modules can read via extension method)
-                _settingsService.SetSetting("Directories.Maps", _mapsDirectory);
-                
+                // Save Maps directory
+                _settingsService.SetSetting("Directories.Maps", MapsDirectory);
+
                 Log.Information("Map module settings saved: {Count} data types configured, Maps directory: {Path}", 
                     DataTypes.Count, _mapsDirectory);
             }
@@ -396,7 +382,7 @@ namespace EasyAF.Modules.Map.ViewModels
         /// </summary>
         public void ReloadSettings()
         {
-            _settings = _settingsService.GetMapVisibilitySettings();
+            _settings = _settingsService.GetDataTypeVisibilitySettings();
             _mapsDirectory = _settingsService.GetSetting("Directories.Maps", GetDefaultMapsDirectory());
             DataTypes.Clear();
             InitializeDataTypes();

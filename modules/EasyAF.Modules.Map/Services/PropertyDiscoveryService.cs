@@ -5,6 +5,7 @@ using System.Reflection;
 using EasyAF.Modules.Map.Models;
 using EasyAF.Data.Models;
 using EasyAF.Core.Contracts;
+using EasyAF.Core.Services; // NEW: For DataTypeSettingsExtensions
 using Serilog;
 using MapPropertyInfo = EasyAF.Modules.Map.Models.PropertyInfo;
 using EasyAF.Data.Attributes;
