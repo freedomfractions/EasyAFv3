@@ -39,6 +39,7 @@
     <Color x:Key="TextSecondaryColor">#FF6B7280</Color>
     <Color x:Key="TextTertiaryColor">#FF9CA3AF</Color>
     <Color x:Key="TextDisabledColor">#FF9CA3AF</Color>
+    <Color x:Key="SelectedTextColor">#FF111827</Color>
     
     <!-- Status Colors -->
     <Color x:Key="ErrorColor">#FFDC2626</Color>
@@ -106,6 +107,8 @@
     <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondaryColor}"/>
     <SolidColorBrush x:Key="TextTertiaryBrush" Color="{StaticResource TextTertiaryColor}"/>
     <SolidColorBrush x:Key="TextDisabledBrush" Color="{StaticResource TextDisabledColor}"/>
+    <Color x:Key="SelectedTextColor">#FF111827</Color>
+    <SolidColorBrush x:Key="SelectedTextBrush" Color="{StaticResource SelectedTextColor}"/>
     
     <SolidColorBrush x:Key="ErrorBrush" Color="{StaticResource ErrorColor}"/>
     <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource SuccessColor}"/>

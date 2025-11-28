@@ -1081,4 +1081,38 @@
             </Setter.Value>
         </Setter>
     </Style>
+
+    <!-- CROSS-MODULE EDIT: 2025-01-28 Theme Bug Fix -->
+    <!-- Modified for: Fix DataGrid selection text visibility (white-on-white in Dark mode) -->
+    <!-- Related modules: All modules using DataGrid -->
+    <!-- Rollback instructions: Remove DataGridRow and DataGridCell styles -->
+    
+    <!-- Global DataGridRow style -->
+    <Style TargetType="DataGridRow">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+        <Style.Triggers>
+            <Trigger Property="IsSelected" Value="True">
+                <Setter Property="Background" Value="{DynamicResource HighlightSelectionBrush}"/>
+                <Setter Property="Foreground" Value="{DynamicResource SelectedTextBrush}"/>
+            </Trigger>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{DynamicResource HoverBackgroundBrush}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+    
+    <!-- Global DataGridCell style -->
+    <Style TargetType="DataGridCell">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Style.Triggers>
+            <Trigger Property="IsSelected" Value="True">
+                <Setter Property="Foreground" Value="{DynamicResource SelectedTextBrush}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
 </ResourceDictionary>
+
