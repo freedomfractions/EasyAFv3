@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.122" />
+    <PackageReference Include="Prism.Unity" Version="9.0.537" />
+    <PackageReference Include="Serilog" Version="4.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\lib\EasyAF.Core\EasyAF.Core.csproj" />
+    <ProjectReference Include="..\..\lib\EasyAF.Engine\EasyAF.Engine.csproj" />
+    <ProjectReference Include="..\..\lib\EasyAF.Data\EasyAF.Data.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Embedded PNG for in-app use (file tabs) -->
+    <Resource Include="Resources\spec-icon.png" />
+  </ItemGroup>
+
+</Project>
