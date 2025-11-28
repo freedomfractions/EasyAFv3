@@ -4,52 +4,29 @@ using EasyAF.Modules.Spec.ViewModels.Dialogs;
 namespace EasyAF.Modules.Spec.Views.Dialogs
 {
     /// <summary>
-    /// Interaction logic for PropertyPathPickerDialog.
+    /// Interaction logic for PropertyPathPickerDialog.xaml
     /// </summary>
     public partial class PropertyPathPickerDialog : Window
     {
         public PropertyPathPickerDialog()
         {
             InitializeComponent();
+            
+            // Subscribe to ViewModel DialogResult changes
+            DataContextChanged += OnDataContextChanged;
         }
 
-        /// <summary>
-        /// Gets the view model (set externally before showing dialog).
-        /// </summary>
-        public PropertyPathPickerViewModel ViewModel
+        private void OnDataContextChanged(object sender, System.Windows.DependencyPropertyChangedEventArgs e)
         {
-            get => (PropertyPathPickerViewModel)DataContext;
-            set
+            if (e.NewValue is PropertyPathPickerViewModel viewModel)
             {
-                DataContext = value;
-                
-                // Wire up dialog result from ViewModel
-                value.PropertyChanged += (s, e) =>
+                viewModel.PropertyChanged += (s, args) =>
                 {
-                    if (e.PropertyName == nameof(PropertyPathPickerViewModel.DialogResult))
+                    if (args.PropertyName == nameof(PropertyPathPickerViewModel.DialogResult))
                     {
-                        DialogResult = value.DialogResult;
+                        DialogResult = viewModel.DialogResult;
                     }
                 };
-                
-                // Initialize the "Show All" radio button state based on ViewModel
-                ShowAllRadio.IsChecked = !value.ShowActiveOnly;
-            }
-        }
-
-        private void ShowAllRadio_Checked(object sender, RoutedEventArgs e)
-        {
-            if (DataContext is PropertyPathPickerViewModel vm)
-            {
-                vm.ShowActiveOnly = false;
-            }
-        }
-
-        private void ShowAllRadio_Unchecked(object sender, RoutedEventArgs e)
-        {
-            if (DataContext is PropertyPathPickerViewModel vm)
-            {
-                vm.ShowActiveOnly = true;
             }
         }
     }
