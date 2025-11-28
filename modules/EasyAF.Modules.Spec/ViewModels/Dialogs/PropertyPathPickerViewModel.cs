@@ -160,12 +160,30 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
 
             foreach (var typeName in dataTypeNames)
             {
-                // Get all properties for this data type
-                var properties = _propertyDiscovery.GetAllPropertiesForType(typeName);
+                // CROSS-MODULE EDIT: 2025-11-28 Property-Level Filtering
+                // Modified for: Filter properties by enabled state when ShowActiveOnly is true
+                // Related modules: Core (DataTypeSettingsExtensions)
+                // Rollback instructions: Use GetAllPropertiesForType unconditionally
+                
+                // Get properties (filtered or all based on toggle)
+                List<EasyAF.Modules.Map.Models.PropertyInfo> properties;
+                if (_showActiveOnly)
+                {
+                    // Only enabled properties (respects property visibility settings)
+                    properties = _propertyDiscovery.GetPropertiesForType(typeName);
+                    Log.Debug("Data type {TypeName}: {Count} active properties (filtered)", typeName, properties.Count);
+                }
+                else
+                {
+                    // All properties (ignores property visibility settings)
+                    properties = _propertyDiscovery.GetAllPropertiesForType(typeName);
+                    Log.Debug("Data type {TypeName}: {Count} total properties (unfiltered)", typeName, properties.Count);
+                }
                 
                 if (properties.Count == 0)
                 {
-                    Log.Debug("Skipping data type {TypeName} - no properties found", typeName);
+                    Log.Debug("Skipping data type {TypeName} - no {Mode} properties found", 
+                        typeName, _showActiveOnly ? "active" : "total");
                     continue;
                 }
 
@@ -206,9 +224,10 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
                 DataTypes.Add(node);
             }
 
-            Log.Information("Loaded {Count} data types with {PropertyCount} total properties", 
+            Log.Information("Loaded {Count} data types with {PropertyCount} total properties (ShowActiveOnly={ShowActive})", 
                 DataTypes.Count, 
-                DataTypes.Sum(dt => dt.Properties.Count));
+                DataTypes.Sum(dt => dt.Properties.Count),
+                _showActiveOnly);
             
             // Notify UI of count changes
             RaisePropertyChanged(nameof(DisplayedTypeCount));
