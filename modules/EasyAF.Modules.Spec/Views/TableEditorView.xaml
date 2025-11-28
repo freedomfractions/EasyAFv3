@@ -1,6 +1,7 @@
 <UserControl x:Class="EasyAF.Modules.Spec.Views.TableEditorView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="clr-namespace:EasyAF.Modules.Spec.Converters"
              Background="{DynamicResource PrimaryBackgroundBrush}">
     
     <UserControl.Resources>
@@ -8,6 +9,9 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/EasyAF.Modules.Spec;component/Styles/SpecEditorStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+            
+            <!-- Converters -->
+            <converters:NullToBooleanConverter x:Key="NullToBooleanConverter"/>
             
             <!-- Expander Style matching GroupBox appearance -->
             <Style x:Key="TableConfigExpanderStyle" TargetType="Expander">
@@ -354,6 +358,7 @@
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
                                         <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding IsAdvancedFilterLogic}" Value="True">
                                                 <Setter Property="Visibility" Value="Visible"/>
