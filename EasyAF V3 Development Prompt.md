@@ -342,6 +342,133 @@ Next Task: [What should be worked on next]
 **NOTE: Newest entries appear at the top**
 
 ```
+Date: 2025-11-27T23:30:00-06:00
+Task: Task 25 - Build Table Definition Model and Setup Tab
+Status: Complete
+Blocking Issue: None
+Cross-Module Edits:
+- modules/EasyAF.Modules.Spec/EasyAF.Modules.Spec.csproj: Added icon resource
+- modules/EasyAF.Modules.Spec/SpecModule.cs: ViewModel wiring in Create/Open methods
+- modules/EasyAF.Modules.Spec/ViewModels/SpecDocumentViewModel.cs: Document coordinator
+- modules/EasyAF.Modules.Spec/ViewModels/SpecSetupViewModel.cs: Setup tab logic
+- modules/EasyAF.Modules.Spec/Views/SpecDocumentView.xaml: TabControl view
+- modules/EasyAF.Modules.Spec/Views/SpecSetupView.xaml: Two-column setup layout
+- modules/EasyAF.Modules.Spec/Resources/spec-icon.png: Module icon asset
+Notes:
+✅ COMPLETE: Setup tab with table management UI
+
+VIEWMODELS CREATED:
+1. SpecDocumentViewModel (Coordinator)
+   - Manages tab collection (Setup + future table tabs)
+   - Tab selection/activation
+   - Document-level state
+   - Implements IDisposable
+   - TabHeaderInfo class for tab metadata
+   - TablesChanged event subscription
+
+2. SpecSetupViewModel
+   - Table management (add/remove/reorder)
+   - Statistics collection (placeholder for property usage)
+   - Map validation (file selection + results display)
+   - 5 commands (AddTable, RemoveTable, MoveUp, MoveDown, ValidateMap)
+   - Implements IDisposable
+
+3. TableDefinitionViewModel (nested class)
+   - Wraps TableSpec from EasyAF.Engine
+   - Properties: TableName, DataTypesDisplay, ColumnCount
+   - Property change notifications for dirty tracking
+
+VIEWS CREATED:
+1. SpecDocumentView.xaml
+   - TabControl bound to TabHeaders collection
+   - ContentControl with DataTemplate mapping
+   - ViewModel → View mapping (SpecSetupViewModel → SpecSetupView)
+   - Theme-compliant (DynamicResource bindings)
+
+2. SpecSetupView.xaml
+   - TWO-COLUMN LAYOUT (matching Map/Project pattern)
+   - LEFT COLUMN (60%):
+     * Tables GroupBox (DataGrid with toolbar)
+     * Statistics GroupBox (data type usage)
+   - RIGHT COLUMN (40%):
+     * Map Validation GroupBox (dropdown + validate button + results)
+   - All theme brush bindings
+   - Zero code-behind logic
+
+TABLE GRID COLUMNS:
+- Table Name (TextBox, editable, 200px)
+- Data Types (Custom dropdown, 300px) - TODO: DataTypePicker control
+- Columns (Read-only, calculated, 80px)
+- Mode (ComboBox: Label/Report, 100px) - TODO: Bind to property
+
+TOOLBAR BUTTONS:
+- Add Table
+- Remove (enabled when table selected)
+- Move Up/Down (reorder tables)
+
+STATISTICS PANEL:
+- Data type name
+- Status indicator (colored circle)
+- Fields used count
+- Fields available count
+
+MAP VALIDATION PANEL:
+- Map file dropdown (from Documents\EasyAF\Maps\)
+- Validate button (accent style)
+- Results DataGrid (PropertyPath, Status, Status icon)
+
+MVVM COMPLIANCE:
+✅ Zero code-behind logic (only InitializeComponent)
+✅ All logic in ViewModels
+✅ Commands for all interactions
+✅ Property bindings with UpdateSourceTrigger=PropertyChanged
+✅ IsDirty tracking (manual via MarkDirty())
+
+THEME COMPLIANCE:
+✅ All brushes use DynamicResource
+✅ GroupBox borders use ControlBorderBrush
+✅ TextBlocks use TextPrimaryBrush/TextSecondaryBrush
+✅ No hard-coded colors
+✅ CommonControls.xaml styles applied
+
+MODULE INTEGRATION:
+- SpecModule.CreateNewDocument() creates SpecDocumentViewModel
+- SpecModule.OpenDocument() creates SpecDocumentViewModel
+- SpecDocument.ViewModel property stores VM for shell rendering
+- Shell's DataTemplate system will render view based on ViewModel type
+- Icon asset embedded (spec-icon.png)
+
+DEFERRED TO TASK 26:
+- DataTypePickerControl (custom multi-select with fuzzy search)
+- Table editor tabs (WYSIWYG canvas)
+- Column editor dialog
+- Expression builder
+- Conditional formatting
+
+BUILD STATUS: ✅ Successful compilation (0 errors, 0 warnings)
+
+ARCHITECTURE NOTES:
+- Same pattern as Map/Project modules (proven successful)
+- SpecFileRoot wraps EasyAF.Engine classes (minimal custom models)
+- ViewModels bind directly to SpecDocument.Spec.* properties
+- Statistics refresh is manual (called after table changes)
+- Module icon from embedded resource (pack URI)
+
+PATTERNS FOLLOWED:
+✅ Same DocumentViewModel coordinator pattern
+✅ Same two-column layout for Setup tab
+✅ TabHeaderInfo class for tab metadata
+✅ IDisposable implementation
+✅ ViewModel property on Document model
+✅ GroupBox for logical sections
+✅ DynamicResource theme bindings (100%)
+✅ CommonControls.xaml styles
+✅ Dirty tracking and save prompts
+
+Next Task: Task 26 - Create Table Editor Interface (WYSIWYG canvas + column editor)
+Rollback Instructions: Remove modules/EasyAF.Modules.Spec/Views* files and ViewModel wiring in SpecModule
+```
+```
 Date: 2025-11-27T22:45:00-06:00
 Task: Task 24 - Create Spec Module Structure
 Status: Complete
