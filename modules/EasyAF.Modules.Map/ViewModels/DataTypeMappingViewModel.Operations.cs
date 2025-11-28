@@ -1,5 +1,8 @@
 using System.Linq;
+using System;
+using System.Collections.Generic;
 using EasyAF.Modules.Map.Models;
+using EasyAF.Core.Services; // For DataTypeSettingsExtensions
 using Serilog;
 using MapPropertyInfo = EasyAF.Modules.Map.Models.PropertyInfo;
 
@@ -189,7 +192,52 @@ namespace EasyAF.Modules.Map.ViewModels
 
         private void ExecuteManageFields()
         {
-            Log.Information("Manage Fields requested for {DataType}", _dataType);
+            try
+            {
+                // Get all properties for this data type (including hidden ones for configuration)
+                var allProperties = _propertyDiscovery.GetAllPropertiesForType(_dataType);
+                var enabledProperties = _settingsService.GetEnabledProperties(_dataType);
+                var defaultProperties = new List<string> { "*" };
+
+                // Create Property Selector ViewModel
+                var viewModel = new PropertySelectorViewModel(
+                    _dataType,
+                    DataTypeDisplayName,
+                    allProperties,
+                    enabledProperties,
+                    defaultProperties);
+
+                // Show Property Selector Dialog
+                var dialog = new Views.PropertySelectorDialog
+                {
+                    DataContext = viewModel,
+                    Owner = System.Windows.Application.Current?.MainWindow
+                };
+
+                var result = dialog.ShowDialog();
+
+                if (result == true)
+                {
+                    // User clicked OK - save the new property selection
+                    var newEnabledProperties = viewModel.GetEnabledProperties();
+                    _settingsService.SetEnabledProperties(_dataType, newEnabledProperties);
+
+                    // Refresh the target properties list to show/hide properties based on new settings
+                    RefreshTargetProperties();
+
+                    Log.Information("Updated property visibility for {DataType}: {Enabled} of {Total} properties enabled",
+                        _dataType, viewModel.EnabledCount, viewModel.TotalCount);
+                }
+                else
+                {
+                    Log.Debug("User cancelled property selector for {DataType}", _dataType);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error opening property selector for {DataType}", _dataType);
+                _dialogService.ShowError($"Failed to open property selector: {ex.Message}", "Error");
+            }
         }
 
         private bool CanExecuteResetTable()
