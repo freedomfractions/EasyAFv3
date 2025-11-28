@@ -53,6 +53,9 @@ namespace EasyAF.Modules.Spec.ViewModels
             // Initialize filter functionality (from partial class)
             InitializeFilters();
 
+            // Initialize sorting functionality (from partial class)
+            InitializeSorting();
+
             // Initialize commands
             AddColumnCommand = new DelegateCommand(ExecuteAddColumn);
             RemoveColumnCommand = new DelegateCommand(ExecuteRemoveColumn, CanExecuteRemoveColumn)

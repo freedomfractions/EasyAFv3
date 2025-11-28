@@ -414,21 +414,228 @@
                     </Grid>
                 </Expander>
                 
-                <!-- Sorting Expander (placeholder for Phase 2.1.C) -->
-                <Expander Style="{StaticResource TableConfigExpanderStyle}"
-                          Tag="&#xE946;"> <!-- Info icon (placeholder) -->
+                <!-- Sorting Expander -->
+                <Expander Style="{StaticResource TableConfigExpanderStyle}">
                     <Expander.Header>
-                        <TextBlock FontWeight="SemiBold"
-                                   FontSize="13"
-                                   Foreground="{DynamicResource TextPrimaryBrush}">
-                            <Run Text="Sorting"/>
-                            <Run Text="(coming soon)" FontStyle="Italic" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                        </TextBlock>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Sorting"
+                                       FontWeight="SemiBold"
+                                       FontSize="13"
+                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <TextBlock Text="{Binding SortSpecCount, StringFormat=' ({0})'}"
+                                       FontWeight="Normal"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                       VerticalAlignment="Bottom"
+                                       Margin="4,0,0,1"/>
+                        </StackPanel>
                     </Expander.Header>
-                    <TextBlock Text="Sort configuration will be added in Phase 2.1.C"
-                               Foreground="{DynamicResource TextSecondaryBrush}"
-                               FontStyle="Italic"
-                               Margin="4"/>
+                    
+                    <Grid Margin="4">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/> <!-- Toolbar -->
+                            <RowDefinition Height="*"/>    <!-- DataGrid -->
+                            <RowDefinition Height="8"/>
+                            <RowDefinition Height="Auto"/> <!-- Sort Details Panel -->
+                        </Grid.RowDefinitions>
+                        
+                        <!-- Toolbar -->
+                        <ToolBar Grid.Row="0" 
+                                 Background="{DynamicResource SecondaryBackgroundBrush}"
+                                 BorderBrush="{DynamicResource ControlBorderBrush}">
+                            <Button Content="Add Sort" 
+                                    Command="{Binding AddSortSpecCommand}"
+                                    Style="{StaticResource ToolBarButtonStyle}"/>
+                            <Button Content="Remove" 
+                                    Command="{Binding RemoveSortSpecCommand}"
+                                    Style="{StaticResource ToolBarButtonStyle}"/>
+                            <Separator/>
+                            <Button Content="?" 
+                                    Command="{Binding MoveSortSpecUpCommand}"
+                                    ToolTip="Move Up (Higher Priority)"
+                                    Style="{StaticResource ToolBarButtonStyle}"
+                                    Width="32"/>
+                            <Button Content="?" 
+                                    Command="{Binding MoveSortSpecDownCommand}"
+                                    ToolTip="Move Down (Lower Priority)"
+                                    Style="{StaticResource ToolBarButtonStyle}"
+                                    Width="32"/>
+                        </ToolBar>
+                        
+                        <!-- Sort Specs DataGrid -->
+                        <DataGrid Grid.Row="1" 
+                                  ItemsSource="{Binding SortSpecs}"
+                                  SelectedItem="{Binding SelectedSortSpec}"
+                                  AutoGenerateColumns="False"
+                                  CanUserAddRows="False"
+                                  CanUserDeleteRows="False"
+                                  HeadersVisibility="Column"
+                                  Background="{DynamicResource ControlBackgroundBrush}"
+                                  Foreground="{DynamicResource TextPrimaryBrush}"
+                                  BorderBrush="{DynamicResource ControlBorderBrush}"
+                                  BorderThickness="1"
+                                  Margin="0,8,0,0"
+                                  ColumnHeaderStyle="{StaticResource ColumnEditorHeaderStyle}"
+                                  RowStyle="{StaticResource ColumnEditorRowStyle}"
+                                  GridLinesVisibility="Horizontal"
+                                  HorizontalGridLinesBrush="{DynamicResource ControlBorderBrush}"
+                                  ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                  MinHeight="100"
+                                  MaxHeight="150">
+                            <DataGrid.Columns>
+                                <!-- Order Column -->
+                                <DataGridTextColumn Header="Priority" 
+                                                    Binding="{Binding OrderIndex}" 
+                                                    Width="70"
+                                                    IsReadOnly="True">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                                            <Setter Property="FontWeight" Value="SemiBold"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                
+                                <!-- Column Number - EDITABLE -->
+                                <DataGridTextColumn Header="Column #" 
+                                                    Binding="{Binding Column, UpdateSourceTrigger=PropertyChanged}" 
+                                                    Width="80">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                    <DataGridTextColumn.EditingElementStyle>
+                                        <Style TargetType="TextBox">
+                                            <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                                            <Setter Property="BorderBrush" Value="{DynamicResource ControlBorderBrush}"/>
+                                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                        </Style>
+                                    </DataGridTextColumn.EditingElementStyle>
+                                </DataGridTextColumn>
+                                
+                                <!-- Direction - Template Column with ComboBox -->
+                                <DataGridTemplateColumn Header="Direction" Width="150">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding DirectionDisplay}"
+                                                       Foreground="{DynamicResource TextPrimaryBrush}"
+                                                       VerticalAlignment="Center"
+                                                       Margin="4,0"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                    <DataGridTemplateColumn.CellEditingTemplate>
+                                        <DataTemplate>
+                                            <ComboBox SelectedValue="{Binding Direction, UpdateSourceTrigger=PropertyChanged}"
+                                                      SelectedValuePath="Tag"
+                                                      Background="{DynamicResource ControlBackgroundBrush}"
+                                                      Foreground="{DynamicResource TextPrimaryBrush}"
+                                                      BorderBrush="{DynamicResource ControlBorderBrush}">
+                                                <ComboBoxItem Content="Ascending ?" Tag="asc"/>
+                                                <ComboBoxItem Content="Descending ?" Tag="desc"/>
+                                            </ComboBox>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellEditingTemplate>
+                                </DataGridTemplateColumn>
+                                
+                                <!-- Numeric - CHECKBOX -->
+                                <DataGridCheckBoxColumn Header="Numeric" 
+                                                        Binding="{Binding Numeric, UpdateSourceTrigger=PropertyChanged}" 
+                                                        Width="*">
+                                    <DataGridCheckBoxColumn.ElementStyle>
+                                        <Style TargetType="CheckBox">
+                                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                                        </Style>
+                                    </DataGridCheckBoxColumn.ElementStyle>
+                                </DataGridCheckBoxColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                        
+                        <!-- Sort Details Panel (shows summary when item selected) -->
+                        <Border Grid.Row="3"
+                                Background="{DynamicResource SecondaryBackgroundBrush}"
+                                BorderBrush="{DynamicResource ControlBorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="4"
+                                Padding="8,6">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedSortSpec, Converter={StaticResource NullToBooleanConverter}}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            
+                            <StackPanel Orientation="Horizontal" DataContext="{Binding SelectedSortSpec}">
+                                <TextBlock Text="&#xE8CB;"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="14"
+                                           Foreground="{DynamicResource AccentBrush}"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,8,0"/>
+                                <TextBlock Text="{Binding Summary}"
+                                           FontSize="12"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- Empty State Overlay -->
+                        <Border Grid.Row="1"
+                                Background="{DynamicResource WindowBackgroundBrush}"
+                                Opacity="0.95"
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Center"
+                                CornerRadius="8"
+                                Padding="24,16"
+                                BorderBrush="{DynamicResource ControlBorderBrush}"
+                                BorderThickness="2"
+                                IsHitTestVisible="False">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SortSpecs.Count}" Value="0">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            
+                            <StackPanel MaxWidth="300">
+                                <TextBlock Text="&#xE8CB;"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="36"
+                                           HorizontalAlignment="Center"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                           Margin="0,0,0,12"/>
+                                
+                                <TextBlock Text="No Sorting Defined"
+                                           FontSize="14"
+                                           FontWeight="SemiBold"
+                                           HorizontalAlignment="Center"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"
+                                           Margin="0,0,0,6"/>
+                                
+                                <TextBlock TextWrapping="Wrap"
+                                           TextAlignment="Center"
+                                           FontSize="11"
+                                           Foreground="{DynamicResource TextSecondaryBrush}">
+                                    <Run Text="Click"/>
+                                    <Run Text="Add Sort" FontWeight="Bold"/>
+                                    <Run Text="to sort table rows. Higher priority sorts are applied first."/>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
                 </Expander>
                 
                 <!-- Empty Message Expander (placeholder for Phase 2.1.D) -->
