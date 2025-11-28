@@ -1,10 +1,18 @@
 using System.Collections.Generic;
 
-namespace EasyAF.Modules.Map.Models
+namespace EasyAF.Core.Models
 {
+    // CROSS-MODULE EDIT: 2025-11-28 Task 26 - Global Data Type Filtering
+    // Modified for: Move from Map module to Core for global use
+    // Related modules: Core (NEW), Map (original location), Spec (consumer)
+    // Rollback instructions: Delete from Core, restore Map-only usage
+
     /// <summary>
-    /// Settings for controlling which data types and properties are visible in the Map Editor.
+    /// Settings for controlling which data types and properties are visible globally.
     /// </summary>
+    /// <remarks>
+    /// Used by all modules to filter which data types and properties appear in their UIs.
+    /// </remarks>
     public class DataTypeVisibilitySettings
     {
         /// <summary>
@@ -31,7 +39,7 @@ namespace EasyAF.Modules.Map.Models
     public class DataTypeConfig
     {
         /// <summary>
-        /// Whether this data type should appear as a tab in the Map Editor.
+        /// Whether this data type should appear in UI across all modules.
         /// </summary>
         public bool Enabled { get; set; } = true;
 

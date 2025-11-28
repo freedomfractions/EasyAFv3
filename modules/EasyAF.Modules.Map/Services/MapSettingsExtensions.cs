@@ -1,75 +1,52 @@
 using System.Collections.Generic;
-using System.Linq;
 using EasyAF.Core.Contracts;
-using EasyAF.Modules.Map.Models;
+using EasyAF.Core.Services; // NEW: Use global settings
 
 namespace EasyAF.Modules.Map.Services
 {
+    // CROSS-MODULE EDIT: 2025-11-28 Task 26 - Global Data Type Filtering
+    // Modified for: Redirect to global settings (backward compatibility wrapper)
+    // Related modules: Map (this file), Core (DataTypeSettingsExtensions)
+    // Rollback instructions: Restore original Map-only implementation
+
     /// <summary>
     /// Extension methods for accessing Map module settings.
     /// </summary>
+    /// <remarks>
+    /// DEPRECATED: This class now wraps global DataTypeSettingsExtensions.
+    /// Use Core.Services.DataTypeSettingsExtensions directly for new code.
+    /// </remarks>
     public static class MapSettingsExtensions
     {
-        private const string SETTINGS_KEY = "MapModule.DataTypeVisibility";
-
-        /// <summary>
-        /// Gets the data type visibility settings for the Map module.
-        /// </summary>
-        public static DataTypeVisibilitySettings GetMapVisibilitySettings(this ISettingsService settingsService)
+        // DEPRECATED: Redirect to global settings
+        public static Core.Models.DataTypeVisibilitySettings GetMapVisibilitySettings(this ISettingsService settingsService)
         {
-            var settings = settingsService.GetSetting<DataTypeVisibilitySettings>(SETTINGS_KEY);
-            return settings ?? new DataTypeVisibilitySettings();
+            return settingsService.GetDataTypeVisibilitySettings();
         }
 
-        /// <summary>
-        /// Saves the data type visibility settings for the Map module.
-        /// </summary>
-        public static void SetMapVisibilitySettings(this ISettingsService settingsService, DataTypeVisibilitySettings settings)
+        public static void SetMapVisibilitySettings(this ISettingsService settingsService, Core.Models.DataTypeVisibilitySettings settings)
         {
-            settingsService.SetSetting(SETTINGS_KEY, settings);
+            settingsService.SetDataTypeVisibilitySettings(settings);
         }
 
-        /// <summary>
-        /// Checks if a data type is enabled for display in the Map Editor.
-        /// </summary>
         public static bool IsDataTypeEnabled(this ISettingsService settingsService, string dataTypeName)
         {
-            var settings = settingsService.GetMapVisibilitySettings();
-            if (!settings.DataTypes.ContainsKey(dataTypeName))
-                return true; // Default to enabled (opt-out model)
-
-            return settings.DataTypes[dataTypeName].Enabled;
+            return settingsService.IsDataTypeEnabled(dataTypeName);
         }
 
-        /// <summary>
-        /// Gets the list of enabled properties for a data type.
-        /// </summary>
         public static List<string> GetEnabledProperties(this ISettingsService settingsService, string dataTypeName)
         {
-            var settings = settingsService.GetMapVisibilitySettings();
-            var config = settings.GetOrCreateConfig(dataTypeName);
-            return config.EnabledProperties;
+            return settingsService.GetEnabledProperties(dataTypeName);
         }
 
-        /// <summary>
-        /// Sets the list of enabled properties for a data type.
-        /// </summary>
         public static void SetEnabledProperties(this ISettingsService settingsService, string dataTypeName, List<string> enabledProperties)
         {
-            var settings = settingsService.GetMapVisibilitySettings();
-            var config = settings.GetOrCreateConfig(dataTypeName);
-            config.EnabledProperties = enabledProperties;
-            settingsService.SetMapVisibilitySettings(settings);
+            settingsService.SetEnabledProperties(dataTypeName, enabledProperties);
         }
 
-        /// <summary>
-        /// Checks if a specific property is enabled for a data type.
-        /// </summary>
         public static bool IsPropertyEnabled(this ISettingsService settingsService, string dataTypeName, string propertyName)
         {
-            var settings = settingsService.GetMapVisibilitySettings();
-            var config = settings.GetOrCreateConfig(dataTypeName);
-            return config.IsPropertyEnabled(propertyName);
+            return settingsService.IsPropertyEnabled(dataTypeName, propertyName);
         }
     }
 }

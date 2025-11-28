@@ -5,8 +5,9 @@ using System.Linq;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using EasyAF.Core.Contracts;
+using EasyAF.Core.Models; // CHANGED: Use Core models
 using EasyAF.Modules.Map.Models;
-using EasyAF.Modules.Map.Services; // For MapSettingsExtensions
+using EasyAF.Modules.Map.Services;
 using EasyAF.Import;
 using Unity;
 using Fluent;
@@ -216,14 +217,14 @@ namespace EasyAF.Modules.Map
                 Log.Information("Initializing default Map visibility settings (first run or corrupted settings)");
 
                 // Create default settings: all data types enabled with all properties visible
-                var defaults = new Models.DataTypeVisibilitySettings();
+                var defaults = new DataTypeVisibilitySettings();
                 
                 // List of known data types from EasyAF.Data.Models
                 var dataTypes = new[] { "Bus", "LVCB", "Fuse", "Cable", "ArcFlash", "ShortCircuit" };
                 
                 foreach (var dataType in dataTypes)
                 {
-                    defaults.DataTypes[dataType] = new Models.DataTypeConfig
+                    defaults.DataTypes[dataType] = new DataTypeConfig
                     {
                         Enabled = true,
                         EnabledProperties = new List<string> { "*" } // Wildcard = show all properties

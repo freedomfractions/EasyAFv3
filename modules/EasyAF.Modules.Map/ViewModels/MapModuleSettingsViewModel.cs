@@ -5,6 +5,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using EasyAF.Core.Contracts;
+using EasyAF.Core.Models; // CHANGED: Use Core models
 using EasyAF.Modules.Map.Models;
 using EasyAF.Modules.Map.Services;
 using EasyAF.Modules.Map.Views;
