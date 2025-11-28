@@ -57,19 +57,5 @@
         <specView:SpecDocumentView />
     </DataTemplate>
     
-    <!-- CROSS-MODULE EDIT: 2025-11-28 Task 26 - Spec Module Tab Content Views -->
-    <!-- Modified for: Register DataTemplates for Spec module tab content (Setup + Table Editor) -->
-    <!-- Related modules: Spec (SpecSetupViewModel, SpecSetupView, TableEditorViewModel, TableEditorView) -->
-    <!-- Rollback instructions: Remove these two DataTemplates -->
-    
-    <!-- Spec Module Setup Tab View Template -->
-    <DataTemplate DataType="{x:Type specVM:SpecSetupViewModel}">
-        <specView:SpecSetupView />
-    </DataTemplate>
-    
-    <!-- Spec Module Table Editor View Template -->
-    <DataTemplate DataType="{x:Type specVM:TableEditorViewModel}">
-        <specView:TableEditorView />
-    </DataTemplate>
-    
 </ResourceDictionary>
+

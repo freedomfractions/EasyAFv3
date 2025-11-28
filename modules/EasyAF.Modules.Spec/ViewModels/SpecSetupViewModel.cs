@@ -1,25 +1,22 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Windows.Input;
-using Prism.Mvvm;
 using Prism.Commands;
+using Prism.Mvvm;
 using EasyAF.Modules.Spec.Models;
-using EasyAF.Core.Contracts;
 using EasyAF.Engine;
+using EasyAF.Core.Contracts;
 using Serilog;
 
 namespace EasyAF.Modules.Spec.ViewModels
 {
     /// <summary>
-    /// View model for the spec setup tab showing table management and statistics.
+    /// View model for the Spec Setup tab (table management).
     /// </summary>
-    /// <remarks>
-    /// The setup tab provides:
-    /// - Table definitions grid (name, data types, mode)
-    /// - Statistics panel (field usage by data type)
-    /// - Map validation panel
-    /// </remarks>
     public class SpecSetupViewModel : BindableBase, IDisposable
     {
         private readonly SpecDocument _document;
@@ -28,12 +25,7 @@ namespace EasyAF.Modules.Spec.ViewModels
         private string? _selectedMapFile;
         private bool _disposed;
 
-        /// <summary>
-        /// Initializes a new instance of the SpecSetupViewModel.
-        /// </summary>
-        public SpecSetupViewModel(
-            SpecDocument document,
-            IUserDialogService dialogService)
+        public SpecSetupViewModel(SpecDocument document, IUserDialogService dialogService)
         {
             _document = document ?? throw new ArgumentNullException(nameof(document));
             _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
@@ -42,325 +34,234 @@ namespace EasyAF.Modules.Spec.ViewModels
             Tables = new ObservableCollection<TableDefinitionViewModel>();
             Statistics = new ObservableCollection<DataTypeStatistic>();
             ValidationResults = new ObservableCollection<ValidationResult>();
+            AvailableMapFiles = new ObservableCollection<string>();
 
-            // Initialize commands
+            // Load initial data
+            RefreshTables();
+            RefreshStatistics();
+            LoadAvailableMapFiles(); // FIX: Auto-populate map files dropdown
+
+            // Commands
             AddTableCommand = new DelegateCommand(ExecuteAddTable);
-            RemoveTableCommand = new DelegateCommand(ExecuteRemoveTable, CanExecuteRemoveTable);
-            MoveTableUpCommand = new DelegateCommand(ExecuteMoveTableUp, CanExecuteMoveTableUp);
-            MoveTableDownCommand = new DelegateCommand(ExecuteMoveTableDown, CanExecuteMoveTableDown);
-            ValidateMapCommand = new DelegateCommand(ExecuteValidateMap, CanExecuteValidateMap);
+            RemoveTableCommand = new DelegateCommand(ExecuteRemoveTable, CanExecuteRemoveTable)
+                .ObservesProperty(() => SelectedTable);
+            MoveTableUpCommand = new DelegateCommand(ExecuteMoveTableUp, CanExecuteMoveTableUp)
+                .ObservesProperty(() => SelectedTable);
+            MoveTableDownCommand = new DelegateCommand(ExecuteMoveTableDown, CanExecuteMoveTableDown)
+                .ObservesProperty(() => SelectedTable);
+            ValidateMapCommand = new DelegateCommand(ExecuteValidateMap, CanExecuteValidateMap)
+                .ObservesProperty(() => SelectedMapFile);
 
-            // Load existing tables from document
-            LoadTablesFromDocument();
-
-            // Subscribe to table changes
-            Tables.CollectionChanged += (s, e) =>
-            {
-                TablesChanged?.Invoke(this, EventArgs.Empty);
-                RefreshStatistics();
-            };
-
-            Log.Debug("SpecSetupViewModel initialized with {TableCount} tables", Tables.Count);
+            Log.Debug("SpecSetupViewModel initialized");
         }
 
-        #region Events
+        #region Properties
 
-        /// <summary>
-        /// Event fired when tables collection changes (add/remove).
-        /// </summary>
-        public event EventHandler? TablesChanged;
-
-        #endregion
-
-        #region Properties - Table Management
-
-        /// <summary>
-        /// Gets the collection of table definitions.
-        /// </summary>
         public ObservableCollection<TableDefinitionViewModel> Tables { get; }
+        public ObservableCollection<DataTypeStatistic> Statistics { get; }
+        public ObservableCollection<ValidationResult> ValidationResults { get; }
+        public ObservableCollection<string> AvailableMapFiles { get; }
 
-        /// <summary>
-        /// Gets or sets the currently selected table.
-        /// </summary>
         public TableDefinitionViewModel? SelectedTable
         {
             get => _selectedTable;
-            set
-            {
-                if (SetProperty(ref _selectedTable, value))
-                {
-                    (RemoveTableCommand as DelegateCommand)?.RaiseCanExecuteChanged();
-                    (MoveTableUpCommand as DelegateCommand)?.RaiseCanExecuteChanged();
-                    (MoveTableDownCommand as DelegateCommand)?.RaiseCanExecuteChanged();
-                }
-            }
+            set => SetProperty(ref _selectedTable, value);
         }
 
-        #endregion
-
-        #region Properties - Statistics
-
-        /// <summary>
-        /// Gets the collection of data type statistics.
-        /// </summary>
-        public ObservableCollection<DataTypeStatistic> Statistics { get; }
-
-        #endregion
-
-        #region Properties - Map Validation
-
-        /// <summary>
-        /// Gets the collection of available map files.
-        /// </summary>
-        /// <remarks>
-        /// Populated from Documents\EasyAF\Maps\ folder.
-        /// </remarks>
-        public ObservableCollection<string> AvailableMapFiles { get; } = new();
-
-        /// <summary>
-        /// Gets or sets the selected map file for validation.
-        /// </summary>
         public string? SelectedMapFile
         {
             get => _selectedMapFile;
-            set
-            {
-                if (SetProperty(ref _selectedMapFile, value))
-                {
-                    (ValidateMapCommand as DelegateCommand)?.RaiseCanExecuteChanged();
-                }
-            }
+            set => SetProperty(ref _selectedMapFile, value);
         }
-
-        /// <summary>
-        /// Gets the collection of validation results.
-        /// </summary>
-        public ObservableCollection<ValidationResult> ValidationResults { get; }
 
         #endregion
 
         #region Commands
 
-        /// <summary>
-        /// Command to add a new table.
-        /// </summary>
         public ICommand AddTableCommand { get; }
-
-        /// <summary>
-        /// Command to remove the selected table.
-        /// </summary>
         public ICommand RemoveTableCommand { get; }
-
-        /// <summary>
-        /// Command to move selected table up in order.
-        /// </summary>
         public ICommand MoveTableUpCommand { get; }
-
-        /// <summary>
-        /// Command to move selected table down in order.
-        /// </summary>
         public ICommand MoveTableDownCommand { get; }
-
-        /// <summary>
-        /// Command to validate spec against map file.
-        /// </summary>
         public ICommand ValidateMapCommand { get; }
 
         #endregion
 
-        #region Initialization
+        #region Events
 
-        /// <summary>
-        /// Loads existing tables from the document into the collection.
-        /// </summary>
-        private void LoadTablesFromDocument()
-        {
-            Tables.Clear();
-
-            if (_document.Spec.Tables != null)
-            {
-                foreach (var tableSpec in _document.Spec.Tables)
-                {
-                    var vm = new TableDefinitionViewModel(tableSpec);
-                    
-                    // Subscribe to property changes for dirty tracking
-                    vm.PropertyChanged += OnTablePropertyChanged;
-                    
-                    Tables.Add(vm);
-                }
-            }
-
-            RefreshStatistics();
-            Log.Debug("Loaded {Count} tables from document", Tables.Count);
-        }
-
-        /// <summary>
-        /// Handles property changes on table ViewModels to mark document dirty.
-        /// </summary>
-        private void OnTablePropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            _document.MarkDirty();
-        }
-
-        /// <summary>
-        /// Refreshes the statistics display based on current tables.
-        /// </summary>
-        private void RefreshStatistics()
-        {
-            Statistics.Clear();
-
-            // TODO: Task 25 - Implement statistics calculation
-            // For each data type used across all tables:
-            //   - Count unique properties referenced
-            //   - Calculate completeness percentage
-            //   - Determine status color
-
-            Log.Debug("Statistics refreshed (placeholder implementation)");
-        }
+        public event EventHandler? TablesChanged;
 
         #endregion
 
-        #region Command Implementations - Table Management
+        #region Command Implementations
 
-        /// <summary>
-        /// Executes the add table command.
-        /// </summary>
         private void ExecuteAddTable()
         {
             var newTable = new TableSpec
             {
-                Id = Guid.NewGuid().ToString(),
-                AltText = $"Table {Tables.Count + 1}",
+                Id = $"Table{_document.Spec.Tables.Length + 1}",
+                AltText = $"Table {_document.Spec.Tables.Length + 1}",
                 Columns = Array.Empty<ColumnSpec>()
             };
 
-            var vm = new TableDefinitionViewModel(newTable);
-            vm.PropertyChanged += OnTablePropertyChanged;
-            
-            Tables.Add(vm);
-            SelectedTable = vm;
-            
+            var newArray = new TableSpec[_document.Spec.Tables.Length + 1];
+            Array.Copy(_document.Spec.Tables, newArray, _document.Spec.Tables.Length);
+            newArray[^1] = newTable;
+            _document.Spec.Tables = newArray;
+
+            RefreshTables();
+            RefreshStatistics();
             _document.MarkDirty();
-            Log.Information("Added new table: {Name}", newTable.AltText);
+
+            TablesChanged?.Invoke(this, EventArgs.Empty);
+
+            Log.Information("Added new table: {TableId}", newTable.Id);
         }
 
-        /// <summary>
-        /// Determines if the remove table command can execute.
-        /// </summary>
         private bool CanExecuteRemoveTable() => SelectedTable != null;
 
-        /// <summary>
-        /// Executes the remove table command.
-        /// </summary>
         private void ExecuteRemoveTable()
         {
             if (SelectedTable == null) return;
 
-            var confirmed = _dialogService.Confirm(
-                $"Remove table '{SelectedTable.TableName}'?",
-                "Remove Table");
+            var index = Tables.IndexOf(SelectedTable);
+            var newArray = _document.Spec.Tables.Where(t => t != SelectedTable.Table).ToArray();
+            _document.Spec.Tables = newArray;
 
-            if (!confirmed) return;
-
-            SelectedTable.PropertyChanged -= OnTablePropertyChanged;
-            Tables.Remove(SelectedTable);
-            SelectedTable = null;
-            
+            RefreshTables();
+            RefreshStatistics();
             _document.MarkDirty();
+
+            if (Tables.Count > 0)
+            {
+                SelectedTable = Tables.ElementAtOrDefault(Math.Min(index, Tables.Count - 1));
+            }
+
+            TablesChanged?.Invoke(this, EventArgs.Empty);
+
             Log.Information("Removed table");
         }
 
-        /// <summary>
-        /// Determines if move up command can execute.
-        /// </summary>
-        private bool CanExecuteMoveTableUp()
-        {
-            if (SelectedTable == null) return false;
-            var index = Tables.IndexOf(SelectedTable);
-            return index > 0;
-        }
+        private bool CanExecuteMoveTableUp() =>
+            SelectedTable != null && Tables.IndexOf(SelectedTable) > 0;
 
-        /// <summary>
-        /// Executes move table up command.
-        /// </summary>
         private void ExecuteMoveTableUp()
         {
             if (SelectedTable == null) return;
-            
-            var index = Tables.IndexOf(SelectedTable);
-            if (index <= 0) return;
 
-            Tables.Move(index, index - 1);
-            _document.MarkDirty();
+            var index = Array.IndexOf(_document.Spec.Tables, SelectedTable.Table);
+            if (index > 0)
+            {
+                var temp = _document.Spec.Tables[index];
+                _document.Spec.Tables[index] = _document.Spec.Tables[index - 1];
+                _document.Spec.Tables[index - 1] = temp;
+
+                RefreshTables();
+                _document.MarkDirty();
+                SelectedTable = Tables[index - 1];
+            }
         }
 
-        /// <summary>
-        /// Determines if move down command can execute.
-        /// </summary>
-        private bool CanExecuteMoveTableDown()
-        {
-            if (SelectedTable == null) return false;
-            var index = Tables.IndexOf(SelectedTable);
-            return index >= 0 && index < Tables.Count - 1;
-        }
+        private bool CanExecuteMoveTableDown() =>
+            SelectedTable != null && Tables.IndexOf(SelectedTable) < Tables.Count - 1;
 
-        /// <summary>
-        /// Executes move table down command.
-        /// </summary>
         private void ExecuteMoveTableDown()
         {
             if (SelectedTable == null) return;
-            
-            var index = Tables.IndexOf(SelectedTable);
-            if (index < 0 || index >= Tables.Count - 1) return;
 
-            Tables.Move(index, index + 1);
-            _document.MarkDirty();
+            var index = Array.IndexOf(_document.Spec.Tables, SelectedTable.Table);
+            if (index < _document.Spec.Tables.Length - 1)
+            {
+                var temp = _document.Spec.Tables[index];
+                _document.Spec.Tables[index] = _document.Spec.Tables[index + 1];
+                _document.Spec.Tables[index + 1] = temp;
+
+                RefreshTables();
+                _document.MarkDirty();
+                SelectedTable = Tables[index + 1];
+            }
+        }
+
+        private bool CanExecuteValidateMap() => !string.IsNullOrEmpty(SelectedMapFile);
+
+        private void ExecuteValidateMap()
+        {
+            ValidationResults.Clear();
+            Log.Information("Map validation not yet implemented");
         }
 
         #endregion
 
-        #region Command Implementations - Map Validation
+        #region Helper Methods
 
         /// <summary>
-        /// Determines if validate map command can execute.
+        /// AUDIT FIX: Load available map files from Documents\EasyAF\Maps directory
         /// </summary>
-        private bool CanExecuteValidateMap() => !string.IsNullOrWhiteSpace(SelectedMapFile);
-
-        /// <summary>
-        /// Executes the validate map command.
-        /// </summary>
-        private void ExecuteValidateMap()
+        private void LoadAvailableMapFiles()
         {
-            if (string.IsNullOrWhiteSpace(SelectedMapFile)) return;
+            AvailableMapFiles.Clear();
 
-            ValidationResults.Clear();
+            try
+            {
+                var mapsFolder = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                    "EasyAF",
+                    "Maps");
 
-            // TODO: Task 28 - Implement map validation
-            // 1. Load selected .ezmap file
-            // 2. Extract all PropertyPaths from spec tables
-            // 3. Check if each PropertyPath is mapped in the map file
-            // 4. Populate ValidationResults with color-coded results
+                if (Directory.Exists(mapsFolder))
+                {
+                    var mapFiles = Directory.GetFiles(mapsFolder, "*.ezmap")
+                        .Select(Path.GetFileNameWithoutExtension)
+                        .OrderBy(name => name)
+                        .ToList();
 
-            Log.Information("Map validation executed (placeholder)");
+                    foreach (var mapFile in mapFiles)
+                    {
+                        AvailableMapFiles.Add(mapFile);
+                    }
+
+                    Log.Debug("Loaded {Count} map files from {Folder}", mapFiles.Count, mapsFolder);
+                }
+                else
+                {
+                    Log.Warning("Maps folder does not exist: {Folder}", mapsFolder);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to load available map files");
+            }
+        }
+
+        private void RefreshTables()
+        {
+            var selected = SelectedTable?.Table;
+
+            Tables.Clear();
+            for (int i = 0; i < _document.Spec.Tables.Length; i++)
+            {
+                var tableVm = new TableDefinitionViewModel(_document.Spec.Tables[i], _document);
+                Tables.Add(tableVm);
+            }
+
+            if (selected != null)
+            {
+                SelectedTable = Tables.FirstOrDefault(t => t.Table == selected);
+            }
+        }
+
+        private void RefreshStatistics()
+        {
+            Statistics.Clear();
+            // TODO: Populate with actual statistics
         }
 
         #endregion
 
         #region Cleanup
 
-        /// <summary>
-        /// Disposes resources and unsubscribes from events.
-        /// </summary>
         public void Dispose()
         {
             if (_disposed) return;
-
-            // Unsubscribe from table property changes
-            foreach (var table in Tables)
-            {
-                table.PropertyChanged -= OnTablePropertyChanged;
-            }
 
             _disposed = true;
             GC.SuppressFinalize(this);
@@ -370,63 +271,107 @@ namespace EasyAF.Modules.Spec.ViewModels
     }
 
     /// <summary>
-    /// View model wrapper for a table definition.
+    /// AUDIT FIX: Make TableDefinitionViewModel properties editable
     /// </summary>
     public class TableDefinitionViewModel : BindableBase
     {
-        private readonly TableSpec _tableSpec;
+        private readonly SpecDocument _document;
 
-        public TableDefinitionViewModel(TableSpec tableSpec)
+        public TableDefinitionViewModel(TableSpec table, SpecDocument document)
         {
-            _tableSpec = tableSpec ?? throw new ArgumentNullException(nameof(tableSpec));
+            Table = table ?? throw new ArgumentNullException(nameof(table));
+            _document = document ?? throw new ArgumentNullException(nameof(document));
         }
 
-        public TableSpec TableSpec => _tableSpec;
+        public TableSpec Table { get; }
 
+        /// <summary>
+        /// AUDIT FIX: Make table name editable (was read-only)
+        /// </summary>
         public string TableName
         {
-            get => _tableSpec.AltText ?? string.Empty;
+            get => !string.IsNullOrEmpty(Table.AltText) ? Table.AltText : Table.Id;
             set
             {
-                if (_tableSpec.AltText != value)
+                if (Table.AltText != value)
                 {
-                    _tableSpec.AltText = value;
+                    Table.AltText = value;
+                    _document.MarkDirty();
                     RaisePropertyChanged();
                 }
             }
         }
 
-        /// <summary>
-        /// Gets display text for selected data types.
-        /// </summary>
-        /// <remarks>
-        /// TODO: Task 25 - This should show "3 of 34 selected" when multi-select is implemented.
-        /// </remarks>
-        public string DataTypesDisplay => "(not configured)"; // Placeholder
+        public string DataTypesDisplay
+        {
+            get
+            {
+                // Extract data types from column PropertyPaths
+                if (Table.Columns == null || Table.Columns.Length == 0)
+                    return "(no columns)";
+
+                var dataTypes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+                foreach (var column in Table.Columns)
+                {
+                    if (column.PropertyPaths != null)
+                    {
+                        foreach (var path in column.PropertyPaths)
+                        {
+                            // Extract data type from path like "Bus.Name" or "LVCB.TripUnit.Ltpu"
+                            var firstDot = path.IndexOf('.');
+                            if (firstDot > 0)
+                            {
+                                var dataType = path.Substring(0, firstDot);
+                                dataTypes.Add(dataType);
+                            }
+                        }
+                    }
+                }
+
+                return dataTypes.Count > 0
+                    ? string.Join(", ", dataTypes.OrderBy(d => d))
+                    : "(none)";
+            }
+        }
+
+        public int ColumnCount => Table.Columns?.Length ?? 0;
 
         /// <summary>
-        /// Gets the count of columns in this table.
+        /// AUDIT FIX: Add Mode property for ComboBox binding
         /// </summary>
-        public int ColumnCount => _tableSpec.Columns?.Length ?? 0;
-
-        // TODO: Task 25 - Add DataTypes property (ObservableCollection<string> for multi-select)
-        // TODO: Task 25 - Add Mode property (enum: Label/Report)
+        public string Mode
+        {
+            get => Table.Mode ?? "new";
+            set
+            {
+                if (Table.Mode != value)
+                {
+                    Table.Mode = value;
+                    _document.MarkDirty();
+                    RaisePropertyChanged();
+                }
+            }
+        }
     }
 
-    /// <summary>
-    /// Represents statistics for a data type's usage across tables.
-    /// </summary>
     public class DataTypeStatistic : BindableBase
     {
         private string _dataTypeName = string.Empty;
+        private string _statusColor = "Gray";
         private int _fieldsUsed;
         private int _fieldsAvailable;
-        private string _statusColor = "Gray";
 
         public string DataTypeName
         {
             get => _dataTypeName;
             set => SetProperty(ref _dataTypeName, value);
+        }
+
+        public string StatusColor
+        {
+            get => _statusColor;
+            set => SetProperty(ref _statusColor, value);
         }
 
         public int FieldsUsed
@@ -440,23 +385,13 @@ namespace EasyAF.Modules.Spec.ViewModels
             get => _fieldsAvailable;
             set => SetProperty(ref _fieldsAvailable, value);
         }
-
-        public string StatusColor
-        {
-            get => _statusColor;
-            set => SetProperty(ref _statusColor, value);
-        }
     }
 
-    /// <summary>
-    /// Represents a map validation result entry.
-    /// </summary>
     public class ValidationResult : BindableBase
     {
         private string _propertyPath = string.Empty;
-        private string _status = "Unknown";
+        private string _status = string.Empty;
         private string _statusColor = "Gray";
-        private string? _message;
 
         public string PropertyPath
         {
@@ -474,12 +409,6 @@ namespace EasyAF.Modules.Spec.ViewModels
         {
             get => _statusColor;
             set => SetProperty(ref _statusColor, value);
-        }
-
-        public string? Message
-        {
-            get => _message;
-            set => SetProperty(ref _message, value);
         }
     }
 }

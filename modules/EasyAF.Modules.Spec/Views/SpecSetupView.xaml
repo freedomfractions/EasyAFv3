@@ -4,31 +4,66 @@
              Background="{DynamicResource PrimaryBackgroundBrush}">
     
     <UserControl.Resources>
-        <!-- DataGrid Column Header Style (matching Map/Project modules) -->
-        <Style x:Key="SpecDataGridColumnHeaderStyle" TargetType="DataGridColumnHeader">
-            <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
-            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource ControlBorderBrush}"/>
-            <Setter Property="BorderThickness" Value="0,0,1,1"/>
-            <Setter Property="Padding" Value="8,4"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="HorizontalContentAlignment" Value="Left"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-        </Style>
-        
-        <!-- DataGrid Row Style (for proper theming) -->
-        <Style x:Key="SpecDataGridRowStyle" TargetType="DataGridRow">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
-            <Style.Triggers>
-                <Trigger Property="IsSelected" Value="True">
-                    <Setter Property="Background" Value="{DynamicResource HighlightSelectionBrush}"/>
-                </Trigger>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!-- CROSS-MODULE EDIT: 2025-11-28 Toolbar Styling Fix -->
+                <!-- Modified for: Merge SpecEditorStyles to get ToolBarButtonStyle (matches Map module) -->
+                <!-- Related modules: Spec (SpecEditorStyles.xaml) -->
+                <!-- Rollback instructions: Remove this MergedDictionaries section -->
+                <ResourceDictionary Source="/EasyAF.Modules.Spec;component/Styles/SpecEditorStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            
+            <!-- DataGrid Column Header Style (matching Map/Project modules) -->
+            <Style x:Key="SpecDataGridColumnHeaderStyle" TargetType="DataGridColumnHeader">
+                <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
+                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource ControlBorderBrush}"/>
+                <Setter Property="BorderThickness" Value="0,0,1,1"/>
+                <Setter Property="Padding" Value="8,4"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+            </Style>
+            
+            <!-- DataGrid Row Style (for proper theming) -->
+            <Style x:Key="SpecDataGridRowStyle" TargetType="DataGridRow">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                <Style.Triggers>
+                    <Trigger Property="IsSelected" Value="True">
+                        <Setter Property="Background" Value="{DynamicResource HighlightSelectionBrush}"/>
+                    </Trigger>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+            
+            <!-- THEME FIX: DataGrid Cell Style for proper background theming -->
+            <Style x:Key="SpecDataGridCellStyle" TargetType="DataGridCell">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                <Setter Property="BorderBrush" Value="Transparent"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="DataGridCell">
+                            <Border Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    Padding="{TemplateBinding Padding}">
+                                <ContentPresenter VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+                <Style.Triggers>
+                    <Trigger Property="IsSelected" Value="True">
+                        <Setter Property="Background" Value="{DynamicResource HighlightSelectionBrush}"/>
+                        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+        </ResourceDictionary>
     </UserControl.Resources>
     
     <ScrollViewer VerticalScrollBarVisibility="Auto"
@@ -61,27 +96,31 @@
                             <RowDefinition Height="*"/>    <!-- Grid -->
                         </Grid.RowDefinitions>
                         
+                        <!-- CROSS-MODULE EDIT: 2025-11-28 Toolbar Button Styling Fix -->
+                        <!-- Modified for: Use ToolBarButtonStyle instead of BaseButtonStyle (matches Map module exactly) -->
+                        <!-- Related modules: Map (MapSummaryView.xaml has identical toolbar) -->
+                        <!-- Rollback instructions: Change Style back to BaseButtonStyle -->
+                        
                         <!-- Toolbar -->
                         <ToolBar Grid.Row="0" 
                                  Background="{DynamicResource SecondaryBackgroundBrush}"
-                                 BorderBrush="{DynamicResource ControlBorderBrush}"
-                                 BorderThickness="0,0,0,1">
+                                 BorderBrush="{DynamicResource ControlBorderBrush}">
                             <Button Content="Add Table" 
                                     Command="{Binding AddTableCommand}"
-                                    Style="{StaticResource BaseButtonStyle}"/>
+                                    Style="{StaticResource ToolBarButtonStyle}"/>
                             <Button Content="Remove" 
                                     Command="{Binding RemoveTableCommand}"
-                                    Style="{StaticResource BaseButtonStyle}"/>
+                                    Style="{StaticResource ToolBarButtonStyle}"/>
                             <Separator/>
                             <Button Content="▲" 
                                     Command="{Binding MoveTableUpCommand}"
                                     ToolTip="Move Up"
-                                    Style="{StaticResource BaseButtonStyle}"
+                                    Style="{StaticResource ToolBarButtonStyle}"
                                     Width="32"/>
                             <Button Content="▼" 
                                     Command="{Binding MoveTableDownCommand}"
                                     ToolTip="Move Down"
-                                    Style="{StaticResource BaseButtonStyle}"
+                                    Style="{StaticResource ToolBarButtonStyle}"
                                     Width="32"/>
                         </ToolBar>
                         
@@ -92,6 +131,7 @@
                                   AutoGenerateColumns="False"
                                   CanUserAddRows="False"
                                   CanUserDeleteRows="False"
+                                  HeadersVisibility="Column"
                                   Background="{DynamicResource ControlBackgroundBrush}"
                                   Foreground="{DynamicResource TextPrimaryBrush}"
                                   BorderBrush="{DynamicResource ControlBorderBrush}"
@@ -99,18 +139,30 @@
                                   Margin="0,8,0,0"
                                   ColumnHeaderStyle="{StaticResource SpecDataGridColumnHeaderStyle}"
                                   RowStyle="{StaticResource SpecDataGridRowStyle}"
+                                  CellStyle="{StaticResource SpecDataGridCellStyle}"
                                   GridLinesVisibility="Horizontal"
                                   HorizontalGridLinesBrush="{DynamicResource ControlBorderBrush}"
+                                  RowBackground="{DynamicResource ControlBackgroundBrush}"
+                                  AlternatingRowBackground="{DynamicResource PrimaryBackgroundBrush}"
                                   ScrollViewer.VerticalScrollBarVisibility="Auto"
                                   ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                   ScrollViewer.CanContentScroll="False">
                             <DataGrid.Columns>
-                                <!-- Table Name Column -->
+                                <!-- AUDIT FIX: Table Name Column - Now editable with themed editor! -->
                                 <DataGridTextColumn Header="Table Name" 
                                                     Binding="{Binding TableName, UpdateSourceTrigger=PropertyChanged}" 
-                                                    Width="200"/>
+                                                    Width="200">
+                                    <DataGridTextColumn.EditingElementStyle>
+                                        <Style TargetType="TextBox">
+                                            <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                                            <Setter Property="BorderBrush" Value="{DynamicResource ControlBorderBrush}"/>
+                                            <Setter Property="CaretBrush" Value="{DynamicResource TextPrimaryBrush}"/>
+                                        </Style>
+                                    </DataGridTextColumn.EditingElementStyle>
+                                </DataGridTextColumn>
                                 
-                                <!-- Data Types Column (TODO: Custom cell template with DataTypePicker) -->
+                                <!-- Data Types Column (TODO: Custom cell template with DataTypePicker - Future enhancement) -->
                                 <DataGridTextColumn Header="Data Types" 
                                                     Binding="{Binding DataTypesDisplay, Mode=OneWay}" 
                                                     Width="300"
@@ -128,10 +180,34 @@
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
                                 
-                                <!-- Mode Column (TODO: Bind to TableMode property) -->
+                                <!-- AUDIT FIX: Mode Column - Now has proper binding! -->
                                 <DataGridComboBoxColumn Header="Mode" 
-                                                        Width="100">
-                                    <!-- Placeholder for Task 26 -->
+                                                        Width="100"
+                                                        SelectedItemBinding="{Binding Mode, UpdateSourceTrigger=PropertyChanged}">
+                                    <DataGridComboBoxColumn.ElementStyle>
+                                        <Style TargetType="ComboBox">
+                                            <Setter Property="ItemsSource">
+                                                <Setter.Value>
+                                                    <x:Array Type="sys:String" xmlns:sys="clr-namespace:System;assembly=mscorlib">
+                                                        <sys:String>new</sys:String>
+                                                        <sys:String>diff</sys:String>
+                                                    </x:Array>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </DataGridComboBoxColumn.ElementStyle>
+                                    <DataGridComboBoxColumn.EditingElementStyle>
+                                        <Style TargetType="ComboBox">
+                                            <Setter Property="ItemsSource">
+                                                <Setter.Value>
+                                                    <x:Array Type="sys:String" xmlns:sys="clr-namespace:System;assembly=mscorlib">
+                                                        <sys:String>new</sys:String>
+                                                        <sys:String>diff</sys:String>
+                                                    </x:Array>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </DataGridComboBoxColumn.EditingElementStyle>
                                 </DataGridComboBoxColumn>
                             </DataGrid.Columns>
                         </DataGrid>

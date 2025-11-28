@@ -1,0 +1,148 @@
+﻿<Window x:Class="EasyAF.Modules.Spec.Views.Dialogs.PropertyPathPickerDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Select Property Paths"
+        Width="500"
+        Height="600"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource WindowBackgroundBrush}"
+        ResizeMode="CanResize">
+    
+    <Window.Resources>
+        <!-- TreeView Item Style -->
+        <Style x:Key="PropertyTreeViewItemStyle" TargetType="TreeViewItem">
+            <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+    </Window.Resources>
+    
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <!-- Title -->
+            <RowDefinition Height="Auto"/> <!-- Search -->
+            <RowDefinition Height="*"/>    <!-- Tree -->
+            <RowDefinition Height="Auto"/> <!-- Selected count -->
+            <RowDefinition Height="Auto"/> <!-- Buttons -->
+        </Grid.RowDefinitions>
+        
+        <!-- Title -->
+        <TextBlock Grid.Row="0" 
+                   Text="Select property paths for this column:"
+                   FontSize="14"
+                   FontWeight="SemiBold"
+                   Foreground="{DynamicResource TextPrimaryBrush}"
+                   Margin="0,0,0,16"/>
+        
+        <!-- Search Box -->
+        <Grid Grid.Row="1" Margin="0,0,0,12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            
+            <TextBox Grid.Column="0"
+                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                     Background="{DynamicResource ControlBackgroundBrush}"
+                     Foreground="{DynamicResource TextPrimaryBrush}"
+                     BorderBrush="{DynamicResource ControlBorderBrush}"
+                     Padding="8,6">
+                <TextBox.Style>
+                    <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                        <Style.Triggers>
+                            <Trigger Property="Text" Value="">
+                                <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBox.Style>
+            </TextBox>
+            
+            <Button Grid.Column="1"
+                    Content="✕"
+                    Command="{Binding ClearSearchCommand}"
+                    Style="{StaticResource BaseButtonStyle}"
+                    Width="32"
+                    Margin="4,0,0,0"
+                    ToolTip="Clear search"/>
+        </Grid>
+        
+        <!-- Property Tree -->
+        <Border Grid.Row="2"
+                BorderBrush="{DynamicResource ControlBorderBrush}"
+                BorderThickness="1"
+                Background="{DynamicResource ControlBackgroundBrush}">
+            <TreeView ItemsSource="{Binding DataTypesView}"
+                      Background="Transparent"
+                      BorderThickness="0"
+                      Padding="4"
+                      ItemContainerStyle="{StaticResource PropertyTreeViewItemStyle}">
+                
+                <!-- Data Type Level (Bus, LVCB, etc.) -->
+                <TreeView.ItemTemplate>
+                    <HierarchicalDataTemplate ItemsSource="{Binding Properties}">
+                        <!-- Data Type Header -->
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="📁"
+                                       FontFamily="Segoe UI Emoji"
+                                       Margin="0,0,6,0"/>
+                            <TextBlock Text="{Binding FriendlyName}"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <TextBlock Text="{Binding Properties.Count, StringFormat=' ({0} properties)'}"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                       FontSize="11"
+                                       Margin="4,1,0,0"/>
+                        </StackPanel>
+                        
+                        <!-- Property Level (Name, BaseKV, etc.) -->
+                        <HierarchicalDataTemplate.ItemTemplate>
+                            <DataTemplate>
+                                <CheckBox IsChecked="{Binding IsSelected}"
+                                          Foreground="{DynamicResource TextPrimaryBrush}"
+                                          Margin="4,2">
+                                    <CheckBox.Content>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding PropertyName}"
+                                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                            <TextBlock Text="{Binding UsageCountDisplay}"
+                                                       Foreground="{DynamicResource TextTertiaryBrush}"
+                                                       FontSize="10"
+                                                       Margin="4,1,0,0"/>
+                                        </StackPanel>
+                                    </CheckBox.Content>
+                                </CheckBox>
+                            </DataTemplate>
+                        </HierarchicalDataTemplate.ItemTemplate>
+                    </HierarchicalDataTemplate>
+                </TreeView.ItemTemplate>
+            </TreeView>
+        </Border>
+        
+        <!-- Selected Count -->
+        <TextBlock Grid.Row="3"
+                   Margin="0,12,0,16"
+                   Foreground="{DynamicResource TextSecondaryBrush}"
+                   HorizontalAlignment="Right">
+            <Run Text="{Binding SelectedPaths.Count, Mode=OneWay}"/>
+            <Run Text="path(s) selected"/>
+        </TextBlock>
+        
+        <!-- Buttons -->
+        <StackPanel Grid.Row="4"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right">
+            <Button Content="OK"
+                    Command="{Binding OkCommand}"
+                    Style="{StaticResource AccentButtonStyle}"
+                    MinWidth="80"
+                    Padding="12,6"
+                    Margin="0,0,8,0"/>
+            <Button Content="Cancel"
+                    Command="{Binding CancelCommand}"
+                    Style="{StaticResource BaseButtonStyle}"
+                    MinWidth="80"
+                    Padding="12,6"/>
+        </StackPanel>
+    </Grid>
+</Window>

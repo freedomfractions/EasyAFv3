@@ -17,6 +17,7 @@
     <ProjectReference Include="..\..\lib\EasyAF.Core\EasyAF.Core.csproj" />
     <ProjectReference Include="..\..\lib\EasyAF.Engine\EasyAF.Engine.csproj" />
     <ProjectReference Include="..\..\lib\EasyAF.Data\EasyAF.Data.csproj" />
+    <ProjectReference Include="..\EasyAF.Modules.Map\EasyAF.Modules.Map.csproj" />
   </ItemGroup>
 
   <ItemGroup>

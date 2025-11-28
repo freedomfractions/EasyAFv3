@@ -5,6 +5,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using EasyAF.Core.Contracts;
 using EasyAF.Modules.Spec.Models;
+using EasyAF.Modules.Map.Services;
 using Unity;
 using Serilog;
 
@@ -95,11 +96,14 @@ namespace EasyAF.Modules.Spec
             var document = SpecDocument.CreateNew();
             document.OwnerModule = this;
             
-            // Create ViewModel
+            // Resolve services from container
             var dialogService = _container?.Resolve<IUserDialogService>() 
                 ?? throw new InvalidOperationException("IUserDialogService not registered in container");
             
-            var viewModel = new ViewModels.SpecDocumentViewModel(document, dialogService);
+            var propertyDiscovery = _container?.Resolve<IPropertyDiscoveryService>() 
+                ?? throw new InvalidOperationException("IPropertyDiscoveryService not registered in container");
+            
+            var viewModel = new ViewModels.SpecDocumentViewModel(document, dialogService, propertyDiscovery);
             document.ViewModel = viewModel;
             
             Log.Information("New spec document created");
@@ -124,11 +128,14 @@ namespace EasyAF.Modules.Spec
             var document = SpecDocument.LoadFrom(filePath);
             document.OwnerModule = this;
             
-            // Create ViewModel
+            // Resolve services from container
             var dialogService = _container?.Resolve<IUserDialogService>() 
                 ?? throw new InvalidOperationException("IUserDialogService not registered in container");
             
-            var viewModel = new ViewModels.SpecDocumentViewModel(document, dialogService);
+            var propertyDiscovery = _container?.Resolve<IPropertyDiscoveryService>() 
+                ?? throw new InvalidOperationException("IPropertyDiscoveryService not registered in container");
+            
+            var viewModel = new ViewModels.SpecDocumentViewModel(document, dialogService, propertyDiscovery);
             document.ViewModel = viewModel;
             
             Log.Information("Spec document opened successfully: {FilePath}", filePath);
