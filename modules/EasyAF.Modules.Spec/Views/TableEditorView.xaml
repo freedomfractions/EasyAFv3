@@ -208,7 +208,7 @@
                 </Expander>
                 
                 <!-- Filters Expander -->
-                <Expander Style="{StaticResource TableConfigExpanderStyle}">
+                <Expander Style="{StaticResource TableConfigExpanderStyle}" IsExpanded="False">
                     <Expander.Header>
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="Filters"
@@ -420,7 +420,7 @@
                 </Expander>
                 
                 <!-- Sorting Expander -->
-                <Expander Style="{StaticResource TableConfigExpanderStyle}">
+                <Expander Style="{StaticResource TableConfigExpanderStyle}" IsExpanded="False">
                     <Expander.Header>
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="Sorting"
@@ -455,12 +455,12 @@
                                     Command="{Binding RemoveSortSpecCommand}"
                                     Style="{StaticResource ToolBarButtonStyle}"/>
                             <Separator/>
-                            <Button Content="?" 
+                            <Button Content="▲" 
                                     Command="{Binding MoveSortSpecUpCommand}"
                                     ToolTip="Move Up (Higher Priority)"
                                     Style="{StaticResource ToolBarButtonStyle}"
                                     Width="32"/>
-                            <Button Content="?" 
+                            <Button Content="▼" 
                                     Command="{Binding MoveSortSpecDownCommand}"
                                     ToolTip="Move Down (Lower Priority)"
                                     Style="{StaticResource ToolBarButtonStyle}"
@@ -691,13 +691,11 @@
                             Command="{Binding RemoveColumnCommand}"
                             Style="{StaticResource ToolBarButtonStyle}"/>
                     <Separator/>
-                    <Button Content="?" 
-                            Command="{Binding MoveColumnUpCommand}"
+                    <Button Content="▲" Command="{Binding MoveColumnUpCommand}"
                             ToolTip="Move Up"
                             Style="{StaticResource ToolBarButtonStyle}"
                             Width="32"/>
-                    <Button Content="?" 
-                            Command="{Binding MoveColumnDownCommand}"
+                    <Button Content="▼" Command="{Binding MoveColumnDownCommand}"
                             ToolTip="Move Down"
                             Style="{StaticResource ToolBarButtonStyle}"
                             Width="32"/>
