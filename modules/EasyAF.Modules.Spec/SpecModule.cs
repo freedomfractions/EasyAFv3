@@ -64,8 +64,7 @@ namespace EasyAF.Modules.Spec
         /// <summary>
         /// Gets the icon for this module (null for now - can add embedded resource later).
         /// </summary>
-        public ImageSource? ModuleIcon => new BitmapImage(
-            new Uri("pack://application:,,,/EasyAF.Modules.Spec;component/Resources/spec-icon.png"));
+        public ImageSource? ModuleIcon => null; // TODO: Add spec-icon.png resource
 
         /// <summary>
         /// Initializes the module and registers services with the DI container.
@@ -187,6 +186,18 @@ namespace EasyAF.Modules.Spec
         {
             var extension = System.IO.Path.GetExtension(filePath);
             return SupportedFileExtensions.Any(ext => ext.Equals(extension.TrimStart('.'), StringComparison.OrdinalIgnoreCase));
+        }
+
+        /// <summary>
+        /// Gets a suggested filename for the document based on its content.
+        /// </summary>
+        /// <param name="document">The document to suggest a name for.</param>
+        /// <returns>Suggested filename without extension, or null to use default Title.</returns>
+        public string? GetSuggestedFileName(IDocument document)
+        {
+            // Use default Title-based naming for spec files
+            // Could enhance later to suggest names like "[Software Version] Spec"
+            return null;
         }
     }
 }

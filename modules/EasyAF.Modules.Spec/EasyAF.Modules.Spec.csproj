@@ -19,9 +19,11 @@
     <ProjectReference Include="..\..\lib\EasyAF.Data\EasyAF.Data.csproj" />
   </ItemGroup>
 
+  <!-- TODO: Add spec-icon.png resource when creating icon -->
+  <!--
   <ItemGroup>
-    <!-- Embedded PNG for in-app use (file tabs) -->
     <Resource Include="Resources\spec-icon.png" />
   </ItemGroup>
+  -->
 
 </Project>
