@@ -36,5 +36,17 @@ namespace EasyAF.Modules.Spec.Views
                 viewModel.EditColumnCommand.Execute(null);
             }
         }
+
+        /// <summary>
+        /// Handles double-click on Filters DataGrid to edit the selected filter.
+        /// </summary>
+        private void FiltersDataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            // Get the ViewModel and trigger the EditFilter command
+            if (DataContext is TableEditorViewModel viewModel && viewModel.EditFilterCommand.CanExecute(null))
+            {
+                viewModel.EditFilterCommand.Execute(null);
+            }
+        }
     }
 }

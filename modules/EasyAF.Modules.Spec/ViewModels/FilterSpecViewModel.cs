@@ -14,11 +14,22 @@ namespace EasyAF.Modules.Spec.ViewModels
     {
         private readonly FilterSpec _filterSpec;
         private readonly Action _onChanged;
+        private int _ruleNumber;
 
-        public FilterSpecViewModel(FilterSpec filterSpec, Action onChanged)
+        public FilterSpecViewModel(FilterSpec filterSpec, Action onChanged, int ruleNumber = 0)
         {
             _filterSpec = filterSpec ?? throw new ArgumentNullException(nameof(filterSpec));
             _onChanged = onChanged ?? throw new ArgumentNullException(nameof(onChanged));
+            _ruleNumber = ruleNumber;
+        }
+
+        /// <summary>
+        /// Gets the rule number for display (1-based index).
+        /// </summary>
+        public int RuleNumber
+        {
+            get => _ruleNumber;
+            set => SetProperty(ref _ruleNumber, value);
         }
 
         /// <summary>

@@ -42,6 +42,30 @@ namespace EasyAF.Modules.Spec.ViewModels
         /// </summary>
         public int FilterCount => Filters.Count;
 
+        private string _filterLogic = "AND";
+
+        /// <summary>
+        /// Gets or sets the filter logic mode (AND, OR, or Advanced).
+        /// </summary>
+        public string FilterLogic
+        {
+            get => _filterLogic;
+            set
+            {
+                if (SetProperty(ref _filterLogic, value))
+                {
+                    RaisePropertyChanged(nameof(IsAdvancedFilterLogic));
+                    _document.MarkDirty();
+                    Log.Information("Filter logic changed to: {Logic} for table {TableId}", value, _table.Id);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets whether Advanced filter logic mode is enabled.
+        /// </summary>
+        public bool IsAdvancedFilterLogic => FilterLogic == "Advanced";
+
         #endregion
 
         #region Filter Commands
@@ -66,6 +90,11 @@ namespace EasyAF.Modules.Spec.ViewModels
         /// </summary>
         public ICommand PickCompareToPropertyCommand { get; private set; } = null!;
 
+        /// <summary>
+        /// Command to edit the selected filter (opens dialog).
+        /// </summary>
+        public ICommand EditFilterCommand { get; private set; } = null!;
+
         #endregion
 
         #region Filter Initialization
@@ -86,6 +115,8 @@ namespace EasyAF.Modules.Spec.ViewModels
             PickFilterPropertyCommand = new DelegateCommand(ExecutePickFilterProperty, CanExecutePickFilterProperty)
                 .ObservesProperty(() => SelectedFilter);
             PickCompareToPropertyCommand = new DelegateCommand(ExecutePickCompareToProperty, CanExecutePickCompareToProperty)
+                .ObservesProperty(() => SelectedFilter);
+            EditFilterCommand = new DelegateCommand(ExecuteEditFilter, CanExecuteEditFilter)
                 .ObservesProperty(() => SelectedFilter);
         }
 
@@ -259,9 +290,9 @@ namespace EasyAF.Modules.Spec.ViewModels
 
             if (_table.FilterSpecs != null)
             {
-                foreach (var filterSpec in _table.FilterSpecs)
+                for (int i = 0; i < _table.FilterSpecs.Length; i++)
                 {
-                    var filterVm = new FilterSpecViewModel(filterSpec, OnFilterChanged);
+                    var filterVm = new FilterSpecViewModel(_table.FilterSpecs[i], OnFilterChanged, i + 1);
                     Filters.Add(filterVm);
                 }
             }
@@ -281,6 +312,27 @@ namespace EasyAF.Modules.Spec.ViewModels
         private void OnFilterChanged()
         {
             _document.MarkDirty();
+        }
+
+        private bool CanExecuteEditFilter() => SelectedFilter != null;
+
+        private void ExecuteEditFilter()
+        {
+            if (SelectedFilter == null) return;
+
+            try
+            {
+                // TODO: Open Filter Editor Dialog
+                // For now, open PropertyPath picker as placeholder
+                ExecutePickFilterProperty();
+                
+                Log.Information("Editing filter #{RuleNumber}", SelectedFilter.RuleNumber);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to edit filter");
+                _dialogService.ShowError("Failed to edit filter", ex.Message);
+            }
         }
 
         #endregion

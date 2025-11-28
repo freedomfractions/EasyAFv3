@@ -225,7 +225,7 @@
                             <RowDefinition Height="Auto"/> <!-- Toolbar -->
                             <RowDefinition Height="*"/>    <!-- DataGrid -->
                             <RowDefinition Height="8"/>
-                            <RowDefinition Height="Auto"/> <!-- Selected Filter Details -->
+                            <RowDefinition Height="Auto"/> <!-- Filter Logic Dropdown -->
                         </Grid.RowDefinitions>
                         
                         <!-- Toolbar -->
@@ -238,9 +238,13 @@
                             <Button Content="Remove" 
                                     Command="{Binding RemoveFilterCommand}"
                                     Style="{StaticResource ToolBarButtonStyle}"/>
+                            <Separator/>
+                            <Button Content="Edit..." 
+                                    Command="{Binding EditFilterCommand}"
+                                    Style="{StaticResource ToolBarButtonStyle}"/>
                         </ToolBar>
                         
-                        <!-- Filters DataGrid -->
+                        <!-- Filters DataGrid (READ-ONLY - double-click to edit) -->
                         <DataGrid Grid.Row="1" 
                                   ItemsSource="{Binding Filters}"
                                   SelectedItem="{Binding SelectedFilter}"
@@ -261,8 +265,22 @@
                                   ScrollViewer.VerticalScrollBarVisibility="Auto"
                                   ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                   MinHeight="120"
-                                  MaxHeight="200">
+                                  MaxHeight="200"
+                                  MouseDoubleClick="FiltersDataGrid_MouseDoubleClick">
                             <DataGrid.Columns>
+                                <!-- Rule # Column -->
+                                <DataGridTextColumn Header="Rule #" 
+                                                    Binding="{Binding RuleNumber}" 
+                                                    Width="60">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                                            <Setter Property="FontWeight" Value="SemiBold"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                
                                 <!-- Summary Column -->
                                 <DataGridTextColumn Header="Filter Rule" 
                                                     Binding="{Binding Summary}" 
@@ -300,137 +318,51 @@
                             </DataGrid.Columns>
                         </DataGrid>
                         
-                        <!-- Selected Filter Details Panel -->
-                        <GroupBox Grid.Row="3"
-                                  Header="Filter Details"
-                                  Foreground="{DynamicResource TextPrimaryBrush}"
-                                  BorderBrush="{DynamicResource ControlBorderBrush}"
-                                  Margin="0,8,0,0">
-                            <GroupBox.Style>
-                                <Style TargetType="GroupBox">
-                                    <Setter Property="Visibility" Value="Visible"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding SelectedFilter}" Value="{x:Null}">
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </GroupBox.Style>
+                        <!-- Filter Logic Dropdown -->
+                        <Grid Grid.Row="3">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
                             
-                            <Grid Margin="8" DataContext="{Binding SelectedFilter}">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="8"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="8"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                
-                                <!-- Property Path -->
-                                <TextBlock Grid.Row="0" Grid.Column="0"
-                                           Text="Property:"
-                                           VerticalAlignment="Center"
-                                           Margin="0,0,8,0"
-                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
-                                <TextBox Grid.Row="0" Grid.Column="1"
-                                         Text="{Binding PropertyPath, UpdateSourceTrigger=PropertyChanged}"
-                                         IsReadOnly="True"
-                                         Background="{DynamicResource ReadonlyBackgroundBrush}"
-                                         Foreground="{DynamicResource TextSecondaryBrush}"
-                                         BorderBrush="{DynamicResource ControlBorderBrush}"
-                                         Padding="4"
-                                         ToolTip="{Binding PropertyPath}"/>
-                                <Button Grid.Row="0" Grid.Column="2"
-                                        Content="Pick..."
-                                        Command="{Binding DataContext.PickFilterPropertyCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                        Style="{StaticResource BaseButtonStyle}"
-                                        Width="60"
-                                        Margin="8,0,0,0"/>
-                                
-                                <!-- Operator -->
-                                <TextBlock Grid.Row="2" Grid.Column="0"
-                                           Text="Operator:"
-                                           VerticalAlignment="Center"
-                                           Margin="0,0,8,0"
-                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
-                                <ComboBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
-                                          ItemsSource="{Binding DataContext.AvailableOperators, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                          SelectedValue="{Binding Operator, UpdateSourceTrigger=PropertyChanged}"
-                                          SelectedValuePath="Value"
-                                          DisplayMemberPath="Display"
-                                          Background="{DynamicResource ControlBackgroundBrush}"
-                                          Foreground="{DynamicResource TextPrimaryBrush}"
-                                          BorderBrush="{DynamicResource ControlBorderBrush}"/>
-                                
-                                <!-- Compare To (Value OR Property) -->
-                                <TextBlock Grid.Row="4" Grid.Column="0"
-                                           Text="Compare To:"
-                                           VerticalAlignment="Center"
-                                           Margin="0,0,8,0"
-                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
-                                
-                                <!-- Value Mode -->
-                                <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal">
-                                    <StackPanel.Style>
-                                        <Style TargetType="StackPanel">
-                                            <Setter Property="Visibility" Value="Visible"/>
-                                            <Setter Property="Orientation" Value="Horizontal"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsValueMode}" Value="False">
-                                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </StackPanel.Style>
-                                    
-                                    <TextBox Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}"
-                                             Background="{DynamicResource ControlBackgroundBrush}"
-                                             Foreground="{DynamicResource TextPrimaryBrush}"
-                                             BorderBrush="{DynamicResource ControlBorderBrush}"
-                                             Padding="4"
-                                             MinWidth="150"/>
-                                    
-                                    <CheckBox Content="Numeric"
-                                              IsChecked="{Binding Numeric, UpdateSourceTrigger=PropertyChanged}"
-                                              VerticalAlignment="Center"
-                                              Margin="12,0,0,0"
-                                              Foreground="{DynamicResource TextPrimaryBrush}"/>
-                                </StackPanel>
-                                
-                                <!-- Property Compare Mode -->
-                                <TextBox Grid.Row="4" Grid.Column="1"
-                                         Text="{Binding CompareToDisplay, Mode=OneWay}"
-                                         IsReadOnly="True"
-                                         Background="{DynamicResource ReadonlyBackgroundBrush}"
-                                         Foreground="{DynamicResource TextSecondaryBrush}"
-                                         BorderBrush="{DynamicResource ControlBorderBrush}"
-                                         Padding="4">
-                                    <TextBox.Style>
-                                        <Style TargetType="TextBox">
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsPropertyCompareMode}" Value="True">
-                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBox.Style>
-                                </TextBox>
-                                
-                                <Button Grid.Row="4" Grid.Column="2"
-                                        Content="Property..."
-                                        Command="{Binding DataContext.PickCompareToPropertyCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                        Style="{StaticResource BaseButtonStyle}"
-                                        Width="80"
-                                        Margin="8,0,0,0"
-                                        ToolTip="Compare to another property instead of a literal value"/>
-                            </Grid>
-                        </GroupBox>
+                            <TextBlock Grid.Column="0"
+                                       Text="Apply filters using:"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,8,0"
+                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            
+                            <ComboBox Grid.Column="1"
+                                      SelectedValue="{Binding FilterLogic, UpdateSourceTrigger=PropertyChanged}"
+                                      SelectedValuePath="Tag"
+                                      Background="{DynamicResource ControlBackgroundBrush}"
+                                      Foreground="{DynamicResource TextPrimaryBrush}"
+                                      BorderBrush="{DynamicResource ControlBorderBrush}">
+                                <ComboBoxItem Content="AND (all must match)" Tag="AND" IsSelected="True"/>
+                                <ComboBoxItem Content="OR (any must match)" Tag="OR"/>
+                                <ComboBoxItem Content="Advanced..." Tag="Advanced"/>
+                            </ComboBox>
+                            
+                            <!-- Advanced logic hint (shown when Advanced selected) -->
+                            <TextBlock Grid.Column="2"
+                                       Text="Use rule numbers in logic: e.g., '(1 | 2) &amp; 3'"
+                                       VerticalAlignment="Center"
+                                       Margin="12,0,0,0"
+                                       FontStyle="Italic"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource TextSecondaryBrush}">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsAdvancedFilterLogic}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Grid>
                         
                         <!-- Empty State Overlay -->
                         <Border Grid.Row="1"
@@ -475,7 +407,7 @@
                                            Foreground="{DynamicResource TextSecondaryBrush}">
                                     <Run Text="Click"/>
                                     <Run Text="Add Filter" FontWeight="Bold"/>
-                                    <Run Text="to include/exclude rows based on property values."/>
+                                    <Run Text="to include/exclude rows. Double-click a filter to edit it."/>
                                 </TextBlock>
                             </StackPanel>
                         </Border>
