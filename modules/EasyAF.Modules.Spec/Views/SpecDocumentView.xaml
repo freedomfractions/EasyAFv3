@@ -1,0 +1,39 @@
+<UserControl x:Class="EasyAF.Modules.Spec.Views.SpecDocumentView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:EasyAF.Modules.Spec.ViewModels"
+             xmlns:views="clr-namespace:EasyAF.Modules.Spec.Views"
+             Background="{DynamicResource PrimaryBackgroundBrush}">
+    <TabControl ItemsSource="{Binding TabHeaders}"
+                SelectedIndex="{Binding SelectedTabIndex}"
+                Background="{DynamicResource PrimaryBackgroundBrush}"
+                BorderBrush="{DynamicResource ControlBorderBrush}"
+                BorderThickness="0,1,0,0">
+        
+        <!-- Tab Header Template -->
+        <TabControl.ItemTemplate>
+            <DataTemplate>
+                <TextBlock Text="{Binding Header}"
+                           Foreground="{DynamicResource TextPrimaryBrush}"
+                           Padding="12,6"
+                           VerticalAlignment="Center"/>
+            </DataTemplate>
+        </TabControl.ItemTemplate>
+        
+        <!-- Tab Content Template -->
+        <TabControl.ContentTemplate>
+            <DataTemplate>
+                <ContentControl Content="{Binding ViewModel}">
+                    <ContentControl.Resources>
+                        <!-- Map ViewModels to Views -->
+                        <DataTemplate DataType="{x:Type vm:SpecSetupViewModel}">
+                            <views:SpecSetupView/>
+                        </DataTemplate>
+                        <!-- TODO Task 26: Add DataTemplate for TableEditorViewModel -->
+                    </ContentControl.Resources>
+                </ContentControl>
+            </DataTemplate>
+        </TabControl.ContentTemplate>
+        
+    </TabControl>
+</UserControl>

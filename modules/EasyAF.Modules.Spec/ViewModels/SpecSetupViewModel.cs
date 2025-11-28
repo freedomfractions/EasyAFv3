@@ -396,9 +396,21 @@ namespace EasyAF.Modules.Spec.ViewModels
             }
         }
 
-        // TODO: Task 25 - Add DataTypes property (multi-select)
-        // TODO: Task 25 - Add Mode property (Label/Report)
-        // TODO: Task 25 - Add ColumnCount property (read-only, calculated)
+        /// <summary>
+        /// Gets display text for selected data types.
+        /// </summary>
+        /// <remarks>
+        /// TODO: Task 25 - This should show "3 of 34 selected" when multi-select is implemented.
+        /// </remarks>
+        public string DataTypesDisplay => "(not configured)"; // Placeholder
+
+        /// <summary>
+        /// Gets the count of columns in this table.
+        /// </summary>
+        public int ColumnCount => _tableSpec.Columns?.Length ?? 0;
+
+        // TODO: Task 25 - Add DataTypes property (ObservableCollection<string> for multi-select)
+        // TODO: Task 25 - Add Mode property (enum: Label/Report)
     }
 
     /// <summary>

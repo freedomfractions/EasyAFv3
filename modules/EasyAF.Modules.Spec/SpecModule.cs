@@ -64,7 +64,8 @@ namespace EasyAF.Modules.Spec
         /// <summary>
         /// Gets the icon for this module (null for now - can add embedded resource later).
         /// </summary>
-        public ImageSource? ModuleIcon => null; // TODO: Add spec-icon.png resource
+        public ImageSource? ModuleIcon => new BitmapImage(
+            new Uri("pack://application:,,,/EasyAF.Modules.Spec;component/Resources/spec-icon.png"));
 
         /// <summary>
         /// Initializes the module and registers services with the DI container.
@@ -94,10 +95,12 @@ namespace EasyAF.Modules.Spec
             var document = SpecDocument.CreateNew();
             document.OwnerModule = this;
             
-            // TODO: Create ViewModel in Task 25
-            // var dialogService = _container?.Resolve<IUserDialogService>();
-            // var viewModel = new ViewModels.SpecDocumentViewModel(document, dialogService);
-            // SetDocumentViewModel(document, viewModel);
+            // Create ViewModel
+            var dialogService = _container?.Resolve<IUserDialogService>() 
+                ?? throw new InvalidOperationException("IUserDialogService not registered in container");
+            
+            var viewModel = new ViewModels.SpecDocumentViewModel(document, dialogService);
+            document.ViewModel = viewModel;
             
             Log.Information("New spec document created");
             
@@ -121,10 +124,12 @@ namespace EasyAF.Modules.Spec
             var document = SpecDocument.LoadFrom(filePath);
             document.OwnerModule = this;
             
-            // TODO: Create ViewModel in Task 25
-            // var dialogService = _container?.Resolve<IUserDialogService>();
-            // var viewModel = new ViewModels.SpecDocumentViewModel(document, dialogService);
-            // SetDocumentViewModel(document, viewModel);
+            // Create ViewModel
+            var dialogService = _container?.Resolve<IUserDialogService>() 
+                ?? throw new InvalidOperationException("IUserDialogService not registered in container");
+            
+            var viewModel = new ViewModels.SpecDocumentViewModel(document, dialogService);
+            document.ViewModel = viewModel;
             
             Log.Information("Spec document opened successfully: {FilePath}", filePath);
             
