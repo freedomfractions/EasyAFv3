@@ -342,7 +342,7 @@ Next Task: [What should be worked on next]
 **NOTE: Newest entries appear at the top**
 
 ```
-Date: 2025-11-27T23:30:00-06:00
+Date: 2025-11-27T23:45:00-06:00
 Task: Task 25 - Build Table Definition Model and Setup Tab
 Status: Complete
 Blocking Issue: None
@@ -354,8 +354,16 @@ Cross-Module Edits:
 - modules/EasyAF.Modules.Spec/Views/SpecDocumentView.xaml: TabControl view
 - modules/EasyAF.Modules.Spec/Views/SpecSetupView.xaml: Two-column setup layout
 - modules/EasyAF.Modules.Spec/Resources/spec-icon.png: Module icon asset
+- app/EasyAF.Shell/EasyAF.Shell.csproj: Spec module project reference (module integration)
 Notes:
-✅ COMPLETE: Setup tab with table management UI
+✅ COMPLETE: Setup tab with table management UI + Shell integration
+
+MODULE INTEGRATION COMPLETE:
+- Shell project reference added with <Private>true</Private>
+- Module DLL will be copied to output folder automatically
+- ModuleLoader will discover SpecModule via reflection
+- "New File" dialog will show "Spec Editor" option
+- Icon embedded and loaded via pack URI
 
 VIEWMODELS CREATED:
 1. SpecDocumentViewModel (Coordinator)
@@ -432,18 +440,22 @@ THEME COMPLIANCE:
 ✅ CommonControls.xaml styles applied
 
 MODULE INTEGRATION:
-- SpecModule.CreateNewDocument() creates SpecDocumentViewModel
-- SpecModule.OpenDocument() creates SpecDocumentViewModel
-- SpecDocument.ViewModel property stores VM for shell rendering
+✅ Shell project reference added (EasyAF.Shell.csproj)
+✅ Module DLL copied automatically via <Private>true</Private>
+✅ ModuleLoader discovers module via reflection
+✅ SpecModule.CreateNewDocument() creates SpecDocumentViewModel
+✅ SpecModule.OpenDocument() creates SpecDocumentViewModel
+✅ SpecDocument.ViewModel property stores VM for shell rendering
 - Shell's DataTemplate system will render view based on ViewModel type
-- Icon asset embedded (spec-icon.png)
+✅ Icon asset embedded (spec-icon.png)
 
 DEFERRED TO TASK 26:
-- DataTypePickerControl (custom multi-select with fuzzy search)
-- Table editor tabs (WYSIWYG canvas)
-- Column editor dialog
-- Expression builder
-- Conditional formatting
+⏸️ DataTemplate registration in Shell's App.xaml (view-level integration)
+⏸️ DataTypePickerControl (custom multi-select with fuzzy search)
+⏸️ Table editor tabs (WYSIWYG canvas)
+⏸️ Column editor dialog
+⏸️ Expression builder
+⏸️ Conditional formatting
 
 BUILD STATUS: ✅ Successful compilation (0 errors, 0 warnings)
 
@@ -453,6 +465,7 @@ ARCHITECTURE NOTES:
 - ViewModels bind directly to SpecDocument.Spec.* properties
 - Statistics refresh is manual (called after table changes)
 - Module icon from embedded resource (pack URI)
+- Module registration via Shell project reference (not manual copy)
 
 PATTERNS FOLLOWED:
 ✅ Same DocumentViewModel coordinator pattern
@@ -464,9 +477,10 @@ PATTERNS FOLLOWED:
 ✅ DynamicResource theme bindings (100%)
 ✅ CommonControls.xaml styles
 ✅ Dirty tracking and save prompts
+✅ Module registration via Shell project reference
 
-Next Task: Task 26 - Create Table Editor Interface (WYSIWYG canvas + column editor)
-Rollback Instructions: Remove modules/EasyAF.Modules.Spec/Views* files and ViewModel wiring in SpecModule
+Next Task: Task 26 - Create Table Editor Interface (WYSIWYG canvas + column editor + DataTemplate in Shell)
+Rollback Instructions: Remove modules/EasyAF.Modules.Spec/Views* files, ViewModel wiring in SpecModule, and Shell project reference
 ```
 ```
 Date: 2025-11-27T22:45:00-06:00
