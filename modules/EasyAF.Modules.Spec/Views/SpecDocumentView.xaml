@@ -4,8 +4,39 @@
              xmlns:vm="clr-namespace:EasyAF.Modules.Spec.ViewModels"
              xmlns:views="clr-namespace:EasyAF.Modules.Spec.Views"
              Background="{DynamicResource PrimaryBackgroundBrush}">
+    
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <!-- DataTemplates to map ViewModels to Views -->
+            <DataTemplate DataType="{x:Type vm:SpecSetupViewModel}">
+                <views:SpecSetupView HorizontalAlignment="Stretch" 
+                                     VerticalAlignment="Stretch"/>
+            </DataTemplate>
+            
+            <DataTemplate DataType="{x:Type vm:TableEditorViewModel}">
+                <views:TableEditorView HorizontalAlignment="Stretch" 
+                                       VerticalAlignment="Stretch"/>
+            </DataTemplate>
+            
+            <!-- AUDIT FIX #4: TabControl Style to ensure content stretches (matches Map module) -->
+            <Style TargetType="TabControl">
+                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+            </Style>
+            
+            <!-- AUDIT FIX #4: TabItem Style to ensure each tab's content area stretches (matches Map module) -->
+            <Style TargetType="TabItem" BasedOn="{StaticResource {x:Type TabItem}}">
+                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+            </Style>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    
+    <!-- AUDIT FIX #4: Make tabs expand to fill horizontal space (matches Map module) -->
     <TabControl ItemsSource="{Binding TabHeaders}"
                 SelectedIndex="{Binding SelectedTabIndex}"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
                 Background="{DynamicResource PrimaryBackgroundBrush}"
                 BorderBrush="{DynamicResource ControlBorderBrush}"
                 BorderThickness="0,1,0,0">
@@ -23,15 +54,13 @@
         <!-- Tab Content Template -->
         <TabControl.ContentTemplate>
             <DataTemplate>
-                <ContentControl Content="{Binding ViewModel}">
-                    <ContentControl.Resources>
-                        <!-- Map ViewModels to Views -->
-                        <DataTemplate DataType="{x:Type vm:SpecSetupViewModel}">
-                            <views:SpecSetupView/>
-                        </DataTemplate>
-                        <!-- TODO Task 26: Add DataTemplate for TableEditorViewModel -->
-                    </ContentControl.Resources>
-                </ContentControl>
+                <!-- The ViewModel property contains the actual VM (SpecSetupViewModel or TableEditorViewModel) -->
+                <!-- WPF will automatically use the DataTemplate from Resources based on the ViewModel type -->
+                <ContentControl Content="{Binding ViewModel}"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                HorizontalContentAlignment="Stretch"
+                                VerticalContentAlignment="Stretch"/>
             </DataTemplate>
         </TabControl.ContentTemplate>
         

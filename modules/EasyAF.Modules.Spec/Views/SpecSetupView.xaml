@@ -69,7 +69,8 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto"
                   HorizontalScrollBarVisibility="Disabled"
                   Background="{DynamicResource PrimaryBackgroundBrush}">
-        <Grid Margin="20">
+        <!-- AUDIT FIX #3: Add MaxWidth for better layout on wide screens (matches Project module) -->
+        <Grid Margin="20" MaxWidth="1400">
             <!-- Two-column layout (same as Map/Project Setup tabs) -->
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="3*"/> <!-- Left: Table definitions + Statistics -->
@@ -145,7 +146,7 @@
                                   RowBackground="{DynamicResource ControlBackgroundBrush}"
                                   AlternatingRowBackground="{DynamicResource PrimaryBackgroundBrush}"
                                   ScrollViewer.VerticalScrollBarVisibility="Auto"
-                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                  ScrollViewer.HorizontalScrollBarVisibility="Auto"
                                   ScrollViewer.CanContentScroll="False">
                             <DataGrid.Columns>
                                 <!-- AUDIT FIX: Table Name Column - Now editable with themed editor! -->
@@ -171,7 +172,7 @@
                                 <!-- Columns Count (Read-only) -->
                                 <DataGridTextColumn Header="Columns" 
                                                     Binding="{Binding ColumnCount, Mode=OneWay}" 
-                                                    Width="80"
+                                                    Width="*"
                                                     IsReadOnly="True">
                                     <DataGridTextColumn.ElementStyle>
                                         <Style TargetType="TextBlock">
@@ -179,36 +180,6 @@
                                         </Style>
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
-                                
-                                <!-- AUDIT FIX: Mode Column - Now has proper binding! -->
-                                <DataGridComboBoxColumn Header="Mode" 
-                                                        Width="100"
-                                                        SelectedItemBinding="{Binding Mode, UpdateSourceTrigger=PropertyChanged}">
-                                    <DataGridComboBoxColumn.ElementStyle>
-                                        <Style TargetType="ComboBox">
-                                            <Setter Property="ItemsSource">
-                                                <Setter.Value>
-                                                    <x:Array Type="sys:String" xmlns:sys="clr-namespace:System;assembly=mscorlib">
-                                                        <sys:String>new</sys:String>
-                                                        <sys:String>diff</sys:String>
-                                                    </x:Array>
-                                                </Setter.Value>
-                                            </Setter>
-                                        </Style>
-                                    </DataGridComboBoxColumn.ElementStyle>
-                                    <DataGridComboBoxColumn.EditingElementStyle>
-                                        <Style TargetType="ComboBox">
-                                            <Setter Property="ItemsSource">
-                                                <Setter.Value>
-                                                    <x:Array Type="sys:String" xmlns:sys="clr-namespace:System;assembly=mscorlib">
-                                                        <sys:String>new</sys:String>
-                                                        <sys:String>diff</sys:String>
-                                                    </x:Array>
-                                                </Setter.Value>
-                                            </Setter>
-                                        </Style>
-                                    </DataGridComboBoxColumn.EditingElementStyle>
-                                </DataGridComboBoxColumn>
                             </DataGrid.Columns>
                         </DataGrid>
                         

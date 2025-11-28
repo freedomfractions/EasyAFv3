@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="EasyAF.Modules.Spec.Views.TableEditorView"
+<UserControl x:Class="EasyAF.Modules.Spec.Views.TableEditorView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Background="{DynamicResource PrimaryBackgroundBrush}">
@@ -9,69 +9,525 @@
                 <ResourceDictionary Source="/EasyAF.Modules.Spec;component/Styles/SpecEditorStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
             
-            <!-- DataGrid Column Header Style -->
-            <Style x:Key="ColumnEditorHeaderStyle" TargetType="DataGridColumnHeader">
-                <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
-                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+            <!-- Expander Style matching GroupBox appearance -->
+            <Style x:Key="TableConfigExpanderStyle" TargetType="Expander">
+                <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}"/>
                 <Setter Property="BorderBrush" Value="{DynamicResource ControlBorderBrush}"/>
-                <Setter Property="BorderThickness" Value="0,0,1,1"/>
-                <Setter Property="Padding" Value="8,4"/>
-                <Setter Property="FontWeight" Value="SemiBold"/>
-                <Setter Property="HorizontalContentAlignment" Value="Left"/>
-                <Setter Property="VerticalContentAlignment" Value="Center"/>
-            </Style>
-            
-            <!-- DataGrid Row Style -->
-            <Style x:Key="ColumnEditorRowStyle" TargetType="DataGridRow">
-                <Setter Property="Background" Value="Transparent"/>
-                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
-                <Style.Triggers>
-                    <Trigger Property="IsSelected" Value="True">
-                        <Setter Property="Background" Value="{DynamicResource HighlightSelectionBrush}"/>
-                    </Trigger>
-                    <Trigger Property="IsMouseOver" Value="True">
-                        <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
-                    </Trigger>
-                </Style.Triggers>
-            </Style>
-            
-            <!-- THEME FIX: DataGrid Cell Style for proper theming -->
-            <Style x:Key="ColumnEditorCellStyle" TargetType="DataGridCell">
-                <Setter Property="Background" Value="Transparent"/>
-                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
-                <Setter Property="BorderBrush" Value="Transparent"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="Margin" Value="0,0,0,8"/>
+                <Setter Property="IsExpanded" Value="True"/>
                 <Setter Property="Template">
                     <Setter.Value>
-                        <ControlTemplate TargetType="DataGridCell">
+                        <ControlTemplate TargetType="Expander">
                             <Border Background="{TemplateBinding Background}"
                                     BorderBrush="{TemplateBinding BorderBrush}"
                                     BorderThickness="{TemplateBinding BorderThickness}"
-                                    Padding="{TemplateBinding Padding}">
-                                <ContentPresenter VerticalAlignment="Center"/>
+                                    CornerRadius="4">
+                                <DockPanel>
+                                    <!-- Header with validation icon -->
+                                    <Border DockPanel.Dock="Top"
+                                            Background="{DynamicResource SecondaryBackgroundBrush}"
+                                            BorderBrush="{DynamicResource ControlBorderBrush}"
+                                            BorderThickness="0,0,0,1"
+                                            Padding="8,4">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            
+                                            <!-- Expander toggle button -->
+                                            <ToggleButton Grid.Column="0"
+                                                          IsChecked="{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}}"
+                                                          VerticalAlignment="Center"
+                                                          Margin="0,0,6,0">
+                                                <ToggleButton.Style>
+                                                    <Style TargetType="ToggleButton">
+                                                        <Setter Property="Background" Value="Transparent"/>
+                                                        <Setter Property="BorderThickness" Value="0"/>
+                                                        <Setter Property="Padding" Value="0"/>
+                                                        <Setter Property="Width" Value="16"/>
+                                                        <Setter Property="Height" Value="16"/>
+                                                        <Setter Property="Template">
+                                                            <Setter.Value>
+                                                                <ControlTemplate TargetType="ToggleButton">
+                                                                    <Border Background="{TemplateBinding Background}">
+                                                                        <TextBlock FontFamily="Segoe MDL2 Assets"
+                                                                                   FontSize="12"
+                                                                                   HorizontalAlignment="Center"
+                                                                                   VerticalAlignment="Center"
+                                                                                   Foreground="{DynamicResource TextPrimaryBrush}">
+                                                                            <TextBlock.Style>
+                                                                                <Style TargetType="TextBlock">
+                                                                                    <Setter Property="Text" Value="&#xE76C;"/> <!-- ChevronRight -->
+                                                                                    <Style.Triggers>
+                                                                                        <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource TemplatedParent}}" Value="True">
+                                                                                            <Setter Property="Text" Value="&#xE70D;"/> <!-- ChevronDown -->
+                                                                                        </DataTrigger>
+                                                                                    </Style.Triggers>
+                                                                                </Style>
+                                                                            </TextBlock.Style>
+                                                                        </TextBlock>
+                                                                    </Border>
+                                                                </ControlTemplate>
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </Style>
+                                                </ToggleButton.Style>
+                                            </ToggleButton>
+                                            
+                                            <!-- Header text -->
+                                            <ContentPresenter Grid.Column="1"
+                                                              Content="{TemplateBinding Header}"
+                                                              VerticalAlignment="Center"/>
+                                            
+                                            <!-- Validation icon (bound in DataContext) -->
+                                            <TextBlock Grid.Column="2"
+                                                       FontFamily="Segoe MDL2 Assets"
+                                                       FontSize="14"
+                                                       VerticalAlignment="Center"
+                                                       Margin="8,0,0,0"
+                                                       Text="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}}"
+                                                       Foreground="{DynamicResource SuccessBrush}"/>
+                                        </Grid>
+                                    </Border>
+                                    
+                                    <!-- Content area -->
+                                    <ContentPresenter x:Name="Content"
+                                                      Margin="8"
+                                                      Visibility="Collapsed"/>
+                                </DockPanel>
                             </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsExpanded" Value="True">
+                                    <Setter TargetName="Content" Property="Visibility" Value="Visible"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
-                <Style.Triggers>
-                    <Trigger Property="IsSelected" Value="True">
-                        <Setter Property="Background" Value="{DynamicResource HighlightSelectionBrush}"/>
-                        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
-                    </Trigger>
-                </Style.Triggers>
             </Style>
         </ResourceDictionary>
     </UserControl.Resources>
     
+    <!-- Main Grid with 3 rows: Upper Section, GridSplitter, Lower Section -->
     <Grid Margin="20">
         <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>    <!-- Column list -->
-            <RowDefinition Height="16"/>   <!-- Spacer -->
-            <RowDefinition Height="Auto"/> <!-- Column properties -->
+            <RowDefinition Height="Auto" MinHeight="200"/>
+            <RowDefinition Height="4"/>
+            <RowDefinition Height="*" MinHeight="200"/>
         </Grid.RowDefinitions>
         
-        <!-- Column List Section -->
-        <GroupBox Grid.Row="0" 
-                  Header="Columns" 
+        <!-- UPPER SECTION: Table Configuration -->
+        <ScrollViewer Grid.Row="0"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled"
+                      Background="{DynamicResource PrimaryBackgroundBrush}">
+            <StackPanel>
+                <!-- Table Properties Expander -->
+                <Expander Style="{StaticResource TableConfigExpanderStyle}"
+                          Tag="&#xE73E;"> <!-- Checkmark icon -->
+                    <Expander.Header>
+                        <TextBlock Text="Table Properties"
+                                   FontWeight="SemiBold"
+                                   FontSize="13"
+                                   Foreground="{DynamicResource TextPrimaryBrush}"/>
+                    </Expander.Header>
+                    
+                    <Grid Margin="4">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="8"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <!-- Row 0: Table Name | Mode | Hide if no diff -->
+                        <TextBlock Grid.Row="0" Grid.Column="0"
+                                   Text="Table Name:"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,8,0"
+                                   Foreground="{DynamicResource TextPrimaryBrush}"/>
+                        <TextBox Grid.Row="0" Grid.Column="1"
+                                 Text="{Binding TableName, UpdateSourceTrigger=PropertyChanged}"
+                                 Background="{DynamicResource ControlBackgroundBrush}"
+                                 Foreground="{DynamicResource TextPrimaryBrush}"
+                                 BorderBrush="{DynamicResource ControlBorderBrush}"
+                                 Padding="4"
+                                 MinWidth="200"/>
+                        
+                        <StackPanel Grid.Row="0" Grid.Column="2"
+                                    Orientation="Horizontal"
+                                    Margin="16,0,0,0">
+                            <TextBlock Text="Mode:"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,8,0"
+                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <ComboBox Width="80"
+                                      SelectedValue="{Binding Mode, UpdateSourceTrigger=PropertyChanged}"
+                                      SelectedValuePath="Tag"
+                                      Background="{DynamicResource ControlBackgroundBrush}"
+                                      Foreground="{DynamicResource TextPrimaryBrush}"
+                                      BorderBrush="{DynamicResource ControlBorderBrush}">
+                                <ComboBoxItem Content="new" Tag="new"/>
+                                <ComboBoxItem Content="diff" Tag="diff"/>
+                            </ComboBox>
+                        </StackPanel>
+                        
+                        <CheckBox Grid.Row="0" Grid.Column="3"
+                                  Content="Hide if no diff"
+                                  IsChecked="{Binding HideIfNoDiff, UpdateSourceTrigger=PropertyChanged}"
+                                  IsEnabled="{Binding IsDiffMode}"
+                                  Margin="16,0,0,0"
+                                  VerticalAlignment="Center"
+                                  Foreground="{DynamicResource TextPrimaryBrush}"/>
+                        
+                        <!-- Row 2: Pagination -->
+                        <TextBlock Grid.Row="2" Grid.Column="0"
+                                   Text="Pagination:"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,8,0"
+                                   Foreground="{DynamicResource TextPrimaryBrush}"/>
+                        <CheckBox Grid.Row="2" Grid.Column="1"
+                                  Grid.ColumnSpan="3"
+                                  Content="Allow row break across pages"
+                                  IsChecked="{Binding AllowRowBreakAcrossPages, UpdateSourceTrigger=PropertyChanged}"
+                                  VerticalAlignment="Center"
+                                  Foreground="{DynamicResource TextPrimaryBrush}"/>
+                    </Grid>
+                </Expander>
+                
+                <!-- Filters Expander -->
+                <Expander Style="{StaticResource TableConfigExpanderStyle}">
+                    <Expander.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Filters"
+                                       FontWeight="SemiBold"
+                                       FontSize="13"
+                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <TextBlock Text="{Binding FilterCount, StringFormat=' ({0})'}"
+                                       FontWeight="Normal"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                       VerticalAlignment="Bottom"
+                                       Margin="4,0,0,1"/>
+                        </StackPanel>
+                    </Expander.Header>
+                    
+                    <Grid Margin="4">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/> <!-- Toolbar -->
+                            <RowDefinition Height="*"/>    <!-- DataGrid -->
+                            <RowDefinition Height="8"/>
+                            <RowDefinition Height="Auto"/> <!-- Selected Filter Details -->
+                        </Grid.RowDefinitions>
+                        
+                        <!-- Toolbar -->
+                        <ToolBar Grid.Row="0" 
+                                 Background="{DynamicResource SecondaryBackgroundBrush}"
+                                 BorderBrush="{DynamicResource ControlBorderBrush}">
+                            <Button Content="Add Filter" 
+                                    Command="{Binding AddFilterCommand}"
+                                    Style="{StaticResource ToolBarButtonStyle}"/>
+                            <Button Content="Remove" 
+                                    Command="{Binding RemoveFilterCommand}"
+                                    Style="{StaticResource ToolBarButtonStyle}"/>
+                        </ToolBar>
+                        
+                        <!-- Filters DataGrid -->
+                        <DataGrid Grid.Row="1" 
+                                  ItemsSource="{Binding Filters}"
+                                  SelectedItem="{Binding SelectedFilter}"
+                                  AutoGenerateColumns="False"
+                                  CanUserAddRows="False"
+                                  CanUserDeleteRows="False"
+                                  IsReadOnly="True"
+                                  HeadersVisibility="Column"
+                                  Background="{DynamicResource ControlBackgroundBrush}"
+                                  Foreground="{DynamicResource TextPrimaryBrush}"
+                                  BorderBrush="{DynamicResource ControlBorderBrush}"
+                                  BorderThickness="1"
+                                  Margin="0,8,0,0"
+                                  ColumnHeaderStyle="{StaticResource ColumnEditorHeaderStyle}"
+                                  RowStyle="{StaticResource ColumnEditorRowStyle}"
+                                  GridLinesVisibility="Horizontal"
+                                  HorizontalGridLinesBrush="{DynamicResource ControlBorderBrush}"
+                                  ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                  MinHeight="120"
+                                  MaxHeight="200">
+                            <DataGrid.Columns>
+                                <!-- Summary Column -->
+                                <DataGridTextColumn Header="Filter Rule" 
+                                                    Binding="{Binding Summary}" 
+                                                    Width="*">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                                            <Setter Property="TextWrapping" Value="NoWrap"/>
+                                            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                                            <Setter Property="ToolTip" Value="{Binding Summary}"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                
+                                <!-- Type Indicator -->
+                                <DataGridTemplateColumn Header="Type" Width="80">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock HorizontalAlignment="Center"
+                                                       Foreground="{DynamicResource TextSecondaryBrush}">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Text" Value="Text"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Numeric}" Value="True">
+                                                                <Setter Property="Text" Value="Numeric"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                        
+                        <!-- Selected Filter Details Panel -->
+                        <GroupBox Grid.Row="3"
+                                  Header="Filter Details"
+                                  Foreground="{DynamicResource TextPrimaryBrush}"
+                                  BorderBrush="{DynamicResource ControlBorderBrush}"
+                                  Margin="0,8,0,0">
+                            <GroupBox.Style>
+                                <Style TargetType="GroupBox">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedFilter}" Value="{x:Null}">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </GroupBox.Style>
+                            
+                            <Grid Margin="8" DataContext="{Binding SelectedFilter}">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="8"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="8"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <!-- Property Path -->
+                                <TextBlock Grid.Row="0" Grid.Column="0"
+                                           Text="Property:"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,8,0"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <TextBox Grid.Row="0" Grid.Column="1"
+                                         Text="{Binding PropertyPath, UpdateSourceTrigger=PropertyChanged}"
+                                         IsReadOnly="True"
+                                         Background="{DynamicResource ReadonlyBackgroundBrush}"
+                                         Foreground="{DynamicResource TextSecondaryBrush}"
+                                         BorderBrush="{DynamicResource ControlBorderBrush}"
+                                         Padding="4"
+                                         ToolTip="{Binding PropertyPath}"/>
+                                <Button Grid.Row="0" Grid.Column="2"
+                                        Content="Pick..."
+                                        Command="{Binding DataContext.PickFilterPropertyCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        Style="{StaticResource BaseButtonStyle}"
+                                        Width="60"
+                                        Margin="8,0,0,0"/>
+                                
+                                <!-- Operator -->
+                                <TextBlock Grid.Row="2" Grid.Column="0"
+                                           Text="Operator:"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,8,0"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <ComboBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
+                                          ItemsSource="{Binding DataContext.AvailableOperators, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                          SelectedValue="{Binding Operator, UpdateSourceTrigger=PropertyChanged}"
+                                          SelectedValuePath="Value"
+                                          DisplayMemberPath="Display"
+                                          Background="{DynamicResource ControlBackgroundBrush}"
+                                          Foreground="{DynamicResource TextPrimaryBrush}"
+                                          BorderBrush="{DynamicResource ControlBorderBrush}"/>
+                                
+                                <!-- Compare To (Value OR Property) -->
+                                <TextBlock Grid.Row="4" Grid.Column="0"
+                                           Text="Compare To:"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,8,0"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                
+                                <!-- Value Mode -->
+                                <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal">
+                                    <StackPanel.Style>
+                                        <Style TargetType="StackPanel">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                            <Setter Property="Orientation" Value="Horizontal"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsValueMode}" Value="False">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </StackPanel.Style>
+                                    
+                                    <TextBox Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}"
+                                             Background="{DynamicResource ControlBackgroundBrush}"
+                                             Foreground="{DynamicResource TextPrimaryBrush}"
+                                             BorderBrush="{DynamicResource ControlBorderBrush}"
+                                             Padding="4"
+                                             MinWidth="150"/>
+                                    
+                                    <CheckBox Content="Numeric"
+                                              IsChecked="{Binding Numeric, UpdateSourceTrigger=PropertyChanged}"
+                                              VerticalAlignment="Center"
+                                              Margin="12,0,0,0"
+                                              Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                </StackPanel>
+                                
+                                <!-- Property Compare Mode -->
+                                <TextBox Grid.Row="4" Grid.Column="1"
+                                         Text="{Binding CompareToDisplay, Mode=OneWay}"
+                                         IsReadOnly="True"
+                                         Background="{DynamicResource ReadonlyBackgroundBrush}"
+                                         Foreground="{DynamicResource TextSecondaryBrush}"
+                                         BorderBrush="{DynamicResource ControlBorderBrush}"
+                                         Padding="4">
+                                    <TextBox.Style>
+                                        <Style TargetType="TextBox">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsPropertyCompareMode}" Value="True">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBox.Style>
+                                </TextBox>
+                                
+                                <Button Grid.Row="4" Grid.Column="2"
+                                        Content="Property..."
+                                        Command="{Binding DataContext.PickCompareToPropertyCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        Style="{StaticResource BaseButtonStyle}"
+                                        Width="80"
+                                        Margin="8,0,0,0"
+                                        ToolTip="Compare to another property instead of a literal value"/>
+                            </Grid>
+                        </GroupBox>
+                        
+                        <!-- Empty State Overlay -->
+                        <Border Grid.Row="1"
+                                Background="{DynamicResource WindowBackgroundBrush}"
+                                Opacity="0.95"
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Center"
+                                CornerRadius="8"
+                                Padding="24,16"
+                                BorderBrush="{DynamicResource ControlBorderBrush}"
+                                BorderThickness="2"
+                                IsHitTestVisible="False">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Filters.Count}" Value="0">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            
+                            <StackPanel MaxWidth="300">
+                                <TextBlock Text="&#xE71C;"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="36"
+                                           HorizontalAlignment="Center"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                           Margin="0,0,0,12"/>
+                                
+                                <TextBlock Text="No Filters Defined"
+                                           FontSize="14"
+                                           FontWeight="SemiBold"
+                                           HorizontalAlignment="Center"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"
+                                           Margin="0,0,0,6"/>
+                                
+                                <TextBlock TextWrapping="Wrap"
+                                           TextAlignment="Center"
+                                           FontSize="11"
+                                           Foreground="{DynamicResource TextSecondaryBrush}">
+                                    <Run Text="Click"/>
+                                    <Run Text="Add Filter" FontWeight="Bold"/>
+                                    <Run Text="to include/exclude rows based on property values."/>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </Expander>
+                
+                <!-- Sorting Expander (placeholder for Phase 2.1.C) -->
+                <Expander Style="{StaticResource TableConfigExpanderStyle}"
+                          Tag="&#xE946;"> <!-- Info icon (placeholder) -->
+                    <Expander.Header>
+                        <TextBlock FontWeight="SemiBold"
+                                   FontSize="13"
+                                   Foreground="{DynamicResource TextPrimaryBrush}">
+                            <Run Text="Sorting"/>
+                            <Run Text="(coming soon)" FontStyle="Italic" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        </TextBlock>
+                    </Expander.Header>
+                    <TextBlock Text="Sort configuration will be added in Phase 2.1.C"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               FontStyle="Italic"
+                               Margin="4"/>
+                </Expander>
+                
+                <!-- Empty Message Expander (placeholder for Phase 2.1.D) -->
+                <Expander Style="{StaticResource TableConfigExpanderStyle}"
+                          Tag="&#xE946;"> <!-- Info icon (placeholder) -->
+                    <Expander.Header>
+                        <TextBlock FontWeight="SemiBold"
+                                   FontSize="13"
+                                   Foreground="{DynamicResource TextPrimaryBrush}">
+                            <Run Text="Empty Message"/>
+                            <Run Text="(coming soon)" FontStyle="Italic" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        </TextBlock>
+                    </Expander.Header>
+                    <TextBlock Text="Empty message configuration will be added in Phase 2.1.D"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               FontStyle="Italic"
+                               Margin="4"/>
+                </Expander>
+            </StackPanel>
+        </ScrollViewer>
+        
+        <!-- GridSplitter for resizing -->
+        <GridSplitter Grid.Row="1"
+                      HorizontalAlignment="Stretch"
+                      VerticalAlignment="Stretch"
+                      Background="{DynamicResource ControlBorderBrush}"
+                      ShowsPreview="True"/>
+        
+        <!-- LOWER SECTION: Columns (existing implementation) -->
+        <GroupBox Grid.Row="2"
+                  Header="Columns"
                   Foreground="{DynamicResource TextPrimaryBrush}"
                   BorderBrush="{DynamicResource ControlBorderBrush}">
             <Grid Margin="8">
@@ -91,12 +547,12 @@
                             Command="{Binding RemoveColumnCommand}"
                             Style="{StaticResource ToolBarButtonStyle}"/>
                     <Separator/>
-                    <Button Content="▲" 
+                    <Button Content="?" 
                             Command="{Binding MoveColumnUpCommand}"
                             ToolTip="Move Up"
                             Style="{StaticResource ToolBarButtonStyle}"
                             Width="32"/>
-                    <Button Content="▼" 
+                    <Button Content="?" 
                             Command="{Binding MoveColumnDownCommand}"
                             ToolTip="Move Down"
                             Style="{StaticResource ToolBarButtonStyle}"
@@ -271,19 +727,6 @@
                     </StackPanel>
                 </Border>
             </Grid>
-        </GroupBox>
-        
-        <!-- Column Properties Section (future: show properties of selected column) -->
-        <GroupBox Grid.Row="2" 
-                  Header="Column Properties" 
-                  Foreground="{DynamicResource TextPrimaryBrush}"
-                  BorderBrush="{DynamicResource ControlBorderBrush}"
-                  MaxHeight="200">
-            <TextBlock Text="Select a column above to edit its properties. (Property editor deferred to future enhancement)"
-                       Foreground="{DynamicResource TextSecondaryBrush}"
-                       FontStyle="Italic"
-                       Margin="8"
-                       TextWrapping="Wrap"/>
         </GroupBox>
     </Grid>
 </UserControl>

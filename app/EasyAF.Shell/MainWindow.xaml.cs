@@ -2,6 +2,7 @@
 using Fluent;
 using EasyAF.Shell.Services;
 using EasyAF.Shell.ViewModels;
+using System.ComponentModel; // for CancelEventArgs
 
 namespace EasyAF.Shell;
 
@@ -23,6 +24,21 @@ public partial class MainWindow : RibbonWindow
                 backstage.IsOpen = false;
             }
         };
+
+        // AUDIT FIX #7: Check for dirty documents before closing (prevents data loss)
+        Closing += OnWindowClosing;
+    }
+
+    private void OnWindowClosing(object? sender, CancelEventArgs e)
+    {
+        // Delegate to ViewModel for dirty document check
+        if (DataContext is MainWindowViewModel vm)
+        {
+            if (!vm.CheckUnsavedChangesBeforeClose())
+            {
+                e.Cancel = true; // User cancelled close
+            }
+        }
     }
     
     /// <summary>

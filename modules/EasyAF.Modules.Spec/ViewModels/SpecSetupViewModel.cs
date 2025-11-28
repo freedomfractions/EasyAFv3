@@ -158,6 +158,11 @@ namespace EasyAF.Modules.Spec.ViewModels
                 RefreshTables();
                 _document.MarkDirty();
                 SelectedTable = Tables[index - 1];
+                
+                // FIX: Notify tabs to update their order
+                TablesChanged?.Invoke(this, EventArgs.Empty);
+                
+                Log.Debug("Moved table up: {TableId}", SelectedTable.TableSpec.Id);
             }
         }
 
@@ -178,6 +183,11 @@ namespace EasyAF.Modules.Spec.ViewModels
                 RefreshTables();
                 _document.MarkDirty();
                 SelectedTable = Tables[index + 1];
+                
+                // FIX: Notify tabs to update their order
+                TablesChanged?.Invoke(this, EventArgs.Empty);
+                
+                Log.Debug("Moved table down: {TableId}", SelectedTable.TableSpec.Id);
             }
         }
 
@@ -283,6 +293,11 @@ namespace EasyAF.Modules.Spec.ViewModels
             _document = document ?? throw new ArgumentNullException(nameof(document));
         }
 
+        /// <summary>
+        /// Gets the underlying TableSpec this ViewModel wraps.
+        /// </summary>
+        public TableSpec TableSpec => Table; // AUDIT FIX #2: Expose TableSpec for tab header lookup
+        
         public TableSpec Table { get; }
 
         /// <summary>

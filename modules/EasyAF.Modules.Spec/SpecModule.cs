@@ -168,6 +168,18 @@ namespace EasyAF.Modules.Spec
             if (document is not SpecDocument specDoc)
                 throw new InvalidCastException($"Document must be a SpecDocument, but was {document.GetType().Name}");
             
+            // AUDIT FIX: Sync ViewModel state back to SpecFileRoot before saving
+            // This ensures changes made in UI (Setup tab tables, Table Editor columns) are persisted
+            if (specDoc.ViewModel is ViewModels.SpecDocumentViewModel viewModel)
+            {
+                specDoc.SyncFromViewModel(viewModel);
+                Log.Debug("Synced ViewModel state before save");
+            }
+            else
+            {
+                Log.Warning("SpecDocument.ViewModel is not SpecDocumentViewModel - state may not be fully synced!");
+            }
+            
             specDoc.SaveAs(filePath);
             Log.Information("Spec document saved successfully: {FilePath}", filePath);
         }

@@ -602,50 +602,6 @@ public class MainWindowViewModel : BindableBase
     public LogViewerViewModel LogViewerViewModel { get; }
 
     /// <summary>
-    /// Exits the application, prompting to save unsaved changes.
-    /// </summary>
-    /// <remarks>
-    /// <para>
-    /// If any documents have unsaved changes:
-    /// - Shows confirmation dialog with Save/Don't Save/Cancel options
-    /// - On Save: Attempts to save all dirty documents, aborts exit if any save fails
-    /// - On Don't Save: Closes without saving
-    /// - On Cancel: Aborts the exit operation
-    /// </para>
-    /// </remarks>
-    private void Exit()
-    {
-        // Check for dirty documents before exiting
-        var dirtyDocs = Documents.Where(d => d.IsDirty).ToList();
-        if (dirtyDocs.Count > 0)
-        {
-            var message = dirtyDocs.Count == 1
-                ? $"'{dirtyDocs[0].Title}' has unsaved changes. Save before exiting?"
-                : $"{dirtyDocs.Count} documents have unsaved changes. Save all before exiting?";
-
-            var result = _dialogService.ConfirmWithCancel(message, "Unsaved Changes");
-            
-            if (result == MessageBoxResult.Cancel)
-                return;
-                
-            if (result == MessageBoxResult.Yes)
-            {
-                // Try to save all dirty documents
-                foreach (var doc in dirtyDocs)
-                {
-                    if (!_documentManager.SaveDocument(doc))
-                    {
-                        _dialogService.ShowError($"Failed to save '{doc.Title}'.", "Save Error");
-                        return; // Abort exit
-                    }
-                }
-            }
-        }
-        
-        Application.Current.Shutdown();
-    }
-
-    /// <summary>
     /// Opens the application settings dialog.
     /// </summary>
     /// <remarks>
@@ -770,5 +726,120 @@ public class MainWindowViewModel : BindableBase
     {
         IsFileTabStripVisible = !IsFileTabStripVisible;
         Log.Debug("File tab strip visibility toggled: {Visible}", IsFileTabStripVisible);
+    }
+
+    /// <summary>
+    /// Checks for unsaved changes before closing the application.
+    /// </summary>
+    /// <returns>True if OK to close (all dirty docs saved or discarded), False to cancel close.</returns>
+    public bool CheckUnsavedChangesBeforeClose()
+    {
+        var dirtyDocs = _documentManager.OpenDocuments.Where(d => d.IsDirty).ToList();
+        
+        if (!dirtyDocs.Any())
+        {
+            return true; // No dirty documents, OK to close
+        }
+
+        // Show confirmation dialog
+        var docWord = dirtyDocs.Count == 1 ? "document" : "documents";
+        var result = _dialogService.ConfirmWithCancel(
+            $"You have {dirtyDocs.Count} {docWord} with unsaved changes.\n\nSave before closing?",
+            "Unsaved Changes");
+        
+        if (result == MessageBoxResult.Cancel) // Cancel - don't close
+        {
+            Log.Debug("User cancelled close (unsaved changes)");
+            return false;
+        }
+        
+        if (result == MessageBoxResult.Yes) // Yes - save all
+        {
+            Log.Information("Saving {Count} dirty documents before close", dirtyDocs.Count);
+            
+            foreach (var doc in dirtyDocs)
+            {
+                try
+                {
+                    if (string.IsNullOrEmpty(doc.FilePath))
+                    {
+                        // Need path - show save dialog
+                        var filter = GetSaveFilter(doc.OwnerModule);
+                        var defaultExt = GetDefaultExtension(doc.OwnerModule);
+                        var suggestedName = doc.Title;
+                        
+                        var saveDialog = new Microsoft.Win32.SaveFileDialog
+                        {
+                            Filter = filter,
+                            DefaultExt = defaultExt,
+                            FileName = suggestedName,
+                            Title = $"Save {doc.Title}"
+                        };
+                        
+                        if (saveDialog.ShowDialog() != true)
+                        {
+                            // User cancelled save for this document - cancel close
+                            Log.Debug("User cancelled save dialog during close - cancelling close");
+                            return false;
+                        }
+                        
+                        doc.OwnerModule.SaveDocument(doc, saveDialog.FileName);
+                    }
+                    else
+                    {
+                        // Save to existing path
+                        doc.OwnerModule.SaveDocument(doc, doc.FilePath);
+                    }
+                    
+                    Log.Debug("Saved {FilePath} before close", doc.FilePath);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Failed to save {Title} before close", doc.Title);
+                    
+                    // Show error and ask if user wants to continue closing
+                    var continueResult = _dialogService.Confirm(
+                        $"Failed to save '{doc.Title}':\n{ex.Message}\n\nContinue closing anyway?",
+                        "Save Error");
+                    
+                    if (!continueResult)
+                    {
+                        return false; // User wants to fix the issue - cancel close
+                    }
+                }
+            }
+        }
+        // If No, just close without saving
+        
+        Log.Information("Closing application with {Count} dirty documents (saved={SavedThem})", 
+            dirtyDocs.Count, result == MessageBoxResult.Yes);
+        return true;
+    }
+
+    private string GetSaveFilter(IDocumentModule module)
+    {
+        var ext = module.SupportedFileExtensions.FirstOrDefault() ?? ".dat";
+        var desc = module.ModuleName;
+        return $"{desc} files (*{ext})|*{ext}|All files (*.*)|*.*";
+    }
+
+    private string GetDefaultExtension(IDocumentModule module)
+    {
+        var ext = module.SupportedFileExtensions.FirstOrDefault();
+        return ext?.TrimStart('.') ?? "dat";
+    }
+
+    /// <summary>
+    /// Exits the application, prompting to save unsaved changes.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Exit now delegates to Window.Close which will trigger OnWindowClosing
+    /// and call CheckUnsavedChangesBeforeClose() for dirty document handling.
+    /// </para>
+    /// </remarks>
+    private void Exit()
+    {
+        Application.Current.MainWindow?.Close();
     }
 }

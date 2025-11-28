@@ -114,7 +114,10 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
             set => SetProperty(ref _dialogResult, value);
         }
 
-        public string[] ResultPaths => SelectedPaths.OrderBy(p => p).ToArray();
+        public string[] ResultPaths => SelectedPaths
+            .Where(p => !string.IsNullOrWhiteSpace(p))
+            .OrderBy(p => p)
+            .ToArray();
 
         #endregion
 

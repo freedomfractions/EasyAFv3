@@ -278,6 +278,34 @@ namespace EasyAF.Modules.Spec.Models
         #region Save Operations
 
         /// <summary>
+        /// Synchronizes changes from the ViewModel back to the underlying SpecFileRoot.
+        /// </summary>
+        /// <param name="viewModel">The SpecDocumentViewModel containing current state.</param>
+        /// <remarks>
+        /// AUDIT FIX: Sync ViewModel state to SpecFileRoot before saving.
+        /// This ensures changes made in the UI (like adding/editing tables in Setup tab and Table Editor tabs)
+        /// are written back to the _spec object before serialization.
+        /// </remarks>
+        public void SyncFromViewModel(ViewModels.SpecDocumentViewModel viewModel)
+        {
+            if (viewModel == null)
+                throw new ArgumentNullException(nameof(viewModel));
+
+            Log.Debug("Syncing ViewModel state to SpecFileRoot before save");
+
+            // Sync tables from Setup tab back to SpecFileRoot
+            var setupVm = viewModel.Setup;
+            if (setupVm != null && setupVm.Tables != null)
+            {
+                _spec.Tables = setupVm.Tables.Select(tableVm => tableVm.TableSpec).ToArray();
+                Log.Information("Synced {Count} tables from Setup to SpecFileRoot", _spec.Tables.Length);
+            }
+
+            // Mark as dirty since we're about to save (will be cleared after save completes)
+            // Note: Caller (SpecModule.SaveDocument) will clear IsDirty after successful save
+        }
+
+        /// <summary>
         /// Saves the document to its current FilePath.
         /// </summary>
         /// <exception cref="InvalidOperationException">If FilePath is null (document has never been saved).</exception>
@@ -304,6 +332,10 @@ namespace EasyAF.Modules.Spec.Models
         /// - FilePath is updated to the new path
         /// - IsDirty is set to false
         /// - Title is updated (derived from new FilePath)
+        /// </para>
+        /// <para>
+        /// IMPORTANT: Caller must call SyncFromViewModel() before calling SaveAs() to ensure
+        /// UI changes are written back to the SpecFileRoot!
         /// </para>
         /// </remarks>
         public void SaveAs(string filePath)

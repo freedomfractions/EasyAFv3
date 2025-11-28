@@ -20,7 +20,7 @@ namespace EasyAF.Modules.Spec.ViewModels
     /// This VM provides a WYSIWYG interface for defining columns in a report or label table.
     /// Users can add, remove, reorder, and configure columns with formatting options.
     /// </remarks>
-    public class TableEditorViewModel : BindableBase, IDisposable
+    public partial class TableEditorViewModel : BindableBase, IDisposable
     {
         private readonly TableSpec _table;
         private readonly SpecDocument _document;
@@ -50,6 +50,9 @@ namespace EasyAF.Modules.Spec.ViewModels
             Columns = new ObservableCollection<ColumnViewModel>();
             RefreshColumns();
 
+            // Initialize filter functionality (from partial class)
+            InitializeFilters();
+
             // Initialize commands
             AddColumnCommand = new DelegateCommand(ExecuteAddColumn);
             RemoveColumnCommand = new DelegateCommand(ExecuteRemoveColumn, CanExecuteRemoveColumn)
@@ -67,9 +70,82 @@ namespace EasyAF.Modules.Spec.ViewModels
         #region Properties
 
         /// <summary>
-        /// Gets the table display name (AltText or Id).
+        /// Gets or sets the table display name (AltText).
         /// </summary>
-        public string TableName => !string.IsNullOrEmpty(_table.AltText) ? _table.AltText : _table.Id;
+        public string TableName
+        {
+            get => !string.IsNullOrEmpty(_table.AltText) ? _table.AltText : _table.Id;
+            set
+            {
+                if (_table.AltText != value)
+                {
+                    _table.AltText = value;
+                    _document.MarkDirty();
+                    RaisePropertyChanged();
+                    Log.Debug("Table name changed to: {Name}", value);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the table mode (new/diff).
+        /// </summary>
+        public string Mode
+        {
+            get => _table.Mode ?? "new";
+            set
+            {
+                if (_table.Mode != value)
+                {
+                    _table.Mode = value;
+                    _document.MarkDirty();
+                    RaisePropertyChanged();
+                    RaisePropertyChanged(nameof(IsDiffMode));
+                    Log.Debug("Table mode changed to: {Mode}", value);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets whether the table is in diff mode (for enabling HideIfNoDiff checkbox).
+        /// </summary>
+        public bool IsDiffMode => string.Equals(Mode, "diff", StringComparison.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// Gets or sets whether to hide the table if no differences are found (diff mode only).
+        /// </summary>
+        public bool HideIfNoDiff
+        {
+            get => _table.HideIfNoDiff ?? false;
+            set
+            {
+                if (_table.HideIfNoDiff != value)
+                {
+                    _table.HideIfNoDiff = value;
+                    _document.MarkDirty();
+                    RaisePropertyChanged();
+                    Log.Debug("HideIfNoDiff changed to: {Value}", value);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets whether rows can break across pages.
+        /// </summary>
+        public bool AllowRowBreakAcrossPages
+        {
+            get => _table.AllowRowBreakAcrossPages ?? false;
+            set
+            {
+                if (_table.AllowRowBreakAcrossPages != value)
+                {
+                    _table.AllowRowBreakAcrossPages = value;
+                    _document.MarkDirty();
+                    RaisePropertyChanged();
+                    Log.Debug("AllowRowBreakAcrossPages changed to: {Value}", value);
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the collection of columns for this table.

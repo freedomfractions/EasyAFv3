@@ -162,22 +162,52 @@ namespace EasyAF.Modules.Spec.ViewModels
                 ? TabHeaders[SelectedTabIndex] 
                 : null;
             
-            // Remove all table tabs (keep Setup tab)
-            for (int i = TabHeaders.Count - 1; i >= 1; i--)
+            // AUDIT FIX #2: Unsubscribe from old table editor VMs AND table VMs before removing
+            for (int i = 1; i < TabHeaders.Count; i++)
             {
+                if (TabHeaders[i].ViewModel is TableEditorViewModel oldVm)
+                {
+                    oldVm.PropertyChanged -= OnTableEditorPropertyChanged;
+                    
+                    // Unsubscribe from the underlying table spec PropertyChanged
+                    if (Setup?.Tables != null)
+                    {
+                        var tableVm = Setup.Tables.FirstOrDefault(t => t.TableSpec.Id == TabHeaders[i].TableId);
+                        if (tableVm != null)
+                        {
+                            tableVm.PropertyChanged -= OnTableViewModelPropertyChanged;
+                        }
+                    }
+                }
+                
                 if (TabHeaders[i].ViewModel is IDisposable disposable)
                 {
                     disposable.Dispose();
                 }
+            }
+            
+            // Remove all table tabs (keep Setup tab)
+            for (int i = TabHeaders.Count - 1; i >= 1; i--)
+            {
                 TabHeaders.RemoveAt(i);
             }
             
             // Add table tabs
-            if (_document.Spec?.Tables != null)
+            if (_document.Spec?.Tables != null && Setup?.Tables != null)
             {
-                foreach (var table in _document.Spec.Tables)
+                for (int i = 0; i < _document.Spec.Tables.Length; i++)
                 {
+                    var table = _document.Spec.Tables[i];
+                    var tableVm = Setup.Tables[i]; // Get corresponding TableDefinitionViewModel
+                    
                     var editorVm = new TableEditorViewModel(table, _document, _dialogService, _propertyDiscovery, _settingsService);
+                    
+                    // AUDIT FIX #2: Subscribe to property changes to update tab header when table renamed
+                    editorVm.PropertyChanged += OnTableEditorPropertyChanged;
+                    
+                    // AUDIT FIX #2: Also subscribe to TableDefinitionViewModel PropertyChanged
+                    tableVm.PropertyChanged += OnTableViewModelPropertyChanged;
+                    
                     TabHeaders.Add(new TabHeaderInfo
                     {
                         Header = !string.IsNullOrEmpty(table.AltText) ? table.AltText : table.Id,
@@ -208,6 +238,47 @@ namespace EasyAF.Modules.Spec.ViewModels
             
             Log.Information("Tab rebuild complete: {Count} total tabs ({TableCount} table editors)", 
                 TabHeaders.Count, TabHeaders.Count - 1);
+        }
+
+        /// <summary>
+        /// Handles property changes on table view models (from Setup tab) to update tab headers.
+        /// </summary>
+        /// <remarks>
+        /// AUDIT FIX #2: Update tab header when TableName property changes in Setup tab's DataGrid
+        /// </remarks>
+        private void OnTableViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "TableName" && sender is TableDefinitionViewModel tableVm)
+            {
+                // Find the tab corresponding to this table
+                var tab = TabHeaders.FirstOrDefault(t => t.TableId == tableVm.TableSpec.Id);
+                if (tab != null && !string.IsNullOrEmpty(tableVm.TableName))
+                {
+                    tab.Header = tableVm.TableName;
+                    tab.DisplayName = tableVm.TableName;
+                    Log.Debug("Updated tab header from TableViewModel to: {TableName}", tableVm.TableName);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Handles property changes on table editor VMs to update tab headers.
+        /// </summary>
+        /// <remarks>
+        /// AUDIT FIX #2: Update tab header when table name changes in Table Editor tab
+        /// </remarks>
+        private void OnTableEditorPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "TableName" && sender is TableEditorViewModel tableVm)
+            {
+                var tab = TabHeaders.FirstOrDefault(t => t.ViewModel == tableVm);
+                if (tab != null && !string.IsNullOrEmpty(tableVm.TableName))
+                {
+                    tab.Header = tableVm.TableName;
+                    tab.DisplayName = tableVm.TableName;
+                    Log.Debug("Updated tab header from TableEditorViewModel to: {TableName}", tableVm.TableName);
+                }
+            }
         }
 
         #endregion
@@ -245,9 +316,14 @@ namespace EasyAF.Modules.Spec.ViewModels
                 Setup.TablesChanged -= OnTablesChanged;
             }
 
-            // Dispose child VMs
+            // AUDIT FIX #2: Unsubscribe from table editor VMs and dispose child VMs
             foreach (var tab in TabHeaders)
             {
+                if (tab.ViewModel is TableEditorViewModel tableVm)
+                {
+                    tableVm.PropertyChanged -= OnTableEditorPropertyChanged;
+                }
+                
                 if (tab.ViewModel is IDisposable disposable)
                 {
                     disposable.Dispose();

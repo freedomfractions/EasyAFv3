@@ -40,7 +40,8 @@
     <Color x:Key="TextSecondaryColor">#FFCACACA</Color>
     <Color x:Key="TextTertiaryColor">#FF9E9E9E</Color>
     <Color x:Key="TextDisabledColor">#FF6E6E6E</Color>
-    
+    <Color x:Key="SelectedTextColor">#FFF2F2F2</Color> <!-- NEW: Text color for selected items (same as primary for dark mode) -->
+
     <!-- Status Colors (used in content; keep readable on dark bg) -->
     <Color x:Key="ErrorColor">#FFEF4444</Color>
     <Color x:Key="SuccessColor">#FF22C55E</Color>
@@ -107,7 +108,8 @@
     <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondaryColor}"/>
     <SolidColorBrush x:Key="TextTertiaryBrush" Color="{StaticResource TextTertiaryColor}"/>
     <SolidColorBrush x:Key="TextDisabledBrush" Color="{StaticResource TextDisabledColor}"/>
-    
+    <SolidColorBrush x:Key="SelectedTextBrush" Color="{StaticResource SelectedTextColor}"/> <!-- NEW: Brush for selected text -->
+
     <SolidColorBrush x:Key="ErrorBrush" Color="{StaticResource ErrorColor}"/>
     <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource SuccessColor}"/>
     <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource WarningColor}"/>
