@@ -132,6 +132,16 @@
                                 <CheckBox IsChecked="{Binding IsSelected}"
                                           Foreground="{DynamicResource TextPrimaryBrush}"
                                           Margin="4,2">
+                                    <CheckBox.Style>
+                                        <Style TargetType="CheckBox" BasedOn="{StaticResource {x:Type CheckBox}}">
+                                            <Style.Triggers>
+                                                <!-- Hide when IsVisible = false (search filter) -->
+                                                <DataTrigger Binding="{Binding IsVisible}" Value="False">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </CheckBox.Style>
                                     <CheckBox.Content>
                                         <StackPanel Orientation="Horizontal">
                                             <TextBlock Text="{Binding PropertyName}"

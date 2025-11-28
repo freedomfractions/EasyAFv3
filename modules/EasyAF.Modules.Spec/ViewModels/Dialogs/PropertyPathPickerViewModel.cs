@@ -291,17 +291,68 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
 
             var search = _searchText.ToLowerInvariant();
 
-            // Match friendly name (e.g., "Buses", "LV Breakers")
-            if (node.FriendlyName.ToLowerInvariant().Contains(search))
-                return true;
+            // CROSS-MODULE EDIT: 2025-11-28 Enhanced Search with Property Filtering
+            // Modified for: Smart filtering - show all properties for good data type matches, filter properties otherwise
+            // Related modules: None
+            // Rollback instructions: Restore simple contains() logic
+            
+            // Score the data type name match (0-100)
+            var typeScore = CalculateTypeMatchScore(node, search);
+            
+            // If data type name is a strong match (?70), show the entire data type with all properties
+            if (typeScore >= 70)
+            {
+                // Clear any property filtering - show all properties
+                foreach (var prop in node.Properties)
+                {
+                    prop.IsVisible = true;
+                }
+                return true; // Show this data type
+            }
+            
+            // Data type name is not a strong match - check if any properties match
+            var hasMatchingProperties = false;
+            foreach (var prop in node.Properties)
+            {
+                // Check if property name matches search
+                var propertyMatches = prop.PropertyName.ToLowerInvariant().Contains(search);
+                
+                // Set visibility for this property
+                prop.IsVisible = propertyMatches;
+                
+                if (propertyMatches)
+                {
+                    hasMatchingProperties = true;
+                }
+            }
+            
+            // Show this data type only if it has matching properties
+            return hasMatchingProperties;
+        }
 
-            // Match raw type name (e.g., "Bus", "LVCB")
-            if (node.TypeName.ToLowerInvariant().Contains(search))
-                return true;
-
-            // Match any property name (NOT full path, to avoid confusion)
-            return node.Properties.Any(p =>
-                p.PropertyName.ToLowerInvariant().Contains(search));
+        /// <summary>
+        /// Calculates a match score for data type name (0-100).
+        /// Higher score = better match.
+        /// </summary>
+        private int CalculateTypeMatchScore(DataTypeNode node, string search)
+        {
+            var friendlyLower = node.FriendlyName.ToLowerInvariant();
+            var typeLower = node.TypeName.ToLowerInvariant();
+            
+            // Exact match = 100
+            if (friendlyLower == search || typeLower == search)
+                return 100;
+            
+            // Starts with match = 90
+            if (friendlyLower.StartsWith(search) || typeLower.StartsWith(search))
+                return 90;
+            
+            // Contains match = 70 (threshold for showing all properties)
+            if (friendlyLower.Contains(search) || typeLower.Contains(search))
+                return 70;
+            
+            // No match = 0
+            return 0;
         }
 
         private void ExecuteOk()
@@ -367,6 +418,7 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
         private bool _isSelected;
         private bool _isExpanded = false; // FIX: Add IsExpanded property for TreeView binding
         private int _usageCount = 0; // NEW: Track how many times this property is used
+        private bool _isVisible = true; // NEW: Track visibility for search filtering
 
         public string PropertyName
         {
@@ -408,5 +460,18 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
         /// Gets the display text for the usage count (e.g., "(3)" or empty if 0).
         /// </summary>
         public string UsageCountDisplay => UsageCount > 0 ? $"({UsageCount})" : string.Empty;
+
+        /// <summary>
+        /// Gets or sets whether this property is visible in the tree (for search filtering).
+        /// </summary>
+        /// <remarks>
+        /// When true, property is shown in the tree.
+        /// When false, property is hidden (filtered out by search).
+        /// </remarks>
+        public bool IsVisible
+        {
+            get => _isVisible;
+            set => SetProperty(ref _isVisible, value);
+        }
     }
 }
