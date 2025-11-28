@@ -1,4 +1,4 @@
-<UserControl x:Class="EasyAF.Modules.Spec.Views.TableEditorView"
+﻿<UserControl x:Class="EasyAF.Modules.Spec.Views.TableEditorView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:converters="clr-namespace:EasyAF.Modules.Spec.Converters"
@@ -874,3 +874,4 @@
         </GroupBox>
     </Grid>
 </UserControl>
+
