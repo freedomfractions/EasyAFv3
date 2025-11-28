@@ -1,0 +1,214 @@
+{
+  "Global.DataTypeVisibility": {
+    "DataTypes": {
+      "ArcFlash": {
+        "Enabled": true,
+        "EnabledProperties": [
+          "ArcFlashBoundary",
+          "ArcFlashBusName",
+          "Comments",
+          "IncidentEnergy",
+          "Scenario",
+          "WorkingDistance"
+        ],
+        "AllPropertiesEnabled": false
+      },
+      "Battery": {
+        "Enabled": false,
+        "EnabledProperties": ["*"],
+        "AllPropertiesEnabled": true
+      },
+      "Bus": {
+        "Enabled": true,
+        "EnabledProperties": [
+          "BaseKV",
+          "Buses",
+          "Comments",
+          "Name",
+          "NoOfPhases"
+        ],
+        "AllPropertiesEnabled": false
+      },
+      "Cable": {
+        "Enabled": true,
+        "EnabledProperties": [
+          "Cables",
+          "Comments",
+          "Length",
+          "Name",
+          "NoOfPhases"
+        ],
+        "AllPropertiesEnabled": false
+      },
+      "Capacitor": {
+        "Enabled": false,
+        "EnabledProperties": ["*"],
+        "AllPropertiesEnabled": true
+      },
+      "CapacitorBank": {
+        "Enabled": false,
+        "EnabledProperties": ["*"],
+        "AllPropertiesEnabled": true
+      },
+      "DCBus": {
+        "Enabled": false,
+        "EnabledProperties": ["*"],
+        "AllPropertiesEnabled": true
+      },
+      "FaultContributor": {
+        "Enabled": false,
+        "EnabledProperties": ["*"],
+        "AllPropertiesEnabled": true
+      },
+      "Filter": {
+        "Enabled": false,
+        "EnabledProperties": ["*"],
+        "AllPropertiesEnabled": true
+      },
+      "Fuse": {
+        "Enabled": true,
+        "EnabledProperties": [
+          "BaseKV",
+          "Comments",
+          "Fuses",
+          "Name",
+          "OnBus",
+          "Style"
+        ],
+        "AllPropertiesEnabled": false
+      },
+      "Generator": {
+        "Enabled": false,
+        "EnabledProperties": ["*"],
+        "AllPropertiesEnabled": true
+      },
+      "Harmonic": {
+        "Enabled": false,
+        "EnabledProperties": ["*"],
+        "AllPropertiesEnabled": true
+      },
+      "HarmonicFilter": {
+        "Enabled": false,
+        "EnabledProperties": ["*"],
+        "AllPropertiesEnabled": true
+      },
+      "Inverter": {
+        "Enabled": false,
+        "EnabledProperties": ["*"],
+        "AllPropertiesEnabled": true
+      },
+      "LVCB": {
+        "Enabled": true,
+        "EnabledProperties": [
+          "BaseKV",
+          "Comments",
+          "LVBreakers",
+          "Name",
+          "OnBus",
+          "Style"
+        ],
+        "AllPropertiesEnabled": false
+      },
+      "MVCB": {
+        "Enabled": true,
+        "EnabledProperties": [
+          "BaseKV",
+          "Comments",
+          "MVBreakers",
+          "Name",
+          "OnBus",
+          "Style"
+        ],
+        "AllPropertiesEnabled": false
+      },
+      "Meter": {
+        "Enabled": false,
+        "EnabledProperties": ["*"],
+        "AllPropertiesEnabled": true
+      },
+      "Motor": {
+        "Enabled": false,
+        "EnabledProperties": ["*"],
+        "AllPropertiesEnabled": true
+      },
+      "Photovoltaic": {
+        "Enabled": false,
+        "EnabledProperties": ["*"],
+        "AllPropertiesEnabled": true
+      },
+      "POC": {
+        "Enabled": false,
+        "EnabledProperties": ["*"],
+        "AllPropertiesEnabled": true
+      },
+      "Rectifier": {
+        "Enabled": false,
+        "EnabledProperties": ["*"],
+        "AllPropertiesEnabled": true
+      },
+      "Relay": {
+        "Enabled": false,
+        "EnabledProperties": ["*"],
+        "AllPropertiesEnabled": true
+      },
+      "ShortCircuit": {
+        "Enabled": true,
+        "EnabledProperties": [
+          "BusName",
+          "EquipmentName",
+          "Scenario",
+          "BusBaseKV",
+          "Comments",
+          "EquipmentManufacturer",
+          "EquipmentStyle",
+          "FaultType",
+          "OneTwoCycleDuty",
+          "OneTwoCycleDutyPercent",
+          "OneTwoCycleRating",
+          "WorstCase"
+        ],
+        "AllPropertiesEnabled": false
+      },
+      "Shunt": {
+        "Enabled": false,
+        "EnabledProperties": ["*"],
+        "AllPropertiesEnabled": true
+      },
+      "Switch": {
+        "Enabled": false,
+        "EnabledProperties": ["*"],
+        "AllPropertiesEnabled": true
+      },
+      "Transformer2W": {
+        "Enabled": false,
+        "EnabledProperties": ["*"],
+        "AllPropertiesEnabled": true
+      },
+      "Transformer3W": {
+        "Enabled": false,
+        "EnabledProperties": ["*"],
+        "AllPropertiesEnabled": true
+      },
+      "TransmissionLine": {
+        "Enabled": false,
+        "EnabledProperties": ["*"],
+        "AllPropertiesEnabled": true
+      },
+      "UPS": {
+        "Enabled": false,
+        "EnabledProperties": ["*"],
+        "AllPropertiesEnabled": true
+      },
+      "Utility": {
+        "Enabled": false,
+        "EnabledProperties": ["*"],
+        "AllPropertiesEnabled": true
+      },
+      "ZigzagTransformer": {
+        "Enabled": false,
+        "EnabledProperties": ["*"],
+        "AllPropertiesEnabled": true
+      }
+    }
+  }
+}
