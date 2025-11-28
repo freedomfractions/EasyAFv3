@@ -1,0 +1,358 @@
+{
+  "Global": {
+    "Theme": "Dark",
+    "RecentFiles.MaxCount": 50,
+    "RecentFilesLimit": 25,
+    "QuickAccessFolders": [
+      "C:\\Users\\brand\\OneDrive\\Documents",
+      "C:\\Users\\brand\\OneDrive\\Desktop",
+      "C:\\Users\\brand\\Downloads"
+    ],
+    "OpenBackstage.QuickAccessFolders": [
+      "C:\\Users\\brand\\OneDrive\\Documents",
+      "C:\\Users\\brand\\OneDrive\\Desktop",
+      "C:\\Users\\brand\\Downloads"
+    ],
+    "OpenDialog.DefaultFilterIndex": 1,
+    "Application.Theme": "Dark",
+    "MapModule.DataTypeVisibility": {
+      "DataTypes": {
+        "AFD": {
+          "Enabled": false,
+          "EnabledProperties": [
+            "*"
+          ],
+          "AllPropertiesEnabled": true
+        },
+        "ArcFlash": {
+          "Enabled": true,
+          "EnabledProperties": [
+            "ArcFaultBusKV",
+            "ArcFaultBusName",
+            "ArcTimeSec",
+            "BusArcFaultKA",
+            "BusBoltedFaultKA",
+            "Comments",
+            "EquipType",
+            "EstArcFlashBoundaryInches",
+            "IncidentEnergyCalPerCm2",
+            "OpeningTimeSec",
+            "Scenario",
+            "TripTimeSec",
+            "UpstreamTripDeviceFunction",
+            "UpstreamTripDeviceName",
+            "WorstCase"
+          ],
+          "AllPropertiesEnabled": false
+        },
+        "ATS": {
+          "Enabled": false,
+          "EnabledProperties": [
+            "*"
+          ],
+          "AllPropertiesEnabled": true
+        },
+        "Battery": {
+          "Enabled": false,
+          "EnabledProperties": [
+            "*"
+          ],
+          "AllPropertiesEnabled": true
+        },
+        "Bus": {
+          "Enabled": true,
+          "EnabledProperties": [
+            "Buses",
+            "BaseKV",
+            "BusBracing",
+            "BusRatingA",
+            "NoOfPhases"
+          ],
+          "AllPropertiesEnabled": false
+        },
+        "Busway": {
+          "Enabled": false,
+          "EnabledProperties": [
+            "*"
+          ],
+          "AllPropertiesEnabled": true
+        },
+        "Cable": {
+          "Enabled": false,
+          "EnabledProperties": [
+            "*"
+          ],
+          "AllPropertiesEnabled": true
+        },
+        "Capacitor": {
+          "Enabled": false,
+          "EnabledProperties": [
+            "*"
+          ],
+          "AllPropertiesEnabled": true
+        },
+        "CLReactor": {
+          "Enabled": false,
+          "EnabledProperties": [
+            "*"
+          ],
+          "AllPropertiesEnabled": true
+        },
+        "CT": {
+          "Enabled": false,
+          "EnabledProperties": [
+            "*"
+          ],
+          "AllPropertiesEnabled": true
+        },
+        "Filter": {
+          "Enabled": false,
+          "EnabledProperties": [
+            "*"
+          ],
+          "AllPropertiesEnabled": true
+        },
+        "Fuse": {
+          "Enabled": true,
+          "EnabledProperties": [
+            "BaseKV",
+            "Fuses",
+            "OnBus",
+            "Comment",
+            "FuseMfr",
+            "FuseStyle",
+            "FuseType",
+            "Model",
+            "SCIntKA",
+            "Size",
+            "TCCIntKA"
+          ],
+          "AllPropertiesEnabled": false
+        },
+        "Generator": {
+          "Enabled": false,
+          "EnabledProperties": [
+            "*"
+          ],
+          "AllPropertiesEnabled": true
+        },
+        "HVBreaker": {
+          "Enabled": false,
+          "EnabledProperties": [
+            "*"
+          ],
+          "AllPropertiesEnabled": true
+        },
+        "Inverter": {
+          "Enabled": false,
+          "EnabledProperties": [
+            "*"
+          ],
+          "AllPropertiesEnabled": true
+        },
+        "Load": {
+          "Enabled": false,
+          "EnabledProperties": [
+            "*"
+          ],
+          "AllPropertiesEnabled": true
+        },
+        "LVBreaker": {
+          "Enabled": true,
+          "EnabledProperties": [
+            "BaseKV",
+            "BreakerMfr",
+            "BreakerStyle",
+            "BreakerType",
+            "FrameA",
+            "GndA",
+            "GndDelay",
+            "GndI2t",
+            "GndMaintA",
+            "GndMaintPickup",
+            "GndPickup",
+            "GndSensor",
+            "InstA",
+            "InstSetting",
+            "LtCurve",
+            "LtdBand",
+            "LTPUMult",
+            "LTPUSetting",
+            "LVBreakers",
+            "MaintA",
+            "MaintMode",
+            "MaintSetting",
+            "NoOfPhases",
+            "NormalState",
+            "OnBus",
+            "PlugTapTrip",
+            "SCIntKA",
+            "SensorFrame",
+            "STPUA",
+            "STPUBand",
+            "STPUI2t",
+            "STPUSetting",
+            "TCCGndMomKA",
+            "Trip",
+            "TripA",
+            "TripAdjust",
+            "TripMfr",
+            "TripPickup",
+            "TripStyle",
+            "TripType"
+          ],
+          "AllPropertiesEnabled": false
+        },
+        "MCC": {
+          "Enabled": false,
+          "EnabledProperties": [
+            "*"
+          ],
+          "AllPropertiesEnabled": true
+        },
+        "Meter": {
+          "Enabled": false,
+          "EnabledProperties": [
+            "*"
+          ],
+          "AllPropertiesEnabled": true
+        },
+        "Motor": {
+          "Enabled": false,
+          "EnabledProperties": [
+            "*"
+          ],
+          "AllPropertiesEnabled": true
+        },
+        "Panel": {
+          "Enabled": false,
+          "EnabledProperties": [
+            "*"
+          ],
+          "AllPropertiesEnabled": true
+        },
+        "Photovoltaic": {
+          "Enabled": false,
+          "EnabledProperties": [
+            "*"
+          ],
+          "AllPropertiesEnabled": true
+        },
+        "POC": {
+          "Enabled": false,
+          "EnabledProperties": [
+            "*"
+          ],
+          "AllPropertiesEnabled": true
+        },
+        "Rectifier": {
+          "Enabled": false,
+          "EnabledProperties": [
+            "*"
+          ],
+          "AllPropertiesEnabled": true
+        },
+        "Relay": {
+          "Enabled": false,
+          "EnabledProperties": [
+            "*"
+          ],
+          "AllPropertiesEnabled": true
+        },
+        "ShortCircuit": {
+          "Enabled": true,
+          "EnabledProperties": [
+            "BusName",
+            "EquipmentName",
+            "Scenario",
+            "BusBaseKV",
+            "Comments",
+            "EquipmentManufacturer",
+            "EquipmentStyle",
+            "FaultType",
+            "OneTwoCycleDuty",
+            "OneTwoCycleDutyPercent",
+            "OneTwoCycleRating",
+            "WorstCase"
+          ],
+          "AllPropertiesEnabled": false
+        },
+        "Shunt": {
+          "Enabled": false,
+          "EnabledProperties": [
+            "*"
+          ],
+          "AllPropertiesEnabled": true
+        },
+        "Switch": {
+          "Enabled": false,
+          "EnabledProperties": [
+            "*"
+          ],
+          "AllPropertiesEnabled": true
+        },
+        "Transformer2W": {
+          "Enabled": false,
+          "EnabledProperties": [
+            "*"
+          ],
+          "AllPropertiesEnabled": true
+        },
+        "Transformer3W": {
+          "Enabled": false,
+          "EnabledProperties": [
+            "*"
+          ],
+          "AllPropertiesEnabled": true
+        },
+        "TransmissionLine": {
+          "Enabled": false,
+          "EnabledProperties": [
+            "*"
+          ],
+          "AllPropertiesEnabled": true
+        },
+        "UPS": {
+          "Enabled": false,
+          "EnabledProperties": [
+            "*"
+          ],
+          "AllPropertiesEnabled": true
+        },
+        "Utility": {
+          "Enabled": false,
+          "EnabledProperties": [
+            "*"
+          ],
+          "AllPropertiesEnabled": true
+        },
+        "ZigzagTransformer": {
+          "Enabled": false,
+          "EnabledProperties": [
+            "*"
+          ],
+          "AllPropertiesEnabled": true
+        }
+      }
+    },
+    "RecentFiles": [
+      "C:\\Users\\brand\\OneDrive\\Documents\\EasyAF\\Maps\\2024 EasyPower Map.ezmap",
+      "C:\\Users\\brand\\OneDrive\\Documents\\EasyAF\\Maps\\2025 EasyPower Map.ezmap",
+      "C:\\Users\\brand\\OneDrive\\Desktop\\PD0002 - Performance Data.ezaf",
+      "C:\\Users\\brand\\OneDrive\\Desktop\\PD0001 - Performance Data Test.ezaf"
+    ],
+    "FileDialogs.LastDirectory": "C:\\Users\\brand\\OneDrive\\Documents\\EasyAF\\Maps",
+    "FileCommands.DefaultDocumentModule": "Project Editor",
+    "Directories.Maps": "C:\\Users\\brand\\OneDrive\\Documents\\EasyAF\\Maps",
+    "Directories.Specs": "C:\\Users\\brand\\OneDrive\\Documents\\EasyAF\\Specs",
+    "Directories.Templates": "C:\\Users\\brand\\OneDrive\\Documents\\EasyAF\\Templates",
+    "Directories.Output": "C:\\Users\\brand\\OneDrive\\Documents\\EasyAF\\Output",
+    "ProjectModule": "{\r\n  \u0022DefaultImportMapPath\u0022: \u0022C:\\\\Users\\\\brand\\\\OneDrive\\\\Documents\\\\EasyAF\\\\Maps\\\\2025 EasyPower Map.ezmap\u0022,\r\n  \u0022TemplatesDirectory\u0022: null,\r\n  \u0022OutputDirectory\u0022: null\r\n}",
+    "RecentFolders.MaxCount": 10,
+    "RecentFolders": [
+      "C:\\Users\\brand\\OneDrive\\Documents\\EasyAF\\Maps",
+      "C:\\Users\\brand\\OneDrive\\Desktop"
+    ]
+  },
+  "Modules": {}
+}
