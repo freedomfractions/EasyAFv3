@@ -34,11 +34,13 @@ public class SettingsDialogViewModel : BindableBase
     /// <param name="settingsService">The settings service.</param>
     /// <param name="mapSettingsViewModel">The Map module settings view model (optional).</param>
     /// <param name="projectSettingsViewModel">The Project module settings view model (optional).</param>
+    /// <param name="dataTypesSettingsViewModel">The global Data Types settings view model (optional).</param>
     public SettingsDialogViewModel(
         IThemeService themeService,
         ISettingsService settingsService,
         object? mapSettingsViewModel = null,
-        object? projectSettingsViewModel = null)
+        object? projectSettingsViewModel = null,
+        object? dataTypesSettingsViewModel = null)
     {
         _themeService = themeService ?? throw new ArgumentNullException(nameof(themeService));
         _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
@@ -59,13 +61,11 @@ public class SettingsDialogViewModel : BindableBase
         // Store Map module settings VM if provided
         MapSettingsViewModel = mapSettingsViewModel;
         
-        // CROSS-MODULE EDIT: 2025-01-27 Project Module Settings
-        // Modified for: Store Project module settings ViewModel
-        // Related modules: Project (ProjectModuleSettingsViewModel)
-        // Rollback instructions: Remove ProjectSettingsViewModel property and assignment
-        
         // Store Project module settings VM if provided
         ProjectSettingsViewModel = projectSettingsViewModel;
+        
+        // NEW: Store global Data Types settings VM
+        DataTypesSettingsViewModel = dataTypesSettingsViewModel;
 
         // Initialize commands
         ApplyCommand = new DelegateCommand(Apply);
@@ -169,6 +169,15 @@ public class SettingsDialogViewModel : BindableBase
     /// Rollback instructions: Remove this property
     /// </remarks>
     public object? ProjectSettingsViewModel { get; }
+
+    /// <summary>
+    /// Gets the global Data Types settings view model.
+    /// </summary>
+    /// <remarks>
+    /// Controls which data types and properties are visible across all modules.
+    /// Moved from Map module to global scope as part of cross-module data type filtering.
+    /// </remarks>
+    public object? DataTypesSettingsViewModel { get; }
 
     /// <summary>
     /// Gets or sets the default maps directory path.
@@ -309,6 +318,13 @@ public class SettingsDialogViewModel : BindableBase
             Log.Debug("Project module settings saved");
         }
 
+        // Save global Data Types settings if available
+        if (DataTypesSettingsViewModel is DataTypesSettingsViewModel dataTypesVm)
+        {
+            dataTypesVm.SaveSettings();
+            Log.Debug("Data types settings saved");
+        }
+
         Log.Information("Settings applied: Theme={Theme}, RecentFilesLimit={Limit}", SelectedThemeDescriptor?.Name, _recentFilesLimit);
     }
 
@@ -345,6 +361,13 @@ public class SettingsDialogViewModel : BindableBase
         {
             projectVm.ReloadSettings();
             Log.Debug("Project module settings reloaded (changes discarded)");
+        }
+
+        // Reload global Data Types settings if available (discard changes)
+        if (DataTypesSettingsViewModel is DataTypesSettingsViewModel dataTypesVm)
+        {
+            dataTypesVm.ReloadSettings();
+            Log.Debug("Data types settings reloaded (changes discarded)");
         }
 
         DialogResult = false;

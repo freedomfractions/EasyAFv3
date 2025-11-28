@@ -178,6 +178,20 @@
                 </ScrollViewer>
             </TabItem>
 
+            <!-- NEW: Global Data Types Settings Tab -->
+            <TabItem Header="Data Types"
+                     Visibility="{Binding DataTypesSettingsViewModel, Converter={StaticResource NullToVisibilityConverter}}">
+                <TabItem.HeaderTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}" 
+                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                   FontWeight="SemiBold"
+                                   Padding="12,8"/>
+                    </DataTemplate>
+                </TabItem.HeaderTemplate>
+                <ContentControl Content="{Binding DataTypesSettingsViewModel}"/>
+            </TabItem>
+
             <!-- CROSS-MODULE EDIT: 2025-01-16 Map Module Settings Feature - Step 8 -->
             <!-- Modified for: Add Map Editor settings tab -->
             <!-- Related modules: Map (MapModuleSettingsView, MapModuleSettingsViewModel) -->

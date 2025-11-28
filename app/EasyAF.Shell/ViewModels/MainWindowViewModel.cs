@@ -688,7 +688,10 @@ public class MainWindowViewModel : BindableBase
             Log.Debug("Project module settings not available (module not loaded)");
         }
         
-        var viewModel = new SettingsDialogViewModel(_themeService, _settingsService, mapSettingsVm, projectSettingsVm);
+        // NEW: Create global Data Types settings ViewModel
+        var dataTypesSettingsVm = new DataTypesSettingsViewModel(_settingsService, _dialogService);
+        
+        var viewModel = new SettingsDialogViewModel(_themeService, _settingsService, mapSettingsVm, projectSettingsVm, dataTypesSettingsVm);
         var dialog = new Views.SettingsDialog
         {
             DataContext = viewModel,

@@ -1,0 +1,163 @@
+<UserControl x:Class="EasyAF.Shell.Views.DataTypesSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="{DynamicResource SecondaryBackgroundBrush}">
+    
+    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="20">
+            
+            <!-- Header -->
+            <TextBlock Text="Data Types Configuration"
+                       FontSize="16"
+                       FontWeight="SemiBold"
+                       Foreground="{DynamicResource TextPrimaryBrush}"
+                       Margin="0,0,0,8"/>
+            
+            <!-- Description -->
+            <TextBlock TextWrapping="Wrap"
+                       Foreground="{DynamicResource TextSecondaryBrush}"
+                       Margin="0,0,0,20">
+                <Run Text="Control which data types and properties are available across all modules (Map Editor, Spec Editor, etc.)."/>
+                <LineBreak/>
+                <Run Text="Unchecked data types will not appear in module interfaces. Click 'Properties...' to configure which properties are available."/>
+            </TextBlock>
+            
+            <!-- Data Type Configuration Section Header -->
+            <Grid Margin="0,0,0,8">
+                <TextBlock Text="Available Data Types"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource TextPrimaryBrush}"
+                           VerticalAlignment="Center"/>
+                
+                <!-- Data Type Count -->
+                <TextBlock HorizontalAlignment="Right"
+                           VerticalAlignment="Center"
+                           Foreground="{DynamicResource TextSecondaryBrush}"
+                           FontSize="12">
+                    <Run Text="{Binding EnabledCount, Mode=OneWay}" FontWeight="SemiBold"/>
+                    <Run Text="of"/>
+                    <Run Text="{Binding TotalCount, Mode=OneWay}" FontWeight="SemiBold"/>
+                    <Run Text="data types enabled"/>
+                </TextBlock>
+            </Grid>
+            
+            <!-- Data Types Grid -->
+            <Border BorderBrush="{DynamicResource ControlBorderBrush}"
+                    BorderThickness="1"
+                    Background="{DynamicResource ControlBackgroundBrush}"
+                    Margin="0,0,0,16"
+                    MinHeight="300"
+                    MaxHeight="400">
+                <DataGrid ItemsSource="{Binding DataTypes}"
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="False"
+                          CanUserDeleteRows="False"
+                          CanUserResizeRows="False"
+                          CanUserReorderColumns="False"
+                          HeadersVisibility="Column"
+                          GridLinesVisibility="Horizontal"
+                          RowBackground="{DynamicResource ControlBackgroundBrush}"
+                          AlternatingRowBackground="{DynamicResource SecondaryBackgroundBrush}"
+                          Background="{DynamicResource ControlBackgroundBrush}"
+                          BorderThickness="0"
+                          SelectionMode="Single"
+                          RowHeight="48">
+                    
+                    <DataGrid.Resources>
+                        <Style TargetType="ScrollViewer">
+                            <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}"/>
+                        </Style>
+                    </DataGrid.Resources>
+                    
+                    <!-- Style for headers -->
+                    <DataGrid.ColumnHeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                            <Setter Property="BorderBrush" Value="{DynamicResource ControlBorderBrush}"/>
+                            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                            <Setter Property="Padding" Value="8,6"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                        </Style>
+                    </DataGrid.ColumnHeaderStyle>
+                    
+                    <!-- Style for cells -->
+                    <DataGrid.CellStyle>
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                            <Setter Property="Padding" Value="0"/>
+                            <Setter Property="VerticalContentAlignment" Value="Center"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" Value="{DynamicResource HighlightSelectionBrush}"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.CellStyle>
+                    
+                    <!-- Columns -->
+                    <DataGrid.Columns>
+                        <!-- Enabled Checkbox -->
+                        <DataGridTemplateColumn Header="Enabled" Width="80">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <CheckBox IsChecked="{Binding IsEnabled, UpdateSourceTrigger=PropertyChanged}"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              Margin="8"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        
+                        <!-- Data Type Name -->
+                        <DataGridTextColumn Header="Data Type" 
+                                            Binding="{Binding DataTypeDisplayName}" 
+                                            Width="250"
+                                            IsReadOnly="True">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                    <Setter Property="Padding" Value="8,0"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        
+                        <!-- Properties Button -->
+                        <DataGridTemplateColumn Header="Properties" Width="*">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Content="{Binding PropertiesDisplay}"
+                                            Command="{Binding DataContext.ConfigurePropertiesCommand, 
+                                                     RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"
+                                            Style="{StaticResource BaseButtonStyle}"
+                                            HorizontalAlignment="Left"
+                                            VerticalAlignment="Center"
+                                            Padding="12,6"
+                                            Margin="8,0"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+            
+            <!-- Reset Button -->
+            <Button Content="Reset to Defaults"
+                    Command="{Binding ResetToDefaultsCommand}"
+                    Style="{StaticResource BaseButtonStyle}"
+                    HorizontalAlignment="Left"
+                    Padding="12,6">
+                <Button.ToolTip>
+                    <ToolTip>
+                        <TextBlock Text="Enable all data types and properties (wildcard mode)"/>
+                    </ToolTip>
+                </Button.ToolTip>
+            </Button>
+            
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
