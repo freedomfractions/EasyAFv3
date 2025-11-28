@@ -3,7 +3,9 @@
                     xmlns:mapVM="clr-namespace:EasyAF.Modules.Map.ViewModels;assembly=EasyAF.Modules.Map"
                     xmlns:mapView="clr-namespace:EasyAF.Modules.Map.Views;assembly=EasyAF.Modules.Map"
                     xmlns:projectVM="clr-namespace:EasyAF.Modules.Project.ViewModels;assembly=EasyAF.Modules.Project"
-                    xmlns:projectView="clr-namespace:EasyAF.Modules.Project.Views;assembly=EasyAF.Modules.Project">
+                    xmlns:projectView="clr-namespace:EasyAF.Modules.Project.Views;assembly=EasyAF.Modules.Project"
+                    xmlns:specVM="clr-namespace:EasyAF.Modules.Spec.ViewModels;assembly=EasyAF.Modules.Spec"
+                    xmlns:specView="clr-namespace:EasyAF.Modules.Spec.Views;assembly=EasyAF.Modules.Spec">
     
     <!-- CROSS-MODULE EDIT: 2025-01-15 Map Module View Hosting -->
     <!-- Modified for: Register DataTemplate to display MapDocumentViewModel with MapDocumentView -->
@@ -43,6 +45,16 @@
     <!-- Project Module Settings View Template -->
     <DataTemplate DataType="{x:Type projectVM:ProjectModuleSettingsViewModel}">
         <projectView:ProjectModuleSettingsView />
+    </DataTemplate>
+    
+    <!-- CROSS-MODULE EDIT: 2025-11-27 Task 25 - Spec Module View Hosting -->
+    <!-- Modified for: Register DataTemplate to display SpecDocumentViewModel with SpecDocumentView -->
+    <!-- Related modules: Spec (SpecDocumentViewModel, SpecDocumentView) -->
+    <!-- Rollback instructions: Remove this DataTemplate and xmlns:specVM/specView declarations -->
+    
+    <!-- Spec Module Document View Template -->
+    <DataTemplate DataType="{x:Type specVM:SpecDocumentViewModel}">
+        <specView:SpecDocumentView />
     </DataTemplate>
     
 </ResourceDictionary>
