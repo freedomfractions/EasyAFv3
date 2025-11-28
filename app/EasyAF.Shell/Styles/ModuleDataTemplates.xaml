@@ -5,7 +5,9 @@
                     xmlns:projectVM="clr-namespace:EasyAF.Modules.Project.ViewModels;assembly=EasyAF.Modules.Project"
                     xmlns:projectView="clr-namespace:EasyAF.Modules.Project.Views;assembly=EasyAF.Modules.Project"
                     xmlns:specVM="clr-namespace:EasyAF.Modules.Spec.ViewModels;assembly=EasyAF.Modules.Spec"
-                    xmlns:specView="clr-namespace:EasyAF.Modules.Spec.Views;assembly=EasyAF.Modules.Spec">
+                    xmlns:specView="clr-namespace:EasyAF.Modules.Spec.Views;assembly=EasyAF.Modules.Spec"
+                    xmlns:shellVM="clr-namespace:EasyAF.Shell.ViewModels"
+                    xmlns:shellView="clr-namespace:EasyAF.Shell.Views">
     
     <!-- CROSS-MODULE EDIT: 2025-01-15 Map Module View Hosting -->
     <!-- Modified for: Register DataTemplate to display MapDocumentViewModel with MapDocumentView -->
@@ -70,6 +72,11 @@
     <!-- Spec Module Table Editor View Template -->
     <DataTemplate DataType="{x:Type specVM:TableEditorViewModel}">
         <specView:TableEditorView />
+    </DataTemplate>
+    
+    <!-- Global Data Types Settings View Template -->
+    <DataTemplate DataType="{x:Type shellVM:DataTypesSettingsViewModel}">
+        <shellView:DataTypesSettingsView />
     </DataTemplate>
     
 </ResourceDictionary>
