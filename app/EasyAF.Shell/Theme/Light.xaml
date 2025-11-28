@@ -107,7 +107,6 @@
     <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondaryColor}"/>
     <SolidColorBrush x:Key="TextTertiaryBrush" Color="{StaticResource TextTertiaryColor}"/>
     <SolidColorBrush x:Key="TextDisabledBrush" Color="{StaticResource TextDisabledColor}"/>
-    <Color x:Key="SelectedTextColor">#FF111827</Color>
     <SolidColorBrush x:Key="SelectedTextBrush" Color="{StaticResource SelectedTextColor}"/>
     
     <SolidColorBrush x:Key="ErrorBrush" Color="{StaticResource ErrorColor}"/>
@@ -141,3 +140,4 @@
     <SolidColorBrush x:Key="LogFatalBrush" Color="{StaticResource LogFatalColor}"/>
 
 </ResourceDictionary>
+
