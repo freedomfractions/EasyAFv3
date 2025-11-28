@@ -106,7 +106,7 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
         /// <summary>
         /// Gets the total count of properties currently displayed.
         /// </summary>
-        public int DisplayedPropertyCount => DataTypes.Sum(dt => dt.Properties.Count);
+        public int DisplayedPropertyCount => DataTypes.Sum(dt => dt.AllProperties.Count);
 
         public bool? DialogResult
         {
@@ -218,7 +218,7 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
                         }
                     };
 
-                    node.Properties.Add(propertyNode);
+                    node.AllProperties.Add(propertyNode);
                 }
 
                 DataTypes.Add(node);
@@ -226,7 +226,7 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
 
             Log.Information("Loaded {Count} data types with {PropertyCount} total properties (ShowActiveOnly={ShowActive})", 
                 DataTypes.Count, 
-                DataTypes.Sum(dt => dt.Properties.Count),
+                DataTypes.Sum(dt => dt.AllProperties.Count),
                 _showActiveOnly);
             
             // Notify UI of count changes
@@ -287,7 +287,18 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
         private bool FilterDataType(object obj)
         {
             if (obj is not DataTypeNode node) return false;
-            if (string.IsNullOrWhiteSpace(_searchText)) return true;
+            
+            // When search is cleared, show all properties
+            if (string.IsNullOrWhiteSpace(_searchText))
+            {
+                // Reset all properties to visible
+                foreach (var prop in node.AllProperties)
+                {
+                    prop.IsVisible = true;
+                }
+                node.RefreshPropertyFilter();
+                return true;
+            }
 
             var search = _searchText.ToLowerInvariant();
 
@@ -303,16 +314,17 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
             if (typeScore >= 70)
             {
                 // Clear any property filtering - show all properties
-                foreach (var prop in node.Properties)
+                foreach (var prop in node.AllProperties)
                 {
                     prop.IsVisible = true;
                 }
+                node.RefreshPropertyFilter();
                 return true; // Show this data type
             }
             
             // Data type name is not a strong match - check if any properties match
             var hasMatchingProperties = false;
-            foreach (var prop in node.Properties)
+            foreach (var prop in node.AllProperties)
             {
                 // Check if property name matches search
                 var propertyMatches = prop.PropertyName.ToLowerInvariant().Contains(search);
@@ -325,6 +337,9 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
                     hasMatchingProperties = true;
                 }
             }
+            
+            // Refresh the property filter to consolidate results
+            node.RefreshPropertyFilter();
             
             // Show this data type only if it has matching properties
             return hasMatchingProperties;
@@ -384,6 +399,13 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
         private string _friendlyName = string.Empty; // NEW: User-friendly display name
         private bool _isExpanded;
 
+        public DataTypeNode()
+        {
+            // Create filtered view of properties
+            PropertiesView = CollectionViewSource.GetDefaultView(AllProperties);
+            PropertiesView.Filter = obj => obj is PropertyNode node && node.IsVisible;
+        }
+
         public string TypeName
         {
             get => _typeName;
@@ -405,7 +427,27 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
             set => SetProperty(ref _isExpanded, value);
         }
 
-        public ObservableCollection<PropertyNode> Properties { get; } = new();
+        /// <summary>
+        /// Gets the raw collection of all properties (for manipulation).
+        /// </summary>
+        public ObservableCollection<PropertyNode> AllProperties { get; } = new();
+
+        /// <summary>
+        /// Gets the filtered view of properties (for display in TreeView).
+        /// </summary>
+        /// <remarks>
+        /// This automatically filters based on PropertyNode.IsVisible.
+        /// Call RefreshPropertyFilter() after changing IsVisible values.
+        /// </remarks>
+        public ICollectionView PropertiesView { get; }
+
+        /// <summary>
+        /// Refreshes the property filter to apply visibility changes.
+        /// </summary>
+        public void RefreshPropertyFilter()
+        {
+            PropertiesView.Refresh();
+        }
     }
 
     /// <summary>

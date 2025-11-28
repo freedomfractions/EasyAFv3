@@ -111,7 +111,7 @@
                 
                 <!-- Data Type Level (Bus, LVCB, etc.) -->
                 <TreeView.ItemTemplate>
-                    <HierarchicalDataTemplate ItemsSource="{Binding Properties}">
+                    <HierarchicalDataTemplate ItemsSource="{Binding PropertiesView}">
                         <!-- Data Type Header -->
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="📁"
@@ -120,7 +120,7 @@
                             <TextBlock Text="{Binding FriendlyName}"
                                        FontWeight="SemiBold"
                                        Foreground="{DynamicResource TextPrimaryBrush}"/>
-                            <TextBlock Text="{Binding Properties.Count, StringFormat=' ({0} properties)'}"
+                            <TextBlock Text="{Binding PropertiesView.Count, StringFormat=' ({0} properties)'}"
                                        Foreground="{DynamicResource TextSecondaryBrush}"
                                        FontSize="11"
                                        Margin="4,1,0,0"/>
