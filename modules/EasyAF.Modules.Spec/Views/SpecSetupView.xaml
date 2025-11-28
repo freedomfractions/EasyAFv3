@@ -3,6 +3,34 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Background="{DynamicResource PrimaryBackgroundBrush}">
     
+    <UserControl.Resources>
+        <!-- DataGrid Column Header Style (matching Map/Project modules) -->
+        <Style x:Key="SpecDataGridColumnHeaderStyle" TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ControlBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="0,0,1,1"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+        
+        <!-- DataGrid Row Style (for proper theming) -->
+        <Style x:Key="SpecDataGridRowStyle" TargetType="DataGridRow">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource HighlightSelectionBrush}"/>
+                </Trigger>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+    
     <ScrollViewer VerticalScrollBarVisibility="Auto"
                   HorizontalScrollBarVisibility="Disabled"
                   Background="{DynamicResource PrimaryBackgroundBrush}">
@@ -69,6 +97,10 @@
                                   BorderBrush="{DynamicResource ControlBorderBrush}"
                                   BorderThickness="1"
                                   Margin="0,8,0,0"
+                                  ColumnHeaderStyle="{StaticResource SpecDataGridColumnHeaderStyle}"
+                                  RowStyle="{StaticResource SpecDataGridRowStyle}"
+                                  GridLinesVisibility="Horizontal"
+                                  HorizontalGridLinesBrush="{DynamicResource ControlBorderBrush}"
                                   ScrollViewer.VerticalScrollBarVisibility="Auto"
                                   ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                   ScrollViewer.CanContentScroll="False">
@@ -172,6 +204,10 @@
                               BorderBrush="{DynamicResource ControlBorderBrush}"
                               BorderThickness="1"
                               HeadersVisibility="Column"
+                              ColumnHeaderStyle="{StaticResource SpecDataGridColumnHeaderStyle}"
+                              RowStyle="{StaticResource SpecDataGridRowStyle}"
+                              GridLinesVisibility="Horizontal"
+                              HorizontalGridLinesBrush="{DynamicResource ControlBorderBrush}"
                               ScrollViewer.VerticalScrollBarVisibility="Auto"
                               ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                               ScrollViewer.CanContentScroll="False">
@@ -270,6 +306,10 @@
                                       Foreground="{DynamicResource TextPrimaryBrush}"
                                       BorderBrush="{DynamicResource ControlBorderBrush}"
                                       BorderThickness="1"
+                                      ColumnHeaderStyle="{StaticResource SpecDataGridColumnHeaderStyle}"
+                                      RowStyle="{StaticResource SpecDataGridRowStyle}"
+                                      GridLinesVisibility="Horizontal"
+                                      HorizontalGridLinesBrush="{DynamicResource ControlBorderBrush}"
                                       ScrollViewer.VerticalScrollBarVisibility="Auto"
                                       ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                       ScrollViewer.CanContentScroll="False">
