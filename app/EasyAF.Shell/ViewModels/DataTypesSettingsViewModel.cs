@@ -31,6 +31,7 @@ namespace EasyAF.Shell.ViewModels
     {
         private readonly ISettingsService _settingsService;
         private readonly IUserDialogService _dialogService;
+        private readonly EasyAF.Modules.Map.Services.IPropertyDiscoveryService _propertyDiscovery;
         private DataTypeVisibilitySettings _settings;
 
         /// <summary>
@@ -38,10 +39,15 @@ namespace EasyAF.Shell.ViewModels
         /// </summary>
         /// <param name="settingsService">Service for accessing application settings.</param>
         /// <param name="dialogService">Service for showing user dialogs.</param>
-        public DataTypesSettingsViewModel(ISettingsService settingsService, IUserDialogService dialogService)
+        /// <param name="propertyDiscovery">Service for discovering data type properties.</param>
+        public DataTypesSettingsViewModel(
+            ISettingsService settingsService, 
+            IUserDialogService dialogService,
+            EasyAF.Modules.Map.Services.IPropertyDiscoveryService propertyDiscovery)
         {
             _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
             _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
+            _propertyDiscovery = propertyDiscovery ?? throw new ArgumentNullException(nameof(propertyDiscovery));
 
             // Load settings
             _settings = _settingsService.GetDataTypeVisibilitySettings();
@@ -94,13 +100,13 @@ namespace EasyAF.Shell.ViewModels
 
         private void InitializeDataTypes()
         {
-            // Get all data types from the DataSet model
-            var dataTypes = GetAvailableDataTypes();
+            // Get all data types from property discovery service
+            var dataTypes = _propertyDiscovery.GetAvailableDataTypes();
 
             foreach (var dataType in dataTypes)
             {
                 var config = _settings.GetOrCreateConfig(dataType);
-                var allProperties = GetAllPropertiesForType(dataType);
+                var allProperties = _propertyDiscovery.GetAllPropertiesForType(dataType);
                 var enabledProperties = config.EnabledProperties;
 
                 int enabledCount;
@@ -110,17 +116,17 @@ namespace EasyAF.Shell.ViewModels
                 }
                 else
                 {
-                    enabledCount = allProperties.Count(p => enabledProperties.Contains(p));
+                    enabledCount = allProperties.Count(p => enabledProperties.Contains(p.PropertyName));
                 }
 
                 var item = new DataTypeItem
                 {
                     DataTypeName = dataType,
-                    DataTypeDisplayName = GetDataTypeDescription(dataType),
+                    DataTypeDisplayName = _propertyDiscovery.GetDataTypeDescription(dataType),
                     IsEnabled = config.Enabled,
                     EnabledPropertiesCount = enabledCount,
                     TotalPropertiesCount = allProperties.Count,
-                    AllProperties = allProperties,
+                    AllProperties = allProperties.Select(p => p.PropertyName).ToList(),
                     EnabledProperties = new List<string>(enabledProperties)
                 };
 
@@ -128,97 +134,6 @@ namespace EasyAF.Shell.ViewModels
                 item.PropertyChanged += OnDataTypeItemChanged;
 
                 DataTypes.Add(item);
-            }
-        }
-
-        /// <summary>
-        /// Gets all available data types from the DataSet model.
-        /// </summary>
-        private List<string> GetAvailableDataTypes()
-        {
-            try
-            {
-                // Use reflection on DataSet to find all "*Entries" properties
-                var dataSetType = typeof(EasyAF.Data.Models.DataSet);
-                var dataModelTypes = dataSetType.GetProperties()
-                    .Where(p => p.Name.EndsWith("Entries") && p.PropertyType.IsGenericType)
-                    .Select(p =>
-                    {
-                        var genericArgs = p.PropertyType.GetGenericArguments();
-                        return genericArgs.Length >= 2 ? genericArgs[1].Name : null;
-                    })
-                    .Where(name => !string.IsNullOrEmpty(name))
-                    .OrderBy(name => name)
-                    .ToList();
-
-                Log.Debug("Discovered {Count} data types", dataModelTypes.Count);
-                return dataModelTypes!;
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Failed to discover data types");
-                return new List<string>();
-            }
-        }
-
-        /// <summary>
-        /// Gets the user-friendly description for a data type.
-        /// </summary>
-        private string GetDataTypeDescription(string dataTypeName)
-        {
-            try
-            {
-                var type = typeof(EasyAF.Data.Models.Bus).Assembly
-                    .GetTypes()
-                    .FirstOrDefault(t => t.Name == dataTypeName && t.Namespace == "EasyAF.Data.Models");
-
-                if (type != null)
-                {
-                    var attribute = type.GetCustomAttributes(typeof(EasyAF.Data.Attributes.EasyPowerClassAttribute), false)
-                        .FirstOrDefault() as EasyAF.Data.Attributes.EasyPowerClassAttribute;
-
-                    if (attribute != null && !string.IsNullOrWhiteSpace(attribute.EasyPowerClassName))
-                    {
-                        return attribute.EasyPowerClassName;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Warning(ex, "Failed to get description for {DataType}", dataTypeName);
-            }
-
-            return dataTypeName; // Fallback to class name
-        }
-
-        /// <summary>
-        /// Gets all properties for a data type.
-        /// </summary>
-        private List<string> GetAllPropertiesForType(string dataTypeName)
-        {
-            try
-            {
-                var type = typeof(EasyAF.Data.Models.Bus).Assembly
-                    .GetTypes()
-                    .FirstOrDefault(t => t.Name == dataTypeName && t.Namespace == "EasyAF.Data.Models");
-
-                if (type == null)
-                    return new List<string>();
-
-                var properties = type.GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance)
-                    .Where(p => p.CanRead && p.CanWrite)
-                    .Where(p => !p.GetCustomAttributes(typeof(System.Text.Json.Serialization.JsonIgnoreAttribute), false).Any()
-                             && !p.GetCustomAttributes(typeof(Newtonsoft.Json.JsonIgnoreAttribute), false).Any())
-                    .Select(p => p.Name)
-                    .OrderBy(name => name)
-                    .ToList();
-
-                return properties;
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Failed to get properties for {DataType}", dataTypeName);
-                return new List<string>();
             }
         }
 
@@ -233,18 +148,38 @@ namespace EasyAF.Shell.ViewModels
 
             try
             {
-                // For now, show a simple message - property selector dialog needs to be moved to Shell too
-                _dialogService.ShowMessage(
-                    $"Property configuration for {item.DataTypeDisplayName} will be implemented in the property selector dialog.\n\n" +
-                    $"Currently: {item.EnabledPropertiesCount} of {item.TotalPropertiesCount} properties enabled.",
-                    "Configure Properties");
+                var defaultProperties = new List<string> { "*" };
+                var allPropertiesWithInfo = _propertyDiscovery.GetAllPropertiesForType(item.DataTypeName);
 
-                // TODO: Move PropertySelectorDialog from Map module to Shell
-                // Then use it here to configure properties
+                // Use PropertySelectorDialog from Map module
+                var viewModel = new EasyAF.Modules.Map.ViewModels.PropertySelectorViewModel(
+                    item.DataTypeName,
+                    item.DataTypeDisplayName,
+                    allPropertiesWithInfo,
+                    item.EnabledProperties,
+                    defaultProperties);
+
+                var dialog = new EasyAF.Modules.Map.Views.PropertySelectorDialog
+                {
+                    DataContext = viewModel,
+                    Owner = Application.Current.MainWindow
+                };
+
+                var result = dialog.ShowDialog();
+
+                if (result == true)
+                {
+                    item.EnabledProperties = viewModel.GetEnabledProperties();
+                    item.EnabledPropertiesCount = viewModel.EnabledCount;
+
+                    Log.Information("Updated {DataType} properties: {Enabled} of {Total} enabled", 
+                        item.DataTypeName, item.EnabledPropertiesCount, item.TotalPropertiesCount);
+                }
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error opening property selector for {DataType}", item.DataTypeName);
+                _dialogService.ShowError($"Failed to open property selector: {ex.Message}", "Error");
             }
         }
 

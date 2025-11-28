@@ -689,7 +689,24 @@ public class MainWindowViewModel : BindableBase
         }
         
         // NEW: Create global Data Types settings ViewModel
-        var dataTypesSettingsVm = new DataTypesSettingsViewModel(_settingsService, _dialogService);
+        object? propertyDiscoveryService = null;
+        try
+        {
+            propertyDiscoveryService = _container.Resolve<EasyAF.Modules.Map.Services.IPropertyDiscoveryService>();
+        }
+        catch
+        {
+            Log.Warning("IPropertyDiscoveryService not available (Map module not loaded) - Data Types tab will be hidden");
+        }
+        
+        DataTypesSettingsViewModel? dataTypesSettingsVm = null;
+        if (propertyDiscoveryService != null)
+        {
+            dataTypesSettingsVm = new DataTypesSettingsViewModel(
+                _settingsService, 
+                _dialogService, 
+                (EasyAF.Modules.Map.Services.IPropertyDiscoveryService)propertyDiscoveryService);
+        }
         
         var viewModel = new SettingsDialogViewModel(_themeService, _settingsService, mapSettingsVm, projectSettingsVm, dataTypesSettingsVm);
         var dialog = new Views.SettingsDialog
