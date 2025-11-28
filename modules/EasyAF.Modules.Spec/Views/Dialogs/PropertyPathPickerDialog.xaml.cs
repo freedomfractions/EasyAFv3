@@ -31,6 +31,25 @@ namespace EasyAF.Modules.Spec.Views.Dialogs
                         DialogResult = value.DialogResult;
                     }
                 };
+                
+                // Initialize the "Show All" radio button state based on ViewModel
+                ShowAllRadio.IsChecked = !value.ShowActiveOnly;
+            }
+        }
+
+        private void ShowAllRadio_Checked(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is PropertyPathPickerViewModel vm)
+            {
+                vm.ShowActiveOnly = false;
+            }
+        }
+
+        private void ShowAllRadio_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is PropertyPathPickerViewModel vm)
+            {
+                vm.ShowActiveOnly = true;
             }
         }
     }

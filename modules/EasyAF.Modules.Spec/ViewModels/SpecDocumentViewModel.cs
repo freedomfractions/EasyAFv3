@@ -25,6 +25,7 @@ namespace EasyAF.Modules.Spec.ViewModels
         private readonly SpecDocument _document;
         private readonly IUserDialogService _dialogService;
         private readonly IPropertyDiscoveryService _propertyDiscovery;
+        private readonly ISettingsService _settingsService; // NEW: For global settings access
         private bool _disposed;
         private object? _selectedTabContent;
         private int _selectedTabIndex;
@@ -35,12 +36,14 @@ namespace EasyAF.Modules.Spec.ViewModels
         /// <param name="document">The spec document this VM represents.</param>
         /// <param name="dialogService">Service for showing user dialogs.</param>
         /// <param name="propertyDiscovery">Service for discovering data type properties.</param>
+        /// <param name="settingsService">Service for accessing settings (property visibility).</param>
         /// <exception cref="ArgumentNullException">If document or dialogService is null.</exception>
-        public SpecDocumentViewModel(SpecDocument document, IUserDialogService dialogService, IPropertyDiscoveryService propertyDiscovery)
+        public SpecDocumentViewModel(SpecDocument document, IUserDialogService dialogService, IPropertyDiscoveryService propertyDiscovery, ISettingsService settingsService)
         {
             _document = document ?? throw new ArgumentNullException(nameof(document));
             _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
             _propertyDiscovery = propertyDiscovery ?? throw new ArgumentNullException(nameof(propertyDiscovery));
+            _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
 
             // Initialize collections
             TabHeaders = new ObservableCollection<TabHeaderInfo>();
@@ -174,7 +177,7 @@ namespace EasyAF.Modules.Spec.ViewModels
             {
                 foreach (var table in _document.Spec.Tables)
                 {
-                    var editorVm = new TableEditorViewModel(table, _document, _dialogService, _propertyDiscovery);
+                    var editorVm = new TableEditorViewModel(table, _document, _dialogService, _propertyDiscovery, _settingsService);
                     TabHeaders.Add(new TabHeaderInfo
                     {
                         Header = !string.IsNullOrEmpty(table.AltText) ? table.AltText : table.Id,

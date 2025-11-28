@@ -103,7 +103,10 @@ namespace EasyAF.Modules.Spec
             var propertyDiscovery = _container?.Resolve<IPropertyDiscoveryService>() 
                 ?? throw new InvalidOperationException("IPropertyDiscoveryService not registered in container");
             
-            var viewModel = new ViewModels.SpecDocumentViewModel(document, dialogService, propertyDiscovery);
+            var settingsService = _container?.Resolve<ISettingsService>() 
+                ?? throw new InvalidOperationException("ISettingsService not registered in container");
+            
+            var viewModel = new ViewModels.SpecDocumentViewModel(document, dialogService, propertyDiscovery, settingsService);
             document.ViewModel = viewModel;
             
             Log.Information("New spec document created");
@@ -135,7 +138,10 @@ namespace EasyAF.Modules.Spec
             var propertyDiscovery = _container?.Resolve<IPropertyDiscoveryService>() 
                 ?? throw new InvalidOperationException("IPropertyDiscoveryService not registered in container");
             
-            var viewModel = new ViewModels.SpecDocumentViewModel(document, dialogService, propertyDiscovery);
+            var settingsService = _container?.Resolve<ISettingsService>() 
+                ?? throw new InvalidOperationException("ISettingsService not registered in container");
+            
+            var viewModel = new ViewModels.SpecDocumentViewModel(document, dialogService, propertyDiscovery, settingsService);
             document.ViewModel = viewModel;
             
             Log.Information("Spec document opened successfully: {FilePath}", filePath);

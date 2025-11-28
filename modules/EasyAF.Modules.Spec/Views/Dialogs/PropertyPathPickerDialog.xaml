@@ -1,6 +1,7 @@
 ﻿<Window x:Class="EasyAF.Modules.Spec.Views.Dialogs.PropertyPathPickerDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
         Title="Select Property Paths"
         Width="500"
         Height="600"
@@ -9,6 +10,13 @@
         ResizeMode="CanResize">
     
     <Window.Resources>
+        <!-- Inverse Boolean Converter -->
+        <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/>
+        
+        <!-- Simple inline converter for inverting boolean -->
+        <sys:Boolean x:Key="TrueValue">True</sys:Boolean>
+        <sys:Boolean x:Key="FalseValue">False</sys:Boolean>
+        
         <!-- TreeView Item Style -->
         <Style x:Key="PropertyTreeViewItemStyle" TargetType="TreeViewItem">
             <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
@@ -20,6 +28,7 @@
     <Grid Margin="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/> <!-- Title -->
+            <RowDefinition Height="Auto"/> <!-- Filter toggle -->
             <RowDefinition Height="Auto"/> <!-- Search -->
             <RowDefinition Height="*"/>    <!-- Tree -->
             <RowDefinition Height="Auto"/> <!-- Selected count -->
@@ -32,10 +41,38 @@
                    FontSize="14"
                    FontWeight="SemiBold"
                    Foreground="{DynamicResource TextPrimaryBrush}"
-                   Margin="0,0,0,16"/>
+                   Margin="0,0,0,12"/>
+        
+        <!-- Filter Toggle (Active/All) -->
+        <StackPanel Grid.Row="1" 
+                    Orientation="Horizontal" 
+                    Margin="0,0,0,12">
+            <RadioButton Content="Active Data Types"
+                         IsChecked="{Binding ShowActiveOnly}"
+                         GroupName="FilterMode"
+                         Foreground="{DynamicResource TextPrimaryBrush}"
+                         Margin="0,0,16,0"
+                         ToolTip="Show only data types enabled in Options"/>
+            <RadioButton x:Name="ShowAllRadio"
+                         Content="All Data Types"
+                         GroupName="FilterMode"
+                         Foreground="{DynamicResource TextPrimaryBrush}"
+                         Margin="0,0,16,0"
+                         ToolTip="Show all available data types"
+                         Checked="ShowAllRadio_Checked"
+                         Unchecked="ShowAllRadio_Unchecked"/>
+            
+            <!-- Info with link to settings -->
+            <TextBlock VerticalAlignment="Center"
+                       Foreground="{DynamicResource TextSecondaryBrush}"
+                       FontSize="11">
+                <Run Text="💡" FontFamily="Segoe UI Emoji"/>
+                <Run Text="(Configure in File > Options > Data Types)"/>
+            </TextBlock>
+        </StackPanel>
         
         <!-- Search Box -->
-        <Grid Grid.Row="1" Margin="0,0,0,12">
+        <Grid Grid.Row="2" Margin="0,0,0,12">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
@@ -68,7 +105,7 @@
         </Grid>
         
         <!-- Property Tree -->
-        <Border Grid.Row="2"
+        <Border Grid.Row="3"
                 BorderBrush="{DynamicResource ControlBorderBrush}"
                 BorderThickness="1"
                 Background="{DynamicResource ControlBackgroundBrush}">
@@ -120,7 +157,7 @@
         </Border>
         
         <!-- Selected Count -->
-        <TextBlock Grid.Row="3"
+        <TextBlock Grid.Row="4"
                    Margin="0,12,0,16"
                    Foreground="{DynamicResource TextSecondaryBrush}"
                    HorizontalAlignment="Right">
@@ -129,7 +166,7 @@
         </TextBlock>
         
         <!-- Buttons -->
-        <StackPanel Grid.Row="4"
+        <StackPanel Grid.Row="5"
                     Orientation="Horizontal"
                     HorizontalAlignment="Right">
             <Button Content="OK"

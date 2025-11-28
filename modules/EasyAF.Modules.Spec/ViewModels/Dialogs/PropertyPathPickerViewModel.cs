@@ -10,6 +10,7 @@ using Prism.Mvvm;
 using EasyAF.Engine;
 using EasyAF.Modules.Spec.Models;
 using EasyAF.Modules.Map.Services;
+using EasyAF.Core.Contracts; // NEW: For ISettingsService
 using Serilog;
 
 namespace EasyAF.Modules.Spec.ViewModels.Dialogs
@@ -26,13 +27,16 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
     {
         private string _searchText = string.Empty;
         private bool? _dialogResult;
+        private bool _showActiveOnly = true; // NEW: Default to active (enabled) data types only
         private readonly SpecDocument? _document;
         private readonly IPropertyDiscoveryService _propertyDiscovery;
+        private readonly EasyAF.Core.Contracts.ISettingsService _settingsService; // NEW: For reading visibility settings
 
-        public PropertyPathPickerViewModel(string[] currentPaths, SpecDocument? document, IPropertyDiscoveryService propertyDiscovery)
+        public PropertyPathPickerViewModel(string[] currentPaths, SpecDocument? document, IPropertyDiscoveryService propertyDiscovery, EasyAF.Core.Contracts.ISettingsService settingsService)
         {
             _document = document;
             _propertyDiscovery = propertyDiscovery ?? throw new ArgumentNullException(nameof(propertyDiscovery));
+            _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
 
             // Initialize collections
             DataTypes = new ObservableCollection<DataTypeNode>();
@@ -72,6 +76,37 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
             }
         }
 
+        /// <summary>
+        /// Gets or sets whether to show only active (enabled) data types.
+        /// </summary>
+        /// <remarks>
+        /// When true, only shows data types that are enabled in Options > Data Types.
+        /// When false, shows ALL data types discovered via reflection.
+        /// </remarks>
+        public bool ShowActiveOnly
+        {
+            get => _showActiveOnly;
+            set
+            {
+                if (SetProperty(ref _showActiveOnly, value))
+                {
+                    // Reload data types with new filter
+                    ReloadDataTypes();
+                    Log.Information("PropertyPath picker filter changed: {Mode}", value ? "Active Only" : "All Data Types");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the count of data types currently displayed.
+        /// </summary>
+        public int DisplayedTypeCount => DataTypes.Count;
+
+        /// <summary>
+        /// Gets the total count of properties currently displayed.
+        /// </summary>
+        public int DisplayedPropertyCount => DataTypes.Sum(dt => dt.Properties.Count);
+
         public bool? DialogResult
         {
             get => _dialogResult;
@@ -94,13 +129,33 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
 
         private void LoadDataTypes()
         {
-            // Dynamically discover ALL data types from EasyAF.Data via reflection
-            var dataTypeNames = _propertyDiscovery.GetAvailableDataTypes();
+            // CROSS-MODULE EDIT: 2025-11-28 Global Data Type Filtering
+            // Modified for: Filter by enabled data types when ShowActiveOnly is true
+            // Related modules: Core (DataTypeSettingsExtensions), Map (MapModuleSettingsViewModel)
+            // Rollback instructions: Remove ShowActiveOnly logic, always load all types
+            
+            // Get data types (filtered or all based on toggle)
+            List<string> dataTypeNames;
+            if (_showActiveOnly)
+            {
+                // Only enabled data types
+                dataTypeNames = _propertyDiscovery.GetAvailableDataTypes()
+                    .Where(dt => _settingsService.IsDataTypeEnabled(dt))
+                    .ToList();
+                Log.Debug("Loading {Count} ACTIVE data types (filtered)", dataTypeNames.Count);
+            }
+            else
+            {
+                // All data types discovered via reflection
+                dataTypeNames = _propertyDiscovery.GetAvailableDataTypes();
+                Log.Debug("Loading {Count} data types (ALL - unfiltered)", dataTypeNames.Count);
+            }
             
             // Calculate usage counts across entire spec document
             var usageCounts = CalculateUsageCounts();
 
-            Log.Information("Loading {Count} data types from EasyAF.Data", dataTypeNames.Count);
+            Log.Information("Loading {Count} data types from EasyAF.Data (ShowActiveOnly={ShowActive})", 
+                dataTypeNames.Count, _showActiveOnly);
 
             foreach (var typeName in dataTypeNames)
             {
@@ -153,6 +208,26 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
             Log.Information("Loaded {Count} data types with {PropertyCount} total properties", 
                 DataTypes.Count, 
                 DataTypes.Sum(dt => dt.Properties.Count));
+            
+            // Notify UI of count changes
+            RaisePropertyChanged(nameof(DisplayedTypeCount));
+            RaisePropertyChanged(nameof(DisplayedPropertyCount));
+        }
+
+        /// <summary>
+        /// Reloads data types (called when ShowActiveOnly toggle changes).
+        /// </summary>
+        private void ReloadDataTypes()
+        {
+            // Preserve current selections before clearing
+            var currentSelections = new HashSet<string>(SelectedPaths);
+            
+            // Clear and reload
+            DataTypes.Clear();
+            LoadDataTypes();
+            
+            // No need to restore selections - they're preserved in SelectedPaths HashSet
+            // The LoadDataTypes method reads from SelectedPaths when creating PropertyNodes
         }
 
         /// <summary>

@@ -26,6 +26,7 @@ namespace EasyAF.Modules.Spec.ViewModels
         private readonly SpecDocument _document;
         private readonly IUserDialogService _dialogService;
         private readonly IPropertyDiscoveryService _propertyDiscovery;
+        private readonly ISettingsService _settingsService; // NEW: For property visibility filtering
         private ColumnViewModel? _selectedColumn;
         private bool _disposed;
 
@@ -36,12 +37,14 @@ namespace EasyAF.Modules.Spec.ViewModels
         /// <param name="document">The parent spec document.</param>
         /// <param name="dialogService">Service for showing user dialogs.</param>
         /// <param name="propertyDiscovery">Service for discovering data type properties.</param>
-        public TableEditorViewModel(TableSpec table, SpecDocument document, IUserDialogService dialogService, IPropertyDiscoveryService propertyDiscovery)
+        /// <param name="settingsService">Service for accessing settings (property visibility).</param>
+        public TableEditorViewModel(TableSpec table, SpecDocument document, IUserDialogService dialogService, IPropertyDiscoveryService propertyDiscovery, ISettingsService settingsService)
         {
             _table = table ?? throw new ArgumentNullException(nameof(table));
             _document = document ?? throw new ArgumentNullException(nameof(document));
             _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
             _propertyDiscovery = propertyDiscovery ?? throw new ArgumentNullException(nameof(propertyDiscovery));
+            _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
 
             // Initialize column collection
             Columns = new ObservableCollection<ColumnViewModel>();
@@ -217,10 +220,10 @@ namespace EasyAF.Modules.Spec.ViewModels
             {
                 // Open PropertyPath picker dialog with real property discovery
                 var currentPaths = SelectedColumn.Column.PropertyPaths ?? Array.Empty<string>();
-                var viewModel = new Dialogs.PropertyPathPickerViewModel(currentPaths, _document, _propertyDiscovery);
+                var viewModel = new Dialogs.PropertyPathPickerViewModel(currentPaths, _document, _propertyDiscovery, _settingsService);
                 var dialog = new Views.Dialogs.PropertyPathPickerDialog
                 {
-                    ViewModel = viewModel,
+                    DataContext = viewModel,
                     Owner = System.Windows.Application.Current.MainWindow
                 };
 
