@@ -178,8 +178,9 @@
                                       Background="{DynamicResource ControlBackgroundBrush}"
                                       Foreground="{DynamicResource TextPrimaryBrush}"
                                       BorderBrush="{DynamicResource ControlBorderBrush}">
-                                <ComboBoxItem Content="new" Tag="new"/>
-                                <ComboBoxItem Content="diff" Tag="diff"/>
+                                <ComboBoxItem Content="New" Tag="new"/>
+                                <ComboBoxItem Content="Diff" Tag="diff"/>
+                                <ComboBoxItem Content="Old" Tag="old"/>
                             </ComboBox>
                         </StackPanel>
                         
@@ -275,11 +276,17 @@
                                 <DataGridTextColumn Header="Rule #" 
                                                     Binding="{Binding RuleNumber}" 
                                                     Width="60">
+                                    <DataGridTextColumn.HeaderStyle>
+                                        <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource ColumnEditorHeaderStyle}">
+                                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                        </Style>
+                                    </DataGridTextColumn.HeaderStyle>
                                     <DataGridTextColumn.ElementStyle>
                                         <Style TargetType="TextBlock">
                                             <Setter Property="HorizontalAlignment" Value="Center"/>
                                             <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
                                             <Setter Property="FontWeight" Value="SemiBold"/>
+                                            <Setter Property="Cursor" Value="Hand"/>
                                         </Style>
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
@@ -294,16 +301,23 @@
                                             <Setter Property="TextWrapping" Value="NoWrap"/>
                                             <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
                                             <Setter Property="ToolTip" Value="{Binding Summary}"/>
+                                            <Setter Property="Cursor" Value="Hand"/>
                                         </Style>
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
                                 
                                 <!-- Type Indicator -->
                                 <DataGridTemplateColumn Header="Type" Width="80">
+                                    <DataGridTemplateColumn.HeaderStyle>
+                                        <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource ColumnEditorHeaderStyle}">
+                                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                        </Style>
+                                    </DataGridTemplateColumn.HeaderStyle>
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock HorizontalAlignment="Center"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}">
+                                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                                       Cursor="Hand">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
                                                         <Setter Property="Text" Value="Text"/>
@@ -538,6 +552,19 @@
                                     </DataGridTextColumn.EditingElementStyle>
                                 </DataGridTextColumn>
                                 
+                                <!-- Column Header - READ-ONLY -->
+                                <DataGridTextColumn Header="Column Header" 
+                                                    Binding="{Binding ColumnHeader, Mode=OneWay}" 
+                                                    Width="180"
+                                                    IsReadOnly="True">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                                            <Setter Property="FontStyle" Value="Italic"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                
                                 <!-- Direction - Template Column with ComboBox -->
                                 <DataGridTemplateColumn Header="Direction" Width="150">
                                     <DataGridTemplateColumn.CellTemplate>
@@ -727,6 +754,8 @@
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="8"/>
                                     <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="8"/>
+                                    <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="120"/>
@@ -740,14 +769,25 @@
                                            Text="Font Name:"
                                            VerticalAlignment="Center"
                                            Foreground="{DynamicResource TextPrimaryBrush}"/>
-                                <TextBox Grid.Row="0" Grid.Column="1"
-                                         Text="{Binding EmptyFontName, UpdateSourceTrigger=PropertyChanged}"
-                                         Background="{DynamicResource ControlBackgroundBrush}"
-                                         Foreground="{DynamicResource TextPrimaryBrush}"
-                                         BorderBrush="{DynamicResource ControlBorderBrush}"
-                                         CaretBrush="{DynamicResource TextPrimaryBrush}"
-                                         Padding="4"
-                                         Margin="0,0,8,0"/>
+                                <Grid Grid.Row="0" Grid.Column="1" Margin="0,0,8,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Grid.Column="0"
+                                             Text="{Binding EmptyFontName, UpdateSourceTrigger=PropertyChanged}"
+                                             Background="{DynamicResource ControlBackgroundBrush}"
+                                             Foreground="{DynamicResource TextPrimaryBrush}"
+                                             BorderBrush="{DynamicResource ControlBorderBrush}"
+                                             CaretBrush="{DynamicResource TextPrimaryBrush}"
+                                             Padding="4"/>
+                                    <Button Grid.Column="1"
+                                            Content="..."
+                                            Width="32"
+                                            Margin="4,0,0,0"
+                                            ToolTip="Choose Font"
+                                            Style="{StaticResource BaseButtonStyle}"/>
+                                </Grid>
                                 
                                 <TextBlock Grid.Row="0" Grid.Column="2"
                                            Text="Font Size:"
@@ -761,20 +801,35 @@
                                          CaretBrush="{DynamicResource TextPrimaryBrush}"
                                          Padding="4"/>
                                 
-                                <!-- Row 2: Bold | Alignment -->
-                                <CheckBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                                <!-- Row 2: Bold | Italic | Underline -->
+                                <CheckBox Grid.Row="2" Grid.Column="0"
                                           Content="Bold"
                                           IsChecked="{Binding EmptyBold, UpdateSourceTrigger=PropertyChanged}"
                                           VerticalAlignment="Center"
                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
                                 
-                                <TextBlock Grid.Row="2" Grid.Column="2"
+                                <CheckBox Grid.Row="2" Grid.Column="1"
+                                          Content="Italic"
+                                          IsChecked="{Binding EmptyItalic, UpdateSourceTrigger=PropertyChanged}"
+                                          VerticalAlignment="Center"
+                                          Margin="0,0,8,0"
+                                          Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                
+                                <CheckBox Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2"
+                                          Content="Underline"
+                                          IsChecked="{Binding EmptyUnderline, UpdateSourceTrigger=PropertyChanged}"
+                                          VerticalAlignment="Center"
+                                          Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                
+                                <!-- Row 4: H-Alignment | V-Alignment -->
+                                <TextBlock Grid.Row="4" Grid.Column="0"
                                            Text="H-Alignment:"
                                            VerticalAlignment="Center"
                                            Foreground="{DynamicResource TextPrimaryBrush}"/>
-                                <ComboBox Grid.Row="2" Grid.Column="3"
+                                <ComboBox Grid.Row="4" Grid.Column="1"
                                           SelectedValue="{Binding EmptyHorizontalAlignment, UpdateSourceTrigger=PropertyChanged}"
                                           SelectedValuePath="Tag"
+                                          Margin="0,0,8,0"
                                           Background="{DynamicResource ControlBackgroundBrush}"
                                           Foreground="{DynamicResource TextPrimaryBrush}"
                                           BorderBrush="{DynamicResource ControlBorderBrush}">
@@ -783,42 +838,81 @@
                                     <ComboBoxItem Content="Right" Tag="right"/>
                                 </ComboBox>
                                 
-                                <!-- Row 4: Fill Color | Text Color -->
-                                <TextBlock Grid.Row="4" Grid.Column="0"
+                                <TextBlock Grid.Row="4" Grid.Column="2"
+                                           Text="V-Alignment:"
+                                           VerticalAlignment="Center"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <ComboBox Grid.Row="4" Grid.Column="3"
+                                          SelectedValue="{Binding EmptyVerticalAlignment, UpdateSourceTrigger=PropertyChanged}"
+                                          SelectedValuePath="Tag"
+                                          Background="{DynamicResource ControlBackgroundBrush}"
+                                          Foreground="{DynamicResource TextPrimaryBrush}"
+                                          BorderBrush="{DynamicResource ControlBorderBrush}">
+                                    <ComboBoxItem Content="Top" Tag="top"/>
+                                    <ComboBoxItem Content="Center" Tag="center"/>
+                                    <ComboBoxItem Content="Bottom" Tag="bottom"/>
+                                </ComboBox>
+                                
+                                <!-- Row 6: Fill Color | Text Color (with chooser buttons) -->
+                                <TextBlock Grid.Row="6" Grid.Column="0"
                                            Text="Fill Color:"
                                            VerticalAlignment="Center"
                                            Foreground="{DynamicResource TextPrimaryBrush}"/>
-                                <TextBox Grid.Row="4" Grid.Column="1"
-                                         Text="{Binding EmptyFill, UpdateSourceTrigger=PropertyChanged}"
-                                         Background="{DynamicResource ControlBackgroundBrush}"
-                                         Foreground="{DynamicResource TextPrimaryBrush}"
-                                         BorderBrush="{DynamicResource ControlBorderBrush}"
-                                         CaretBrush="{DynamicResource TextPrimaryBrush}"
-                                         Padding="4"
-                                         Margin="0,0,8,0"
-                                         ToolTip="Hex color without # (e.g., FFFFFF for white)"/>
+                                <Grid Grid.Row="6" Grid.Column="1" Margin="0,0,8,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Grid.Column="0"
+                                             Text="{Binding EmptyFill, UpdateSourceTrigger=PropertyChanged}"
+                                             Background="{DynamicResource ControlBackgroundBrush}"
+                                             Foreground="{DynamicResource TextPrimaryBrush}"
+                                             BorderBrush="{DynamicResource ControlBorderBrush}"
+                                             CaretBrush="{DynamicResource TextPrimaryBrush}"
+                                             Padding="4"
+                                             ToolTip="Hex color without # (e.g., FFFFFF for white)"/>
+                                    <Button Grid.Column="1"
+                                            Content="..."
+                                            Width="32"
+                                            Margin="4,0,0,0"
+                                            ToolTip="Choose Color"
+                                            Style="{StaticResource BaseButtonStyle}"/>
+                                </Grid>
                                 
-                                <TextBlock Grid.Row="4" Grid.Column="2"
+                                <TextBlock Grid.Row="6" Grid.Column="2"
                                            Text="Text Color:"
                                            VerticalAlignment="Center"
                                            Foreground="{DynamicResource TextPrimaryBrush}"/>
-                                <TextBox Grid.Row="4" Grid.Column="3"
-                                         Text="{Binding EmptyTextColor, UpdateSourceTrigger=PropertyChanged}"
-                                         Background="{DynamicResource ControlBackgroundBrush}"
-                                         Foreground="{DynamicResource TextPrimaryBrush}"
-                                         BorderBrush="{DynamicResource ControlBorderBrush}"
-                                         CaretBrush="{DynamicResource TextPrimaryBrush}"
-                                         Padding="4"
-                                         ToolTip="Hex color without # (e.g., 000000 for black)"/>
+                                <Grid Grid.Row="6" Grid.Column="3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Grid.Column="0"
+                                             Text="{Binding EmptyTextColor, UpdateSourceTrigger=PropertyChanged}"
+                                             Background="{DynamicResource ControlBackgroundBrush}"
+                                             Foreground="{DynamicResource TextPrimaryBrush}"
+                                             BorderBrush="{DynamicResource ControlBorderBrush}"
+                                             CaretBrush="{DynamicResource TextPrimaryBrush}"
+                                             Padding="4"
+                                             ToolTip="Hex color without # (e.g., 000000 for black)"/>
+                                    <Button Grid.Column="1"
+                                            Content="..."
+                                            Width="32"
+                                            Margin="4,0,0,0"
+                                            ToolTip="Choose Color"
+                                            Style="{StaticResource BaseButtonStyle}"/>
+                                </Grid>
                                 
-                                <!-- Row 6: Clear Formatting Button -->
-                                <Button Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2"
+                                <!-- Row 8: Clear Formatting Button -->
+                                <Button Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2"
                                         Content="Clear Formatting"
                                         Command="{Binding ClearEmptyFormattingCommand}"
                                         HorizontalAlignment="Left"
                                         Padding="12,6"
                                         Style="{StaticResource BaseButtonStyle}"/>
                             </Grid>
+
                         </Expander>
                     </Grid>
                 </Expander>
@@ -906,6 +1000,11 @@
                                                 Binding="{Binding OrderIndex}" 
                                                 Width="40"
                                                 IsReadOnly="True">
+                                <DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource ColumnEditorHeaderStyle}">
+                                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                    </Style>
+                                </DataGridTextColumn.HeaderStyle>
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="TextBlock">
                                         <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -953,7 +1052,6 @@
                                                 Width="80">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="TextBlock">
-                                        <Setter Property="HorizontalAlignment" Value="Center"/>
                                         <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
                                     </Style>
                                 </DataGridTextColumn.ElementStyle>
