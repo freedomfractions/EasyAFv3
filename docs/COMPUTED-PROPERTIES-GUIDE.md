@@ -148,52 +148,47 @@ Add XML documentation explaining:
 ### Step 4: Test Discovery
 
 The property will automatically appear in:
-- ? Property Path Picker (Filter Editor)
-- ? Property Path Picker (Column Editor)  
-- ? Sort Spec selectors
+- ? Property Path Picker (Filter Editor) - **by default**
+- ? Property Path Picker (Column Editor) - **by default**
+- ? Sort Spec selectors - **by default**
 - ? Not serialized to JSON (as intended)
 - ? Not included in CSV imports (as intended)
 
-## Benefits of This Approach
+### Step 5: Optional - Control Visibility
 
-1. **Non-invasive**: Doesn't modify auto-generated code
-2. **Reusable**: Same pattern works for all models
-3. **Discoverable**: Properties appear in all Spec module pickers
-4. **Not Serialized**: Properly excluded from JSON/CSV
-5. **Self-Documenting**: `[Category("Computed")]` clearly identifies purpose
+The PropertyPathPickerViewModel has an `IncludeComputedProperties` flag (defaults to `true`):
 
-## Future Computed Properties
+```csharp
+// Include computed properties (default)
+var picker = new PropertyPathPickerViewModel(
+    currentPaths,
+    document,
+    propertyDiscovery,
+    settingsService,
+    allowMultiSelect: true,
+    includeComputedProperties: true  // Show IsAdjustable, etc.
+);
 
-Consider adding computed properties for:
+// Exclude computed properties (for import mapping scenarios)
+var picker = new PropertyPathPickerViewModel(
+    currentPaths,
+    document,
+    propertyDiscovery,
+    settingsService,
+    allowMultiSelect: true,
+    includeComputedProperties: false  // Hide computed properties
+);
+```
 
-### Bus
-- `HasLoadConnected` - Does bus have downstream loads?
-- `IsUtilityBus` - Is this a utility connection point?
-- `VoltageLevel` - "LV", "MV", "HV" based on BaseKV
+**When to exclude computed properties:**
+- Map Editor (importing CSV data - computed properties don't have source columns)
+- Schema validation (checking against import file structure)
 
-### Cable  
-- `IsOverloaded` - Current > Ampacity
-- `VoltageDropPercent` - Calculated voltage drop
-- `LengthCategory` - "Short", "Medium", "Long"
-
-### Fuse
-- `IsFusedDisconnect` - Has associated disconnect switch
-
-### Motor
-- `IsHighEfficiency` - Based on efficiency rating
-- `PowerCategory` - "Fractional", "Integral", "Large"
-
-## Testing Recommendations
-
-When adding computed properties:
-
-1. **Unit Test the Computation**: Test the logic independently
-2. **Verify Discovery**: Check property appears in pickers
-3. **Test Filtering**: Create filter using the property
-4. **Test Sorting**: Sort table by the property
-5. **Test Serialization**: Verify property is NOT in saved JSON
-
-## Troubleshooting
+**When to include computed properties (default):**
+- Spec Module filters (filter by IsAdjustable, etc.)
+- Spec Module columns (display computed values)
+- Spec Module sorts (sort by computed values)
+- Any user-facing property selection
 
 ### Property Doesn't Appear in Picker
 
@@ -203,30 +198,37 @@ When adding computed properties:
 3. ? Property is `public` with getter?
 4. ? Build successful?
 5. ? Restarted application? (property cache might be stale)
+6. ? `IncludeComputedProperties` is `true`? (default, but check if overridden)
+
+### Property Appears in Some Pickers But Not Others
+
+**This is by design!** The `includeComputedProperties` parameter controls visibility:
+- ? **Spec Module**: Defaults to `true` (computed properties shown)
+- ? **Map Module**: Should default to `false` (computed properties hidden for import mapping)
+
+Check the constructor call in the ViewModel to see which flag is being used.
 
 ### Property Appears But Filter Doesn't Work
 
 **Check:**
-1. ? PropertyPath format: `"ModelName.PropertyName"` (not just `"PropertyName"`)
-2. ? Operator matches data type (`eq` for bool, not `contains`)
-3. ? Value matches property type (`"true"` for bool, not `"True"` or `"1"`)
-
-### Property Gets Serialized (Should Not)
-
-**Check:**
-1. ? Has both `[System.Text.Json.Serialization.JsonIgnore]` AND `[Newtonsoft.Json.JsonIgnore]`?
-2. ? Property is read-only (get-only)?
+- ? Is the property marked `[JsonIgnore]`? (it should be, to prevent serialization)
+- ?? Is the filtering logic correct? (e.g., `Operator`: `eq`, `Value`: `true`)
+- ?? Are there any data issues? (e.g., mismatched types, null values)
 
 ## Files Modified
 
 - ? `lib/EasyAF.Data/Models/LVBreaker.cs` - Made partial
 - ? `lib/EasyAF.Data/Models/LVBreaker.Computed.cs` - Added IsAdjustable
-- ? `modules/EasyAF.Modules.Map/Services/PropertyDiscoveryService.cs` - Allow computed properties
+- ? `modules/EasyAF.Modules.Map/Services/PropertyDiscoveryService.cs` - Allow computed properties, set IsComputed flag
+- ? `modules/EasyAF.Modules.Map/Models/PropertyInfo.cs` - Added IsComputed property
+- ? `modules/EasyAF.Modules.Spec/ViewModels/Dialogs/PropertyPathPickerViewModel.cs` - Added IncludeComputedProperties flag
 
 ## Commits
 
 - `e67fd56` - Add IsAdjustable computed property to LVBreaker for filtering/sorting
 - `ea4c924` - Make IsAdjustable available in Spec module property pickers by excluding computed properties from JsonIgnore filter
+- `8138e2d` - Add comprehensive guide for implementing computed properties in Spec module
+- `b947992` - Add IncludeComputedProperties flag to PropertyPathPicker (defaults to true) for filtering computed properties like IsAdjustable
 
 ---
 
