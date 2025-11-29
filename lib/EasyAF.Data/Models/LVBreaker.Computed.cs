@@ -26,13 +26,17 @@ public partial class LVBreaker
     /// <para>
     /// <strong>Not Serialized:</strong> This property is computed at runtime and not included in JSON/XML serialization.
     /// </para>
+    /// <para>
+    /// <strong>Available for Filtering/Sorting:</strong> This property IS available in the Spec module's property pickers
+    /// for use in filters, sorts, and column definitions.
+    /// </para>
     /// </remarks>
     /// <example>
     /// Filter for adjustable breakers in Spec module:
     /// <code>
     /// {
     ///   "FilterSpecs": [
-    ///     { "PropertyPath": "IsAdjustable", "Operator": "eq", "Value": "true" }
+    ///     { "PropertyPath": "LVBreaker.IsAdjustable", "Operator": "eq", "Value": "true" }
     ///   ]
     /// }
     /// </code>

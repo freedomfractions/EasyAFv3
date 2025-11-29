@@ -266,9 +266,25 @@ namespace EasyAF.Modules.Map.Services
 
                 var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
                     .Where(p => p.CanRead && p.CanWrite)
-                    // FILTER OUT: Properties with JsonIgnore attributes (aliases like Id)
-                    .Where(p => !p.GetCustomAttributes(typeof(System.Text.Json.Serialization.JsonIgnoreAttribute), false).Any()
-                             && !p.GetCustomAttributes(typeof(Newtonsoft.Json.JsonIgnoreAttribute), false).Any())
+                    // CROSS-MODULE EDIT: 2025-01-19 Include Computed Properties
+                    // Modified for: Allow properties with [Category("Computed")] even if they have [JsonIgnore]
+                    // Related modules: Data (LVBreaker.Computed.cs and future computed properties)
+                    // Rollback instructions: Remove Category check, filter out all JsonIgnore properties
+                    .Where(p =>
+                    {
+                        // Check if it's a computed property (has [Category("Computed")])
+                        var categoryAttr = p.GetCustomAttribute<CategoryAttribute>();
+                        bool isComputed = categoryAttr != null && 
+                                        string.Equals(categoryAttr.Category, "Computed", StringComparison.OrdinalIgnoreCase);
+                        
+                        // If it's a computed property, always include it (ignore JsonIgnore)
+                        if (isComputed)
+                            return true;
+                        
+                        // Otherwise, filter out properties with JsonIgnore (like Id alias)
+                        return !p.GetCustomAttributes(typeof(System.Text.Json.Serialization.JsonIgnoreAttribute), false).Any()
+                            && !p.GetCustomAttributes(typeof(Newtonsoft.Json.JsonIgnoreAttribute), false).Any();
+                    })
                     .Select(p => new MapPropertyInfo
                     {
                         PropertyName = p.Name,
