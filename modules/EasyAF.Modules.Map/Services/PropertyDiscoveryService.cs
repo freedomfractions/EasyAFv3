@@ -265,7 +265,7 @@ namespace EasyAF.Modules.Map.Services
                 var requiredNames = GetRequiredPropertyNames(dataTypeName);
 
                 var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                    .Where(p => p.CanRead && p.CanWrite)
+                    .Where(p => p.CanRead) // FIXED: Removed && p.CanWrite to allow computed properties
                     // CROSS-MODULE EDIT: 2025-01-19 Include Computed Properties
                     // Modified for: Allow properties with [Category("Computed")] even if they have [JsonIgnore]
                     // Related modules: Data (LVBreaker.Computed.cs and future computed properties)
@@ -277,11 +277,14 @@ namespace EasyAF.Modules.Map.Services
                         bool isComputed = categoryAttr != null && 
                                         string.Equals(categoryAttr.Category, "Computed", StringComparison.OrdinalIgnoreCase);
                         
-                        // If it's a computed property, always include it (ignore JsonIgnore)
+                        // If it's a computed property, always include it (ignore JsonIgnore and CanWrite requirement)
                         if (isComputed)
                             return true;
                         
-                        // Otherwise, filter out properties with JsonIgnore (like Id alias)
+                        // For regular properties, require CanWrite and filter out JsonIgnore (like Id alias)
+                        if (!p.CanWrite)
+                            return false;
+                            
                         return !p.GetCustomAttributes(typeof(System.Text.Json.Serialization.JsonIgnoreAttribute), false).Any()
                             && !p.GetCustomAttributes(typeof(Newtonsoft.Json.JsonIgnoreAttribute), false).Any();
                     })
