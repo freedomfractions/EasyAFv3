@@ -49,6 +49,9 @@ namespace EasyAF.Modules.Spec.ViewModels
             // Initialize column collection
             Columns = new ObservableCollection<ColumnViewModel>();
             RefreshColumns();
+            
+            // Subscribe to Columns collection changes to wire up PropertyChanged events
+            Columns.CollectionChanged += OnColumnsCollectionChanged;
 
             // Initialize filter functionality (from partial class)
             InitializeFilters();
@@ -355,6 +358,47 @@ namespace EasyAF.Modules.Spec.ViewModels
             if (selectedColumn != null)
             {
                 SelectedColumn = Columns.FirstOrDefault(c => c.Column == selectedColumn);
+            }
+        }
+        
+        /// <summary>
+        /// Handles changes to the Columns collection to wire up PropertyChanged events.
+        /// </summary>
+        private void OnColumnsCollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            // Unsubscribe from old items
+            if (e.OldItems != null)
+            {
+                foreach (ColumnViewModel oldItem in e.OldItems)
+                {
+                    oldItem.PropertyChanged -= OnColumnPropertyChanged;
+                }
+            }
+            
+            // Subscribe to new items
+            if (e.NewItems != null)
+            {
+                foreach (ColumnViewModel newItem in e.NewItems)
+                {
+                    newItem.PropertyChanged += OnColumnPropertyChanged;
+                }
+            }
+        }
+        
+        /// <summary>
+        /// Handles property changes on ColumnViewModel instances to refresh SortSpec column headers.
+        /// </summary>
+        private void OnColumnPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(ColumnViewModel.ColumnHeader))
+            {
+                // Refresh all SortSpec column headers
+                foreach (var sortSpec in SortSpecs)
+                {
+                    sortSpec.RaisePropertyChanged(nameof(SortSpecViewModel.ColumnHeader));
+                }
+                
+                Log.Debug("Column header changed - refreshed sort spec column headers");
             }
         }
 

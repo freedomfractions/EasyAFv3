@@ -785,6 +785,7 @@
                                             Content="..."
                                             Width="32"
                                             Margin="4,0,0,0"
+                                            Command="{Binding ChooseEmptyFontCommand}"
                                             ToolTip="Choose Font"
                                             Style="{StaticResource BaseButtonStyle}"/>
                                 </Grid>
@@ -875,6 +876,7 @@
                                             Content="..."
                                             Width="32"
                                             Margin="4,0,0,0"
+                                            Command="{Binding ChooseEmptyFillColorCommand}"
                                             ToolTip="Choose Color"
                                             Style="{StaticResource BaseButtonStyle}"/>
                                 </Grid>
@@ -900,6 +902,7 @@
                                             Content="..."
                                             Width="32"
                                             Margin="4,0,0,0"
+                                            Command="{Binding ChooseEmptyTextColorCommand}"
                                             ToolTip="Choose Color"
                                             Style="{StaticResource BaseButtonStyle}"/>
                                 </Grid>

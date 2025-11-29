@@ -119,5 +119,14 @@ namespace EasyAF.Modules.Spec.ViewModels
         /// Gets the underlying SortSpec DTO.
         /// </summary>
         public SortSpec SortSpec => _sortSpec;
+        
+        /// <summary>
+        /// Manually raises PropertyChanged for a specific property name.
+        /// Used when column headers change externally.
+        /// </summary>
+        public void RaisePropertyChanged(string propertyName)
+        {
+            base.RaisePropertyChanged(propertyName);
+        }
     }
 }
