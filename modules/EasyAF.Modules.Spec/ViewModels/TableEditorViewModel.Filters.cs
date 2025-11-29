@@ -322,11 +322,30 @@ namespace EasyAF.Modules.Spec.ViewModels
 
             try
             {
-                // TODO: Open Filter Editor Dialog
-                // For now, open PropertyPath picker as placeholder
-                ExecutePickFilterProperty();
-                
-                Log.Information("Editing filter #{RuleNumber}", SelectedFilter.RuleNumber);
+                // Open Filter Editor Dialog
+                var viewModel = new Dialogs.FilterEditorViewModel(
+                    SelectedFilter.FilterSpec,
+                    _document,
+                    _propertyDiscovery,
+                    _settingsService,
+                    OnFilterChanged);
+
+                var dialog = new Views.Dialogs.FilterEditorDialog
+                {
+                    DataContext = viewModel,
+                    Owner = System.Windows.Application.Current.MainWindow
+                };
+
+                var result = dialog.ShowDialog();
+
+                if (result == true)
+                {
+                    // Refresh the filter view model to show updated values
+                    SelectedFilter.RefreshProperties();
+                    
+                    Log.Information("Edited filter #{RuleNumber}: {Summary}", 
+                        SelectedFilter.RuleNumber, SelectedFilter.Summary);
+                }
             }
             catch (Exception ex)
             {

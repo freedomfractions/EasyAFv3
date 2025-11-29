@@ -199,6 +199,23 @@ namespace EasyAF.Modules.Spec.ViewModels
         /// Gets the underlying FilterSpec DTO.
         /// </summary>
         public FilterSpec FilterSpec => _filterSpec;
+
+        /// <summary>
+        /// Refreshes all properties to update UI after external changes to FilterSpec.
+        /// </summary>
+        public void RefreshProperties()
+        {
+            RaisePropertyChanged(nameof(PropertyPath));
+            RaisePropertyChanged(nameof(Operator));
+            RaisePropertyChanged(nameof(Value));
+            RaisePropertyChanged(nameof(RightPropertyPath));
+            RaisePropertyChanged(nameof(Numeric));
+            RaisePropertyChanged(nameof(Summary));
+            RaisePropertyChanged(nameof(OperatorDisplay));
+            RaisePropertyChanged(nameof(CompareToDisplay));
+            RaisePropertyChanged(nameof(IsValueMode));
+            RaisePropertyChanged(nameof(IsPropertyCompareMode));
+        }
     }
 
     /// <summary>
@@ -208,6 +225,7 @@ namespace EasyAF.Modules.Spec.ViewModels
     {
         public string Value { get; set; } = string.Empty;
         public string Display { get; set; } = string.Empty;
+        public string DisplayName => Display; // Alias for XAML binding
 
         public OperatorOption() { }
 
