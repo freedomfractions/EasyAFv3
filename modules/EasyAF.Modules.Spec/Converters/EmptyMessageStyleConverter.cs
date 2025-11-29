@@ -12,7 +12,7 @@ namespace EasyAF.Modules.Spec.Converters
     /// </summary>
     public class EmptyMessageFontFamilyConverter : IValueConverter
     {
-        public object? Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value is string fontName && !string.IsNullOrWhiteSpace(fontName))
             {
@@ -22,10 +22,11 @@ namespace EasyAF.Modules.Spec.Converters
                 }
                 catch
                 {
-                    return DependencyProperty.UnsetValue;
+                    // Invalid font name, return default
                 }
             }
-            return DependencyProperty.UnsetValue;
+            // Return default font
+            return new FontFamily("Segoe UI");
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
@@ -42,7 +43,8 @@ namespace EasyAF.Modules.Spec.Converters
             {
                 return size;
             }
-            return DependencyProperty.UnsetValue;
+            // Return default font size
+            return 12.0;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
@@ -104,7 +106,7 @@ namespace EasyAF.Modules.Spec.Converters
 
     public class EmptyMessageBackgroundConverter : IValueConverter
     {
-        public object? Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value is string hex && !string.IsNullOrWhiteSpace(hex))
             {
@@ -115,10 +117,11 @@ namespace EasyAF.Modules.Spec.Converters
                 }
                 catch
                 {
-                    return DependencyProperty.UnsetValue;
+                    // Invalid color, fall through to default
                 }
             }
-            return DependencyProperty.UnsetValue;
+            // Return transparent (use default control background)
+            return Brushes.Transparent;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
@@ -129,7 +132,7 @@ namespace EasyAF.Modules.Spec.Converters
 
     public class EmptyMessageForegroundConverter : IValueConverter
     {
-        public object? Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value is string hex && !string.IsNullOrWhiteSpace(hex))
             {
@@ -140,9 +143,10 @@ namespace EasyAF.Modules.Spec.Converters
                 }
                 catch
                 {
-                    return DependencyProperty.UnsetValue;
+                    // Invalid color, fall through to default
                 }
             }
+            // Return unset so it uses the default theme color
             return DependencyProperty.UnsetValue;
         }
 

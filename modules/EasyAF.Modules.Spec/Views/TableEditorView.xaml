@@ -739,15 +739,15 @@
                                      AcceptsReturn="False"
                                      MinHeight="60">
                                 <TextBox.Style>
-                                    <Style TargetType="TextBox">
-                                        <!-- Apply formatting preview -->
-                                        <Setter Property="FontFamily" Value="{Binding EmptyFontName, Converter={StaticResource EmptyMessageFontFamilyConverter}, FallbackValue=Segoe UI}"/>
-                                        <Setter Property="FontSize" Value="{Binding EmptyFontSize, Converter={StaticResource EmptyMessageFontSizeConverter}, FallbackValue=12}"/>
+                                    <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                                        <!-- Apply formatting preview - converters provide defaults when values are null/empty -->
+                                        <Setter Property="FontFamily" Value="{Binding EmptyFontName, Converter={StaticResource EmptyMessageFontFamilyConverter}}"/>
+                                        <Setter Property="FontSize" Value="{Binding EmptyFontSize, Converter={StaticResource EmptyMessageFontSizeConverter}}"/>
                                         <Setter Property="FontWeight" Value="{Binding EmptyBold, Converter={StaticResource EmptyMessageFontWeightConverter}}"/>
                                         <Setter Property="FontStyle" Value="{Binding EmptyItalic, Converter={StaticResource EmptyMessageFontStyleConverter}}"/>
                                         <Setter Property="TextDecorations" Value="{Binding EmptyUnderline, Converter={StaticResource EmptyMessageTextDecorationConverter}}"/>
-                                        <Setter Property="Background" Value="{Binding EmptyFill, Converter={StaticResource EmptyMessageBackgroundConverter}, FallbackValue={DynamicResource ControlBackgroundBrush}}"/>
-                                        <Setter Property="Foreground" Value="{Binding EmptyTextColor, Converter={StaticResource EmptyMessageForegroundConverter}, FallbackValue={DynamicResource TextPrimaryBrush}}"/>
+                                        <Setter Property="Background" Value="{Binding EmptyFill, Converter={StaticResource EmptyMessageBackgroundConverter}}"/>
+                                        <Setter Property="Foreground" Value="{Binding EmptyTextColor, Converter={StaticResource EmptyMessageForegroundConverter}}"/>
                                         <Setter Property="TextAlignment" Value="{Binding EmptyHorizontalAlignment, Converter={StaticResource EmptyMessageHorizontalAlignmentConverter}}"/>
                                         <Setter Property="VerticalContentAlignment" Value="{Binding EmptyVerticalAlignment, Converter={StaticResource EmptyMessageVerticalAlignmentConverter}}"/>
                                     </Style>
