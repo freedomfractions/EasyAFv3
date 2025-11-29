@@ -259,6 +259,8 @@ Check the constructor call in the ViewModel to see which flag is being used.
 - `b947992` - Add IncludeComputedProperties flag to PropertyPathPicker (defaults to true) for filtering computed properties like IsAdjustable
 - `5187a13` - Update computed properties guide with IncludeComputedProperties flag documentation
 - `45951ae` - **Fix: Remove duplicate LVBreaker.cs from Generated folder** - PropertyDiscoveryService was finding wrong file without partial keyword
+- `8f1e8dc` - Add troubleshooting guide for computed property caching issues and duplicate file problems
+- `1fb88e3` - **CRITICAL FIX: Allow read-only computed properties** - Removed CanWrite requirement for Category("Computed") properties
 
 ---
 
@@ -270,12 +272,18 @@ Check the constructor call in the ViewModel to see which flag is being used.
 
 ### Issue: Computed property doesn't appear after adding it
 
-**Cause**: Property cache + settings file have old property list
+**Root Causes:**
+1. Property cache + settings file have old property list
+2. **CRITICAL**: PropertyDiscoveryService was filtering out read-only properties (computed properties have no setter)
 
-**Fix**: Delete `settings.json` from `%APPDATA%\EasyAF` and restart app
+**Fix for Cache Issue**: Delete `settings.json` from `%APPDATA%\EasyAF` and restart app
+
+**Fix for Read-Only Issue**: ? **FIXED in commit `1fb88e3`** - PropertyDiscoveryService now allows read-only properties with `[Category("Computed")]`
 
 ### Issue: Only 40 properties show instead of 41
 
 **Cause**: Settings file has explicit list of 40 properties (before `IsAdjustable` was added)
 
 **Fix**: Either delete settings file OR manually add `"IsAdjustable"` to LVBreaker properties in settings.json
+
+**After Latest Fix**: Once you restart the app (with the latest code), `IsAdjustable` should appear automatically! ??
