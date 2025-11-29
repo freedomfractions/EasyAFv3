@@ -87,6 +87,11 @@ namespace EasyAF.Engine
         public List<SortSpec>? SortSpecs { get; set; }
         public List<FilterSpec>? FilterSpecs { get; set; }
         public List<FilterGroup>? FilterGroups { get; set; }
+        /// <summary>
+        /// Advanced filter logic expression (e.g., "(1 | 2) & 3").
+        /// If null/empty/"AND"/"OR", uses simple logic. Otherwise evaluates via FilterLogicEvaluator.
+        /// </summary>
+        public string? FilterLogic { get; set; }
         public List<RowConditionSpec>? RowConditions { get; set; }
         public List<CellConditionSpec>? GlobalCellConditions { get; set; }
         public TableMode Mode { get; set; } = TableMode.New;

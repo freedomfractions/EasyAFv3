@@ -151,22 +151,20 @@ namespace EasyAF.Engine
                     td.FilterSpecs = s.FilterSpecs.ToList();
                 }
 
-                if (s.FilterGroups?.Length > 0)
+                // Preserve FilterLogic and validate if it's an advanced expression
+                if (!string.IsNullOrWhiteSpace(s.FilterLogic))
                 {
-                    td.FilterGroups = new List<FilterGroup>();
-                    foreach (var fg in s.FilterGroups)
+                    td.FilterLogic = s.FilterLogic.Trim();
+                    
+                    // Validate advanced expressions (not AND/OR)
+                    if (!td.FilterLogic.Equals("AND", StringComparison.OrdinalIgnoreCase) &&
+                        !td.FilterLogic.Equals("OR", StringComparison.OrdinalIgnoreCase))
                     {
-                        var grp = new FilterGroup { Logic = fg.Logic ?? "AND" };
-                        foreach (var f in fg.Filters)
+                        var filterCount = s.FilterSpecs?.Length ?? 0;
+                        if (!FilterLogicEvaluator.Validate(td.FilterLogic, filterCount, out var validationError))
                         {
-                            if (!AllowedFilterOperators.Contains(f.Operator))
-                            {
-                                result.Warnings.Add($"Table '{s.Id}': group filter operator '{f.Operator}' not recognized. Defaulting to 'eq'.");
-                                f.Operator = "eq";
-                            }
-                            grp.Filters.Add(f);
+                            result.Errors.Add($"Table '{s.Id}': FilterLogic validation failed: {validationError}");
                         }
-                        if (grp.Filters.Count > 0) td.FilterGroups.Add(grp);
                     }
                 }
 

@@ -105,6 +105,14 @@ namespace EasyAF.Engine
         public FilterSpec[]? FilterSpecs { get; set; }
         /// <summary>Advanced grouped filters (future use).</summary>
         public FilterGroupSpec[]? FilterGroups { get; set; }
+        /// <summary>
+        /// Advanced filter logic expression (e.g., "(1 | 2) & 3" or "!1 & 2").
+        /// If null, empty, "AND", or "OR", uses simple logic.
+        /// If a complex expression, it's parsed and evaluated using FilterLogicEvaluator.
+        /// Numbers represent 1-based filter indices from FilterSpecs array.
+        /// Operators: & (AND), | (OR), ! (NOT), ( ) (grouping).
+        /// </summary>
+        public string? FilterLogic { get; set; }
         /// <summary>Row-level conditional formatting rules.</summary>
         public RowConditionSpec[]? RowConditions { get; set; }
         /// <summary>Global cell conditions applied after column-specific conditions.</summary>

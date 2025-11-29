@@ -69,6 +69,9 @@ namespace EasyAF.Modules.Spec.ViewModels
                         }
                     }
                     
+                    // Update the table spec FilterLogic
+                    UpdateTableFilterLogic();
+                    
                     _document.MarkDirty();
                     Log.Information("Filter logic changed to: {Logic} for table {TableId}", value, _table.Id);
                 }
@@ -83,7 +86,7 @@ namespace EasyAF.Modules.Spec.ViewModels
         /// <summary>
         /// Gets or sets the advanced filter expression when FilterLogic is "Advanced".
         /// This is a free-form text field for complex filter logic like "(1 | 2) & 3".
-        /// TODO: Add FilterLogic property to TableSpec in JSON schema to persist this.
+        /// Stored in TableDefinition.FilterLogic property in the Engine.
         /// </summary>
         public string? AdvancedFilterExpression
         {
@@ -92,9 +95,29 @@ namespace EasyAF.Modules.Spec.ViewModels
             {
                 if (SetProperty(ref _advancedFilterExpression, value))
                 {
+                    UpdateTableFilterLogic();
                     _document.MarkDirty();
                     Log.Debug("Advanced filter expression changed to: {Expression}", value);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Updates the TableDefinition.FilterLogic based on current UI state.
+        /// </summary>
+        private void UpdateTableFilterLogic()
+        {
+            if (IsAdvancedFilterLogic && !string.IsNullOrWhiteSpace(_advancedFilterExpression))
+            {
+                _table.FilterLogic = _advancedFilterExpression;
+            }
+            else if (_filterLogic == "OR")
+            {
+                _table.FilterLogic = "OR";
+            }
+            else
+            {
+                _table.FilterLogic = "AND"; // Default
             }
         }
 
@@ -141,6 +164,9 @@ namespace EasyAF.Modules.Spec.ViewModels
             AvailableOperators = OperatorOption.GetStandardOperators();
             RefreshFilters();
 
+            // Load FilterLogic from table
+            LoadFilterLogicFromTable();
+
             AddFilterCommand = new DelegateCommand(ExecuteAddFilter);
             RemoveFilterCommand = new DelegateCommand(ExecuteRemoveFilter, CanExecuteRemoveFilter)
                 .ObservesProperty(() => SelectedFilter);
@@ -150,6 +176,38 @@ namespace EasyAF.Modules.Spec.ViewModels
                 .ObservesProperty(() => SelectedFilter);
             EditFilterCommand = new DelegateCommand(ExecuteEditFilter, CanExecuteEditFilter)
                 .ObservesProperty(() => SelectedFilter);
+        }
+
+        /// <summary>
+        /// Loads the FilterLogic setting from the table into the ViewModel.
+        /// </summary>
+        private void LoadFilterLogicFromTable()
+        {
+            if (!string.IsNullOrWhiteSpace(_table.FilterLogic))
+            {
+                // Check if it's an advanced expression
+                if (!_table.FilterLogic.Equals("AND", StringComparison.OrdinalIgnoreCase) &&
+                    !_table.FilterLogic.Equals("OR", StringComparison.OrdinalIgnoreCase))
+                {
+                    // It's an advanced expression
+                    _filterLogic = "Advanced";
+                    _advancedFilterExpression = _table.FilterLogic;
+                }
+                else
+                {
+                    // Simple AND or OR
+                    _filterLogic = _table.FilterLogic;
+                }
+            }
+            else
+            {
+                // Default to AND
+                _filterLogic = "AND";
+            }
+
+            RaisePropertyChanged(nameof(FilterLogic));
+            RaisePropertyChanged(nameof(IsAdvancedFilterLogic));
+            RaisePropertyChanged(nameof(AdvancedFilterExpression));
         }
 
         #endregion
