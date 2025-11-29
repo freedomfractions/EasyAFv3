@@ -231,11 +231,6 @@ namespace EasyAF.Modules.Spec.ViewModels
         /// Command to choose text color for empty message.
         /// </summary>
         public ICommand ChooseEmptyTextColorCommand { get; private set; } = null!;
-        
-        /// <summary>
-        /// Command to set alignment from grid picker.
-        /// </summary>
-        public ICommand SetEmptyAlignmentCommand { get; private set; } = null!;
 
         #endregion
 
@@ -251,7 +246,6 @@ namespace EasyAF.Modules.Spec.ViewModels
             ChooseEmptyFontCommand = new DelegateCommand(ExecuteChooseEmptyFont);
             ChooseEmptyFillColorCommand = new DelegateCommand(ExecuteChooseEmptyFillColor);
             ChooseEmptyTextColorCommand = new DelegateCommand(ExecuteChooseEmptyTextColor);
-            SetEmptyAlignmentCommand = new DelegateCommand<string>(ExecuteSetEmptyAlignment);
         }
 
         #endregion
