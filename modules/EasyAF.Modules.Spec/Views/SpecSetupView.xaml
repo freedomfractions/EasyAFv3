@@ -113,16 +113,24 @@
                                     Command="{Binding RemoveTableCommand}"
                                     Style="{StaticResource ToolBarButtonStyle}"/>
                             <Separator/>
-                            <Button Content="▲" 
+                            <Button ToolTip="Move Up"
                                     Command="{Binding MoveTableUpCommand}"
-                                    ToolTip="Move Up"
                                     Style="{StaticResource ToolBarButtonStyle}"
-                                    Width="32"/>
-                            <Button Content="▼" 
+                                    Width="32">
+                                <TextBlock Text="&#xE70E;" 
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="14"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            </Button>
+                            <Button ToolTip="Move Down"
                                     Command="{Binding MoveTableDownCommand}"
-                                    ToolTip="Move Down"
                                     Style="{StaticResource ToolBarButtonStyle}"
-                                    Width="32"/>
+                                    Width="32">
+                                <TextBlock Text="&#xE70D;" 
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="14"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            </Button>
                         </ToolBar>
                         
                         <!-- Table Grid -->

@@ -356,16 +356,18 @@ namespace EasyAF.Modules.Spec.ViewModels
 
                 if (result == true)
                 {
-                    // FORCE UI UPDATE: Call RefreshProperties on the existing VM
-                    SelectedFilter.RefreshProperties();
+                    // NUCLEAR OPTION: Rebuild entire collection to force UI update
+                    var temp = Filters.ToList();
+                    Filters.Clear();
+                    foreach (var f in temp)
+                    {
+                        Filters.Add(f);
+                    }
                     
-                    // ALSO force collection change notification
-                    var temp = SelectedFilter;
-                    Filters[index] = null!;
-                    Filters[index] = temp;
+                    SelectedFilter = Filters[index];
                     
                     Log.Information("Edited filter #{RuleNumber}: {Summary}", 
-                        temp.RuleNumber, temp.Summary);
+                        SelectedFilter.RuleNumber, SelectedFilter.Summary);
                 }
             }
             catch (Exception ex)

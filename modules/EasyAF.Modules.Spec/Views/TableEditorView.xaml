@@ -498,13 +498,30 @@
                                   MaxHeight="150">
                             <DataGrid.Columns>
                                 <!-- Order Column -->
-                                <DataGridTextColumn Header="Priority" Binding="{Binding OrderIndex}" Width="70" IsReadOnly="True"><DataGridTextColumn.HeaderStyle><Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource ColumnEditorHeaderStyle}"><Setter Property="HorizontalContentAlignment" Value="Center"/></Style></DataGridTextColumn.HeaderStyle><DataGridTextColumn.ElementStyle><Style TargetType="TextBlock"><Setter Property="HorizontalAlignment" Value="Center"/><Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/><Setter Property="FontWeight" Value="SemiBold"/></Style></DataGridTextColumn.ElementStyle>
+                                <DataGridTextColumn Header="Priority" Binding="{Binding OrderIndex}" Width="70" IsReadOnly="True">
+                                    <DataGridTextColumn.HeaderStyle>
+                                        <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource ColumnEditorHeaderStyle}">
+                                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                        </Style>
+                                    </DataGridTextColumn.HeaderStyle>
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                                            <Setter Property="FontWeight" Value="SemiBold"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
                                 
                                 <!-- Column Number - EDITABLE -->
                                 <DataGridTextColumn Header="Column #" 
                                                     Binding="{Binding Column, UpdateSourceTrigger=PropertyChanged}" 
                                                     Width="80">
+                                    <DataGridTextColumn.HeaderStyle>
+                                        <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource ColumnEditorHeaderStyle}">
+                                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                        </Style>
+                                    </DataGridTextColumn.HeaderStyle>
                                     <DataGridTextColumn.ElementStyle>
                                         <Style TargetType="TextBlock">
                                             <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -549,6 +566,11 @@
                                 <DataGridCheckBoxColumn Header="Numeric" 
                                                         Binding="{Binding Numeric, UpdateSourceTrigger=PropertyChanged}" 
                                                         Width="*">
+                                    <DataGridCheckBoxColumn.HeaderStyle>
+                                        <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource ColumnEditorHeaderStyle}">
+                                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                        </Style>
+                                    </DataGridCheckBoxColumn.HeaderStyle>
                                     <DataGridCheckBoxColumn.ElementStyle>
                                         <Style TargetType="CheckBox">
                                             <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -687,10 +709,15 @@
                         <Expander Grid.Row="2"
                                   Header="Formatting Options"
                                   IsExpanded="{Binding IsEmptyFormattingExpanded}"
-                                  Background="{DynamicResource SecondaryBackgroundBrush}"
                                   BorderBrush="{DynamicResource ControlBorderBrush}"
                                   BorderThickness="1"
                                   Padding="8">
+                            <Expander.Style>
+                                <Style TargetType="Expander">
+                                    <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                                </Style>
+                            </Expander.Style>
                             <Grid Margin="4">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
@@ -718,6 +745,7 @@
                                          Background="{DynamicResource ControlBackgroundBrush}"
                                          Foreground="{DynamicResource TextPrimaryBrush}"
                                          BorderBrush="{DynamicResource ControlBorderBrush}"
+                                         CaretBrush="{DynamicResource TextPrimaryBrush}"
                                          Padding="4"
                                          Margin="0,0,8,0"/>
                                 
@@ -730,6 +758,7 @@
                                          Background="{DynamicResource ControlBackgroundBrush}"
                                          Foreground="{DynamicResource TextPrimaryBrush}"
                                          BorderBrush="{DynamicResource ControlBorderBrush}"
+                                         CaretBrush="{DynamicResource TextPrimaryBrush}"
                                          Padding="4"/>
                                 
                                 <!-- Row 2: Bold | Alignment -->
@@ -764,6 +793,7 @@
                                          Background="{DynamicResource ControlBackgroundBrush}"
                                          Foreground="{DynamicResource TextPrimaryBrush}"
                                          BorderBrush="{DynamicResource ControlBorderBrush}"
+                                         CaretBrush="{DynamicResource TextPrimaryBrush}"
                                          Padding="4"
                                          Margin="0,0,8,0"
                                          ToolTip="Hex color without # (e.g., FFFFFF for white)"/>
@@ -777,6 +807,7 @@
                                          Background="{DynamicResource ControlBackgroundBrush}"
                                          Foreground="{DynamicResource TextPrimaryBrush}"
                                          BorderBrush="{DynamicResource ControlBorderBrush}"
+                                         CaretBrush="{DynamicResource TextPrimaryBrush}"
                                          Padding="4"
                                          ToolTip="Hex color without # (e.g., 000000 for black)"/>
                                 
@@ -786,9 +817,7 @@
                                         Command="{Binding ClearEmptyFormattingCommand}"
                                         HorizontalAlignment="Left"
                                         Padding="12,6"
-                                        Background="{DynamicResource ControlBackgroundBrush}"
-                                        Foreground="{DynamicResource TextPrimaryBrush}"
-                                        BorderBrush="{DynamicResource ControlBorderBrush}"/>
+                                        Style="{StaticResource BaseButtonStyle}"/>
                             </Grid>
                         </Expander>
                     </Grid>
