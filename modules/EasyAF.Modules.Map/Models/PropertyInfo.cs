@@ -71,6 +71,27 @@ namespace EasyAF.Modules.Map.Models
         /// </para>
         /// </remarks>
         public bool IsRequired { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether this is a computed property (not from CSV/import data).
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// CROSS-MODULE EDIT: 2025-01-19 Computed Properties Support
+        /// Modified for: Identify computed properties for optional filtering in Spec module
+        /// Related modules: Data (LVBreaker.Computed.cs), Spec (PropertyPathPickerViewModel)
+        /// Rollback instructions: Remove this property
+        /// </para>
+        /// <para>
+        /// Computed properties:
+        /// - Are marked with [Category("Computed")] attribute in the model
+        /// - Are calculated at runtime (e.g., LVBreaker.IsAdjustable)
+        /// - Are NOT part of CSV/Excel imports
+        /// - Are useful for filtering and sorting in reports
+        /// - Can be optionally hidden in property pickers via IncludeComputedProperties flag
+        /// </para>
+        /// </remarks>
+        public bool IsComputed { get; set; }
         
         /// <summary>
         /// Gets or sets the confidence score for this mapping (0.0 to 1.0), or null if not applicable.

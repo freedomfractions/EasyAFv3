@@ -30,6 +30,7 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
         private bool? _dialogResult;
         private bool _showActiveOnly = true; // NEW: Default to active (enabled) data types only
         private bool _allowMultiSelect = true; // NEW: Control multi-select behavior
+        private bool _includeComputedProperties = true; // NEW: Default to include computed properties
         private readonly SpecDocument? _document;
         private readonly IPropertyDiscoveryService _propertyDiscovery;
         private readonly EasyAF.Core.Contracts.ISettingsService _settingsService; // NEW: For reading visibility settings
@@ -39,12 +40,14 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
             SpecDocument? document, 
             IPropertyDiscoveryService propertyDiscovery, 
             EasyAF.Core.Contracts.ISettingsService settingsService,
-            bool allowMultiSelect = true)
+            bool allowMultiSelect = true,
+            bool includeComputedProperties = true)
         {
             _document = document;
             _propertyDiscovery = propertyDiscovery ?? throw new ArgumentNullException(nameof(propertyDiscovery));
             _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
             _allowMultiSelect = allowMultiSelect;
+            _includeComputedProperties = includeComputedProperties;
 
             // Initialize collections
             DataTypes = new ObservableCollection<DataTypeNode>();
@@ -63,7 +66,8 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
             // Load data types dynamically from EasyAF.Data
             LoadDataTypes();
 
-            Log.Debug("PropertyPathPickerViewModel initialized with {Count} selected paths", SelectedPaths.Count);
+            Log.Debug("PropertyPathPickerViewModel initialized with {Count} selected paths (IncludeComputed={Include})", 
+                SelectedPaths.Count, _includeComputedProperties);
         }
 
         #region Properties
@@ -101,6 +105,28 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
                     // Reload data types with new filter
                     ReloadDataTypes();
                     Log.Information("PropertyPath picker filter changed: {Mode}", value ? "Active Only" : "All Data Types");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets whether to include computed properties (like IsAdjustable).
+        /// </summary>
+        /// <remarks>
+        /// When true (default), includes properties marked with [Category("Computed")].
+        /// When false, only shows properties that map to CSV/import columns.
+        /// Computed properties are useful for filtering/sorting but are not part of data imports.
+        /// </remarks>
+        public bool IncludeComputedProperties
+        {
+            get => _includeComputedProperties;
+            set
+            {
+                if (SetProperty(ref _includeComputedProperties, value))
+                {
+                    // Reload properties with new filter
+                    ReloadDataTypes();
+                    Log.Information("PropertyPath picker: IncludeComputedProperties = {Include}", value);
                 }
             }
         }
@@ -194,6 +220,22 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
                     properties = _propertyDiscovery.GetAllPropertiesForType(typeName);
                     Log.Debug("Data type {TypeName}: {Count} total properties (unfiltered)", typeName, properties.Count);
                 }
+
+                // CROSS-MODULE EDIT: 2025-01-19 Computed Properties Filter
+                // Modified for: Filter out computed properties when IncludeComputedProperties is false
+                // Related modules: Data (LVBreaker.Computed.cs and future computed properties), Map (PropertyInfo.IsComputed)
+                // Rollback instructions: Remove this filtering logic
+                if (!_includeComputedProperties)
+                {
+                    var beforeCount = properties.Count;
+                    properties = properties.Where(p => !p.IsComputed).ToList();
+                    
+                    if (beforeCount != properties.Count)
+                    {
+                        Log.Debug("Filtered {Count} computed properties from {TypeName}", 
+                            beforeCount - properties.Count, typeName);
+                    }
+                }
                 
                 if (properties.Count == 0)
                 {
@@ -257,10 +299,16 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
                 DataTypes.Add(node);
             }
 
-            Log.Information("Loaded {Count} data types with {PropertyCount} total properties (ShowActiveOnly={ShowActive})", 
+            var totalComputed = DataTypes.Sum(dt => dt.AllProperties.Count(p => 
+                _propertyDiscovery.GetAllPropertiesForType(dt.TypeName)
+                    .FirstOrDefault(pi => pi.PropertyName == p.PropertyName)?.IsComputed ?? false));
+
+            Log.Information("Loaded {Count} data types with {PropertyCount} total properties ({ComputedCount} computed, ShowActiveOnly={ShowActive}, IncludeComputed={IncludeComputed})", 
                 DataTypes.Count, 
                 DataTypes.Sum(dt => dt.AllProperties.Count),
-                _showActiveOnly);
+                totalComputed,
+                _showActiveOnly,
+                _includeComputedProperties);
             
             // Notify UI of count changes
             RaisePropertyChanged(nameof(DisplayedTypeCount));

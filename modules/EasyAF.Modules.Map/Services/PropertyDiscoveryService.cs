@@ -285,12 +285,21 @@ namespace EasyAF.Modules.Map.Services
                         return !p.GetCustomAttributes(typeof(System.Text.Json.Serialization.JsonIgnoreAttribute), false).Any()
                             && !p.GetCustomAttributes(typeof(Newtonsoft.Json.JsonIgnoreAttribute), false).Any();
                     })
-                    .Select(p => new MapPropertyInfo
+                    .Select(p =>
                     {
-                        PropertyName = p.Name,
-                        PropertyType = GetFriendlyTypeName(p.PropertyType),
-                        Description = GetPropertyDescription(p),
-                        IsRequired = requiredNames.Contains(p.Name)  // Mark as required if in the set
+                        // Check if it's a computed property
+                        var categoryAttr = p.GetCustomAttribute<CategoryAttribute>();
+                        bool isComputed = categoryAttr != null && 
+                                        string.Equals(categoryAttr.Category, "Computed", StringComparison.OrdinalIgnoreCase);
+
+                        return new MapPropertyInfo
+                        {
+                            PropertyName = p.Name,
+                            PropertyType = GetFriendlyTypeName(p.PropertyType),
+                            Description = GetPropertyDescription(p),
+                            IsRequired = requiredNames.Contains(p.Name),
+                            IsComputed = isComputed  // NEW: Mark computed properties
+                        };
                     })
                     // CROSS-MODULE EDIT: 2025-01-18 Required Properties Float to Top
                     // Modified for: Sort required properties to the top for visibility in map editor
@@ -303,8 +312,9 @@ namespace EasyAF.Modules.Map.Services
                 // Cache the results
                 _propertyCache[dataTypeName] = properties;
 
-                Log.Information("Discovered {Count} properties for {DataType} ({RequiredCount} required)", 
-                    properties.Count, dataTypeName, properties.Count(p => p.IsRequired));
+                var computedCount = properties.Count(p => p.IsComputed);
+                Log.Information("Discovered {Count} properties for {DataType} ({RequiredCount} required, {ComputedCount} computed)", 
+                    properties.Count, dataTypeName, properties.Count(p => p.IsRequired), computedCount);
 
                 return properties;
             }
