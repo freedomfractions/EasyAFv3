@@ -287,10 +287,14 @@ namespace EasyAF.Engine
                 var passSamples = new List<string>();
                 var failSamples = new List<string>();
                 var filtered = new List<object>();
+                
+                // Get the filter logic from the table spec
+                var filterLogic = GetFilterLogicFromTableSpec(td);
+                
                 foreach (var it in items)
                 {
                     string? reason;
-                    var ok = ApplyFilters(it, td.FilterSpecs, td.FilterGroups, out reason);
+                    var ok = ApplyFilters(it, td.FilterSpecs, td.FilterGroups, out reason, filterLogic);
                     if (ok)
                     {
                         filtered.Add(it);
@@ -334,6 +338,24 @@ namespace EasyAF.Engine
                 if (string.IsNullOrWhiteSpace(id)) id = it.GetType().Name;
             }
             return id + " => " + status;
+        }
+
+        /// <summary>
+        /// Gets the filter logic from the table definition.
+        /// Returns null for simple AND logic, or the advanced expression.
+        /// </summary>
+        private static string? GetFilterLogicFromTableSpec(TableDefinition td)
+        {
+            if (string.IsNullOrWhiteSpace(td.FilterLogic))
+                return null; // Simple AND logic
+
+            // If it's just "AND" or "OR", treat as simple logic
+            if (td.FilterLogic.Equals("AND", StringComparison.OrdinalIgnoreCase) ||
+                td.FilterLogic.Equals("OR", StringComparison.OrdinalIgnoreCase))
+                return null;
+
+            // Otherwise, it's an advanced expression
+            return td.FilterLogic;
         }
 
         private List<string[]> BuildDiffRows(TableDefinition td, ProjectContext ctx)
@@ -427,10 +449,18 @@ namespace EasyAF.Engine
             var keys = new HashSet<CompositeKey>(newMap.Keys);
             foreach (var k in oldMap.Keys) keys.Add(k);
             
+            // Get filter logic (diff mode can also use advanced expressions)
+            var filterLogic = GetFilterLogicFromTableSpec(td);
+            
             foreach (var key in keys)
             {
                 newMap.TryGetValue(key, out var newObj); oldMap.TryGetValue(key, out var oldObj);
-                if (newObj != null && td.FilterSpecs != null && td.FilterSpecs.Count > 0 && !ApplyFilters(newObj!, td.FilterSpecs, td.FilterGroups)) continue;
+                if (newObj != null && td.FilterSpecs != null && td.FilterSpecs.Count > 0)
+                {
+                    string? filterFailReason;
+                    if (!ApplyFilters(newObj!, td.FilterSpecs, td.FilterGroups, out filterFailReason, filterLogic))
+                        continue;
+                }
                 var newRow = newObj != null ? RenderRow(td, ctx, newObj!) : new string[td.Columns.Count];
                 var oldRow = oldObj != null ? RenderRow(td, ctx, oldObj!) : new string[td.Columns.Count];
                 var merged = new string[td.Columns.Count];
@@ -463,27 +493,54 @@ namespace EasyAF.Engine
                 return string.Empty;
             }).ToArray();
 
-        private static bool ApplyFilters(object it, List<FilterSpec> filters, List<FilterGroup>? groups = null)
+        private static bool ApplyFilters(object it, List<FilterSpec> filters, List<FilterGroup>? groups, out string? failReason, string? filterLogic = null)
         {
-            foreach (var f in filters)
+            failReason = null;
+
+            // Check if we have advanced filter logic expression
+            if (!string.IsNullOrWhiteSpace(filterLogic) && 
+                !filterLogic.Equals("AND", StringComparison.OrdinalIgnoreCase) && 
+                !filterLogic.Equals("OR", StringComparison.OrdinalIgnoreCase))
             {
-                if (!EvaluateFilter(it, f)) return false;
-            }
-            if (groups != null && groups.Count > 0)
-            {
-                foreach (var g in groups)
+                // Advanced expression like "(1 | 2) & 3"
+                try
                 {
-                    bool groupResult = string.Equals(g.Logic, "OR", StringComparison.OrdinalIgnoreCase)
-                        ? g.Filters.Any(f => EvaluateFilter(it, f))
-                        : g.Filters.All(f => EvaluateFilter(it, f));
-                    if (!groupResult) return false;
+                    // Evaluate each filter and store results (with reasons)
+                    var filterResults = new bool[filters.Count];
+                    var filterReasons = new string?[filters.Count];
+                    
+                    for (int i = 0; i < filters.Count; i++)
+                    {
+                        filterResults[i] = EvaluateFilter(it, filters[i], out filterReasons[i]);
+                    }
+
+                    // Evaluate the advanced logic expression
+                    bool result = FilterLogicEvaluator.Evaluate(filterLogic, filterResults);
+                    
+                    if (!result)
+                    {
+                        // Build a helpful failure reason showing which filters failed
+                        var failedFilters = new List<string>();
+                        for (int i = 0; i < filterResults.Length; i++)
+                        {
+                            if (!filterResults[i] && !string.IsNullOrWhiteSpace(filterReasons[i]))
+                            {
+                                failedFilters.Add($"#{i + 1}: {filterReasons[i]}");
+                            }
+                        }
+                        failReason = $"Advanced logic '{filterLogic}' failed. Failures: {string.Join("; ", failedFilters)}";
+                    }
+                    
+                    return result;
+                }
+                catch (Exception ex)
+                {
+                    failReason = $"Filter logic evaluation error: {ex.Message}";
+                    return false;
                 }
             }
-            return true;
-        }
 
-        private static bool ApplyFilters(object it, List<FilterSpec> filters, List<FilterGroup>? groups, out string? failReason)
-        {
+            // Simple AND logic (all filters must pass)
             foreach (var f in filters)
             {
                 if (!EvaluateFilter(it, f, out failReason)) return false;
