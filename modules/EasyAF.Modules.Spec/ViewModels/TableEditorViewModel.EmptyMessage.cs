@@ -47,10 +47,11 @@ namespace EasyAF.Modules.Spec.ViewModels
 
         /// <summary>
         /// Gets or sets the font name for empty message.
+        /// Default: Arial
         /// </summary>
         public string? EmptyFontName
         {
-            get => _table.EmptyFormatting?.FontName;
+            get => _table.EmptyFormatting?.FontName ?? "Arial";
             set
             {
                 EnsureEmptyFormatting();
@@ -65,10 +66,15 @@ namespace EasyAF.Modules.Spec.ViewModels
 
         /// <summary>
         /// Gets or sets the font size for empty message.
+        /// Default: 11
         /// </summary>
         public string EmptyFontSize
         {
-            get => _table.EmptyFormatting?.FontSize?.ToString("F1") ?? string.Empty;
+            get
+            {
+                var fontSize = _table.EmptyFormatting?.FontSize;
+                return fontSize.HasValue ? fontSize.Value.ToString("F1") : "11.0";
+            }
             set
             {
                 EnsureEmptyFormatting();
@@ -84,6 +90,7 @@ namespace EasyAF.Modules.Spec.ViewModels
 
         /// <summary>
         /// Gets or sets whether the empty message is bold.
+        /// Default: false
         /// </summary>
         public bool EmptyBold
         {
@@ -102,6 +109,7 @@ namespace EasyAF.Modules.Spec.ViewModels
         
         /// <summary>
         /// Gets or sets whether the empty message is italic (placeholder - not yet in Engine spec).
+        /// Default: false
         /// </summary>
         private bool _emptyItalic;
         public bool EmptyItalic
@@ -118,6 +126,7 @@ namespace EasyAF.Modules.Spec.ViewModels
         
         /// <summary>
         /// Gets or sets whether the empty message is underlined (placeholder - not yet in Engine spec).
+        /// Default: false
         /// </summary>
         private bool _emptyUnderline;
         public bool EmptyUnderline
@@ -134,10 +143,11 @@ namespace EasyAF.Modules.Spec.ViewModels
 
         /// <summary>
         /// Gets or sets the horizontal alignment for empty message.
+        /// Default: center
         /// </summary>
         public string? EmptyHorizontalAlignment
         {
-            get => _table.EmptyFormatting?.HorizontalAlignment;
+            get => _table.EmptyFormatting?.HorizontalAlignment ?? "center";
             set
             {
                 EnsureEmptyFormatting();
@@ -152,10 +162,11 @@ namespace EasyAF.Modules.Spec.ViewModels
         
         /// <summary>
         /// Gets or sets the vertical alignment for empty message.
+        /// Default: center (middle)
         /// </summary>
         public string? EmptyVerticalAlignment
         {
-            get => _table.EmptyFormatting?.VerticalAlignment;
+            get => _table.EmptyFormatting?.VerticalAlignment ?? "center";
             set
             {
                 EnsureEmptyFormatting();
@@ -170,10 +181,11 @@ namespace EasyAF.Modules.Spec.ViewModels
 
         /// <summary>
         /// Gets or sets the fill color for empty message (hex without #).
+        /// Default: FFFFFF (white)
         /// </summary>
         public string? EmptyFill
         {
-            get => _table.EmptyFormatting?.Fill;
+            get => _table.EmptyFormatting?.Fill ?? "FFFFFF";
             set
             {
                 EnsureEmptyFormatting();
@@ -190,10 +202,11 @@ namespace EasyAF.Modules.Spec.ViewModels
 
         /// <summary>
         /// Gets or sets the text color for empty message (hex without #).
+        /// Default: 000000 (black)
         /// </summary>
         public string? EmptyTextColor
         {
-            get => _table.EmptyFormatting?.TextColor;
+            get => _table.EmptyFormatting?.TextColor ?? "000000";
             set
             {
                 EnsureEmptyFormatting();
@@ -256,13 +269,18 @@ namespace EasyAF.Modules.Spec.ViewModels
         {
             if (_table.EmptyFormatting == null) return;
 
-            _table.EmptyFormatting.FontName = null;
-            _table.EmptyFormatting.FontSize = null;
-            _table.EmptyFormatting.HorizontalAlignment = null;
-            _table.EmptyFormatting.VerticalAlignment = null;
-            _table.EmptyFormatting.Bold = null;
-            _table.EmptyFormatting.Fill = null;
-            _table.EmptyFormatting.TextColor = null;
+            // Reset to defaults instead of null
+            _table.EmptyFormatting.FontName = "Arial";
+            _table.EmptyFormatting.FontSize = 11.0;
+            _table.EmptyFormatting.HorizontalAlignment = "center";
+            _table.EmptyFormatting.VerticalAlignment = "center";
+            _table.EmptyFormatting.Bold = false;
+            _table.EmptyFormatting.Fill = "FFFFFF"; // White
+            _table.EmptyFormatting.TextColor = "000000"; // Black
+
+            // Reset italic and underline (local properties)
+            EmptyItalic = false;
+            EmptyUnderline = false;
 
             RaisePropertyChanged(nameof(EmptyFontName));
             RaisePropertyChanged(nameof(EmptyFontSize));
@@ -274,7 +292,7 @@ namespace EasyAF.Modules.Spec.ViewModels
 
             _document.MarkDirty();
 
-            Log.Information("Cleared empty message formatting for table {TableId}", _table.Id);
+            Log.Information("Reset empty message formatting to defaults for table {TableId}", _table.Id);
         }
         
         private void ExecuteSetEmptyAlignment(string? alignment)
@@ -323,24 +341,23 @@ namespace EasyAF.Modules.Spec.ViewModels
                     ShowEffects = true // Enable Bold, Italic, Underline
                 };
                 
-                // Set current font if available
-                if (!string.IsNullOrWhiteSpace(EmptyFontName))
+                // Set current font (with defaults)
+                try
                 {
-                    try
-                    {
-                        var fontSizeStr = EmptyFontSize;
-                        var fontSize = string.IsNullOrWhiteSpace(fontSizeStr) ? 10f : float.Parse(fontSizeStr);
-                        var style = System.Drawing.FontStyle.Regular;
-                        if (EmptyBold) style |= System.Drawing.FontStyle.Bold;
-                        if (EmptyItalic) style |= System.Drawing.FontStyle.Italic;
-                        if (EmptyUnderline) style |= System.Drawing.FontStyle.Underline;
-                        
-                        dialog.Font = new System.Drawing.Font(EmptyFontName, fontSize, style);
-                    }
-                    catch
-                    {
-                        // Use default if parsing fails
-                    }
+                    var fontName = EmptyFontName ?? "Arial";
+                    var fontSizeStr = EmptyFontSize ?? "11.0";
+                    var fontSize = float.TryParse(fontSizeStr, out var size) ? size : 11f;
+                    var style = System.Drawing.FontStyle.Regular;
+                    if (EmptyBold) style |= System.Drawing.FontStyle.Bold;
+                    if (EmptyItalic) style |= System.Drawing.FontStyle.Italic;
+                    if (EmptyUnderline) style |= System.Drawing.FontStyle.Underline;
+                    
+                    dialog.Font = new System.Drawing.Font(fontName, fontSize, style);
+                }
+                catch
+                {
+                    // Use default Arial 11 if parsing fails
+                    dialog.Font = new System.Drawing.Font("Arial", 11f);
                 }
                 
                 if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
@@ -372,18 +389,17 @@ namespace EasyAF.Modules.Spec.ViewModels
                     AnyColor = true
                 };
                 
-                // Set current color if available
-                if (!string.IsNullOrWhiteSpace(EmptyFill))
+                // Set current color (with default white)
+                try
                 {
-                    try
-                    {
-                        var color = System.Drawing.ColorTranslator.FromHtml("#" + EmptyFill);
-                        dialog.Color = color;
-                    }
-                    catch
-                    {
-                        // Use default if parsing fails
-                    }
+                    var fillColor = EmptyFill ?? "FFFFFF";
+                    var color = System.Drawing.ColorTranslator.FromHtml("#" + fillColor);
+                    dialog.Color = color;
+                }
+                catch
+                {
+                    // Use white if parsing fails
+                    dialog.Color = System.Drawing.Color.White;
                 }
                 
                 if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
@@ -413,18 +429,17 @@ namespace EasyAF.Modules.Spec.ViewModels
                     AnyColor = true
                 };
                 
-                // Set current color if available
-                if (!string.IsNullOrWhiteSpace(EmptyTextColor))
+                // Set current color (with default black)
+                try
                 {
-                    try
-                    {
-                        var color = System.Drawing.ColorTranslator.FromHtml("#" + EmptyTextColor);
-                        dialog.Color = color;
-                    }
-                    catch
-                    {
-                        // Use default if parsing fails
-                    }
+                    var textColor = EmptyTextColor ?? "000000";
+                    var color = System.Drawing.ColorTranslator.FromHtml("#" + textColor);
+                    dialog.Color = color;
+                }
+                catch
+                {
+                    // Use black if parsing fails
+                    dialog.Color = System.Drawing.Color.Black;
                 }
                 
                 if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
