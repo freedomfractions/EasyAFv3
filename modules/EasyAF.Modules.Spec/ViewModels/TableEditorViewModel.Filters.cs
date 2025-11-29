@@ -43,6 +43,7 @@ namespace EasyAF.Modules.Spec.ViewModels
         public int FilterCount => Filters.Count;
 
         private string _filterLogic = "AND";
+        private string? _advancedFilterExpression;
 
         /// <summary>
         /// Gets or sets the filter logic mode (AND, OR, or Advanced).
@@ -55,6 +56,19 @@ namespace EasyAF.Modules.Spec.ViewModels
                 if (SetProperty(ref _filterLogic, value))
                 {
                     RaisePropertyChanged(nameof(IsAdvancedFilterLogic));
+                    
+                    // When switching TO Advanced mode, initialize with current AND/OR if empty
+                    if (value == "Advanced" && string.IsNullOrWhiteSpace(_advancedFilterExpression))
+                    {
+                        // Initialize with simple AND logic showing all filter numbers
+                        if (_table.FilterSpecs != null && _table.FilterSpecs.Length > 0)
+                        {
+                            var numbers = Enumerable.Range(1, _table.FilterSpecs.Length);
+                            _advancedFilterExpression = string.Join(" & ", numbers);
+                            RaisePropertyChanged(nameof(AdvancedFilterExpression));
+                        }
+                    }
+                    
                     _document.MarkDirty();
                     Log.Information("Filter logic changed to: {Logic} for table {TableId}", value, _table.Id);
                 }
@@ -64,7 +78,25 @@ namespace EasyAF.Modules.Spec.ViewModels
         /// <summary>
         /// Gets whether Advanced filter logic mode is enabled.
         /// </summary>
-        public bool IsAdvancedFilterLogic => FilterLogic == "Advanced";
+        public bool IsAdvancedFilterLogic => FilterLogic?.Equals("Advanced", StringComparison.OrdinalIgnoreCase) ?? false;
+
+        /// <summary>
+        /// Gets or sets the advanced filter expression when FilterLogic is "Advanced".
+        /// This is a free-form text field for complex filter logic like "(1 | 2) & 3".
+        /// TODO: Add FilterLogic property to TableSpec in JSON schema to persist this.
+        /// </summary>
+        public string? AdvancedFilterExpression
+        {
+            get => _advancedFilterExpression;
+            set
+            {
+                if (SetProperty(ref _advancedFilterExpression, value))
+                {
+                    _document.MarkDirty();
+                    Log.Debug("Advanced filter expression changed to: {Expression}", value);
+                }
+            }
+        }
 
         #endregion
 

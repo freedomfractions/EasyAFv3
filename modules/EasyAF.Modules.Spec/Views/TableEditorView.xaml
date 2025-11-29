@@ -348,49 +348,77 @@
                         
                         <!-- Filter Logic Dropdown -->
                         <Grid Grid.Row="3">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="150"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             
-                            <TextBlock Grid.Column="0"
+                            <!-- Row 0: Label and ComboBox -->
+                            <TextBlock Grid.Row="0" Grid.Column="0"
                                        Text="Apply filters using:"
                                        VerticalAlignment="Center"
                                        Margin="0,0,8,0"
                                        Foreground="{DynamicResource TextPrimaryBrush}"/>
                             
-                            <ComboBox Grid.Column="1"
-                                      SelectedValue="{Binding FilterLogic, UpdateSourceTrigger=PropertyChanged}"
-                                      SelectedValuePath="Tag"
-                                      Background="{DynamicResource ControlBackgroundBrush}"
-                                      Foreground="{DynamicResource TextPrimaryBrush}"
-                                      BorderBrush="{DynamicResource ControlBorderBrush}">
-                                <ComboBoxItem Content="AND (all must match)" Tag="AND" IsSelected="True"/>
-                                <ComboBoxItem Content="OR (any must match)" Tag="OR"/>
-                                <ComboBoxItem Content="Advanced..." Tag="Advanced"/>
-                            </ComboBox>
+
+                            <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
+                                <ComboBox Width="150"
+                                          SelectedValue="{Binding FilterLogic, UpdateSourceTrigger=PropertyChanged}"
+                                          SelectedValuePath="Tag"
+                                          Background="{DynamicResource ControlBackgroundBrush}"
+                                          Foreground="{DynamicResource TextPrimaryBrush}"
+                                          BorderBrush="{DynamicResource ControlBorderBrush}">
+                                    <ComboBoxItem Content="AND (all must match)" Tag="AND" IsSelected="True"/>
+                                    <ComboBoxItem Content="OR (any must match)" Tag="OR"/>
+                                    <ComboBoxItem Content="Advanced..." Tag="Advanced"/>
+                                </ComboBox>
+                                
+                                <!-- Advanced logic hint (shown when Advanced selected) -->
+                                <TextBlock Text="Use rule numbers in logic: e.g., '(1 | 2) &amp; 3'"
+                                           VerticalAlignment="Center"
+                                           Margin="12,0,0,0"
+                                           FontStyle="Italic"
+                                           FontSize="11"
+                                           Foreground="{DynamicResource TextSecondaryBrush}">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsAdvancedFilterLogic}" Value="True">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </StackPanel>
                             
-                            <!-- Advanced logic hint (shown when Advanced selected) -->
-                            <TextBlock Grid.Column="2"
-                                       Text="Use rule numbers in logic: e.g., '(1 | 2) &amp; 3'"
-                                       VerticalAlignment="Center"
-                                       Margin="12,0,0,0"
-                                       FontStyle="Italic"
-                                       FontSize="11"
-                                       Foreground="{DynamicResource TextSecondaryBrush}">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
+                            <!-- Row 1: Advanced expression TextBox (shown when Advanced selected) -->
+                            <TextBox Grid.Row="1" Grid.Column="1"
+                                     Text="{Binding AdvancedFilterExpression, UpdateSourceTrigger=PropertyChanged}"
+                                     Background="{DynamicResource ControlBackgroundBrush}"
+                                     Foreground="{DynamicResource TextPrimaryBrush}"
+                                     BorderBrush="{DynamicResource ControlBorderBrush}"
+                                     Padding="4"
+                                     Margin="0,4,0,0"
+                                     FontFamily="Consolas"
+                                     ToolTip="Enter advanced filter logic using rule numbers and operators: &amp; (AND), | (OR), ! (NOT), ( ) (grouping)">
+                                <TextBox.Style>
+                                    <Style TargetType="TextBox">
                                         <Setter Property="Visibility" Value="Collapsed"/>
-                                        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding IsAdvancedFilterLogic}" Value="True">
                                                 <Setter Property="Visibility" Value="Visible"/>
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
-                                </TextBlock.Style>
-                            </TextBlock>
+                                </TextBox.Style>
+                            </TextBox>
                         </Grid>
                         
                         <!-- Empty State Overlay -->
@@ -704,7 +732,7 @@
                 
                 <!-- Empty Message Expander -->
                 <Expander Style="{StaticResource TableConfigExpanderStyle}"
-                          IsExpanded="False">
+                          IsExpanded="True">
                     <Expander.Header>
                         <TextBlock Text="Empty Message"
                                    FontWeight="SemiBold"
@@ -741,7 +769,7 @@
                                      AcceptsReturn="False"
                                      MinHeight="60">
                                 <i:Interaction.Behaviors>
-                                    <behaviors:WatermarkTextBoxBehavior WatermarkText="Sample Text"/>
+                                    <behaviors:WatermarkTextBoxBehavior WatermarkText="(Type your message here)"/>
                                 </i:Interaction.Behaviors>
                                 <TextBox.Style>
                                     <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
