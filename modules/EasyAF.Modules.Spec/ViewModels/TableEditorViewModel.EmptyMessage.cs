@@ -103,26 +103,32 @@ namespace EasyAF.Modules.Spec.ViewModels
         /// <summary>
         /// Gets or sets whether the empty message is italic (placeholder - not yet in Engine spec).
         /// </summary>
+        private bool _emptyItalic;
         public bool EmptyItalic
         {
-            get => false; // TODO: Add to EmptyMessageFormattingSpec when Engine updated
+            get => _emptyItalic;
             set
             {
-                // Placeholder for future implementation
-                RaisePropertyChanged();
+                if (SetProperty(ref _emptyItalic, value))
+                {
+                    _document.MarkDirty();
+                }
             }
         }
         
         /// <summary>
         /// Gets or sets whether the empty message is underlined (placeholder - not yet in Engine spec).
         /// </summary>
+        private bool _emptyUnderline;
         public bool EmptyUnderline
         {
-            get => false; // TODO: Add to EmptyMessageFormattingSpec when Engine updated
+            get => _emptyUnderline;
             set
             {
-                // Placeholder for future implementation
-                RaisePropertyChanged();
+                if (SetProperty(ref _emptyUnderline, value))
+                {
+                    _document.MarkDirty();
+                }
             }
         }
 
@@ -225,6 +231,11 @@ namespace EasyAF.Modules.Spec.ViewModels
         /// Command to choose text color for empty message.
         /// </summary>
         public ICommand ChooseEmptyTextColorCommand { get; private set; } = null!;
+        
+        /// <summary>
+        /// Command to set alignment from grid picker.
+        /// </summary>
+        public ICommand SetEmptyAlignmentCommand { get; private set; } = null!;
 
         #endregion
 
@@ -240,6 +251,7 @@ namespace EasyAF.Modules.Spec.ViewModels
             ChooseEmptyFontCommand = new DelegateCommand(ExecuteChooseEmptyFont);
             ChooseEmptyFillColorCommand = new DelegateCommand(ExecuteChooseEmptyFillColor);
             ChooseEmptyTextColorCommand = new DelegateCommand(ExecuteChooseEmptyTextColor);
+            SetEmptyAlignmentCommand = new DelegateCommand<string>(ExecuteSetEmptyAlignment);
         }
 
         #endregion
@@ -271,6 +283,42 @@ namespace EasyAF.Modules.Spec.ViewModels
             Log.Information("Cleared empty message formatting for table {TableId}", _table.Id);
         }
         
+        private void ExecuteSetEmptyAlignment(string? alignment)
+        {
+            if (string.IsNullOrWhiteSpace(alignment)) return;
+            
+            var parts = alignment.Split('-');
+            if (parts.Length != 2) return;
+            
+            var vAlign = parts[0] switch
+            {
+                "top" => "top",
+                "center" => "center",
+                "bottom" => "bottom",
+                _ => null
+            };
+            
+            var hAlign = parts[1] switch
+            {
+                "left" => "left",
+                "center" => "center",
+                "right" => "right",
+                _ => null
+            };
+            
+            if (vAlign != null)
+            {
+                EmptyVerticalAlignment = vAlign;
+            }
+            
+            if (hAlign != null)
+            {
+                EmptyHorizontalAlignment = hAlign;
+            }
+            
+            Log.Debug("Set empty message alignment: V={VAlign} H={HAlign}", vAlign, hAlign);
+        }
+        
         private void ExecuteChooseEmptyFont()
         {
             try
@@ -278,7 +326,7 @@ namespace EasyAF.Modules.Spec.ViewModels
                 using var dialog = new System.Windows.Forms.FontDialog
                 {
                     ShowColor = false,
-                    ShowEffects = false
+                    ShowEffects = true // Enable Bold, Italic, Underline
                 };
                 
                 // Set current font if available
@@ -288,7 +336,12 @@ namespace EasyAF.Modules.Spec.ViewModels
                     {
                         var fontSizeStr = EmptyFontSize;
                         var fontSize = string.IsNullOrWhiteSpace(fontSizeStr) ? 10f : float.Parse(fontSizeStr);
-                        dialog.Font = new System.Drawing.Font(EmptyFontName, fontSize);
+                        var style = System.Drawing.FontStyle.Regular;
+                        if (EmptyBold) style |= System.Drawing.FontStyle.Bold;
+                        if (EmptyItalic) style |= System.Drawing.FontStyle.Italic;
+                        if (EmptyUnderline) style |= System.Drawing.FontStyle.Underline;
+                        
+                        dialog.Font = new System.Drawing.Font(EmptyFontName, fontSize, style);
                     }
                     catch
                     {
@@ -300,9 +353,12 @@ namespace EasyAF.Modules.Spec.ViewModels
                 {
                     EmptyFontName = dialog.Font.Name;
                     EmptyFontSize = dialog.Font.Size.ToString("F1");
+                    EmptyBold = dialog.Font.Bold;
+                    EmptyItalic = dialog.Font.Italic;
+                    EmptyUnderline = dialog.Font.Underline;
                     
-                    Log.Information("Selected font for empty message: {Font} {Size}pt", 
-                        dialog.Font.Name, dialog.Font.Size);
+                    Log.Information("Selected font for empty message: {Font} {Size}pt Bold={Bold} Italic={Italic} Underline={Underline}", 
+                        dialog.Font.Name, dialog.Font.Size, dialog.Font.Bold, dialog.Font.Italic, dialog.Font.Underline);
                 }
             }
             catch (Exception ex)

@@ -750,172 +750,146 @@
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="8"/>
                                     <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="8"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="8"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="8"/>
-                                    <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="120"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 
-                                <!-- Row 0: Font Name | Font Size -->
+                                <!-- Row 0: Font | Fill Color | Text Color buttons -->
                                 <TextBlock Grid.Row="0" Grid.Column="0"
-                                           Text="Font Name:"
+                                           Text="Style:"
                                            VerticalAlignment="Center"
+                                           Margin="0,0,12,0"
                                            Foreground="{DynamicResource TextPrimaryBrush}"/>
-                                <Grid Grid.Row="0" Grid.Column="1" Margin="0,0,8,0">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBox Grid.Column="0"
-                                             Text="{Binding EmptyFontName, UpdateSourceTrigger=PropertyChanged}"
-                                             Background="{DynamicResource ControlBackgroundBrush}"
-                                             Foreground="{DynamicResource TextPrimaryBrush}"
-                                             BorderBrush="{DynamicResource ControlBorderBrush}"
-                                             CaretBrush="{DynamicResource TextPrimaryBrush}"
-                                             Padding="4"/>
-                                    <Button Grid.Column="1"
-                                            Content="..."
-                                            Width="32"
-                                            Margin="4,0,0,0"
+                                <StackPanel Grid.Row="0" Grid.Column="1"
+                                            Orientation="Horizontal">
+                                    <Button Content="Font..."
                                             Command="{Binding ChooseEmptyFontCommand}"
-                                            ToolTip="Choose Font"
-                                            Style="{StaticResource BaseButtonStyle}"/>
-                                </Grid>
-                                
-                                <TextBlock Grid.Row="0" Grid.Column="2"
-                                           Text="Font Size:"
-                                           VerticalAlignment="Center"
-                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
-                                <TextBox Grid.Row="0" Grid.Column="3"
-                                         Text="{Binding EmptyFontSize, UpdateSourceTrigger=PropertyChanged}"
-                                         Background="{DynamicResource ControlBackgroundBrush}"
-                                         Foreground="{DynamicResource TextPrimaryBrush}"
-                                         BorderBrush="{DynamicResource ControlBorderBrush}"
-                                         CaretBrush="{DynamicResource TextPrimaryBrush}"
-                                         Padding="4"/>
-                                
-                                <!-- Row 2: Bold | Italic | Underline -->
-                                <CheckBox Grid.Row="2" Grid.Column="0"
-                                          Content="Bold"
-                                          IsChecked="{Binding EmptyBold, UpdateSourceTrigger=PropertyChanged}"
-                                          VerticalAlignment="Center"
-                                          Foreground="{DynamicResource TextPrimaryBrush}"/>
-                                
-                                <CheckBox Grid.Row="2" Grid.Column="1"
-                                          Content="Italic"
-                                          IsChecked="{Binding EmptyItalic, UpdateSourceTrigger=PropertyChanged}"
-                                          VerticalAlignment="Center"
-                                          Margin="0,0,8,0"
-                                          Foreground="{DynamicResource TextPrimaryBrush}"/>
-                                
-                                <CheckBox Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2"
-                                          Content="Underline"
-                                          IsChecked="{Binding EmptyUnderline, UpdateSourceTrigger=PropertyChanged}"
-                                          VerticalAlignment="Center"
-                                          Foreground="{DynamicResource TextPrimaryBrush}"/>
-                                
-                                <!-- Row 4: H-Alignment | V-Alignment -->
-                                <TextBlock Grid.Row="4" Grid.Column="0"
-                                           Text="H-Alignment:"
-                                           VerticalAlignment="Center"
-                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
-                                <ComboBox Grid.Row="4" Grid.Column="1"
-                                          SelectedValue="{Binding EmptyHorizontalAlignment, UpdateSourceTrigger=PropertyChanged}"
-                                          SelectedValuePath="Tag"
-                                          Margin="0,0,8,0"
-                                          Background="{DynamicResource ControlBackgroundBrush}"
-                                          Foreground="{DynamicResource TextPrimaryBrush}"
-                                          BorderBrush="{DynamicResource ControlBorderBrush}">
-                                    <ComboBoxItem Content="Left" Tag="left"/>
-                                    <ComboBoxItem Content="Center" Tag="center"/>
-                                    <ComboBoxItem Content="Right" Tag="right"/>
-                                </ComboBox>
-                                
-                                <TextBlock Grid.Row="4" Grid.Column="2"
-                                           Text="V-Alignment:"
-                                           VerticalAlignment="Center"
-                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
-                                <ComboBox Grid.Row="4" Grid.Column="3"
-                                          SelectedValue="{Binding EmptyVerticalAlignment, UpdateSourceTrigger=PropertyChanged}"
-                                          SelectedValuePath="Tag"
-                                          Background="{DynamicResource ControlBackgroundBrush}"
-                                          Foreground="{DynamicResource TextPrimaryBrush}"
-                                          BorderBrush="{DynamicResource ControlBorderBrush}">
-                                    <ComboBoxItem Content="Top" Tag="top"/>
-                                    <ComboBoxItem Content="Center" Tag="center"/>
-                                    <ComboBoxItem Content="Bottom" Tag="bottom"/>
-                                </ComboBox>
-                                
-                                <!-- Row 6: Fill Color | Text Color (with chooser buttons) -->
-                                <TextBlock Grid.Row="6" Grid.Column="0"
-                                           Text="Fill Color:"
-                                           VerticalAlignment="Center"
-                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
-                                <Grid Grid.Row="6" Grid.Column="1" Margin="0,0,8,0">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBox Grid.Column="0"
-                                             Text="{Binding EmptyFill, UpdateSourceTrigger=PropertyChanged}"
-                                             Background="{DynamicResource ControlBackgroundBrush}"
-                                             Foreground="{DynamicResource TextPrimaryBrush}"
-                                             BorderBrush="{DynamicResource ControlBorderBrush}"
-                                             CaretBrush="{DynamicResource TextPrimaryBrush}"
-                                             Padding="4"
-                                             ToolTip="Hex color without # (e.g., FFFFFF for white)"/>
-                                    <Button Grid.Column="1"
-                                            Content="..."
-                                            Width="32"
-                                            Margin="4,0,0,0"
+                                            Style="{StaticResource BaseButtonStyle}"
+                                            Padding="12,6"
+                                            MinWidth="80"
+                                            ToolTip="Choose font, size, and style"/>
+                                    <Button Content="Fill Color..."
                                             Command="{Binding ChooseEmptyFillColorCommand}"
-                                            ToolTip="Choose Color"
-                                            Style="{StaticResource BaseButtonStyle}"/>
-                                </Grid>
+                                            Style="{StaticResource BaseButtonStyle}"
+                                            Padding="12,6"
+                                            MinWidth="100"
+                                            Margin="8,0,0,0"
+                                            ToolTip="Choose background color"/>
+                                    <Button Content="Text Color..."
+                                            Command="{Binding ChooseEmptyTextColorCommand}"
+                                            Style="{StaticResource BaseButtonStyle}"
+                                            Padding="12,6"
+                                            MinWidth="100"
+                                            Margin="8,0,0,0"
+                                            ToolTip="Choose text color"/>
+                                </StackPanel>
                                 
-                                <TextBlock Grid.Row="6" Grid.Column="2"
-                                           Text="Text Color:"
+                                <!-- Row 2: Alignment Grid | Clear Formatting -->
+                                <TextBlock Grid.Row="2" Grid.Column="0"
+                                           Text="Alignment:"
                                            VerticalAlignment="Center"
+                                           Margin="0,0,12,0"
                                            Foreground="{DynamicResource TextPrimaryBrush}"/>
-                                <Grid Grid.Row="6" Grid.Column="3">
+                                <Grid Grid.Row="2" Grid.Column="1">
                                     <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBox Grid.Column="0"
-                                             Text="{Binding EmptyTextColor, UpdateSourceTrigger=PropertyChanged}"
-                                             Background="{DynamicResource ControlBackgroundBrush}"
-                                             Foreground="{DynamicResource TextPrimaryBrush}"
-                                             BorderBrush="{DynamicResource ControlBorderBrush}"
-                                             CaretBrush="{DynamicResource TextPrimaryBrush}"
-                                             Padding="4"
-                                             ToolTip="Hex color without # (e.g., 000000 for black)"/>
-                                    <Button Grid.Column="1"
-                                            Content="..."
-                                            Width="32"
-                                            Margin="4,0,0,0"
-                                            Command="{Binding ChooseEmptyTextColorCommand}"
-                                            ToolTip="Choose Color"
+                                    
+                                    <!-- 3x3 Alignment Grid -->
+                                    <UniformGrid Grid.Column="0" Rows="3" Columns="3">
+                                        <!-- Top Row -->
+                                        <RadioButton GroupName="EmptyAlignment"
+                                                     Command="{Binding SetEmptyAlignmentCommand}"
+                                                     CommandParameter="top-left"
+                                                     ToolTip="Top Left"
+                                                     Style="{StaticResource BaseButtonStyle}"
+                                                     Width="32" Height="32">
+                                            <TextBlock Text="&#xE26C;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
+                                        </RadioButton>
+                                        <RadioButton GroupName="EmptyAlignment"
+                                                     Command="{Binding SetEmptyAlignmentCommand}"
+                                                     CommandParameter="top-center"
+                                                     ToolTip="Top Center"
+                                                     Style="{StaticResource BaseButtonStyle}"
+                                                     Width="32" Height="32">
+                                            <TextBlock Text="&#xE26D;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
+                                        </RadioButton>
+                                        <RadioButton GroupName="EmptyAlignment"
+                                                     Command="{Binding SetEmptyAlignmentCommand}"
+                                                     CommandParameter="top-right"
+                                                     ToolTip="Top Right"
+                                                     Style="{StaticResource BaseButtonStyle}"
+                                                     Width="32" Height="32">
+                                            <TextBlock Text="&#xE26E;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
+                                        </RadioButton>
+                                        
+                                        <!-- Middle Row -->
+                                        <RadioButton GroupName="EmptyAlignment"
+                                                     Command="{Binding SetEmptyAlignmentCommand}"
+                                                     CommandParameter="center-left"
+                                                     ToolTip="Middle Left"
+                                                     Style="{StaticResource BaseButtonStyle}"
+                                                     Width="32" Height="32">
+                                            <TextBlock Text="&#xE26F;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
+                                        </RadioButton>
+                                        <RadioButton GroupName="EmptyAlignment"
+                                                     Command="{Binding SetEmptyAlignmentCommand}"
+                                                     CommandParameter="center-center"
+                                                     IsChecked="True"
+                                                     ToolTip="Middle Center"
+                                                     Style="{StaticResource BaseButtonStyle}"
+                                                     Width="32" Height="32">
+                                            <TextBlock Text="&#xE9E4;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
+                                        </RadioButton>
+                                        <RadioButton GroupName="EmptyAlignment"
+                                                     Command="{Binding SetEmptyAlignmentCommand}"
+                                                     CommandParameter="center-right"
+                                                     ToolTip="Middle Right"
+                                                     Style="{StaticResource BaseButtonStyle}"
+                                                     Width="32" Height="32">
+                                            <TextBlock Text="&#xE270;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
+                                        </RadioButton>
+                                        
+                                        <!-- Bottom Row -->
+                                        <RadioButton GroupName="EmptyAlignment"
+                                                     Command="{Binding SetEmptyAlignmentCommand}"
+                                                     CommandParameter="bottom-left"
+                                                     ToolTip="Bottom Left"
+                                                     Style="{StaticResource BaseButtonStyle}"
+                                                     Width="32" Height="32">
+                                            <TextBlock Text="&#xE271;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
+                                        </RadioButton>
+                                        <RadioButton GroupName="EmptyAlignment"
+                                                     Command="{Binding SetEmptyAlignmentCommand}"
+                                                     CommandParameter="bottom-center"
+                                                     ToolTip="Bottom Center"
+                                                     Style="{StaticResource BaseButtonStyle}"
+                                                     Width="32" Height="32">
+                                            <TextBlock Text="&#xE272;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
+                                        </RadioButton>
+                                        <RadioButton GroupName="EmptyAlignment"
+                                                     Command="{Binding SetEmptyAlignmentCommand}"
+                                                     CommandParameter="bottom-right"
+                                                     ToolTip="Bottom Right"
+                                                     Style="{StaticResource BaseButtonStyle}"
+                                                     Width="32" Height="32">
+                                            <TextBlock Text="&#xE273;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
+                                        </RadioButton>
+                                    </UniformGrid>
+                                    
+                                    <Button Grid.Column="2"
+                                            Content="Clear Formatting"
+                                            Command="{Binding ClearEmptyFormattingCommand}"
+                                            HorizontalAlignment="Right"
+                                            Padding="12,6"
+                                            Margin="12,0,0,0"
                                             Style="{StaticResource BaseButtonStyle}"/>
                                 </Grid>
-                                
-                                <!-- Row 8: Clear Formatting Button -->
-                                <Button Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2"
-                                        Content="Clear Formatting"
-                                        Command="{Binding ClearEmptyFormattingCommand}"
-                                        HorizontalAlignment="Left"
-                                        Padding="12,6"
-                                        Style="{StaticResource BaseButtonStyle}"/>
                             </Grid>
-
                         </Expander>
                     </Grid>
                 </Expander>
