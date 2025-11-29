@@ -190,6 +190,8 @@ var picker = new PropertyPathPickerViewModel(
 - Spec Module sorts (sort by computed values)
 - Any user-facing property selection
 
+## Troubleshooting
+
 ### Property Doesn't Appear in Picker
 
 **Check:**
@@ -199,6 +201,31 @@ var picker = new PropertyPathPickerViewModel(
 4. ? Build successful?
 5. ? Restarted application? (property cache might be stale)
 6. ? `IncludeComputedProperties` is `true`? (default, but check if overridden)
+7. ? **No duplicate class files?** (Check for `Models/Generated/YourModel.cs` - delete if exists)
+
+### Computed Property Not Showing After First Build
+
+**This is a caching issue!** The PropertyDiscoveryService caches properties on first load.
+
+**Solutions (in order of preference):**
+
+1. **Delete settings file and restart** (recommended for clean slate):
+   - Close the application
+   - Navigate to `%APPDATA%\EasyAF` (or wherever your settings are stored)
+   - Delete `settings.json`
+   - Restart application
+   - All 41 properties (including `IsAdjustable`) will appear
+
+2. **Manually add to settings** (quick fix if you want to keep other settings):
+   - Open your settings file
+   - Find the `LVBreaker` property list
+   - Add `"IsAdjustable"` to the array
+   - Restart application
+
+3. **Use "Show All" toggle** (temporary workaround):
+   - In the property picker, toggle "Show Active Only" to OFF
+   - This bypasses the settings filter and shows all discovered properties
+   - The computed property should appear
 
 ### Property Appears in Some Pickers But Not Others
 
@@ -219,6 +246,7 @@ Check the constructor call in the ViewModel to see which flag is being used.
 
 - ? `lib/EasyAF.Data/Models/LVBreaker.cs` - Made partial
 - ? `lib/EasyAF.Data/Models/LVBreaker.Computed.cs` - Added IsAdjustable
+- ? `lib/EasyAF.Data/Models/Generated/LVBreaker.cs` - **DELETED** (duplicate causing discovery issues)
 - ? `modules/EasyAF.Modules.Map/Services/PropertyDiscoveryService.cs` - Allow computed properties, set IsComputed flag
 - ? `modules/EasyAF.Modules.Map/Models/PropertyInfo.cs` - Added IsComputed property
 - ? `modules/EasyAF.Modules.Spec/ViewModels/Dialogs/PropertyPathPickerViewModel.cs` - Added IncludeComputedProperties flag
@@ -229,9 +257,25 @@ Check the constructor call in the ViewModel to see which flag is being used.
 - `ea4c924` - Make IsAdjustable available in Spec module property pickers by excluding computed properties from JsonIgnore filter
 - `8138e2d` - Add comprehensive guide for implementing computed properties in Spec module
 - `b947992` - Add IncludeComputedProperties flag to PropertyPathPicker (defaults to true) for filtering computed properties like IsAdjustable
+- `5187a13` - Update computed properties guide with IncludeComputedProperties flag documentation
+- `45951ae` - **Fix: Remove duplicate LVBreaker.cs from Generated folder** - PropertyDiscoveryService was finding wrong file without partial keyword
 
 ---
 
 **Status:** ? Complete and tested
-**Version:** 2025-01-19
+**Version:** 2025-01-19 (Updated)
 **Author:** GitHub Copilot
+
+## Known Issues & Workarounds
+
+### Issue: Computed property doesn't appear after adding it
+
+**Cause**: Property cache + settings file have old property list
+
+**Fix**: Delete `settings.json` from `%APPDATA%\EasyAF` and restart app
+
+### Issue: Only 40 properties show instead of 41
+
+**Cause**: Settings file has explicit list of 40 properties (before `IsAdjustable` was added)
+
+**Fix**: Either delete settings file OR manually add `"IsAdjustable"` to LVBreaker properties in settings.json
