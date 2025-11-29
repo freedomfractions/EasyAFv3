@@ -334,9 +334,13 @@ namespace EasyAF.Modules.Spec.ViewModels
 
             try
             {
+                // Store the filter for re-selection
+                var filterSpec = SelectedFilter.FilterSpec;
+                var index = Filters.IndexOf(SelectedFilter);
+
                 // Open Filter Editor Dialog
                 var viewModel = new Dialogs.FilterEditorViewModel(
-                    SelectedFilter.FilterSpec,
+                    filterSpec,
                     _document,
                     _propertyDiscovery,
                     _settingsService,
@@ -352,18 +356,17 @@ namespace EasyAF.Modules.Spec.ViewModels
 
                 if (result == true)
                 {
-                    // Store index and filter before refreshing
-                    var index = Filters.IndexOf(SelectedFilter);
-                    var filterSpec = SelectedFilter.FilterSpec;
+                    // Create a NEW FilterSpecViewModel to force UI update
+                    var newFilterVm = new FilterSpecViewModel(filterSpec, OnFilterChanged, index + 1);
                     
-                    // Completely rebuild the Filters collection to force UI update
-                    RefreshFilters();
+                    // Replace the item in the collection
+                    Filters[index] = newFilterVm;
                     
-                    // Restore selection to the same filter (by matching FilterSpec reference)
-                    SelectedFilter = Filters.FirstOrDefault(f => f.FilterSpec == filterSpec);
+                    // Re-select the new VM
+                    SelectedFilter = newFilterVm;
                     
                     Log.Information("Edited filter #{RuleNumber}: {Summary}", 
-                        SelectedFilter?.RuleNumber ?? 0, SelectedFilter?.Summary ?? "");
+                        newFilterVm.RuleNumber, newFilterVm.Summary);
                 }
             }
             catch (Exception ex)
