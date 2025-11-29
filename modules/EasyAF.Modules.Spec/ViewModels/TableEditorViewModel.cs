@@ -56,6 +56,9 @@ namespace EasyAF.Modules.Spec.ViewModels
             // Initialize sorting functionality (from partial class)
             InitializeSorting();
 
+            // Initialize empty message functionality (from partial class)
+            InitializeEmptyMessage();
+
             // Initialize commands
             AddColumnCommand = new DelegateCommand(ExecuteAddColumn);
             RemoveColumnCommand = new DelegateCommand(ExecuteRemoveColumn, CanExecuteRemoveColumn)

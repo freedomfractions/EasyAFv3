@@ -644,21 +644,156 @@
                     </Grid>
                 </Expander>
                 
-                <!-- Empty Message Expander (placeholder for Phase 2.1.D) -->
+                <!-- Empty Message Expander -->
                 <Expander Style="{StaticResource TableConfigExpanderStyle}"
-                          Tag="&#xE946;"> <!-- Info icon (placeholder) -->
+                          IsExpanded="False">
                     <Expander.Header>
-                        <TextBlock FontWeight="SemiBold"
+                        <TextBlock Text="Empty Message"
+                                   FontWeight="SemiBold"
                                    FontSize="13"
-                                   Foreground="{DynamicResource TextPrimaryBrush}">
-                            <Run Text="Empty Message"/>
-                            <Run Text="(coming soon)" FontStyle="Italic" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                        </TextBlock>
+                                   Foreground="{DynamicResource TextPrimaryBrush}"/>
                     </Expander.Header>
-                    <TextBlock Text="Empty message configuration will be added in Phase 2.1.D"
-                               Foreground="{DynamicResource TextSecondaryBrush}"
-                               FontStyle="Italic"
-                               Margin="4"/>
+                    
+                    <Grid Margin="4">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/> <!-- Message TextBox -->
+                            <RowDefinition Height="8"/>
+                            <RowDefinition Height="Auto"/> <!-- Formatting Expander -->
+                        </Grid.RowDefinitions>
+                        
+                        <!-- Empty Message TextBox -->
+                        <Grid Grid.Row="0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            
+                            <TextBlock Grid.Row="0"
+                                       Text="Message displayed when table has no data:"
+                                       Margin="0,0,0,4"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                       FontSize="11"/>
+                            
+                            <TextBox Grid.Row="1"
+                                     Text="{Binding EmptyMessage, UpdateSourceTrigger=PropertyChanged}"
+                                     Background="{DynamicResource ControlBackgroundBrush}"
+                                     Foreground="{DynamicResource TextPrimaryBrush}"
+                                     BorderBrush="{DynamicResource ControlBorderBrush}"
+                                     Padding="6"
+                                     TextWrapping="Wrap"
+                                     AcceptsReturn="False"
+                                     MinHeight="60"/>
+                        </Grid>
+                        
+                        <!-- Formatting Expander -->
+                        <Expander Grid.Row="2"
+                                  Header="Formatting Options"
+                                  IsExpanded="{Binding IsEmptyFormattingExpanded}"
+                                  Background="{DynamicResource SecondaryBackgroundBrush}"
+                                  BorderBrush="{DynamicResource ControlBorderBrush}"
+                                  BorderThickness="1"
+                                  Padding="8">
+                            <Grid Margin="4">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="8"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="8"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="8"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <!-- Row 0: Font Name | Font Size -->
+                                <TextBlock Grid.Row="0" Grid.Column="0"
+                                           Text="Font Name:"
+                                           VerticalAlignment="Center"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <TextBox Grid.Row="0" Grid.Column="1"
+                                         Text="{Binding EmptyFontName, UpdateSourceTrigger=PropertyChanged}"
+                                         Background="{DynamicResource ControlBackgroundBrush}"
+                                         Foreground="{DynamicResource TextPrimaryBrush}"
+                                         BorderBrush="{DynamicResource ControlBorderBrush}"
+                                         Padding="4"
+                                         Margin="0,0,8,0"/>
+                                
+                                <TextBlock Grid.Row="0" Grid.Column="2"
+                                           Text="Font Size:"
+                                           VerticalAlignment="Center"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <TextBox Grid.Row="0" Grid.Column="3"
+                                         Text="{Binding EmptyFontSize, UpdateSourceTrigger=PropertyChanged}"
+                                         Background="{DynamicResource ControlBackgroundBrush}"
+                                         Foreground="{DynamicResource TextPrimaryBrush}"
+                                         BorderBrush="{DynamicResource ControlBorderBrush}"
+                                         Padding="4"/>
+                                
+                                <!-- Row 2: Bold | Alignment -->
+                                <CheckBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                                          Content="Bold"
+                                          IsChecked="{Binding EmptyBold, UpdateSourceTrigger=PropertyChanged}"
+                                          VerticalAlignment="Center"
+                                          Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                
+                                <TextBlock Grid.Row="2" Grid.Column="2"
+                                           Text="H-Alignment:"
+                                           VerticalAlignment="Center"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <ComboBox Grid.Row="2" Grid.Column="3"
+                                          SelectedValue="{Binding EmptyHorizontalAlignment, UpdateSourceTrigger=PropertyChanged}"
+                                          SelectedValuePath="Tag"
+                                          Background="{DynamicResource ControlBackgroundBrush}"
+                                          Foreground="{DynamicResource TextPrimaryBrush}"
+                                          BorderBrush="{DynamicResource ControlBorderBrush}">
+                                    <ComboBoxItem Content="Left" Tag="left"/>
+                                    <ComboBoxItem Content="Center" Tag="center"/>
+                                    <ComboBoxItem Content="Right" Tag="right"/>
+                                </ComboBox>
+                                
+                                <!-- Row 4: Fill Color | Text Color -->
+                                <TextBlock Grid.Row="4" Grid.Column="0"
+                                           Text="Fill Color:"
+                                           VerticalAlignment="Center"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <TextBox Grid.Row="4" Grid.Column="1"
+                                         Text="{Binding EmptyFill, UpdateSourceTrigger=PropertyChanged}"
+                                         Background="{DynamicResource ControlBackgroundBrush}"
+                                         Foreground="{DynamicResource TextPrimaryBrush}"
+                                         BorderBrush="{DynamicResource ControlBorderBrush}"
+                                         Padding="4"
+                                         Margin="0,0,8,0"
+                                         ToolTip="Hex color without # (e.g., FFFFFF for white)"/>
+                                
+                                <TextBlock Grid.Row="4" Grid.Column="2"
+                                           Text="Text Color:"
+                                           VerticalAlignment="Center"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <TextBox Grid.Row="4" Grid.Column="3"
+                                         Text="{Binding EmptyTextColor, UpdateSourceTrigger=PropertyChanged}"
+                                         Background="{DynamicResource ControlBackgroundBrush}"
+                                         Foreground="{DynamicResource TextPrimaryBrush}"
+                                         BorderBrush="{DynamicResource ControlBorderBrush}"
+                                         Padding="4"
+                                         ToolTip="Hex color without # (e.g., 000000 for black)"/>
+                                
+                                <!-- Row 6: Clear Formatting Button -->
+                                <Button Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2"
+                                        Content="Clear Formatting"
+                                        Command="{Binding ClearEmptyFormattingCommand}"
+                                        HorizontalAlignment="Left"
+                                        Padding="12,6"
+                                        Background="{DynamicResource ControlBackgroundBrush}"
+                                        Foreground="{DynamicResource TextPrimaryBrush}"
+                                        BorderBrush="{DynamicResource ControlBorderBrush}"/>
+                            </Grid>
+                        </Expander>
+                    </Grid>
                 </Expander>
             </StackPanel>
             
