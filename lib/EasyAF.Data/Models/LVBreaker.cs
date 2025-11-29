@@ -14,9 +14,12 @@ namespace EasyAF.Data.Models;
 /// <strong>Auto-Generated:</strong> This file was automatically generated from CSV field definitions.
 /// Do not manually edit property names - regenerate from source CSV if changes are needed.
 /// </para>
+/// <para>
+/// <strong>Extended:</strong> See LVBreaker.Computed.cs for computed/derived properties.
+/// </para>
 /// </remarks>
 [EasyPowerClass("LV Breakers")]
-public class LVBreaker
+public partial class LVBreaker
 {
     /// <summary>LV Breakers (Column: LV Breakers)</summary>
     [Category("Identity")]
