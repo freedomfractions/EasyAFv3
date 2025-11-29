@@ -4,11 +4,13 @@
         xmlns:converters="clr-namespace:EasyAF.Modules.Spec.Converters"
         Title="Edit Filter Rule"
         Width="600"
-        Height="500"
+        Height="600"
         WindowStartupLocation="CenterOwner"
         ResizeMode="CanResize"
         MinWidth="500"
         MinHeight="400"
+        MaxHeight="800"
+        SizeToContent="Height"
         Background="{DynamicResource WindowBackgroundBrush}"
         ShowInTaskbar="False">
     
@@ -55,7 +57,9 @@
         </StackPanel>
         
         <!-- Content -->
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+        <ScrollViewer Grid.Row="1" 
+                      VerticalScrollBarVisibility="Auto"
+                      Margin="0,0,8,0">
             <StackPanel>
                 <!-- Property Path Section -->
                 <TextBlock Text="Property to Filter On"

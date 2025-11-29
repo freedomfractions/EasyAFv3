@@ -343,6 +343,13 @@ namespace EasyAF.Modules.Spec.ViewModels
                     // Refresh the filter view model to show updated values
                     SelectedFilter.RefreshProperties();
                     
+                    // Force the DataGrid to refresh by removing and re-adding the item
+                    var index = Filters.IndexOf(SelectedFilter);
+                    var filter = SelectedFilter;
+                    Filters.RemoveAt(index);
+                    Filters.Insert(index, filter);
+                    SelectedFilter = filter;
+                    
                     Log.Information("Edited filter #{RuleNumber}: {Summary}", 
                         SelectedFilter.RuleNumber, SelectedFilter.Summary);
                 }
