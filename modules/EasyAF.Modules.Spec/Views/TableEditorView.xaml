@@ -806,25 +806,93 @@
                                                      Command="{Binding SetEmptyAlignmentCommand}"
                                                      CommandParameter="top-left"
                                                      ToolTip="Top Left"
-                                                     Style="{StaticResource BaseButtonStyle}"
-                                                     Width="32" Height="32">
-                                            <TextBlock Text="&#xE26C;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
+                                                     Width="32" Height="32"
+                                                     HorizontalAlignment="Center"
+                                                     VerticalAlignment="Center">
+                                            <RadioButton.Template>
+                                                <ControlTemplate TargetType="RadioButton">
+                                                    <Border Background="{TemplateBinding Background}"
+                                                            BorderBrush="{DynamicResource ControlBorderBrush}"
+                                                            BorderThickness="1"
+                                                            CornerRadius="2"
+                                                            Padding="4">
+                                                        <TextBlock Text="&#xE26C;" 
+                                                                   FontFamily="Segoe MDL2 Assets" 
+                                                                   FontSize="14"
+                                                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                                                   HorizontalAlignment="Center"
+                                                                   VerticalAlignment="Center"/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsChecked" Value="True">
+                                                            <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                                        </Trigger>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </RadioButton.Template>
                                         </RadioButton>
                                         <RadioButton GroupName="EmptyAlignment"
                                                      Command="{Binding SetEmptyAlignmentCommand}"
                                                      CommandParameter="top-center"
                                                      ToolTip="Top Center"
-                                                     Style="{StaticResource BaseButtonStyle}"
                                                      Width="32" Height="32">
-                                            <TextBlock Text="&#xE26D;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
+                                            <RadioButton.Template>
+                                                <ControlTemplate TargetType="RadioButton">
+                                                    <Border Background="{TemplateBinding Background}"
+                                                            BorderBrush="{DynamicResource ControlBorderBrush}"
+                                                            BorderThickness="1"
+                                                            CornerRadius="2"
+                                                            Padding="4">
+                                                        <TextBlock Text="&#xE26D;" 
+                                                                   FontFamily="Segoe MDL2 Assets" 
+                                                                   FontSize="14"
+                                                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                                                   HorizontalAlignment="Center"
+                                                                   VerticalAlignment="Center"/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsChecked" Value="True">
+                                                            <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                                        </Trigger>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </RadioButton.Template>
                                         </RadioButton>
                                         <RadioButton GroupName="EmptyAlignment"
                                                      Command="{Binding SetEmptyAlignmentCommand}"
                                                      CommandParameter="top-right"
                                                      ToolTip="Top Right"
-                                                     Style="{StaticResource BaseButtonStyle}"
                                                      Width="32" Height="32">
-                                            <TextBlock Text="&#xE26E;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
+                                            <RadioButton.Template>
+                                                <ControlTemplate TargetType="RadioButton">
+                                                    <Border Background="{TemplateBinding Background}"
+                                                            BorderBrush="{DynamicResource ControlBorderBrush}"
+                                                            BorderThickness="1"
+                                                            CornerRadius="2"
+                                                            Padding="4">
+                                                        <TextBlock Text="&#xE26E;" 
+                                                                   FontFamily="Segoe MDL2 Assets" 
+                                                                   FontSize="14"
+                                                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                                                   HorizontalAlignment="Center"
+                                                                   VerticalAlignment="Center"/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsChecked" Value="True">
+                                                            <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                                        </Trigger>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </RadioButton.Template>
                                         </RadioButton>
                                         
                                         <!-- Middle Row -->
@@ -832,26 +900,92 @@
                                                      Command="{Binding SetEmptyAlignmentCommand}"
                                                      CommandParameter="center-left"
                                                      ToolTip="Middle Left"
-                                                     Style="{StaticResource BaseButtonStyle}"
                                                      Width="32" Height="32">
-                                            <TextBlock Text="&#xE26F;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
+                                            <RadioButton.Template>
+                                                <ControlTemplate TargetType="RadioButton">
+                                                    <Border Background="{TemplateBinding Background}"
+                                                            BorderBrush="{DynamicResource ControlBorderBrush}"
+                                                            BorderThickness="1"
+                                                            CornerRadius="2"
+                                                            Padding="4">
+                                                        <TextBlock Text="&#xE26F;" 
+                                                                   FontFamily="Segoe MDL2 Assets" 
+                                                                   FontSize="14"
+                                                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                                                   HorizontalAlignment="Center"
+                                                                   VerticalAlignment="Center"/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsChecked" Value="True">
+                                                            <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                                        </Trigger>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </RadioButton.Template>
                                         </RadioButton>
                                         <RadioButton GroupName="EmptyAlignment"
                                                      Command="{Binding SetEmptyAlignmentCommand}"
                                                      CommandParameter="center-center"
                                                      IsChecked="True"
                                                      ToolTip="Middle Center"
-                                                     Style="{StaticResource BaseButtonStyle}"
                                                      Width="32" Height="32">
-                                            <TextBlock Text="&#xE9E4;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
+                                            <RadioButton.Template>
+                                                <ControlTemplate TargetType="RadioButton">
+                                                    <Border Background="{TemplateBinding Background}"
+                                                            BorderBrush="{DynamicResource ControlBorderBrush}"
+                                                            BorderThickness="1"
+                                                            CornerRadius="2"
+                                                            Padding="4">
+                                                        <TextBlock Text="&#xE9E4;" 
+                                                                   FontFamily="Segoe MDL2 Assets" 
+                                                                   FontSize="14"
+                                                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                                                   HorizontalAlignment="Center"
+                                                                   VerticalAlignment="Center"/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsChecked" Value="True">
+                                                            <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                                        </Trigger>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </RadioButton.Template>
                                         </RadioButton>
                                         <RadioButton GroupName="EmptyAlignment"
                                                      Command="{Binding SetEmptyAlignmentCommand}"
                                                      CommandParameter="center-right"
                                                      ToolTip="Middle Right"
-                                                     Style="{StaticResource BaseButtonStyle}"
                                                      Width="32" Height="32">
-                                            <TextBlock Text="&#xE270;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
+                                            <RadioButton.Template>
+                                                <ControlTemplate TargetType="RadioButton">
+                                                    <Border Background="{TemplateBinding Background}"
+                                                            BorderBrush="{DynamicResource ControlBorderBrush}"
+                                                            BorderThickness="1"
+                                                            CornerRadius="2"
+                                                            Padding="4">
+                                                        <TextBlock Text="&#xE270;" 
+                                                                   FontFamily="Segoe MDL2 Assets" 
+                                                                   FontSize="14"
+                                                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                                                   HorizontalAlignment="Center"
+                                                                   VerticalAlignment="Center"/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsChecked" Value="True">
+                                                            <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                                        </Trigger>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </RadioButton.Template>
                                         </RadioButton>
                                         
                                         <!-- Bottom Row -->
@@ -859,25 +993,91 @@
                                                      Command="{Binding SetEmptyAlignmentCommand}"
                                                      CommandParameter="bottom-left"
                                                      ToolTip="Bottom Left"
-                                                     Style="{StaticResource BaseButtonStyle}"
                                                      Width="32" Height="32">
-                                            <TextBlock Text="&#xE271;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
+                                            <RadioButton.Template>
+                                                <ControlTemplate TargetType="RadioButton">
+                                                    <Border Background="{TemplateBinding Background}"
+                                                            BorderBrush="{DynamicResource ControlBorderBrush}"
+                                                            BorderThickness="1"
+                                                            CornerRadius="2"
+                                                            Padding="4">
+                                                        <TextBlock Text="&#xE271;" 
+                                                                   FontFamily="Segoe MDL2 Assets" 
+                                                                   FontSize="14"
+                                                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                                                   HorizontalAlignment="Center"
+                                                                   VerticalAlignment="Center"/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsChecked" Value="True">
+                                                            <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                                        </Trigger>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </RadioButton.Template>
                                         </RadioButton>
                                         <RadioButton GroupName="EmptyAlignment"
                                                      Command="{Binding SetEmptyAlignmentCommand}"
                                                      CommandParameter="bottom-center"
                                                      ToolTip="Bottom Center"
-                                                     Style="{StaticResource BaseButtonStyle}"
                                                      Width="32" Height="32">
-                                            <TextBlock Text="&#xE272;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
+                                            <RadioButton.Template>
+                                                <ControlTemplate TargetType="RadioButton">
+                                                    <Border Background="{TemplateBinding Background}"
+                                                            BorderBrush="{DynamicResource ControlBorderBrush}"
+                                                            BorderThickness="1"
+                                                            CornerRadius="2"
+                                                            Padding="4">
+                                                        <TextBlock Text="&#xE272;" 
+                                                                   FontFamily="Segoe MDL2 Assets" 
+                                                                   FontSize="14"
+                                                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                                                   HorizontalAlignment="Center"
+                                                                   VerticalAlignment="Center"/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsChecked" Value="True">
+                                                            <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                                        </Trigger>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </RadioButton.Template>
                                         </RadioButton>
                                         <RadioButton GroupName="EmptyAlignment"
                                                      Command="{Binding SetEmptyAlignmentCommand}"
                                                      CommandParameter="bottom-right"
                                                      ToolTip="Bottom Right"
-                                                     Style="{StaticResource BaseButtonStyle}"
                                                      Width="32" Height="32">
-                                            <TextBlock Text="&#xE273;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
+                                            <RadioButton.Template>
+                                                <ControlTemplate TargetType="RadioButton">
+                                                    <Border Background="{TemplateBinding Background}"
+                                                            BorderBrush="{DynamicResource ControlBorderBrush}"
+                                                            BorderThickness="1"
+                                                            CornerRadius="2"
+                                                            Padding="4">
+                                                        <TextBlock Text="&#xE273;" 
+                                                                   FontFamily="Segoe MDL2 Assets" 
+                                                                   FontSize="14"
+                                                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                                                   HorizontalAlignment="Center"
+                                                                   VerticalAlignment="Center"/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsChecked" Value="True">
+                                                            <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                                        </Trigger>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </RadioButton.Template>
                                         </RadioButton>
                                     </UniformGrid>
                                     
