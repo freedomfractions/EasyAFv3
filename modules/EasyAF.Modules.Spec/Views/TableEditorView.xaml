@@ -455,16 +455,24 @@
                                     Command="{Binding RemoveSortSpecCommand}"
                                     Style="{StaticResource ToolBarButtonStyle}"/>
                             <Separator/>
-                            <Button Content="?" 
+                            <Button ToolTip="Move Up (Higher Priority)"
                                     Command="{Binding MoveSortSpecUpCommand}"
-                                    ToolTip="Move Up (Higher Priority)"
                                     Style="{StaticResource ToolBarButtonStyle}"
-                                    Width="32"/>
-                            <Button Content="?" 
+                                    Width="32">
+                                <TextBlock Text="&#xE70E;" 
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="14"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            </Button>
+                            <Button ToolTip="Move Down (Lower Priority)"
                                     Command="{Binding MoveSortSpecDownCommand}"
-                                    ToolTip="Move Down (Lower Priority)"
                                     Style="{StaticResource ToolBarButtonStyle}"
-                                    Width="32"/>
+                                    Width="32">
+                                <TextBlock Text="&#xE70D;" 
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="14"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            </Button>
                         </ToolBar>
                         
                         <!-- Sort Specs DataGrid -->
@@ -816,14 +824,24 @@
                                 Command="{Binding RemoveColumnCommand}"
                                 Style="{StaticResource ToolBarButtonStyle}"/>
                         <Separator/>
-                        <Button Content="?" Command="{Binding MoveColumnUpCommand}"
-                                ToolTip="Move Up"
+                        <Button ToolTip="Move Up"
+                                Command="{Binding MoveColumnUpCommand}"
                                 Style="{StaticResource ToolBarButtonStyle}"
-                                Width="32"/>
-                        <Button Content="?" Command="{Binding MoveColumnDownCommand}"
-                                ToolTip="Move Down"
+                                Width="32">
+                            <TextBlock Text="&#xE70E;" 
+                                       FontFamily="Segoe MDL2 Assets"
+                                       FontSize="14"
+                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
+                        </Button>
+                        <Button ToolTip="Move Down"
+                                Command="{Binding MoveColumnDownCommand}"
                                 Style="{StaticResource ToolBarButtonStyle}"
-                                Width="32"/>
+                                Width="32">
+                            <TextBlock Text="&#xE70D;" 
+                                       FontFamily="Segoe MDL2 Assets"
+                                       FontSize="14"
+                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
+                        </Button>
                         <Separator/>
                         <Button Content="Edit..." 
                                 Command="{Binding EditColumnCommand}"

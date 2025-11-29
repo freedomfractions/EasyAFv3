@@ -356,17 +356,16 @@ namespace EasyAF.Modules.Spec.ViewModels
 
                 if (result == true)
                 {
-                    // Create a NEW FilterSpecViewModel to force UI update
-                    var newFilterVm = new FilterSpecViewModel(filterSpec, OnFilterChanged, index + 1);
+                    // FORCE UI UPDATE: Call RefreshProperties on the existing VM
+                    SelectedFilter.RefreshProperties();
                     
-                    // Replace the item in the collection
-                    Filters[index] = newFilterVm;
-                    
-                    // Re-select the new VM
-                    SelectedFilter = newFilterVm;
+                    // ALSO force collection change notification
+                    var temp = SelectedFilter;
+                    Filters[index] = null!;
+                    Filters[index] = temp;
                     
                     Log.Information("Edited filter #{RuleNumber}: {Summary}", 
-                        newFilterVm.RuleNumber, newFilterVm.Summary);
+                        temp.RuleNumber, temp.Summary);
                 }
             }
             catch (Exception ex)

@@ -37,7 +37,7 @@ namespace EasyAF.Modules.Spec.ViewModels
         /// </summary>
         public string PropertyPath
         {
-            get => _filterSpec.PropertyPath;
+            get => _filterSpec.PropertyPath ?? string.Empty;
             set
             {
                 if (_filterSpec.PropertyPath != value)
