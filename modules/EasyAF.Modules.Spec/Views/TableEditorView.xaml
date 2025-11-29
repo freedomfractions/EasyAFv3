@@ -127,545 +127,540 @@
             </Grid.RowDefinitions>
             
             <!-- UPPER SECTION: Table Configuration -->
-            <ScrollViewer Grid.Row="0"
-                          VerticalScrollBarVisibility="Auto"
-                          HorizontalScrollBarVisibility="Disabled"
-                          Background="{DynamicResource PrimaryBackgroundBrush}">
-                <StackPanel>
-                    <!-- Table Properties Expander -->
-                    <Expander Style="{StaticResource TableConfigExpanderStyle}"
-                              Tag="&#xE73E;"> <!-- Checkmark icon -->
-                        <Expander.Header>
-                            <TextBlock Text="Table Properties"
+            <StackPanel Grid.Row="0">
+                <!-- Table Properties Expander -->
+                <Expander Style="{StaticResource TableConfigExpanderStyle}"
+                          Tag="&#xE73E;"> <!-- Checkmark icon -->
+                    <Expander.Header>
+                        <TextBlock Text="Table Properties"
+                                   FontWeight="SemiBold"
+                                   FontSize="13"
+                                   Foreground="{DynamicResource TextPrimaryBrush}"/>
+                    </Expander.Header>
+                    
+                    <Grid Margin="4">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="8"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <!-- Row 0: Table Name | Mode | Hide if no diff -->
+                        <TextBlock Grid.Row="0" Grid.Column="0"
+                                   Text="Table Name:"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,8,0"
+                                   Foreground="{DynamicResource TextPrimaryBrush}"/>
+                        <TextBox Grid.Row="0" Grid.Column="1"
+                                 Text="{Binding TableName, UpdateSourceTrigger=PropertyChanged}"
+                                 Background="{DynamicResource ControlBackgroundBrush}"
+                                 Foreground="{DynamicResource TextPrimaryBrush}"
+                                 BorderBrush="{DynamicResource ControlBorderBrush}"
+                                 Padding="4"
+                                 MinWidth="200"/>
+                        
+                        <StackPanel Grid.Row="0" Grid.Column="2"
+                                    Orientation="Horizontal"
+                                    Margin="16,0,0,0">
+                            <TextBlock Text="Mode:"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,8,0"
+                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <ComboBox Width="80"
+                                      SelectedValue="{Binding Mode, UpdateSourceTrigger=PropertyChanged}"
+                                      SelectedValuePath="Tag"
+                                      Background="{DynamicResource ControlBackgroundBrush}"
+                                      Foreground="{DynamicResource TextPrimaryBrush}"
+                                      BorderBrush="{DynamicResource ControlBorderBrush}">
+                                <ComboBoxItem Content="new" Tag="new"/>
+                                <ComboBoxItem Content="diff" Tag="diff"/>
+                            </ComboBox>
+                        </StackPanel>
+                        
+                        <CheckBox Grid.Row="0" Grid.Column="3"
+                                  Content="Hide if no diff"
+                                  IsChecked="{Binding HideIfNoDiff, UpdateSourceTrigger=PropertyChanged}"
+                                  IsEnabled="{Binding IsDiffMode}"
+                                  Margin="16,0,0,0"
+                                  VerticalAlignment="Center"
+                                  Foreground="{DynamicResource TextPrimaryBrush}"/>
+                        
+                        <!-- Row 2: Pagination -->
+                        <TextBlock Grid.Row="2" Grid.Column="0"
+                                   Text="Pagination:"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,8,0"
+                                   Foreground="{DynamicResource TextPrimaryBrush}"/>
+                        <CheckBox Grid.Row="2" Grid.Column="1"
+                                  Grid.ColumnSpan="3"
+                                  Content="Allow row break across pages"
+                                  IsChecked="{Binding AllowRowBreakAcrossPages, UpdateSourceTrigger=PropertyChanged}"
+                                  VerticalAlignment="Center"
+                                  Foreground="{DynamicResource TextPrimaryBrush}"/>
+                    </Grid>
+                </Expander>
+                
+                <!-- Filters Expander -->
+                <Expander Style="{StaticResource TableConfigExpanderStyle}" IsExpanded="False">
+                    <Expander.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Filters"
                                        FontWeight="SemiBold"
                                        FontSize="13"
                                        Foreground="{DynamicResource TextPrimaryBrush}"/>
-                        </Expander.Header>
+                            <TextBlock Text="{Binding FilterCount, StringFormat=' ({0})'}"
+                                       FontWeight="Normal"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                       VerticalAlignment="Bottom"
+                                       Margin="4,0,0,1"/>
+                        </StackPanel>
+                    </Expander.Header>
+                    
+                    <Grid Margin="4">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/> <!-- Toolbar -->
+                            <RowDefinition Height="*"/>    <!-- DataGrid -->
+                            <RowDefinition Height="8"/>
+                            <RowDefinition Height="Auto"/> <!-- Filter Logic Dropdown -->
+                        </Grid.RowDefinitions>
                         
-                        <Grid Margin="4">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="8"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
+                        <!-- Toolbar -->
+                        <ToolBar Grid.Row="0" 
+                                 Background="{DynamicResource SecondaryBackgroundBrush}"
+                                 BorderBrush="{DynamicResource ControlBorderBrush}">
+                            <Button Content="Add Filter" 
+                                    Command="{Binding AddFilterCommand}"
+                                    Style="{StaticResource ToolBarButtonStyle}"/>
+                            <Button Content="Remove" 
+                                    Command="{Binding RemoveFilterCommand}"
+                                    Style="{StaticResource ToolBarButtonStyle}"/>
+                            <Separator/>
+                            <Button Content="Edit..." 
+                                    Command="{Binding EditFilterCommand}"
+                                    Style="{StaticResource ToolBarButtonStyle}"/>
+                        </ToolBar>
+                        
+                        <!-- Filters DataGrid (READ-ONLY - double-click to edit) -->
+                        <DataGrid Grid.Row="1" 
+                                  ItemsSource="{Binding Filters}"
+                                  SelectedItem="{Binding SelectedFilter}"
+                                  AutoGenerateColumns="False"
+                                  CanUserAddRows="False"
+                                  CanUserDeleteRows="False"
+                                  IsReadOnly="True"
+                                  HeadersVisibility="Column"
+                                  Background="{DynamicResource ControlBackgroundBrush}"
+                                  Foreground="{DynamicResource TextPrimaryBrush}"
+                                  BorderBrush="{DynamicResource ControlBorderBrush}"
+                                  BorderThickness="1"
+                                  Margin="0,8,0,0"
+                                  ColumnHeaderStyle="{StaticResource ColumnEditorHeaderStyle}"
+                                  RowStyle="{StaticResource ColumnEditorRowStyle}"
+                                  GridLinesVisibility="Horizontal"
+                                  HorizontalGridLinesBrush="{DynamicResource ControlBorderBrush}"
+                                  ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                  MinHeight="120"
+                                  MaxHeight="200"
+                                  MouseDoubleClick="FiltersDataGrid_MouseDoubleClick">
+                            <DataGrid.Columns>
+                                <!-- Rule # Column -->
+                                <DataGridTextColumn Header="Rule #" 
+                                                    Binding="{Binding RuleNumber}" 
+                                                    Width="60">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                                            <Setter Property="FontWeight" Value="SemiBold"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                
+                                <!-- Summary Column -->
+                                <DataGridTextColumn Header="Filter Rule" 
+                                                    Binding="{Binding Summary}" 
+                                                    Width="*">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                                            <Setter Property="TextWrapping" Value="NoWrap"/>
+                                            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                                            <Setter Property="ToolTip" Value="{Binding Summary}"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                
+                                <!-- Type Indicator -->
+                                <DataGridTemplateColumn Header="Type" Width="80">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock HorizontalAlignment="Center"
+                                                       Foreground="{DynamicResource TextSecondaryBrush}">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Text" Value="Text"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Numeric}" Value="True">
+                                                                <Setter Property="Text" Value="Numeric"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                        
+                        <!-- Filter Logic Dropdown -->
+                        <Grid Grid.Row="3">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="150"/>
                                 <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             
-                            <!-- Row 0: Table Name | Mode | Hide if no diff -->
-                            <TextBlock Grid.Row="0" Grid.Column="0"
-                                       Text="Table Name:"
+                            <TextBlock Grid.Column="0"
+                                       Text="Apply filters using:"
                                        VerticalAlignment="Center"
                                        Margin="0,0,8,0"
                                        Foreground="{DynamicResource TextPrimaryBrush}"/>
-                            <TextBox Grid.Row="0" Grid.Column="1"
-                                     Text="{Binding TableName, UpdateSourceTrigger=PropertyChanged}"
-                                     Background="{DynamicResource ControlBackgroundBrush}"
-                                     Foreground="{DynamicResource TextPrimaryBrush}"
-                                     BorderBrush="{DynamicResource ControlBorderBrush}"
-                                     Padding="4"
-                                     MinWidth="200"/>
                             
-                            <StackPanel Grid.Row="0" Grid.Column="2"
-                                        Orientation="Horizontal"
-                                        Margin="16,0,0,0">
-                                <TextBlock Text="Mode:"
-                                           VerticalAlignment="Center"
-                                           Margin="0,0,8,0"
-                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
-                                <ComboBox Width="80"
-                                          SelectedValue="{Binding Mode, UpdateSourceTrigger=PropertyChanged}"
-                                          SelectedValuePath="Tag"
-                                          Background="{DynamicResource ControlBackgroundBrush}"
-                                          Foreground="{DynamicResource TextPrimaryBrush}"
-                                          BorderBrush="{DynamicResource ControlBorderBrush}">
-                                    <ComboBoxItem Content="new" Tag="new"/>
-                                    <ComboBoxItem Content="diff" Tag="diff"/>
-                                </ComboBox>
-                            </StackPanel>
-                            
-                            <CheckBox Grid.Row="0" Grid.Column="3"
-                                      Content="Hide if no diff"
-                                      IsChecked="{Binding HideIfNoDiff, UpdateSourceTrigger=PropertyChanged}"
-                                      IsEnabled="{Binding IsDiffMode}"
-                                      Margin="16,0,0,0"
-                                      VerticalAlignment="Center"
-                                      Foreground="{DynamicResource TextPrimaryBrush}"/>
-                            
-                            <!-- Row 2: Pagination -->
-                            <TextBlock Grid.Row="2" Grid.Column="0"
-                                       Text="Pagination:"
-                                       VerticalAlignment="Center"
-                                       Margin="0,0,8,0"
-                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
-                            <CheckBox Grid.Row="2" Grid.Column="1"
-                                      Grid.ColumnSpan="3"
-                                      Content="Allow row break across pages"
-                                      IsChecked="{Binding AllowRowBreakAcrossPages, UpdateSourceTrigger=PropertyChanged}"
-                                      VerticalAlignment="Center"
-                                      Foreground="{DynamicResource TextPrimaryBrush}"/>
-                        </Grid>
-                    </Expander>
-                    
-                    <!-- Filters Expander -->
-                    <Expander Style="{StaticResource TableConfigExpanderStyle}" IsExpanded="False">
-                        <Expander.Header>
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="Filters"
-                                           FontWeight="SemiBold"
-                                           FontSize="13"
-                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
-                                <TextBlock Text="{Binding FilterCount, StringFormat=' ({0})'}"
-                                           FontWeight="Normal"
-                                           FontSize="11"
-                                           Foreground="{DynamicResource TextSecondaryBrush}"
-                                           VerticalAlignment="Bottom"
-                                           Margin="4,0,0,1"/>
-                            </StackPanel>
-                        </Expander.Header>
-                        
-                        <Grid Margin="4">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/> <!-- Toolbar -->
-                                <RowDefinition Height="*"/>    <!-- DataGrid -->
-                                <RowDefinition Height="8"/>
-                                <RowDefinition Height="Auto"/> <!-- Filter Logic Dropdown -->
-                            </Grid.RowDefinitions>
-                            
-                            <!-- Toolbar -->
-                            <ToolBar Grid.Row="0" 
-                                     Background="{DynamicResource SecondaryBackgroundBrush}"
-                                     BorderBrush="{DynamicResource ControlBorderBrush}">
-                                <Button Content="Add Filter" 
-                                        Command="{Binding AddFilterCommand}"
-                                        Style="{StaticResource ToolBarButtonStyle}"/>
-                                <Button Content="Remove" 
-                                        Command="{Binding RemoveFilterCommand}"
-                                        Style="{StaticResource ToolBarButtonStyle}"/>
-                                <Separator/>
-                                <Button Content="Edit..." 
-                                        Command="{Binding EditFilterCommand}"
-                                        Style="{StaticResource ToolBarButtonStyle}"/>
-                            </ToolBar>
-                            
-                            <!-- Filters DataGrid (READ-ONLY - double-click to edit) -->
-                            <DataGrid Grid.Row="1" 
-                                      ItemsSource="{Binding Filters}"
-                                      SelectedItem="{Binding SelectedFilter}"
-                                      AutoGenerateColumns="False"
-                                      CanUserAddRows="False"
-                                      CanUserDeleteRows="False"
-                                      IsReadOnly="True"
-                                      HeadersVisibility="Column"
+                            <ComboBox Grid.Column="1"
+                                      SelectedValue="{Binding FilterLogic, UpdateSourceTrigger=PropertyChanged}"
+                                      SelectedValuePath="Tag"
                                       Background="{DynamicResource ControlBackgroundBrush}"
                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                      BorderBrush="{DynamicResource ControlBorderBrush}"
-                                      BorderThickness="1"
-                                      Margin="0,8,0,0"
-                                      ColumnHeaderStyle="{StaticResource ColumnEditorHeaderStyle}"
-                                      RowStyle="{StaticResource ColumnEditorRowStyle}"
-                                      GridLinesVisibility="Horizontal"
-                                      HorizontalGridLinesBrush="{DynamicResource ControlBorderBrush}"
-                                      ScrollViewer.VerticalScrollBarVisibility="Auto"
-                                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                                      MinHeight="120"
-                                      MaxHeight="200"
-                                      MouseDoubleClick="FiltersDataGrid_MouseDoubleClick">
-                                <DataGrid.Columns>
-                                    <!-- Rule # Column -->
-                                    <DataGridTextColumn Header="Rule #" 
-                                                        Binding="{Binding RuleNumber}" 
-                                                        Width="60">
-                                        <DataGridTextColumn.ElementStyle>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="HorizontalAlignment" Value="Center"/>
-                                                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
-                                                <Setter Property="FontWeight" Value="SemiBold"/>
-                                            </Style>
-                                        </DataGridTextColumn.ElementStyle>
-                                    </DataGridTextColumn>
-                                    
-                                    <!-- Summary Column -->
-                                    <DataGridTextColumn Header="Filter Rule" 
-                                                        Binding="{Binding Summary}" 
-                                                        Width="*">
-                                        <DataGridTextColumn.ElementStyle>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
-                                                <Setter Property="TextWrapping" Value="NoWrap"/>
-                                                <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
-                                                <Setter Property="ToolTip" Value="{Binding Summary}"/>
-                                            </Style>
-                                        </DataGridTextColumn.ElementStyle>
-                                    </DataGridTextColumn>
-                                    
-                                    <!-- Type Indicator -->
-                                    <DataGridTemplateColumn Header="Type" Width="80">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <TextBlock HorizontalAlignment="Center"
-                                                           Foreground="{DynamicResource TextSecondaryBrush}">
-                                                    <TextBlock.Style>
-                                                        <Style TargetType="TextBlock">
-                                                            <Setter Property="Text" Value="Text"/>
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding Numeric}" Value="True">
-                                                                    <Setter Property="Text" Value="Numeric"/>
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBlock.Style>
-                                                </TextBlock>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
-                                </DataGrid.Columns>
-                            </DataGrid>
+                                      BorderBrush="{DynamicResource ControlBorderBrush}">
+                                <ComboBoxItem Content="AND (all must match)" Tag="AND" IsSelected="True"/>
+                                <ComboBoxItem Content="OR (any must match)" Tag="OR"/>
+                                <ComboBoxItem Content="Advanced..." Tag="Advanced"/>
+                            </ComboBox>
                             
-                            <!-- Filter Logic Dropdown -->
-                            <Grid Grid.Row="3">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="150"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
+                            <!-- Advanced logic hint (shown when Advanced selected) -->
+                            <TextBlock Grid.Column="2"
+                                       Text="Use rule numbers in logic: e.g., '(1 | 2) &amp; 3'"
+                                       VerticalAlignment="Center"
+                                       Margin="12,0,0,0"
+                                       FontStyle="Italic"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource TextSecondaryBrush}">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsAdvancedFilterLogic}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Grid>
+                        
+                        <!-- Empty State Overlay -->
+                        <Border Grid.Row="1"
+                                Background="{DynamicResource WindowBackgroundBrush}"
+                                Opacity="0.95"
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Center"
+                                CornerRadius="8"
+                                Padding="24,16"
+                                BorderBrush="{DynamicResource ControlBorderBrush}"
+                                BorderThickness="2"
+                                IsHitTestVisible="False">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Setter Property="Opacity" Value="0.95"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Filters.Count}" Value="0">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            
+                            <StackPanel MaxWidth="300">
+                                <TextBlock Text="&#xE71C;"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="36"
+                                           HorizontalAlignment="Center"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                           Margin="0,0,0,12"/>
                                 
-                                <TextBlock Grid.Column="0"
-                                           Text="Apply filters using:"
-                                           VerticalAlignment="Center"
-                                           Margin="0,0,8,0"
-                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <TextBlock Text="No Filters Defined"
+                                           FontSize="14"
+                                           FontWeight="SemiBold"
+                                           HorizontalAlignment="Center"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"
+                                           Margin="0,0,0,6"/>
                                 
-                                <ComboBox Grid.Column="1"
-                                          SelectedValue="{Binding FilterLogic, UpdateSourceTrigger=PropertyChanged}"
-                                          SelectedValuePath="Tag"
-                                          Background="{DynamicResource ControlBackgroundBrush}"
-                                          Foreground="{DynamicResource TextPrimaryBrush}"
-                                          BorderBrush="{DynamicResource ControlBorderBrush}">
-                                    <ComboBoxItem Content="AND (all must match)" Tag="AND" IsSelected="True"/>
-                                    <ComboBoxItem Content="OR (any must match)" Tag="OR"/>
-                                    <ComboBoxItem Content="Advanced..." Tag="Advanced"/>
-                                </ComboBox>
-                                
-                                <!-- Advanced logic hint (shown when Advanced selected) -->
-                                <TextBlock Grid.Column="2"
-                                           Text="Use rule numbers in logic: e.g., '(1 | 2) &amp; 3'"
-                                           VerticalAlignment="Center"
-                                           Margin="12,0,0,0"
-                                           FontStyle="Italic"
+                                <TextBlock TextWrapping="Wrap"
+                                           TextAlignment="Center"
                                            FontSize="11"
                                            Foreground="{DynamicResource TextSecondaryBrush}">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsAdvancedFilterLogic}" Value="True">
-                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
+                                    <Run Text="Click"/>
+                                    <Run Text="Add Filter" FontWeight="Bold"/>
+                                    <Run Text="to include/exclude rows. Double-click a filter to edit it."/>
                                 </TextBlock>
-                            </Grid>
-                            
-                            <!-- Empty State Overlay -->
-                            <Border Grid.Row="1"
-                                    Background="{DynamicResource WindowBackgroundBrush}"
-                                    Opacity="0.95"
-                                    VerticalAlignment="Center"
-                                    HorizontalAlignment="Center"
-                                    CornerRadius="8"
-                                    Padding="24,16"
-                                    BorderBrush="{DynamicResource ControlBorderBrush}"
-                                    BorderThickness="2"
-                                    IsHitTestVisible="False">
-                                <Border.Style>
-                                    <Style TargetType="Border">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                        <Setter Property="Opacity" Value="0.95"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Filters.Count}" Value="0">
-                                                <Setter Property="Visibility" Value="Visible"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Border.Style>
-                                
-                                <StackPanel MaxWidth="300">
-                                    <TextBlock Text="&#xE71C;"
-                                               FontFamily="Segoe MDL2 Assets"
-                                               FontSize="36"
-                                               HorizontalAlignment="Center"
-                                               Foreground="{DynamicResource TextSecondaryBrush}"
-                                               Margin="0,0,0,12"/>
-                                    
-                                    <TextBlock Text="No Filters Defined"
-                                               FontSize="14"
-                                               FontWeight="SemiBold"
-                                               HorizontalAlignment="Center"
-                                               Foreground="{DynamicResource TextPrimaryBrush}"
-                                               Margin="0,0,0,6"/>
-                                    
-                                    <TextBlock TextWrapping="Wrap"
-                                               TextAlignment="Center"
-                                               FontSize="11"
-                                               Foreground="{DynamicResource TextSecondaryBrush}">
-                                        <Run Text="Click"/>
-                                        <Run Text="Add Filter" FontWeight="Bold"/>
-                                        <Run Text="to include/exclude rows. Double-click a filter to edit it."/>
-                                    </TextBlock>
-                                </StackPanel>
-                            </Border>
-                        </Grid>
-                    </Expander>
-                    
-                    <!-- Sorting Expander -->
-                    <Expander Style="{StaticResource TableConfigExpanderStyle}" IsExpanded="False">
-                        <Expander.Header>
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="Sorting"
-                                           FontWeight="SemiBold"
-                                           FontSize="13"
-                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
-                                <TextBlock Text="{Binding SortSpecCount, StringFormat=' ({0})'}"
-                                           FontWeight="Normal"
-                                           FontSize="11"
-                                           Foreground="{DynamicResource TextSecondaryBrush}"
-                                           VerticalAlignment="Bottom"
-                                           Margin="4,0,0,1"/>
                             </StackPanel>
-                        </Expander.Header>
-                        
-                        <Grid Margin="4">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/> <!-- Toolbar -->
-                                <RowDefinition Height="*"/>    <!-- DataGrid -->
-                                <RowDefinition Height="8"/>
-                                <RowDefinition Height="Auto"/> <!-- Sort Details Panel -->
-                            </Grid.RowDefinitions>
-                        
-                            <!-- Toolbar -->
-                            <ToolBar Grid.Row="0" 
-                                     Background="{DynamicResource SecondaryBackgroundBrush}"
-                                     BorderBrush="{DynamicResource ControlBorderBrush}">
-                                <Button Content="Add Sort" 
-                                        Command="{Binding AddSortSpecCommand}"
-                                        Style="{StaticResource ToolBarButtonStyle}"/>
-                                <Button Content="Remove" 
-                                        Command="{Binding RemoveSortSpecCommand}"
-                                        Style="{StaticResource ToolBarButtonStyle}"/>
-                                <Separator/>
-                                <Button Content="▲" 
-                                        Command="{Binding MoveSortSpecUpCommand}"
-                                        ToolTip="Move Up (Higher Priority)"
-                                        Style="{StaticResource ToolBarButtonStyle}"
-                                        Width="32"/>
-                                <Button Content="▼" 
-                                        Command="{Binding MoveSortSpecDownCommand}"
-                                        ToolTip="Move Down (Lower Priority)"
-                                        Style="{StaticResource ToolBarButtonStyle}"
-                                        Width="32"/>
-                            </ToolBar>
-                            
-                            <!-- Sort Specs DataGrid -->
-                            <DataGrid Grid.Row="1" 
-                                      ItemsSource="{Binding SortSpecs}"
-                                      SelectedItem="{Binding SelectedSortSpec}"
-                                      AutoGenerateColumns="False"
-                                      CanUserAddRows="False"
-                                      CanUserDeleteRows="False"
-                                      HeadersVisibility="Column"
-                                      Background="{DynamicResource ControlBackgroundBrush}"
-                                      Foreground="{DynamicResource TextPrimaryBrush}"
-                                      BorderBrush="{DynamicResource ControlBorderBrush}"
-                                      BorderThickness="1"
-                                      Margin="0,8,0,0"
-                                      ColumnHeaderStyle="{StaticResource ColumnEditorHeaderStyle}"
-                                      RowStyle="{StaticResource ColumnEditorRowStyle}"
-                                      GridLinesVisibility="Horizontal"
-                                      HorizontalGridLinesBrush="{DynamicResource ControlBorderBrush}"
-                                      ScrollViewer.VerticalScrollBarVisibility="Auto"
-                                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                                      MinHeight="100"
-                                      MaxHeight="150">
-                                <DataGrid.Columns>
-                                    <!-- Order Column -->
-                                    <DataGridTextColumn Header="Priority" 
-                                                        Binding="{Binding OrderIndex}" 
-                                                        Width="70"
-                                                        IsReadOnly="True">
-                                        <DataGridTextColumn.ElementStyle>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="HorizontalAlignment" Value="Center"/>
-                                                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
-                                                <Setter Property="FontWeight" Value="SemiBold"/>
-                                            </Style>
-                                        </DataGridTextColumn.ElementStyle>
-                                    </DataGridTextColumn>
-                                    
-                                    <!-- Column Number - EDITABLE -->
-                                    <DataGridTextColumn Header="Column #" 
-                                                        Binding="{Binding Column, UpdateSourceTrigger=PropertyChanged}" 
-                                                        Width="80">
-                                        <DataGridTextColumn.ElementStyle>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="HorizontalAlignment" Value="Center"/>
-                                                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
-                                            </Style>
-                                        </DataGridTextColumn.ElementStyle>
-                                        <DataGridTextColumn.EditingElementStyle>
-                                            <Style TargetType="TextBox">
-                                                <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}"/>
-                                                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
-                                                <Setter Property="BorderBrush" Value="{DynamicResource ControlBorderBrush}"/>
-                                                <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                                            </Style>
-                                        </DataGridTextColumn.EditingElementStyle>
-                                    </DataGridTextColumn>
-                                    
-                                    <!-- Direction - Template Column with ComboBox -->
-                                    <DataGridTemplateColumn Header="Direction" Width="150">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Text="{Binding DirectionDisplay}"
-                                                           Foreground="{DynamicResource TextPrimaryBrush}"
-                                                           VerticalAlignment="Center"
-                                                           Margin="4,0"/>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                        <DataGridTemplateColumn.CellEditingTemplate>
-                                            <DataTemplate>
-                                                <ComboBox SelectedValue="{Binding Direction, UpdateSourceTrigger=PropertyChanged}"
-                                                          SelectedValuePath="Tag"
-                                                          Background="{DynamicResource ControlBackgroundBrush}"
-                                                          Foreground="{DynamicResource TextPrimaryBrush}"
-                                                          BorderBrush="{DynamicResource ControlBorderBrush}">
-                                                    <ComboBoxItem Content="Ascending ?" Tag="asc"/>
-                                                    <ComboBoxItem Content="Descending ?" Tag="desc"/>
-                                                </ComboBox>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellEditingTemplate>
-                                    </DataGridTemplateColumn>
-                                    
-                                    <!-- Numeric - CHECKBOX -->
-                                    <DataGridCheckBoxColumn Header="Numeric" 
-                                                            Binding="{Binding Numeric, UpdateSourceTrigger=PropertyChanged}" 
-                                                            Width="*">
-                                        <DataGridCheckBoxColumn.ElementStyle>
-                                            <Style TargetType="CheckBox">
-                                                <Setter Property="HorizontalAlignment" Value="Center"/>
-                                                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
-                                            </Style>
-                                        </DataGridCheckBoxColumn.ElementStyle>
-                                    </DataGridCheckBoxColumn>
-                                </DataGrid.Columns>
-                            </DataGrid>
-                            
-                            <!-- Sort Details Panel (shows summary when item selected) -->
-                            <Border Grid.Row="3"
-                                    Background="{DynamicResource SecondaryBackgroundBrush}"
-                                    BorderBrush="{DynamicResource ControlBorderBrush}"
-                                    BorderThickness="1"
-                                    CornerRadius="4"
-                                    Padding="8,6">
-                                <Border.Style>
-                                    <Style TargetType="Border">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding SelectedSortSpec, Converter={StaticResource NullToBooleanConverter}}" Value="True">
-                                                <Setter Property="Visibility" Value="Visible"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Border.Style>
-                                
-                                <StackPanel Orientation="Horizontal" DataContext="{Binding SelectedSortSpec}">
-                                    <TextBlock Text="&#xE8CB;"
-                                               FontFamily="Segoe MDL2 Assets"
-                                               FontSize="14"
-                                               Foreground="{DynamicResource AccentBrush}"
-                                               VerticalAlignment="Center"
-                                               Margin="0,0,8,0"/>
-                                    <TextBlock Text="{Binding Summary}"
-                                               FontSize="12"
-                                               Foreground="{DynamicResource TextPrimaryBrush}"
-                                               VerticalAlignment="Center"/>
-                                </StackPanel>
-                            </Border>
-                            
-                            <!-- Empty State Overlay -->
-                            <Border Grid.Row="1"
-                                    Background="{DynamicResource WindowBackgroundBrush}"
-                                    Opacity="0.95"
-                                    VerticalAlignment="Center"
-                                    HorizontalAlignment="Center"
-                                    CornerRadius="8"
-                                    Padding="24,16"
-                                    BorderBrush="{DynamicResource ControlBorderBrush}"
-                                    BorderThickness="2"
-                                    IsHitTestVisible="False">
-                                <Border.Style>
-                                    <Style TargetType="Border">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                        <Setter Property="Opacity" Value="0.95"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding SortSpecs.Count}" Value="0">
-                                                <Setter Property="Visibility" Value="Visible"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Border.Style>
-                                
-                                <StackPanel MaxWidth="300">
-                                    <TextBlock Text="&#xE8CB;"
-                                               FontFamily="Segoe MDL2 Assets"
-                                               FontSize="36"
-                                               HorizontalAlignment="Center"
-                                               Foreground="{DynamicResource TextSecondaryBrush}"
-                                               Margin="0,0,0,12"/>
-                                    
-                                    <TextBlock Text="No Sorting Defined"
-                                               FontSize="14"
-                                               FontWeight="SemiBold"
-                                               HorizontalAlignment="Center"
-                                               Foreground="{DynamicResource TextPrimaryBrush}"
-                                               Margin="0,0,0,6"/>
-                                    
-                                    <TextBlock TextWrapping="Wrap"
-                                               TextAlignment="Center"
-                                               FontSize="11"
-                                               Foreground="{DynamicResource TextSecondaryBrush}">
-                                        <Run Text="Click"/>
-                                        <Run Text="Add Sort" FontWeight="Bold"/>
-                                        <Run Text="to sort table rows. Higher priority sorts are applied first."/>
-                                    </TextBlock>
-                                </StackPanel>
-                            </Border>
-                        </Grid>
-                    </Expander>
-                    
-                    <!-- Empty Message Expander (placeholder for Phase 2.1.D) -->
-                    <Expander Style="{StaticResource TableConfigExpanderStyle}"
-                              Tag="&#xE946;"> <!-- Info icon (placeholder) -->
-                        <Expander.Header>
-                            <TextBlock FontWeight="SemiBold"
+                        </Border>
+                    </Grid>
+                </Expander>
+                
+                <!-- Sorting Expander -->
+                <Expander Style="{StaticResource TableConfigExpanderStyle}" IsExpanded="False">
+                    <Expander.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Sorting"
+                                       FontWeight="SemiBold"
                                        FontSize="13"
-                                       Foreground="{DynamicResource TextPrimaryBrush}">
-                                <Run Text="Empty Message"/>
-                                <Run Text="(coming soon)" FontStyle="Italic" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                            </TextBlock>
-                        </Expander.Header>
-                        <TextBlock Text="Empty message configuration will be added in Phase 2.1.D"
-                                   Foreground="{DynamicResource TextSecondaryBrush}"
-                                   FontStyle="Italic"
-                                   Margin="4"/>
-                    </Expander>
-                </StackPanel>
-            </ScrollViewer>
+                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <TextBlock Text="{Binding SortSpecCount, StringFormat=' ({0})'}"
+                                       FontWeight="Normal"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                       VerticalAlignment="Bottom"
+                                       Margin="4,0,0,1"/>
+                        </StackPanel>
+                    </Expander.Header>
+                    
+                    <Grid Margin="4">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/> <!-- Toolbar -->
+                            <RowDefinition Height="*"/>    <!-- DataGrid -->
+                            <RowDefinition Height="8"/>
+                            <RowDefinition Height="Auto"/> <!-- Sort Details Panel -->
+                        </Grid.RowDefinitions>
+                    
+                        <!-- Toolbar -->
+                        <ToolBar Grid.Row="0" 
+                                 Background="{DynamicResource SecondaryBackgroundBrush}"
+                                 BorderBrush="{DynamicResource ControlBorderBrush}">
+                            <Button Content="Add Sort" 
+                                    Command="{Binding AddSortSpecCommand}"
+                                    Style="{StaticResource ToolBarButtonStyle}"/>
+                            <Button Content="Remove" 
+                                    Command="{Binding RemoveSortSpecCommand}"
+                                    Style="{StaticResource ToolBarButtonStyle}"/>
+                            <Separator/>
+                            <Button Content="▲" 
+                                    Command="{Binding MoveSortSpecUpCommand}"
+                                    ToolTip="Move Up (Higher Priority)"
+                                    Style="{StaticResource ToolBarButtonStyle}"
+                                    Width="32"/>
+                            <Button Content="▼" 
+                                    Command="{Binding MoveSortSpecDownCommand}"
+                                    ToolTip="Move Down (Lower Priority)"
+                                    Style="{StaticResource ToolBarButtonStyle}"
+                                    Width="32"/>
+                        </ToolBar>
+                        
+                        <!-- Sort Specs DataGrid -->
+                        <DataGrid Grid.Row="1" 
+                                  ItemsSource="{Binding SortSpecs}"
+                                  SelectedItem="{Binding SelectedSortSpec}"
+                                  AutoGenerateColumns="False"
+                                  CanUserAddRows="False"
+                                  CanUserDeleteRows="False"
+                                  HeadersVisibility="Column"
+                                  Background="{DynamicResource ControlBackgroundBrush}"
+                                  Foreground="{DynamicResource TextPrimaryBrush}"
+                                  BorderBrush="{DynamicResource ControlBorderBrush}"
+                                  BorderThickness="1"
+                                  Margin="0,8,0,0"
+                                  ColumnHeaderStyle="{StaticResource ColumnEditorHeaderStyle}"
+                                  RowStyle="{StaticResource ColumnEditorRowStyle}"
+                                  GridLinesVisibility="Horizontal"
+                                  HorizontalGridLinesBrush="{DynamicResource ControlBorderBrush}"
+                                  ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                  MinHeight="100"
+                                  MaxHeight="150">
+                            <DataGrid.Columns>
+                                <!-- Order Column -->
+                                <DataGridTextColumn Header="Priority" 
+                                                    Binding="{Binding OrderIndex}" 
+                                                    Width="70"
+                                                    IsReadOnly="True">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                                            <Setter Property="FontWeight" Value="SemiBold"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                
+                                <!-- Column Number - EDITABLE -->
+                                <DataGridTextColumn Header="Column #" 
+                                                    Binding="{Binding Column, UpdateSourceTrigger=PropertyChanged}" 
+                                                    Width="80">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                    <DataGridTextColumn.EditingElementStyle>
+                                        <Style TargetType="TextBox">
+                                            <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                                            <Setter Property="BorderBrush" Value="{DynamicResource ControlBorderBrush}"/>
+                                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                        </Style>
+                                    </DataGridTextColumn.EditingElementStyle>
+                                </DataGridTextColumn>
+                                
+                                <!-- Direction - Template Column with ComboBox -->
+                                <DataGridTemplateColumn Header="Direction" Width="150">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding DirectionDisplay}"
+                                                       Foreground="{DynamicResource TextPrimaryBrush}"
+                                                       VerticalAlignment="Center"
+                                                       Margin="4,0"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                    <DataGridTemplateColumn.CellEditingTemplate>
+                                        <DataTemplate>
+                                            <ComboBox SelectedValue="{Binding Direction, UpdateSourceTrigger=PropertyChanged}"
+                                                      SelectedValuePath="Tag"
+                                                      Background="{DynamicResource ControlBackgroundBrush}"
+                                                      Foreground="{DynamicResource TextPrimaryBrush}"
+                                                      BorderBrush="{DynamicResource ControlBorderBrush}">
+                                                <ComboBoxItem Content="Ascending ?" Tag="asc"/>
+                                                <ComboBoxItem Content="Descending ?" Tag="desc"/>
+                                            </ComboBox>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellEditingTemplate>
+                                </DataGridTemplateColumn>
+                                
+                                <!-- Numeric - CHECKBOX -->
+                                <DataGridCheckBoxColumn Header="Numeric" 
+                                                        Binding="{Binding Numeric, UpdateSourceTrigger=PropertyChanged}" 
+                                                        Width="*">
+                                    <DataGridCheckBoxColumn.ElementStyle>
+                                        <Style TargetType="CheckBox">
+                                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                                        </Style>
+                                    </DataGridCheckBoxColumn.ElementStyle>
+                                </DataGridCheckBoxColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                        
+                        <!-- Sort Details Panel (shows summary when item selected) -->
+                        <Border Grid.Row="3"
+                                Background="{DynamicResource SecondaryBackgroundBrush}"
+                                BorderBrush="{DynamicResource ControlBorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="4"
+                                Padding="8,6">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedSortSpec, Converter={StaticResource NullToBooleanConverter}}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            
+                            <StackPanel Orientation="Horizontal" DataContext="{Binding SelectedSortSpec}">
+                                <TextBlock Text="&#xE8CB;"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="14"
+                                           Foreground="{DynamicResource AccentBrush}"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,8,0"/>
+                                <TextBlock Text="{Binding Summary}"
+                                           FontSize="12"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- Empty State Overlay -->
+                        <Border Grid.Row="1"
+                                Background="{DynamicResource WindowBackgroundBrush}"
+                                Opacity="0.95"
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Center"
+                                CornerRadius="8"
+                                Padding="24,16"
+                                BorderBrush="{DynamicResource ControlBorderBrush}"
+                                BorderThickness="2"
+                                IsHitTestVisible="False">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Setter Property="Opacity" Value="0.95"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SortSpecs.Count}" Value="0">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            
+                            <StackPanel MaxWidth="300">
+                                <TextBlock Text="&#xE8CB;"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="36"
+                                           HorizontalAlignment="Center"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                           Margin="0,0,0,12"/>
+                                
+                                <TextBlock Text="No Sorting Defined"
+                                           FontSize="14"
+                                           FontWeight="SemiBold"
+                                           HorizontalAlignment="Center"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"
+                                           Margin="0,0,0,6"/>
+                                
+                                <TextBlock TextWrapping="Wrap"
+                                           TextAlignment="Center"
+                                           FontSize="11"
+                                           Foreground="{DynamicResource TextSecondaryBrush}">
+                                    <Run Text="Click"/>
+                                    <Run Text="Add Sort" FontWeight="Bold"/>
+                                    <Run Text="to sort table rows. Higher priority sorts are applied first."/>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </Expander>
+                
+                <!-- Empty Message Expander (placeholder for Phase 2.1.D) -->
+                <Expander Style="{StaticResource TableConfigExpanderStyle}"
+                          Tag="&#xE946;"> <!-- Info icon (placeholder) -->
+                    <Expander.Header>
+                        <TextBlock FontWeight="SemiBold"
+                                   FontSize="13"
+                                   Foreground="{DynamicResource TextPrimaryBrush}">
+                            <Run Text="Empty Message"/>
+                            <Run Text="(coming soon)" FontStyle="Italic" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        </TextBlock>
+                    </Expander.Header>
+                    <TextBlock Text="Empty message configuration will be added in Phase 2.1.D"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               FontStyle="Italic"
+                               Margin="4"/>
+                </Expander>
+            </StackPanel>
             
             <!-- GridSplitter for resizing -->
             <GridSplitter Grid.Row="1"
