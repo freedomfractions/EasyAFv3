@@ -210,7 +210,11 @@ namespace EasyAF.Modules.Spec.ViewModels
             {
                 for (int i = 0; i < _table.SortSpecs.Length; i++)
                 {
-                    var sortVm = new SortSpecViewModel(_table.SortSpecs[i], OnSortSpecChanged, i + 1);
+                    var sortVm = new SortSpecViewModel(
+                        _table.SortSpecs[i], 
+                        OnSortSpecChanged, 
+                        GetColumnHeaderForColumn,
+                        i + 1);
                     SortSpecs.Add(sortVm);
                 }
             }
@@ -222,6 +226,18 @@ namespace EasyAF.Modules.Spec.ViewModels
             }
 
             RaisePropertyChanged(nameof(SortSpecCount));
+        }
+
+        /// <summary>
+        /// Gets the column header name for a given column number (1-based).
+        /// </summary>
+        private string GetColumnHeaderForColumn(int columnNumber)
+        {
+            if (columnNumber < 1 || columnNumber > _table.Columns.Length)
+                return "(invalid)";
+            
+            var column = _table.Columns[columnNumber - 1];
+            return column.Header ?? $"Column {columnNumber}";
         }
 
         /// <summary>

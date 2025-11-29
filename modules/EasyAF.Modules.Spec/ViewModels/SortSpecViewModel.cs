@@ -13,12 +13,14 @@ namespace EasyAF.Modules.Spec.ViewModels
     {
         private readonly SortSpec _sortSpec;
         private readonly Action _onChanged;
+        private readonly Func<int, string> _getColumnHeader;
         private int _orderIndex;
 
-        public SortSpecViewModel(SortSpec sortSpec, Action onChanged, int orderIndex = 0)
+        public SortSpecViewModel(SortSpec sortSpec, Action onChanged, Func<int, string> getColumnHeader, int orderIndex = 0)
         {
             _sortSpec = sortSpec ?? throw new ArgumentNullException(nameof(sortSpec));
             _onChanged = onChanged ?? throw new ArgumentNullException(nameof(onChanged));
+            _getColumnHeader = getColumnHeader ?? throw new ArgumentNullException(nameof(getColumnHeader));
             _orderIndex = orderIndex;
         }
 
@@ -44,11 +46,17 @@ namespace EasyAF.Modules.Spec.ViewModels
                     _sortSpec.Column = value;
                     _onChanged();
                     RaisePropertyChanged();
+                    RaisePropertyChanged(nameof(ColumnHeader));
                     RaisePropertyChanged(nameof(Summary));
                     Log.Debug("SortSpec Column changed to: {Column}", value);
                 }
             }
         }
+
+        /// <summary>
+        /// Gets the column header name for the current column number.
+        /// </summary>
+        public string ColumnHeader => _getColumnHeader(Column);
 
         /// <summary>
         /// Gets or sets the sort direction (asc/desc).

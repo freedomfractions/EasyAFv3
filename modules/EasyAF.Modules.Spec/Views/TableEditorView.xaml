@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="EasyAF.Modules.Spec.Views.TableEditorView"
+<UserControl x:Class="EasyAF.Modules.Spec.Views.TableEditorView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:converters="clr-namespace:EasyAF.Modules.Spec.Converters"
@@ -455,12 +455,12 @@
                                     Command="{Binding RemoveSortSpecCommand}"
                                     Style="{StaticResource ToolBarButtonStyle}"/>
                             <Separator/>
-                            <Button Content="▲" 
+                            <Button Content="?" 
                                     Command="{Binding MoveSortSpecUpCommand}"
                                     ToolTip="Move Up (Higher Priority)"
                                     Style="{StaticResource ToolBarButtonStyle}"
                                     Width="32"/>
-                            <Button Content="▼" 
+                            <Button Content="?" 
                                     Command="{Binding MoveSortSpecDownCommand}"
                                     ToolTip="Move Down (Lower Priority)"
                                     Style="{StaticResource ToolBarButtonStyle}"
@@ -490,17 +490,7 @@
                                   MaxHeight="150">
                             <DataGrid.Columns>
                                 <!-- Order Column -->
-                                <DataGridTextColumn Header="Priority" 
-                                                    Binding="{Binding OrderIndex}" 
-                                                    Width="70"
-                                                    IsReadOnly="True">
-                                    <DataGridTextColumn.ElementStyle>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="HorizontalAlignment" Value="Center"/>
-                                            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
-                                            <Setter Property="FontWeight" Value="SemiBold"/>
-                                        </Style>
-                                    </DataGridTextColumn.ElementStyle>
+                                <DataGridTextColumn Header="Priority" Binding="{Binding OrderIndex}" Width="70" IsReadOnly="True"><DataGridTextColumn.HeaderStyle><Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource ColumnEditorHeaderStyle}"><Setter Property="HorizontalContentAlignment" Value="Center"/></Style></DataGridTextColumn.HeaderStyle><DataGridTextColumn.ElementStyle><Style TargetType="TextBlock"><Setter Property="HorizontalAlignment" Value="Center"/><Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/><Setter Property="FontWeight" Value="SemiBold"/></Style></DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
                                 
                                 <!-- Column Number - EDITABLE -->
@@ -826,11 +816,11 @@
                                 Command="{Binding RemoveColumnCommand}"
                                 Style="{StaticResource ToolBarButtonStyle}"/>
                         <Separator/>
-                        <Button Content="▲" Command="{Binding MoveColumnUpCommand}"
+                        <Button Content="?" Command="{Binding MoveColumnUpCommand}"
                                 ToolTip="Move Up"
                                 Style="{StaticResource ToolBarButtonStyle}"
                                 Width="32"/>
-                        <Button Content="▼" Command="{Binding MoveColumnDownCommand}"
+                        <Button Content="?" Command="{Binding MoveColumnDownCommand}"
                                 ToolTip="Move Down"
                                 Style="{StaticResource ToolBarButtonStyle}"
                                 Width="32"/>

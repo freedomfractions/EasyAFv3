@@ -149,11 +149,11 @@ namespace EasyAF.Modules.Spec.ViewModels
         public string OperatorDisplay => Operator switch
         {
             "eq" => "equals (=)",
-            "neq" => "not equals (?)",
+            "neq" => "not equals (!=)",
             "gt" => "greater than (>)",
             "lt" => "less than (<)",
-            "gte" => "greater than or equal (?)",
-            "lte" => "less than or equal (?)",
+            "gte" => "greater than or equal (>=)",
+            "lte" => "less than or equal (<=)",
             "contains" => "contains",
             _ => Operator
         };
@@ -178,11 +178,11 @@ namespace EasyAF.Modules.Spec.ViewModels
                 var op = Operator switch
                 {
                     "eq" => "=",
-                    "neq" => "?",
+                    "neq" => "!=",
                     "gt" => ">",
                     "lt" => "<",
-                    "gte" => "?",
-                    "lte" => "?",
+                    "gte" => ">=",
+                    "lte" => "<=",
                     "contains" => "contains",
                     _ => Operator
                 };
@@ -243,11 +243,11 @@ namespace EasyAF.Modules.Spec.ViewModels
             return new ObservableCollection<OperatorOption>
             {
                 new("eq", "equals (=)"),
-                new("neq", "not equals (?)"),
+                new("neq", "not equals (!=)"),
                 new("gt", "greater than (>)"),
                 new("lt", "less than (<)"),
-                new("gte", "greater than or equal (?)"),
-                new("lte", "less than or equal (?)"),
+                new("gte", "greater than or equal (>=)"),
+                new("lte", "less than or equal (<=)"),
                 new("contains", "contains")
             };
         }
