@@ -1,3 +1,4 @@
+using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -39,7 +40,13 @@ namespace EasyAF.Modules.Spec.Behaviors
             AssociatedObject.TextChanged += OnTextChanged;
             AssociatedObject.GotFocus += OnGotFocus;
             AssociatedObject.LostFocus += OnLostFocus;
-            UpdateWatermark();
+            AssociatedObject.Loaded += OnLoaded;
+            
+            // Try to update immediately if already loaded
+            if (AssociatedObject.IsLoaded)
+            {
+                UpdateWatermark();
+            }
         }
 
         protected override void OnDetaching()
@@ -48,6 +55,13 @@ namespace EasyAF.Modules.Spec.Behaviors
             AssociatedObject.TextChanged -= OnTextChanged;
             AssociatedObject.GotFocus -= OnGotFocus;
             AssociatedObject.LostFocus -= OnLostFocus;
+            AssociatedObject.Loaded -= OnLoaded;
+        }
+
+        private void OnLoaded(object sender, RoutedEventArgs e)
+        {
+            // Update watermark after the control is fully loaded
+            UpdateWatermark();
         }
 
         private void OnTextChanged(object sender, TextChangedEventArgs e)
@@ -69,27 +83,33 @@ namespace EasyAF.Modules.Spec.Behaviors
         {
             if (AssociatedObject == null) return;
 
-            var adornerLayer = AdornerLayer.GetAdornerLayer(AssociatedObject);
-            if (adornerLayer == null) return;
-
-            // Remove existing watermark adorner
-            var adorners = adornerLayer.GetAdorners(AssociatedObject);
-            if (adorners != null)
+            // Defer to next render pass to ensure adorner layer is ready
+            Dispatcher.BeginInvoke(new System.Action(() =>
             {
-                foreach (var adorner in adorners)
+                if (AssociatedObject == null) return;
+
+                var adornerLayer = AdornerLayer.GetAdornerLayer(AssociatedObject);
+                if (adornerLayer == null) return;
+
+                // Remove existing watermark adorner
+                var adorners = adornerLayer.GetAdorners(AssociatedObject);
+                if (adorners != null)
                 {
-                    if (adorner is WatermarkAdorner)
+                    foreach (var adorner in adorners)
                     {
-                        adornerLayer.Remove(adorner);
+                        if (adorner is WatermarkAdorner)
+                        {
+                            adornerLayer.Remove(adorner);
+                        }
                     }
                 }
-            }
 
-            // Add watermark if text is empty and not focused
-            if (string.IsNullOrEmpty(AssociatedObject.Text) && !AssociatedObject.IsFocused)
-            {
-                adornerLayer.Add(new WatermarkAdorner(AssociatedObject, WatermarkText));
-            }
+                // Add watermark if text is empty and not focused
+                if (string.IsNullOrEmpty(AssociatedObject.Text) && !AssociatedObject.IsFocused)
+                {
+                    adornerLayer.Add(new WatermarkAdorner(AssociatedObject, WatermarkText));
+                }
+            }), System.Windows.Threading.DispatcherPriority.Render);
         }
     }
 
@@ -153,14 +173,20 @@ namespace EasyAF.Modules.Spec.Behaviors
 
         private Brush CreateWatermarkBrush()
         {
-            // Use the TextBox's foreground but with 40% opacity for ghost effect
+            // Use the TextBox's foreground with full opacity (matching text color exactly)
             if (_textBox.Foreground is SolidColorBrush solidBrush)
             {
                 var color = solidBrush.Color;
-                return new SolidColorBrush(Color.FromArgb((byte)(color.A * 0.4), color.R, color.G, color.B));
+                // Use full opacity but ensure alpha is at least somewhat transparent for "ghost" effect
+                // If the user wants 100% opacity, we'll use 100%, but typically we want a subtle difference
+                return new SolidColorBrush(Color.FromArgb(
+                    Math.Max((byte)1, color.A), // Keep original alpha (full opacity if text is full opacity)
+                    color.R, 
+                    color.G, 
+                    color.B));
             }
             // Fallback to gray
-            return new SolidColorBrush(Color.FromArgb(102, 0, 0, 0)); // 40% black
+            return new SolidColorBrush(Color.FromArgb(255, 128, 128, 128));
         }
     }
 }
