@@ -2,6 +2,8 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:converters="clr-namespace:EasyAF.Modules.Spec.Converters"
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:behaviors="clr-namespace:EasyAF.Modules.Spec.Behaviors"
              Background="{DynamicResource PrimaryBackgroundBrush}">
     
     <UserControl.Resources>
@@ -738,9 +740,12 @@
                                      TextWrapping="Wrap"
                                      AcceptsReturn="False"
                                      MinHeight="60">
+                                <i:Interaction.Behaviors>
+                                    <behaviors:WatermarkTextBoxBehavior WatermarkText="Sample Text"/>
+                                </i:Interaction.Behaviors>
                                 <TextBox.Style>
                                     <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
-                                        <!-- Apply formatting preview - converters provide defaults when values are null/empty -->
+                                        <!-- Apply formatting preview - converters provide defaults (Arial 11pt, Black on White, Middle-Center) -->
                                         <Setter Property="FontFamily" Value="{Binding EmptyFontName, Converter={StaticResource EmptyMessageFontFamilyConverter}}"/>
                                         <Setter Property="FontSize" Value="{Binding EmptyFontSize, Converter={StaticResource EmptyMessageFontSizeConverter}}"/>
                                         <Setter Property="FontWeight" Value="{Binding EmptyBold, Converter={StaticResource EmptyMessageFontWeightConverter}}"/>

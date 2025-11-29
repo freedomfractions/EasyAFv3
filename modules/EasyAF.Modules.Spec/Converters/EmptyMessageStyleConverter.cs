@@ -9,6 +9,11 @@ namespace EasyAF.Modules.Spec.Converters
     /// <summary>
     /// Multi-value converter that converts empty message formatting properties to WPF styling attributes.
     /// Used to provide live preview of formatting in the empty message TextBox.
+    /// 
+    /// Default formatting (when no formatting specified):
+    /// - Font: Arial 11pt Regular
+    /// - Colors: Black text on White background
+    /// - Alignment: Middle Center
     /// </summary>
     public class EmptyMessageFontFamilyConverter : IValueConverter
     {
@@ -25,8 +30,8 @@ namespace EasyAF.Modules.Spec.Converters
                     // Invalid font name, return default
                 }
             }
-            // Return default font
-            return new FontFamily("Segoe UI");
+            // Default: Arial (Word-like default for reports)
+            return new FontFamily("Arial");
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
@@ -43,8 +48,8 @@ namespace EasyAF.Modules.Spec.Converters
             {
                 return size;
             }
-            // Return default font size
-            return 12.0;
+            // Default: 11pt (standard document size)
+            return 11.0;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
@@ -61,6 +66,7 @@ namespace EasyAF.Modules.Spec.Converters
             {
                 return FontWeights.Bold;
             }
+            // Default: Regular (Normal)
             return FontWeights.Normal;
         }
 
@@ -78,6 +84,7 @@ namespace EasyAF.Modules.Spec.Converters
             {
                 return FontStyles.Italic;
             }
+            // Default: Normal (not italic)
             return FontStyles.Normal;
         }
 
@@ -95,6 +102,7 @@ namespace EasyAF.Modules.Spec.Converters
             {
                 return TextDecorations.Underline;
             }
+            // Default: No underline
             return null;
         }
 
@@ -120,8 +128,8 @@ namespace EasyAF.Modules.Spec.Converters
                     // Invalid color, fall through to default
                 }
             }
-            // Return transparent (use default control background)
-            return Brushes.Transparent;
+            // Default: White (plain document background)
+            return Brushes.White;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
@@ -146,8 +154,8 @@ namespace EasyAF.Modules.Spec.Converters
                     // Invalid color, fall through to default
                 }
             }
-            // Return unset so it uses the default theme color
-            return DependencyProperty.UnsetValue;
+            // Default: Black (standard document text)
+            return Brushes.Black;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
@@ -167,10 +175,11 @@ namespace EasyAF.Modules.Spec.Converters
                     "left" => TextAlignment.Left,
                     "center" => TextAlignment.Center,
                     "right" => TextAlignment.Right,
-                    _ => TextAlignment.Left
+                    _ => TextAlignment.Center
                 };
             }
-            return TextAlignment.Left;
+            // Default: Center
+            return TextAlignment.Center;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
@@ -194,6 +203,7 @@ namespace EasyAF.Modules.Spec.Converters
                     _ => VerticalAlignment.Center
                 };
             }
+            // Default: Center (Middle)
             return VerticalAlignment.Center;
         }
 
