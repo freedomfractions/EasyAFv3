@@ -12,6 +12,15 @@
             
             <!-- Converters -->
             <converters:NullToBooleanConverter x:Key="NullToBooleanConverter"/>
+            <converters:EmptyMessageFontFamilyConverter x:Key="EmptyMessageFontFamilyConverter"/>
+            <converters:EmptyMessageFontSizeConverter x:Key="EmptyMessageFontSizeConverter"/>
+            <converters:EmptyMessageFontWeightConverter x:Key="EmptyMessageFontWeightConverter"/>
+            <converters:EmptyMessageFontStyleConverter x:Key="EmptyMessageFontStyleConverter"/>
+            <converters:EmptyMessageTextDecorationConverter x:Key="EmptyMessageTextDecorationConverter"/>
+            <converters:EmptyMessageBackgroundConverter x:Key="EmptyMessageBackgroundConverter"/>
+            <converters:EmptyMessageForegroundConverter x:Key="EmptyMessageForegroundConverter"/>
+            <converters:EmptyMessageHorizontalAlignmentConverter x:Key="EmptyMessageHorizontalAlignmentConverter"/>
+            <converters:EmptyMessageVerticalAlignmentConverter x:Key="EmptyMessageVerticalAlignmentConverter"/>
             
             <!-- Expander Style matching GroupBox appearance -->
             <Style x:Key="TableConfigExpanderStyle" TargetType="Expander">
@@ -716,20 +725,34 @@
                             </Grid.RowDefinitions>
                             
                             <TextBlock Grid.Row="0"
-                                       Text="Message displayed when table has no data:"
+                                       Text="Message displayed when table has no data (live preview of formatting):"
                                        Margin="0,0,0,4"
                                        Foreground="{DynamicResource TextSecondaryBrush}"
                                        FontSize="11"/>
                             
                             <TextBox Grid.Row="1"
+                                     x:Name="EmptyMessagePreviewTextBox"
                                      Text="{Binding EmptyMessage, UpdateSourceTrigger=PropertyChanged}"
-                                     Background="{DynamicResource ControlBackgroundBrush}"
-                                     Foreground="{DynamicResource TextPrimaryBrush}"
                                      BorderBrush="{DynamicResource ControlBorderBrush}"
                                      Padding="6"
                                      TextWrapping="Wrap"
                                      AcceptsReturn="False"
-                                     MinHeight="60"/>
+                                     MinHeight="60">
+                                <TextBox.Style>
+                                    <Style TargetType="TextBox">
+                                        <!-- Apply formatting preview -->
+                                        <Setter Property="FontFamily" Value="{Binding EmptyFontName, Converter={StaticResource EmptyMessageFontFamilyConverter}, FallbackValue={StaticResource DefaultFontFamily}}"/>
+                                        <Setter Property="FontSize" Value="{Binding EmptyFontSize, Converter={StaticResource EmptyMessageFontSizeConverter}, FallbackValue=12}"/>
+                                        <Setter Property="FontWeight" Value="{Binding EmptyBold, Converter={StaticResource EmptyMessageFontWeightConverter}}"/>
+                                        <Setter Property="FontStyle" Value="{Binding EmptyItalic, Converter={StaticResource EmptyMessageFontStyleConverter}}"/>
+                                        <Setter Property="TextDecorations" Value="{Binding EmptyUnderline, Converter={StaticResource EmptyMessageTextDecorationConverter}}"/>
+                                        <Setter Property="Background" Value="{Binding EmptyFill, Converter={StaticResource EmptyMessageBackgroundConverter}, FallbackValue={DynamicResource ControlBackgroundBrush}}"/>
+                                        <Setter Property="Foreground" Value="{Binding EmptyTextColor, Converter={StaticResource EmptyMessageForegroundConverter}, FallbackValue={DynamicResource TextPrimaryBrush}}"/>
+                                        <Setter Property="TextAlignment" Value="{Binding EmptyHorizontalAlignment, Converter={StaticResource EmptyMessageHorizontalAlignmentConverter}}"/>
+                                        <Setter Property="VerticalContentAlignment" Value="{Binding EmptyVerticalAlignment, Converter={StaticResource EmptyMessageVerticalAlignmentConverter}}"/>
+                                    </Style>
+                                </TextBox.Style>
+                            </TextBox>
                         </Grid>
                         
                         <!-- Formatting Expander -->
@@ -794,7 +817,21 @@
                                            Foreground="{DynamicResource TextPrimaryBrush}"/>
                                 <StackPanel Grid.Row="2" Grid.Column="1"
                                             Orientation="Horizontal">
+                                    <!-- Vertical alignment FIRST -->
                                     <ComboBox Width="120"
+                                              SelectedValue="{Binding EmptyVerticalAlignment, UpdateSourceTrigger=PropertyChanged}"
+                                              SelectedValuePath="Tag"
+                                              Background="{DynamicResource ControlBackgroundBrush}"
+                                              Foreground="{DynamicResource TextPrimaryBrush}"
+                                              BorderBrush="{DynamicResource ControlBorderBrush}"
+                                              ToolTip="Vertical alignment">
+                                        <ComboBoxItem Content="Top" Tag="top"/>
+                                        <ComboBoxItem Content="Middle" Tag="center" IsSelected="True"/>
+                                        <ComboBoxItem Content="Bottom" Tag="bottom"/>
+                                    </ComboBox>
+                                    <!-- Horizontal alignment SECOND -->
+                                    <ComboBox Width="120"
+                                              Margin="8,0,0,0"
                                               SelectedValue="{Binding EmptyHorizontalAlignment, UpdateSourceTrigger=PropertyChanged}"
                                               SelectedValuePath="Tag"
                                               Background="{DynamicResource ControlBackgroundBrush}"
@@ -804,18 +841,6 @@
                                         <ComboBoxItem Content="Left" Tag="left"/>
                                         <ComboBoxItem Content="Center" Tag="center" IsSelected="True"/>
                                         <ComboBoxItem Content="Right" Tag="right"/>
-                                    </ComboBox>
-                                    <ComboBox Width="120"
-                                              Margin="8,0,0,0"
-                                              SelectedValue="{Binding EmptyVerticalAlignment, UpdateSourceTrigger=PropertyChanged}"
-                                              SelectedValuePath="Tag"
-                                              Background="{DynamicResource ControlBackgroundBrush}"
-                                              Foreground="{DynamicResource TextPrimaryBrush}"
-                                              BorderBrush="{DynamicResource ControlBorderBrush}"
-                                              ToolTip="Vertical alignment">
-                                        <ComboBoxItem Content="Top" Tag="top"/>
-                                        <ComboBoxItem Content="Center" Tag="center" IsSelected="True"/>
-                                        <ComboBoxItem Content="Bottom" Tag="bottom"/>
                                     </ComboBox>
                                     <Button Content="Clear Formatting"
                                             Command="{Binding ClearEmptyFormattingCommand}"
