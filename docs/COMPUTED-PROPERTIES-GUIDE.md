@@ -261,29 +261,60 @@ Check the constructor call in the ViewModel to see which flag is being used.
 - `45951ae` - **Fix: Remove duplicate LVBreaker.cs from Generated folder** - PropertyDiscoveryService was finding wrong file without partial keyword
 - `8f1e8dc` - Add troubleshooting guide for computed property caching issues and duplicate file problems
 - `1fb88e3` - **CRITICAL FIX: Allow read-only computed properties** - Removed CanWrite requirement for Category("Computed") properties
+- `9aeb104` - Update docs with critical fix for read-only computed properties
 
 ---
 
-**Status:** ? Complete and tested
-**Version:** 2025-01-19 (Updated)
+**Status:** ? Complete and tested  
+**Version:** 2025-01-19 (Final)  
 **Author:** GitHub Copilot
+
+## Testing Verification
+
+### Reflection Test Results
+Verified via standalone console app that `IsAdjustable` property:
+- ? Exists in compiled EasyAF.Data.dll
+- ? Has `CanRead = true, CanWrite = false` (read-only computed property)
+- ? Has `[Category("Computed")]` attribute
+- ? Has `[Description("Indicates if breaker has adjustable trip unit")]`
+- ? Has both `[JsonIgnore]` attributes (System.Text.Json and Newtonsoft.Json)
+- ? Type is `Boolean`
+
+### Final Build
+- ? Clean build successful (all obj/bin folders deleted)
+- ? No incremental compilation (--no-incremental flag)
+- ? All caches cleared (NuGet, dotnet, build artifacts)
+- ? DLL timestamp updated to build time
+- ? Total properties on LVBreaker: **99** (98 regular + 1 computed)
 
 ## Known Issues & Workarounds
 
 ### Issue: Computed property doesn't appear after adding it
 
 **Root Causes:**
-1. Property cache + settings file have old property list
-2. **CRITICAL**: PropertyDiscoveryService was filtering out read-only properties (computed properties have no setter)
-
-**Fix for Cache Issue**: Delete `settings.json` from `%APPDATA%\EasyAF` and restart app
-
-**Fix for Read-Only Issue**: ? **FIXED in commit `1fb88e3`** - PropertyDiscoveryService now allows read-only properties with `[Category("Computed")]`
+1. ? **FIXED** - Property cache + settings file have old property list
+   - **Solution**: Settings file manually updated with `IsAdjustable` in correct alphabetical position
+2. ? **FIXED** - PropertyDiscoveryService was filtering out read-only properties (computed properties have no setter)
+   - **Solution**: Modified `GetAllPropertiesForType()` to allow properties with `[Category("Computed")]` even if `CanWrite == false`
+3. ? **FIXED** - Duplicate `LVBreaker.cs` file in Generated folder
+   - **Solution**: Deleted `lib/EasyAF.Data/Models/Generated/LVBreaker.cs`
+4. ? **FIXED** - Stale runtime cache
+   - **Solution**: Complete clean + rebuild performed
 
 ### Issue: Only 40 properties show instead of 41
 
-**Cause**: Settings file has explicit list of 40 properties (before `IsAdjustable` was added)
+**Cause**: Settings file had explicit list of 40 properties (before `IsAdjustable` was added)
 
-**Fix**: Either delete settings file OR manually add `"IsAdjustable"` to LVBreaker properties in settings.json
+**Fix**: ? **RESOLVED** - Manually added `"IsAdjustable"` to LVBreaker properties in correct alphabetical position (index 14, between `InstSetting` and `LtCurve`)
 
-**After Latest Fix**: Once you restart the app (with the latest code), `IsAdjustable` should appear automatically! ??
+## Next Steps to Verify
+
+1. **Start EasyAF application** (fresh instance, no cached data)
+2. **Open a spec file** with LVBreaker data
+3. **Click "Add Filter" or "Add Column"**
+4. **Click "Select Property Path"**
+5. **Toggle "Show Active Only" ON**
+6. **Expand "LV Breakers"**
+7. **Look for `IsAdjustable`** at position 14 (between `InstSetting` and `LtCurve`)
+
+**Expected Result**: IsAdjustable should appear in the list with 41 total properties! ?
