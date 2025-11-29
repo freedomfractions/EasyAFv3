@@ -226,7 +226,13 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
                     ? Array.Empty<string>()
                     : new[] { PropertyPath };
 
-                var viewModel = new PropertyPathPickerViewModel(currentPath, _document, _propertyDiscovery, _settingsService);
+                var viewModel = new PropertyPathPickerViewModel(
+                    currentPath, 
+                    _document, 
+                    _propertyDiscovery, 
+                    _settingsService,
+                    allowMultiSelect: false); // SINGLE SELECT for filters
+                    
                 var dialog = new Views.Dialogs.PropertyPathPickerDialog
                 {
                     DataContext = viewModel,
@@ -254,7 +260,13 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
                     ? Array.Empty<string>()
                     : new[] { RightPropertyPath };
 
-                var viewModel = new PropertyPathPickerViewModel(currentPath, _document, _propertyDiscovery, _settingsService);
+                var viewModel = new PropertyPathPickerViewModel(
+                    currentPath, 
+                    _document, 
+                    _propertyDiscovery, 
+                    _settingsService,
+                    allowMultiSelect: false); // SINGLE SELECT for filters
+                    
                 var dialog = new Views.Dialogs.PropertyPathPickerDialog
                 {
                     DataContext = viewModel,
