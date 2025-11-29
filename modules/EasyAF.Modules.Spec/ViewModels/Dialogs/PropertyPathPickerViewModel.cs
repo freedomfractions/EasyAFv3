@@ -29,15 +29,22 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
         private string _searchText = string.Empty;
         private bool? _dialogResult;
         private bool _showActiveOnly = true; // NEW: Default to active (enabled) data types only
+        private bool _allowMultiSelect = true; // NEW: Control multi-select behavior
         private readonly SpecDocument? _document;
         private readonly IPropertyDiscoveryService _propertyDiscovery;
         private readonly EasyAF.Core.Contracts.ISettingsService _settingsService; // NEW: For reading visibility settings
 
-        public PropertyPathPickerViewModel(string[] currentPaths, SpecDocument? document, IPropertyDiscoveryService propertyDiscovery, EasyAF.Core.Contracts.ISettingsService settingsService)
+        public PropertyPathPickerViewModel(
+            string[] currentPaths, 
+            SpecDocument? document, 
+            IPropertyDiscoveryService propertyDiscovery, 
+            EasyAF.Core.Contracts.ISettingsService settingsService,
+            bool allowMultiSelect = true)
         {
             _document = document;
             _propertyDiscovery = propertyDiscovery ?? throw new ArgumentNullException(nameof(propertyDiscovery));
             _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
+            _allowMultiSelect = allowMultiSelect;
 
             // Initialize collections
             DataTypes = new ObservableCollection<DataTypeNode>();
@@ -118,6 +125,11 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
             .Where(p => !string.IsNullOrWhiteSpace(p))
             .OrderBy(p => p)
             .ToArray();
+
+        /// <summary>
+        /// Gets whether multi-select is allowed.
+        /// </summary>
+        public bool AllowMultiSelect => _allowMultiSelect;
 
         #endregion
 
@@ -213,9 +225,27 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
                         if (e.PropertyName == nameof(PropertyNode.IsSelected) && s is PropertyNode pNode)
                         {
                             if (pNode.IsSelected)
+                            {
+                                // If single-select mode, deselect all others
+                                if (!_allowMultiSelect)
+                                {
+                                    foreach (var dt in DataTypes)
+                                    {
+                                        foreach (var p in dt.AllProperties)
+                                        {
+                                            if (p != pNode && p.IsSelected)
+                                            {
+                                                p.IsSelected = false; // This will trigger another event
+                                            }
+                                        }
+                                    }
+                                }
                                 SelectedPaths.Add(pNode.FullPath);
+                            }
                             else
+                            {
                                 SelectedPaths.Remove(pNode.FullPath);
+                            }
 
                             Log.Debug("Property {Path} {Action}", pNode.FullPath, pNode.IsSelected ? "selected" : "deselected");
                         }

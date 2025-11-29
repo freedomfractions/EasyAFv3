@@ -193,12 +193,18 @@ namespace EasyAF.Modules.Spec.ViewModels
 
             try
             {
-                // Open PropertyPath picker dialog for filter property (single select)
+                // Open PropertyPath picker dialog for filter property (SINGLE SELECT)
                 var currentPath = string.IsNullOrWhiteSpace(SelectedFilter.PropertyPath) 
                     ? Array.Empty<string>() 
                     : new[] { SelectedFilter.PropertyPath };
                     
-                var viewModel = new Dialogs.PropertyPathPickerViewModel(currentPath, _document, _propertyDiscovery, _settingsService);
+                var viewModel = new Dialogs.PropertyPathPickerViewModel(
+                    currentPath, 
+                    _document, 
+                    _propertyDiscovery, 
+                    _settingsService,
+                    allowMultiSelect: false); // SINGLE SELECT for filters
+                    
                 var dialog = new Views.Dialogs.PropertyPathPickerDialog
                 {
                     DataContext = viewModel,
@@ -232,12 +238,18 @@ namespace EasyAF.Modules.Spec.ViewModels
 
             try
             {
-                // Open PropertyPath picker dialog for compare-to property (single select)
+                // Open PropertyPath picker dialog for compare-to property (SINGLE SELECT)
                 var currentPath = string.IsNullOrWhiteSpace(SelectedFilter.RightPropertyPath)
                     ? Array.Empty<string>()
                     : new[] { SelectedFilter.RightPropertyPath };
 
-                var viewModel = new Dialogs.PropertyPathPickerViewModel(currentPath, _document, _propertyDiscovery, _settingsService);
+                var viewModel = new Dialogs.PropertyPathPickerViewModel(
+                    currentPath, 
+                    _document, 
+                    _propertyDiscovery, 
+                    _settingsService,
+                    allowMultiSelect: false); // SINGLE SELECT for filters
+                    
                 var dialog = new Views.Dialogs.PropertyPathPickerDialog
                 {
                     DataContext = viewModel,
@@ -340,18 +352,18 @@ namespace EasyAF.Modules.Spec.ViewModels
 
                 if (result == true)
                 {
-                    // Refresh the filter view model to show updated values
-                    SelectedFilter.RefreshProperties();
-                    
-                    // Force the DataGrid to refresh by removing and re-adding the item
+                    // Store index and filter before refreshing
                     var index = Filters.IndexOf(SelectedFilter);
-                    var filter = SelectedFilter;
-                    Filters.RemoveAt(index);
-                    Filters.Insert(index, filter);
-                    SelectedFilter = filter;
+                    var filterSpec = SelectedFilter.FilterSpec;
+                    
+                    // Completely rebuild the Filters collection to force UI update
+                    RefreshFilters();
+                    
+                    // Restore selection to the same filter (by matching FilterSpec reference)
+                    SelectedFilter = Filters.FirstOrDefault(f => f.FilterSpec == filterSpec);
                     
                     Log.Information("Edited filter #{RuleNumber}: {Summary}", 
-                        SelectedFilter.RuleNumber, SelectedFilter.Summary);
+                        SelectedFilter?.RuleNumber ?? 0, SelectedFilter?.Summary ?? "");
                 }
             }
             catch (Exception ex)
