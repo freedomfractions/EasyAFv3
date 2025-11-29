@@ -741,7 +741,7 @@
                                 <TextBox.Style>
                                     <Style TargetType="TextBox">
                                         <!-- Apply formatting preview -->
-                                        <Setter Property="FontFamily" Value="{Binding EmptyFontName, Converter={StaticResource EmptyMessageFontFamilyConverter}, FallbackValue={StaticResource DefaultFontFamily}}"/>
+                                        <Setter Property="FontFamily" Value="{Binding EmptyFontName, Converter={StaticResource EmptyMessageFontFamilyConverter}, FallbackValue=Segoe UI}"/>
                                         <Setter Property="FontSize" Value="{Binding EmptyFontSize, Converter={StaticResource EmptyMessageFontSizeConverter}, FallbackValue=12}"/>
                                         <Setter Property="FontWeight" Value="{Binding EmptyBold, Converter={StaticResource EmptyMessageFontWeightConverter}}"/>
                                         <Setter Property="FontStyle" Value="{Binding EmptyItalic, Converter={StaticResource EmptyMessageFontStyleConverter}}"/>
