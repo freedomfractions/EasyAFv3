@@ -238,18 +238,16 @@
             <Button Content="OK"
                     Command="{Binding OkCommand}"
                     IsDefault="True"
-                    Padding="24,8"
-                    Margin="0,0,8,0"
-                    Background="{DynamicResource AccentBrush}"
-                    Foreground="White"
-                    BorderBrush="{DynamicResource AccentBrush}"/>
+                    Style="{StaticResource AccentButtonStyle}"
+                    MinWidth="80"
+                    Padding="12,6"
+                    Margin="0,0,8,0"/>
             <Button Content="Cancel"
                     Command="{Binding CancelCommand}"
                     IsCancel="True"
-                    Padding="24,8"
-                    Background="{DynamicResource ControlBackgroundBrush}"
-                    Foreground="{DynamicResource TextPrimaryBrush}"
-                    BorderBrush="{DynamicResource ControlBorderBrush}"/>
+                    Style="{StaticResource BaseButtonStyle}"
+                    MinWidth="80"
+                    Padding="12,6"/>
         </StackPanel>
     </Grid>
 </Window>
