@@ -312,50 +312,52 @@ namespace EasyAF.Modules.Spec.ViewModels
 
             try
             {
-                // Open PropertyPath picker dialog with real property discovery
-                var currentPaths = SelectedColumn.Column.PropertyPaths ?? Array.Empty<string>();
-                var viewModel = new Dialogs.PropertyPathPickerViewModel(currentPaths, _document, _propertyDiscovery, _settingsService);
-                var dialog = new Views.Dialogs.PropertyPathPickerDialog
+                Log.Information("Opening Column Editor dialog for column: {Header}", SelectedColumn.ColumnHeader);
+
+                // Create ViewModel for Column Editor dialog
+                var viewModel = new Dialogs.ColumnEditorViewModel(
+                    SelectedColumn.Column,
+                    _document,
+                    _propertyDiscovery,
+                    _settingsService);
+
+                // Create and show dialog
+                var dialog = new Views.Dialogs.ColumnEditorDialog
                 {
                     DataContext = viewModel,
                     Owner = System.Windows.Application.Current.MainWindow
                 };
 
                 var result = dialog.ShowDialog();
-                
+
                 if (result == true)
                 {
-                    // Apply selected property paths
-                    SelectedColumn.Column.PropertyPaths = viewModel.ResultPaths;
-                    
-                    // Refresh the display
+                    // Column was updated - refresh the display
+                    SelectedColumn.RaisePropertyChanged(nameof(ColumnViewModel.ColumnHeader));
                     SelectedColumn.RaisePropertyChanged(nameof(ColumnViewModel.PropertyPathsDisplay));
-                    
+                    SelectedColumn.RaisePropertyChanged(nameof(ColumnViewModel.WidthPercent));
+                    SelectedColumn.RaisePropertyChanged(nameof(ColumnViewModel.FormatDisplay));
+
                     _document.MarkDirty();
-                    
-                    Log.Information("Updated property paths for column '{Header}': {Paths}",
-                        SelectedColumn.ColumnHeader,
-                        string.Join(", ", viewModel.ResultPaths));
+
+                    Log.Information("Column Editor dialog returned OK - Column updated: {Header}", SelectedColumn.ColumnHeader);
+                }
+                else
+                {
+                    Log.Information("Column Editor dialog cancelled");
                 }
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Failed to open property path picker");
-                _dialogService.ShowError("Failed to open property path picker", ex.Message);
+                Log.Error(ex, "Failed to open Column Editor dialog");
+                _dialogService.ShowError("Failed to open Column Editor dialog", ex.Message);
             }
         }
 
         private void ExecuteTestColumnEditor()
         {
-            // LOG: Temporary test action - should be replaced with real implementation
-            if (SelectedColumn != null)
-            {
-                Log.Information("Test action executed for column: {Header}", SelectedColumn.Column.Header);
-            }
-            else
-            {
-                Log.Warning("Test action executed but no column selected");
-            }
+            // DEPRECATED: This was a test placeholder - now ExecuteEditColumn uses the real Column Editor
+            Log.Warning("TestColumnEditorCommand called - this should not happen. Use EditColumnCommand instead.");
         }
 
         #endregion
