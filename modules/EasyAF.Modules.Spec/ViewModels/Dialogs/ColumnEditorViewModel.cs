@@ -42,6 +42,7 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
         private string _format = string.Empty;
         private string _expression = string.Empty;
         private string? _numberFormat;
+        private string _literal = string.Empty;
 
         /// <summary>
         /// Initializes a new instance of the ColumnEditorViewModel.
@@ -174,6 +175,12 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
         {
             get => _numberFormat;
             set => SetProperty(ref _numberFormat, value);
+        }
+
+        public string Literal
+        {
+            get => _literal;
+            set => SetProperty(ref _literal, value);
         }
 
         public bool? DialogResult { get; private set; }
@@ -330,8 +337,9 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
                 return false;
             if (IsExpressionMode && string.IsNullOrWhiteSpace(Expression))
                 return false;
+            if (IsLiteralMode && string.IsNullOrWhiteSpace(Literal))
+                return false;
 
-            // Other modes will be validated when we add those panels
             return true;
         }
 
@@ -366,7 +374,13 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
                 _columnSpec.Format = null;
                 _columnSpec.Literal = null;
             }
-            // TODO: Add Literal mode when we build that panel
+            else if (IsLiteralMode)
+            {
+                _columnSpec.Literal = Literal;
+                _columnSpec.PropertyPaths = null;
+                _columnSpec.Format = null;
+                _columnSpec.Expression = null;
+            }
 
             Log.Information("Column updated: {Header}", ColumnHeader);
 
@@ -405,6 +419,7 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
             _format = _columnSpec.Format ?? string.Empty;
             _expression = _columnSpec.Expression ?? string.Empty;
             _numberFormat = _columnSpec.NumberFormat;
+            _literal = _columnSpec.Literal ?? string.Empty;
 
             // Load PropertyPaths if present
             if (_columnSpec.PropertyPaths != null && _columnSpec.PropertyPaths.Length > 0)

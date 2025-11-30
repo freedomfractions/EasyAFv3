@@ -43,6 +43,9 @@
                     <!-- Expression Panel (shown when Expression mode selected) -->
                     <panels:ColumnExpressionPanel DataContext="{Binding}"/>
                     
+                    <!-- Literal Panel (shown when Literal mode selected) -->
+                    <panels:ColumnLiteralPanel DataContext="{Binding}"/>
+                    
                     <TextBlock Text="More panels coming soon..."
                                FontSize="14"
                                FontStyle="Italic"
