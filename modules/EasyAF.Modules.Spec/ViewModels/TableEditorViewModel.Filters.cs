@@ -427,7 +427,10 @@ namespace EasyAF.Modules.Spec.ViewModels
                 // Store the filter for re-selection
                 var filterSpec = SelectedFilter.FilterSpec;
                 var index = Filters.IndexOf(SelectedFilter);
-                var filterVm = SelectedFilter; // Keep reference to the ViewModel
+                
+                // Log BEFORE state
+                Log.Information("BEFORE EDIT - FilterSpec: Path={Path}, Op={Op}, Val={Val}", 
+                    filterSpec.PropertyPath, filterSpec.Operator, filterSpec.Value);
 
                 // Open Filter Editor Dialog
                 var viewModel = new Dialogs.FilterEditorViewModel(
@@ -447,12 +450,22 @@ namespace EasyAF.Modules.Spec.ViewModels
 
                 if (result == true)
                 {
+                    // Log AFTER state
+                    Log.Information("AFTER EDIT - FilterSpec: Path={Path}, Op={Op}, Val={Val}", 
+                        filterSpec.PropertyPath, filterSpec.Operator, filterSpec.Value);
+                    
                     // Force UI update by rebuilding the Filters collection
                     // This is the most reliable way to ensure DataGrid refreshes
                     RefreshFilters();
                     
                     // Re-select the edited filter
                     SelectedFilter = Filters.ElementAtOrDefault(index);
+                    
+                    // Log NEW ViewModel state
+                    if (SelectedFilter != null)
+                    {
+                        Log.Information("NEW ViewModel - Summary={Summary}", SelectedFilter.Summary);
+                    }
                     
                     Log.Information("Edited filter #{RuleNumber}: {Summary}", 
                         SelectedFilter?.RuleNumber ?? index + 1, 
