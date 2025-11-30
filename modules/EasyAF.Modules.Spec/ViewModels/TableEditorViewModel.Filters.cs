@@ -427,6 +427,7 @@ namespace EasyAF.Modules.Spec.ViewModels
                 // Store the filter for re-selection
                 var filterSpec = SelectedFilter.FilterSpec;
                 var index = Filters.IndexOf(SelectedFilter);
+                var filterVm = SelectedFilter; // Keep reference to the ViewModel
 
                 // Open Filter Editor Dialog
                 var viewModel = new Dialogs.FilterEditorViewModel(
@@ -446,11 +447,17 @@ namespace EasyAF.Modules.Spec.ViewModels
 
                 if (result == true)
                 {
-                    // Refresh the selected filter's properties to update UI bindings
-                    SelectedFilter.RefreshProperties();
+                    // Refresh the filter ViewModel's properties to update UI bindings
+                    filterVm.RefreshProperties();
+                    
+                    // Ensure it's still selected
+                    if (SelectedFilter != filterVm)
+                    {
+                        SelectedFilter = filterVm;
+                    }
                     
                     Log.Information("Edited filter #{RuleNumber}: {Summary}", 
-                        SelectedFilter.RuleNumber, SelectedFilter.Summary);
+                        filterVm.RuleNumber, filterVm.Summary);
                 }
             }
             catch (Exception ex)
