@@ -40,6 +40,8 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
         private string? _selectedPropertyPath;
         private string _joinWith = "\n";
         private string _format = string.Empty;
+        private string _expression = string.Empty;
+        private string? _numberFormat;
 
         /// <summary>
         /// Initializes a new instance of the ColumnEditorViewModel.
@@ -160,6 +162,18 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
         {
             get => _format;
             set => SetProperty(ref _format, value);
+        }
+
+        public string Expression
+        {
+            get => _expression;
+            set => SetProperty(ref _expression, value);
+        }
+
+        public string? NumberFormat
+        {
+            get => _numberFormat;
+            set => SetProperty(ref _numberFormat, value);
         }
 
         public bool? DialogResult { get; private set; }
@@ -314,6 +328,8 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
                 return false;
             if (IsFormatMode && string.IsNullOrWhiteSpace(Format))
                 return false;
+            if (IsExpressionMode && string.IsNullOrWhiteSpace(Expression))
+                return false;
 
             // Other modes will be validated when we add those panels
             return true;
@@ -342,7 +358,15 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
                 _columnSpec.Expression = null;
                 _columnSpec.Literal = null;
             }
-            // TODO: Add other modes as we build those panels
+            else if (IsExpressionMode)
+            {
+                _columnSpec.Expression = Expression;
+                _columnSpec.NumberFormat = NumberFormat;
+                _columnSpec.PropertyPaths = null;
+                _columnSpec.Format = null;
+                _columnSpec.Literal = null;
+            }
+            // TODO: Add Literal mode when we build that panel
 
             Log.Information("Column updated: {Header}", ColumnHeader);
 
@@ -379,6 +403,8 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
             _mergeVertically = _columnSpec.MergeVertically;
             _joinWith = _columnSpec.JoinWith ?? "\n";
             _format = _columnSpec.Format ?? string.Empty;
+            _expression = _columnSpec.Expression ?? string.Empty;
+            _numberFormat = _columnSpec.NumberFormat;
 
             // Load PropertyPaths if present
             if (_columnSpec.PropertyPaths != null && _columnSpec.PropertyPaths.Length > 0)

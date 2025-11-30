@@ -40,6 +40,9 @@
                     <!-- Format String Panel (shown when Format mode selected) -->
                     <panels:ColumnFormatStringPanel DataContext="{Binding}"/>
                     
+                    <!-- Expression Panel (shown when Expression mode selected) -->
+                    <panels:ColumnExpressionPanel DataContext="{Binding}"/>
+                    
                     <TextBlock Text="More panels coming soon..."
                                FontSize="14"
                                FontStyle="Italic"
