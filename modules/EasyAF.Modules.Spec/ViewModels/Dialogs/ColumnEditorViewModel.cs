@@ -39,6 +39,7 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
 
         private string? _selectedPropertyPath;
         private string _joinWith = "\n";
+        private string _format = string.Empty;
 
         /// <summary>
         /// Initializes a new instance of the ColumnEditorViewModel.
@@ -68,6 +69,8 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
                 .ObservesProperty(() => SelectedPropertyPath);
             MovePropertyPathDownCommand = new DelegateCommand(ExecuteMovePropertyPathDown, CanExecuteMovePropertyPathDown)
                 .ObservesProperty(() => SelectedPropertyPath);
+
+            InsertFormatTokenCommand = new DelegateCommand(ExecuteInsertFormatToken);
 
             OkCommand = new DelegateCommand(ExecuteOk, CanExecuteOk);
             CancelCommand = new DelegateCommand(ExecuteCancel);
@@ -147,18 +150,24 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
             }
         }
 
+        public string JoinWith
+        {
+            get => _joinWith;
+            set => SetProperty(ref _joinWith, value);
+        }
+
+        public string Format
+        {
+            get => _format;
+            set => SetProperty(ref _format, value);
+        }
+
         public bool? DialogResult { get; private set; }
 
         public string? SelectedPropertyPath
         {
             get => _selectedPropertyPath;
             set => SetProperty(ref _selectedPropertyPath, value);
-        }
-
-        public string JoinWith
-        {
-            get => _joinWith;
-            set => SetProperty(ref _joinWith, value);
         }
 
         #endregion
@@ -169,6 +178,7 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
         public ICommand RemovePropertyPathCommand { get; }
         public ICommand MovePropertyPathUpCommand { get; }
         public ICommand MovePropertyPathDownCommand { get; }
+        public ICommand InsertFormatTokenCommand { get; }
         public ICommand OkCommand { get; }
         public ICommand CancelCommand { get; }
 
@@ -257,6 +267,42 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
             }
         }
 
+        private void ExecuteInsertFormatToken()
+        {
+            try
+            {
+                // Open PropertyPath picker for token insertion (SINGLE SELECT)
+                var viewModel = new PropertyPathPickerViewModel(
+                    Array.Empty<string>(),
+                    _document,
+                    _propertyDiscovery,
+                    _settingsService,
+                    allowMultiSelect: false);
+
+                var dialog = new Views.Dialogs.PropertyPathPickerDialog
+                {
+                    DataContext = viewModel,
+                    Owner = System.Windows.Application.Current.MainWindow
+                };
+
+                var result = dialog.ShowDialog();
+
+                if (result == true)
+                {
+                    var path = viewModel.ResultPaths.FirstOrDefault();
+                    if (!string.IsNullOrWhiteSpace(path))
+                    {
+                        // Insert token at end (could enhance with cursor position tracking)
+                        Format += $"{{{path}}}";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to insert format token");
+            }
+        }
+
         private bool CanExecuteOk()
         {
             // Must have a column header
@@ -265,6 +311,8 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
 
             // Must have content in the selected mode
             if (IsPropertyPathMode && PropertyPaths.Count == 0)
+                return false;
+            if (IsFormatMode && string.IsNullOrWhiteSpace(Format))
                 return false;
 
             // Other modes will be validated when we add those panels
@@ -284,6 +332,13 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
                 _columnSpec.PropertyPaths = PropertyPaths.ToArray();
                 _columnSpec.JoinWith = JoinWith;
                 _columnSpec.Format = null;
+                _columnSpec.Expression = null;
+                _columnSpec.Literal = null;
+            }
+            else if (IsFormatMode)
+            {
+                _columnSpec.Format = Format;
+                _columnSpec.PropertyPaths = null;
                 _columnSpec.Expression = null;
                 _columnSpec.Literal = null;
             }
@@ -323,6 +378,7 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
             _widthPercent = _columnSpec.WidthPercent;
             _mergeVertically = _columnSpec.MergeVertically;
             _joinWith = _columnSpec.JoinWith ?? "\n";
+            _format = _columnSpec.Format ?? string.Empty;
 
             // Load PropertyPaths if present
             if (_columnSpec.PropertyPaths != null && _columnSpec.PropertyPaths.Length > 0)

@@ -37,6 +37,9 @@
                     <!-- Property Paths Panel (shown when PropertyPath mode selected) -->
                     <panels:ColumnPropertyPathsPanel DataContext="{Binding}"/>
                     
+                    <!-- Format String Panel (shown when Format mode selected) -->
+                    <panels:ColumnFormatStringPanel DataContext="{Binding}"/>
+                    
                     <TextBlock Text="More panels coming soon..."
                                FontSize="14"
                                FontStyle="Italic"
