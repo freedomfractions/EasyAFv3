@@ -447,21 +447,16 @@ namespace EasyAF.Modules.Spec.ViewModels
 
                 if (result == true)
                 {
-                    // FORCE UI refresh by:
-                    // 1. Refresh all properties on the ViewModel
-                    filterVm.RefreshProperties();
+                    // Force UI update by rebuilding the Filters collection
+                    // This is the most reliable way to ensure DataGrid refreshes
+                    RefreshFilters();
                     
-                    // 2. Force collection change notification
-                    var tempFilter = filterVm;
-                    Filters[index] = null!; // Trigger collection change
-                    Filters[index] = tempFilter; // Put it back
-                    
-                    // 3. Ensure it's still selected
-                    SelectedFilter = null;
-                    SelectedFilter = filterVm;
+                    // Re-select the edited filter
+                    SelectedFilter = Filters.ElementAtOrDefault(index);
                     
                     Log.Information("Edited filter #{RuleNumber}: {Summary}", 
-                        filterVm.RuleNumber, filterVm.Summary);
+                        SelectedFilter?.RuleNumber ?? index + 1, 
+                        SelectedFilter?.Summary ?? "(updated)");
                 }
             }
             catch (Exception ex)
