@@ -447,14 +447,18 @@ namespace EasyAF.Modules.Spec.ViewModels
 
                 if (result == true)
                 {
-                    // Refresh the filter ViewModel's properties to update UI bindings
+                    // FORCE UI refresh by:
+                    // 1. Refresh all properties on the ViewModel
                     filterVm.RefreshProperties();
                     
-                    // Ensure it's still selected
-                    if (SelectedFilter != filterVm)
-                    {
-                        SelectedFilter = filterVm;
-                    }
+                    // 2. Force collection change notification
+                    var tempFilter = filterVm;
+                    Filters[index] = null!; // Trigger collection change
+                    Filters[index] = tempFilter; // Put it back
+                    
+                    // 3. Ensure it's still selected
+                    SelectedFilter = null;
+                    SelectedFilter = filterVm;
                     
                     Log.Information("Edited filter #{RuleNumber}: {Summary}", 
                         filterVm.RuleNumber, filterVm.Summary);
