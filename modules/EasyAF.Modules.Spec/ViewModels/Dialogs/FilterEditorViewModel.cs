@@ -338,7 +338,12 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
             // Find the window and close it
             var window = System.Windows.Application.Current.Windows.OfType<Views.Dialogs.FilterEditorDialog>()
                 .FirstOrDefault(w => w.DataContext == this);
-            window?.Close();
+            
+            if (window != null)
+            {
+                // Set the Window's DialogResult property, which will also close the window
+                window.DialogResult = DialogResult;
+            }
         }
 
         #endregion

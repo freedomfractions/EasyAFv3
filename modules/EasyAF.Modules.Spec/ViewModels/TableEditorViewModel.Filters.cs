@@ -388,13 +388,24 @@ namespace EasyAF.Modules.Spec.ViewModels
         {
             var selectedFilter = SelectedFilter?.FilterSpec;
 
+            Log.Debug("RefreshFilters START - Current collection count: {Count}", Filters.Count);
+            
             Filters.Clear();
 
             if (_table.FilterSpecs != null)
             {
+                Log.Debug("RefreshFilters - Table has {Count} FilterSpecs", _table.FilterSpecs.Length);
+                
                 for (int i = 0; i < _table.FilterSpecs.Length; i++)
                 {
-                    var filterVm = new FilterSpecViewModel(_table.FilterSpecs[i], OnFilterChanged, i + 1);
+                    var spec = _table.FilterSpecs[i];
+                    Log.Debug("RefreshFilters - Creating VM for FilterSpec[{Index}]: Path={Path}, Op={Op}, Val={Val}", 
+                        i, spec.PropertyPath, spec.Operator, spec.Value);
+                    
+                    var filterVm = new FilterSpecViewModel(spec, OnFilterChanged, i + 1);
+                    
+                    Log.Debug("RefreshFilters - New VM Summary: {Summary}", filterVm.Summary);
+                    
                     Filters.Add(filterVm);
                 }
             }
@@ -403,9 +414,12 @@ namespace EasyAF.Modules.Spec.ViewModels
             if (selectedFilter != null)
             {
                 SelectedFilter = Filters.FirstOrDefault(f => f.FilterSpec == selectedFilter);
+                Log.Debug("RefreshFilters - Restored selection to filter with Summary: {Summary}", 
+                    SelectedFilter?.Summary ?? "(null)");
             }
 
             RaisePropertyChanged(nameof(FilterCount));
+            Log.Debug("RefreshFilters END - New collection count: {Count}", Filters.Count);
         }
 
         /// <summary>
