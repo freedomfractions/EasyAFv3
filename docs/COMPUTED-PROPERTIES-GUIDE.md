@@ -265,6 +265,9 @@ Check the constructor call in the ViewModel to see which flag is being used.
 - `c545199` - Final verification: Clean rebuild confirms IsAdjustable property discovery working correctly (99 properties total)
 - `0dba9aa` - **CRITICAL FIX: IsAdjustable must be in DataTypes.Visibility path** (not MapModule.DataTypeVisibility) for Spec module to see it
 - `b6d260b` - **Fix dialog button highlighting** - IsDefault/IsCancel buttons now properly themed, settings cleaned up
+- `4a5a314` - Update documentation with dialog button fix commit
+- `efee9a2` - Match FilterEditorDialog button styles to PropertyPathPickerDialog
+- `a7e80ee` - **Fix PropertyPathPickerDialog radio button initialization** - ShowActiveOnly properly selected on dialog open
 
 ---
 
