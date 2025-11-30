@@ -268,6 +268,9 @@ Check the constructor call in the ViewModel to see which flag is being used.
 - `4a5a314` - Update documentation with dialog button fix commit
 - `efee9a2` - Match FilterEditorDialog button styles to PropertyPathPickerDialog
 - `a7e80ee` - **Fix PropertyPathPickerDialog radio button initialization** - ShowActiveOnly properly selected on dialog open
+- `6f91a39` - Update documentation with latest commits
+- `bd01e10` - **Fix filter table not updating after edit dialog** - Call RefreshProperties() on FilterSpecViewModel
+- `a9e17ec` - **Ensure filter table updates** - Store ViewModel reference before dialog opens to guarantee correct instance refresh
 
 ---
 
