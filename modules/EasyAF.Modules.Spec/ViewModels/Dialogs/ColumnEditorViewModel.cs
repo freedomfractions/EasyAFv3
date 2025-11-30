@@ -37,6 +37,9 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
         private bool _isExpressionMode;
         private bool _isLiteralMode;
 
+        private string? _selectedPropertyPath;
+        private string _joinWith = "\n";
+
         /// <summary>
         /// Initializes a new instance of the ColumnEditorViewModel.
         /// </summary>
@@ -51,10 +54,21 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
             _propertyDiscovery = propertyDiscovery ?? throw new ArgumentNullException(nameof(propertyDiscovery));
             _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
 
+            // Initialize collections
+            PropertyPaths = new ObservableCollection<string>();
+
             // Load current values from ColumnSpec
             LoadFromColumnSpec();
 
             // Initialize commands
+            AddPropertyPathCommand = new DelegateCommand(ExecuteAddPropertyPath);
+            RemovePropertyPathCommand = new DelegateCommand(ExecuteRemovePropertyPath, CanExecuteRemovePropertyPath)
+                .ObservesProperty(() => SelectedPropertyPath);
+            MovePropertyPathUpCommand = new DelegateCommand(ExecuteMovePropertyPathUp, CanExecuteMovePropertyPathUp)
+                .ObservesProperty(() => SelectedPropertyPath);
+            MovePropertyPathDownCommand = new DelegateCommand(ExecuteMovePropertyPathDown, CanExecuteMovePropertyPathDown)
+                .ObservesProperty(() => SelectedPropertyPath);
+
             OkCommand = new DelegateCommand(ExecuteOk, CanExecuteOk);
             CancelCommand = new DelegateCommand(ExecuteCancel);
 
@@ -63,6 +77,8 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
         }
 
         #region Properties
+
+        public ObservableCollection<string> PropertyPaths { get; }
 
         public string ColumnHeader
         {
@@ -133,10 +149,26 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
 
         public bool? DialogResult { get; private set; }
 
+        public string? SelectedPropertyPath
+        {
+            get => _selectedPropertyPath;
+            set => SetProperty(ref _selectedPropertyPath, value);
+        }
+
+        public string JoinWith
+        {
+            get => _joinWith;
+            set => SetProperty(ref _joinWith, value);
+        }
+
         #endregion
 
         #region Commands
 
+        public ICommand AddPropertyPathCommand { get; }
+        public ICommand RemovePropertyPathCommand { get; }
+        public ICommand MovePropertyPathUpCommand { get; }
+        public ICommand MovePropertyPathDownCommand { get; }
         public ICommand OkCommand { get; }
         public ICommand CancelCommand { get; }
 
@@ -144,12 +176,98 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
 
         #region Command Implementations
 
+        private void ExecuteAddPropertyPath()
+        {
+            try
+            {
+                // Open PropertyPath picker dialog (MULTI-SELECT for column building)
+                var viewModel = new PropertyPathPickerViewModel(
+                    Array.Empty<string>(),
+                    _document,
+                    _propertyDiscovery,
+                    _settingsService,
+                    allowMultiSelect: true); // MULTI-SELECT for columns
+
+                var dialog = new Views.Dialogs.PropertyPathPickerDialog
+                {
+                    DataContext = viewModel,
+                    Owner = System.Windows.Application.Current.MainWindow
+                };
+
+                var result = dialog.ShowDialog();
+
+                if (result == true)
+                {
+                    foreach (var path in viewModel.ResultPaths)
+                    {
+                        if (!PropertyPaths.Contains(path))
+                        {
+                            PropertyPaths.Add(path);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to open property path picker for column");
+            }
+        }
+
+        private bool CanExecuteRemovePropertyPath() => SelectedPropertyPath != null;
+
+        private void ExecuteRemovePropertyPath()
+        {
+            if (SelectedPropertyPath != null)
+            {
+                PropertyPaths.Remove(SelectedPropertyPath);
+            }
+        }
+
+        private bool CanExecuteMovePropertyPathUp()
+        {
+            if (SelectedPropertyPath == null) return false;
+            var index = PropertyPaths.IndexOf(SelectedPropertyPath);
+            return index > 0;
+        }
+
+        private void ExecuteMovePropertyPathUp()
+        {
+            if (SelectedPropertyPath == null) return;
+            var index = PropertyPaths.IndexOf(SelectedPropertyPath);
+            if (index > 0)
+            {
+                PropertyPaths.Move(index, index - 1);
+            }
+        }
+
+        private bool CanExecuteMovePropertyPathDown()
+        {
+            if (SelectedPropertyPath == null) return false;
+            var index = PropertyPaths.IndexOf(SelectedPropertyPath);
+            return index >= 0 && index < PropertyPaths.Count - 1;
+        }
+
+        private void ExecuteMovePropertyPathDown()
+        {
+            if (SelectedPropertyPath == null) return;
+            var index = PropertyPaths.IndexOf(SelectedPropertyPath);
+            if (index >= 0 && index < PropertyPaths.Count - 1)
+            {
+                PropertyPaths.Move(index, index + 1);
+            }
+        }
+
         private bool CanExecuteOk()
         {
             // Must have a column header
             if (string.IsNullOrWhiteSpace(ColumnHeader))
                 return false;
 
+            // Must have content in the selected mode
+            if (IsPropertyPathMode && PropertyPaths.Count == 0)
+                return false;
+
+            // Other modes will be validated when we add those panels
             return true;
         }
 
@@ -159,6 +277,17 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
             _columnSpec.Header = ColumnHeader;
             _columnSpec.WidthPercent = WidthPercent;
             _columnSpec.MergeVertically = MergeVertically;
+
+            // Set content based on selected mode
+            if (IsPropertyPathMode)
+            {
+                _columnSpec.PropertyPaths = PropertyPaths.ToArray();
+                _columnSpec.JoinWith = JoinWith;
+                _columnSpec.Format = null;
+                _columnSpec.Expression = null;
+                _columnSpec.Literal = null;
+            }
+            // TODO: Add other modes as we build those panels
 
             Log.Information("Column updated: {Header}", ColumnHeader);
 
@@ -193,6 +322,16 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
             _columnHeader = _columnSpec.Header ?? string.Empty;
             _widthPercent = _columnSpec.WidthPercent;
             _mergeVertically = _columnSpec.MergeVertically;
+            _joinWith = _columnSpec.JoinWith ?? "\n";
+
+            // Load PropertyPaths if present
+            if (_columnSpec.PropertyPaths != null && _columnSpec.PropertyPaths.Length > 0)
+            {
+                foreach (var path in _columnSpec.PropertyPaths)
+                {
+                    PropertyPaths.Add(path);
+                }
+            }
 
             // Determine content mode based on what's populated in the spec
             if (!string.IsNullOrWhiteSpace(_columnSpec.Literal))
