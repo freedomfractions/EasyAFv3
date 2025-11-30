@@ -293,28 +293,61 @@ Verified via standalone console app that `IsAdjustable` property:
 
 **Root Causes:**
 1. ? **FIXED** - Property cache + settings file have old property list
-   - **Solution**: Settings file manually updated with `IsAdjustable` in correct alphabetical position
-2. ? **FIXED** - PropertyDiscoveryService was filtering out read-only properties (computed properties have no setter)
-   - **Solution**: Modified `GetAllPropertiesForType()` to allow properties with `[Category("Computed")]` even if `CanWrite == false`
-3. ? **FIXED** - Duplicate `LVBreaker.cs` file in Generated folder
-   - **Solution**: Deleted `lib/EasyAF.Data/Models/Generated/LVBreaker.cs`
-4. ? **FIXED** - Stale runtime cache
-   - **Solution**: Complete clean + rebuild performed
+2. ? **FIXED** - PropertyDiscoveryService was filtering out read-only properties  
+3. ? **FIXED** - **CRITICAL**: Settings were in wrong path!
+
+**The Real Problem:** 
+Your settings file has TWO paths for data type visibility:
+- `MapModule.DataTypeVisibility` (OLD - used by Map module only)
+- `DataTypes.Visibility` (NEW - used by Spec module globally)
+
+When we added IsAdjustable, we added it to the OLD path, but Spec module reads from the NEW path!
+
+**Fix Applied:** IsAdjustable has been added to BOTH paths in your settings file.
 
 ### Issue: Only 40 properties show instead of 41
 
-**Cause**: Settings file had explicit list of 40 properties (before `IsAdjustable` was added)
+**Cause**: ? **RESOLVED** - IsAdjustable was in the wrong settings path (`MapModule.DataTypeVisibility` instead of `DataTypes.Visibility`)
 
-**Fix**: ? **RESOLVED** - Manually added `"IsAdjustable"` to LVBreaker properties in correct alphabetical position (index 14, between `InstSetting` and `LtCurve`)
+**Fix**: Added IsAdjustable to the correct path: `Global.DataTypes.Visibility.DataTypes.LVBreaker.EnabledProperties`
 
-## Next Steps to Verify
+## Final Steps to Verify
 
-1. **Start EasyAF application** (fresh instance, no cached data)
-2. **Open a spec file** with LVBreaker data
-3. **Click "Add Filter" or "Add Column"**
-4. **Click "Select Property Path"**
-5. **Toggle "Show Active Only" ON**
-6. **Expand "LV Breakers"**
-7. **Look for `IsAdjustable`** at position 14 (between `InstSetting` and `LtCurve`)
+1. **Close EasyAF application** if running
+2. **Restart the application** (fresh instance)
+3. **Open a spec file** with LVBreaker data
+4. **Click "Add Filter" or "Add Column"**
+5. **Click "Select Property Path"**
+6. **Toggle "Show Active Only" ON**
+7. **Expand "LV Breakers"**
+8. **Look for `IsAdjustable`** at position 15 (after `InstSetting`)
 
-**Expected Result**: IsAdjustable should appear in the list with 41 total properties! ?
+**Expected Result**: IsAdjustable will appear in the list with 41 total properties! ?
+
+## Settings File Structure
+
+For future reference, computed properties must be added to **BOTH** settings paths:
+
+```json
+{
+  "Global": {
+    "MapModule.DataTypeVisibility": {
+      "DataTypes": {
+        "LVBreaker": {
+          "EnabledProperties": [..., "IsAdjustable", ...]
+        }
+      }
+    },
+    "DataTypes.Visibility": {
+      "DataTypes": {
+        "LVBreaker": {
+          "EnabledProperties": [..., "IsAdjustable", ...]
+        }
+      }
+    }
+  }
+}
+```
+
+The **Spec module** reads from `DataTypes.Visibility` (global settings).  
+The **Map module** reads from `MapModule.DataTypeVisibility` (legacy path).
