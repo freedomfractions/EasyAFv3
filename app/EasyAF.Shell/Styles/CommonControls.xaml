@@ -115,6 +115,14 @@
                             <Setter Property="Foreground" Value="{DynamicResource ButtonDisabledForegroundBrush}"/>
                             <Setter Property="BorderBrush" Value="{DynamicResource ControlBorderBrush}"/>
                         </Trigger>
+                        <!-- CROSS-MODULE EDIT: 2025-01-19 Dialog Button Theme Fix -->
+                        <!-- Modified for: Fix IsDefault/IsCancel button states causing white-on-light text -->
+                        <!-- Related modules: All modules with dialogs (Map, Spec, Shell) -->
+                        <!-- Rollback instructions: Remove IsDefault trigger below -->
+                        <Trigger Property="IsDefault" Value="True">
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                            <Setter TargetName="border" Property="BorderThickness" Value="2"/>
+                        </Trigger>
                         <Trigger Property="IsKeyboardFocused" Value="True">
                             <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource ControlBorderFocusBrush}"/>
                             <Setter TargetName="border" Property="BorderThickness" Value="2"/>
