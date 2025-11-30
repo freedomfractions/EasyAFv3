@@ -446,15 +446,8 @@ namespace EasyAF.Modules.Spec.ViewModels
 
                 if (result == true)
                 {
-                    // NUCLEAR OPTION: Rebuild entire collection to force UI update
-                    var temp = Filters.ToList();
-                    Filters.Clear();
-                    foreach (var f in temp)
-                    {
-                        Filters.Add(f);
-                    }
-                    
-                    SelectedFilter = Filters[index];
+                    // Refresh the selected filter's properties to update UI bindings
+                    SelectedFilter.RefreshProperties();
                     
                     Log.Information("Edited filter #{RuleNumber}: {Summary}", 
                         SelectedFilter.RuleNumber, SelectedFilter.Summary);
