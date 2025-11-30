@@ -44,13 +44,13 @@
                     Orientation="Horizontal" 
                     Margin="0,0,0,12">
             <RadioButton Content="Active Data Types"
-                         IsChecked="{Binding ShowActiveOnly}"
+                         IsChecked="{Binding ShowActiveOnly, Mode=TwoWay}"
                          GroupName="FilterMode"
                          Foreground="{DynamicResource TextPrimaryBrush}"
                          Margin="0,0,16,0"
                          ToolTip="Show only data types enabled in Options"/>
             <RadioButton Content="All Data Types"
-                         IsChecked="{Binding ShowActiveOnly, Converter={StaticResource InverseBoolConverter}}"
+                         IsChecked="{Binding ShowActiveOnly, Converter={StaticResource InverseBoolConverter}, Mode=TwoWay}"
                          GroupName="FilterMode"
                          Foreground="{DynamicResource TextPrimaryBrush}"
                          Margin="0,0,16,0"
