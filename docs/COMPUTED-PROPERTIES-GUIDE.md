@@ -262,6 +262,9 @@ Check the constructor call in the ViewModel to see which flag is being used.
 - `8f1e8dc` - Add troubleshooting guide for computed property caching issues and duplicate file problems
 - `1fb88e3` - **CRITICAL FIX: Allow read-only computed properties** - Removed CanWrite requirement for Category("Computed") properties
 - `9aeb104` - Update docs with critical fix for read-only computed properties
+- `c545199` - Final verification: Clean rebuild confirms IsAdjustable property discovery working correctly (99 properties total)
+- `0dba9aa` - **CRITICAL FIX: IsAdjustable must be in DataTypes.Visibility path** (not MapModule.DataTypeVisibility) for Spec module to see it
+- `b6d260b` - **Fix dialog button highlighting** - IsDefault/IsCancel buttons now properly themed, settings cleaned up
 
 ---
 
