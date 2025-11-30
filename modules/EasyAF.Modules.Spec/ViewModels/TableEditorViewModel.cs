@@ -73,6 +73,10 @@ namespace EasyAF.Modules.Spec.ViewModels
             EditColumnCommand = new DelegateCommand(ExecuteEditColumn, CanExecuteEditColumn)
                 .ObservesProperty(() => SelectedColumn);
 
+            // TEST: Add a temporary test command for the Column Editor
+            TestColumnEditorCommand = new DelegateCommand(ExecuteTestColumnEditor, CanExecuteEditColumn)
+                .ObservesProperty(() => SelectedColumn);
+
             Log.Debug("TableEditorViewModel initialized for table: {TableId}/{AltText}", _table.Id, _table.AltText);
         }
 
@@ -198,6 +202,11 @@ namespace EasyAF.Modules.Spec.ViewModels
         /// Command to edit the selected column's properties.
         /// </summary>
         public ICommand EditColumnCommand { get; }
+
+        /// <summary>
+        /// TEST COMMAND: Opens the new Column Editor dialog for testing.
+        /// </summary>
+        public ICommand TestColumnEditorCommand { get; }
 
         #endregion
 
@@ -333,6 +342,19 @@ namespace EasyAF.Modules.Spec.ViewModels
             {
                 Log.Error(ex, "Failed to open property path picker");
                 _dialogService.ShowError("Failed to open property path picker", ex.Message);
+            }
+        }
+
+        private void ExecuteTestColumnEditor()
+        {
+            // LOG: Temporary test action - should be replaced with real implementation
+            if (SelectedColumn != null)
+            {
+                Log.Information("Test action executed for column: {Header}", SelectedColumn.Column.Header);
+            }
+            else
+            {
+                Log.Warning("Test action executed but no column selected");
             }
         }
 
