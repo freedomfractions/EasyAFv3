@@ -32,6 +32,11 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
         private double? _widthPercent;
         private bool _mergeVertically;
 
+        private bool _isPropertyPathMode = true;
+        private bool _isFormatMode;
+        private bool _isExpressionMode;
+        private bool _isLiteralMode;
+
         /// <summary>
         /// Initializes a new instance of the ColumnEditorViewModel.
         /// </summary>
@@ -75,6 +80,55 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
         {
             get => _mergeVertically;
             set => SetProperty(ref _mergeVertically, value);
+        }
+
+        public bool IsPropertyPathMode
+        {
+            get => _isPropertyPathMode;
+            set
+            {
+                if (SetProperty(ref _isPropertyPathMode, value) && value)
+                {
+                    // When selecting this mode, deselect others
+                    IsFormatMode = IsExpressionMode = IsLiteralMode = false;
+                }
+            }
+        }
+
+        public bool IsFormatMode
+        {
+            get => _isFormatMode;
+            set
+            {
+                if (SetProperty(ref _isFormatMode, value) && value)
+                {
+                    IsPropertyPathMode = IsExpressionMode = IsLiteralMode = false;
+                }
+            }
+        }
+
+        public bool IsExpressionMode
+        {
+            get => _isExpressionMode;
+            set
+            {
+                if (SetProperty(ref _isExpressionMode, value) && value)
+                {
+                    IsPropertyPathMode = IsFormatMode = IsLiteralMode = false;
+                }
+            }
+        }
+
+        public bool IsLiteralMode
+        {
+            get => _isLiteralMode;
+            set
+            {
+                if (SetProperty(ref _isLiteralMode, value) && value)
+                {
+                    IsPropertyPathMode = IsFormatMode = IsExpressionMode = false;
+                }
+            }
         }
 
         public bool? DialogResult { get; private set; }
@@ -139,6 +193,29 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
             _columnHeader = _columnSpec.Header ?? string.Empty;
             _widthPercent = _columnSpec.WidthPercent;
             _mergeVertically = _columnSpec.MergeVertically;
+
+            // Determine content mode based on what's populated in the spec
+            if (!string.IsNullOrWhiteSpace(_columnSpec.Literal))
+            {
+                IsLiteralMode = true;
+            }
+            else if (!string.IsNullOrWhiteSpace(_columnSpec.Expression))
+            {
+                IsExpressionMode = true;
+            }
+            else if (!string.IsNullOrWhiteSpace(_columnSpec.Format))
+            {
+                IsFormatMode = true;
+            }
+            else if (_columnSpec.PropertyPaths != null && _columnSpec.PropertyPaths.Length > 0)
+            {
+                IsPropertyPathMode = true;
+            }
+            else
+            {
+                // Default to PropertyPath mode for new columns
+                IsPropertyPathMode = true;
+            }
 
             RaisePropertyChanged(string.Empty); // Refresh all bindings
         }

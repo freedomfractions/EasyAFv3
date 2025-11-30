@@ -31,6 +31,9 @@
                     <!-- Basic Settings Panel -->
                     <panels:ColumnBasicSettingsPanel DataContext="{Binding}"/>
                     
+                    <!-- Content Mode Selector Panel -->
+                    <panels:ColumnContentModePanel DataContext="{Binding}"/>
+                    
                     <TextBlock Text="More panels coming soon..."
                                FontSize="14"
                                FontStyle="Italic"
@@ -41,9 +44,6 @@
                     <TextBlock Text="Next up:"
                                Margin="0,8,0,4"
                                Foreground="{DynamicResource TextPrimaryBrush}"/>
-                    <TextBlock Text="- Content Mode Selector"
-                               Margin="8,2"
-                               Foreground="{DynamicResource TextSecondaryBrush}"/>
                     <TextBlock Text="- Property Paths Panel"
                                Margin="8,2"
                                Foreground="{DynamicResource TextSecondaryBrush}"/>

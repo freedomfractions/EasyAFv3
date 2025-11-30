@@ -1,0 +1,42 @@
+<UserControl x:Class="EasyAF.Modules.Spec.Views.Dialogs.Panels.ColumnContentModePanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="Transparent">
+    
+    <UserControl.Resources>
+        <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+            <Setter Property="Margin" Value="0,8,0,4"/>
+        </Style>
+    </UserControl.Resources>
+    
+    <StackPanel>
+        <TextBlock Text="CONTENT SOURCE" Style="{StaticResource SectionHeaderStyle}"/>
+        
+        <!-- Radio Buttons for Mode Selection -->
+        <StackPanel Margin="0,4,0,8">
+            <RadioButton Content="Property Paths (join multiple properties)"
+                         IsChecked="{Binding IsPropertyPathMode}"
+                         GroupName="ContentMode"
+                         Margin="0,2"
+                         Foreground="{DynamicResource TextPrimaryBrush}"/>
+            <RadioButton Content="Format String (template with tokens)"
+                         IsChecked="{Binding IsFormatMode}"
+                         GroupName="ContentMode"
+                         Margin="0,2"
+                         Foreground="{DynamicResource TextPrimaryBrush}"/>
+            <RadioButton Content="Expression (calculated value)"
+                         IsChecked="{Binding IsExpressionMode}"
+                         GroupName="ContentMode"
+                         Margin="0,2"
+                         Foreground="{DynamicResource TextPrimaryBrush}"/>
+            <RadioButton Content="Literal Text (static)"
+                         IsChecked="{Binding IsLiteralMode}"
+                         GroupName="ContentMode"
+                         Margin="0,2"
+                         Foreground="{DynamicResource TextPrimaryBrush}"/>
+        </StackPanel>
+    </StackPanel>
+</UserControl>
