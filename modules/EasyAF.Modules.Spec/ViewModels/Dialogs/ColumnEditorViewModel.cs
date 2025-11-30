@@ -44,6 +44,11 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
         private string? _numberFormat;
         private string _literal = string.Empty;
 
+        private string? _horizontalAlignment;
+        private string? _verticalAlignment;
+        private string? _fontName;
+        private double? _fontSize;
+
         /// <summary>
         /// Initializes a new instance of the ColumnEditorViewModel.
         /// </summary>
@@ -181,6 +186,30 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
         {
             get => _literal;
             set => SetProperty(ref _literal, value);
+        }
+
+        public string? HorizontalAlignment
+        {
+            get => _horizontalAlignment;
+            set => SetProperty(ref _horizontalAlignment, value);
+        }
+
+        public string? VerticalAlignment
+        {
+            get => _verticalAlignment;
+            set => SetProperty(ref _verticalAlignment, value);
+        }
+
+        public string? FontName
+        {
+            get => _fontName;
+            set => SetProperty(ref _fontName, value);
+        }
+
+        public double? FontSize
+        {
+            get => _fontSize;
+            set => SetProperty(ref _fontSize, value);
         }
 
         public bool? DialogResult { get; private set; }
@@ -349,6 +378,10 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
             _columnSpec.Header = ColumnHeader;
             _columnSpec.WidthPercent = WidthPercent;
             _columnSpec.MergeVertically = MergeVertically;
+            _columnSpec.HorizontalAlignment = HorizontalAlignment;
+            _columnSpec.VerticalAlignment = VerticalAlignment;
+            _columnSpec.FontName = FontName;
+            _columnSpec.FontSize = FontSize;
 
             // Set content based on selected mode
             if (IsPropertyPathMode)
@@ -420,6 +453,11 @@ namespace EasyAF.Modules.Spec.ViewModels.Dialogs
             _expression = _columnSpec.Expression ?? string.Empty;
             _numberFormat = _columnSpec.NumberFormat;
             _literal = _columnSpec.Literal ?? string.Empty;
+
+            _horizontalAlignment = _columnSpec.HorizontalAlignment;
+            _verticalAlignment = _columnSpec.VerticalAlignment;
+            _fontName = _columnSpec.FontName;
+            _fontSize = _columnSpec.FontSize;
 
             // Load PropertyPaths if present
             if (_columnSpec.PropertyPaths != null && _columnSpec.PropertyPaths.Length > 0)
